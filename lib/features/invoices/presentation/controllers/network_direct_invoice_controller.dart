@@ -3,245 +3,265 @@ import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_cart_line_entity.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم إنشاء فاتورة مبيعات مباشرة من جهة شبكة التزويد
+/// متحكم شاشة إصدار فاتورة مبيعات مباشرة لنقطة بيع (NetworkDirectInvoiceController)
 class NetworkDirectInvoiceController extends GetxController {
-  final GetMyNetworksUseCase getMyNetworksUseCase;
-  final GetNetworkPosListUseCase getNetworkPosListUseCase;
-  final GetPackagesUseCase getPackagesUseCase;
-  final CreateDirectSaleInvoiceUseCase createDirectSaleInvoiceUseCase;
-
   NetworkDirectInvoiceController({
-    required this.getMyNetworksUseCase,
-    required this.getNetworkPosListUseCase,
-    required this.getPackagesUseCase,
     required this.createDirectSaleInvoiceUseCase,
+    this.getPackagesUseCase,
+    this.getNetworkPosListUseCase,
   });
+
+  final CreateDirectSaleInvoiceUseCase createDirectSaleInvoiceUseCase;
+  final GetPackagesUseCase? getPackagesUseCase;
+  final GetNetworkPosListUseCase? getNetworkPosListUseCase;
 
   final formKey = GlobalKey<FormState>();
 
-  // ── الكيانات والسياق ──
-  final authorizedNetworks = <NetworkEntity>[].obs;
-  final linkedPos = <PosEntity>[].obs;
-  final availablePackages = <PackageEntity>[].obs;
-
-  final selectedNetworkId = RxnInt();
+  // روابط نقاط البيع التابعة للشبكة
+  final posLinks = <NetworkPosLinkEntity>[].obs;
   final selectedPosId = RxnInt();
-  final selectedSaleType = SaleType.cash.obs;
-  final cart = <DirectInvoiceCartLineEntity>[].obs;
+  final isLoadingPosList = false.obs;
+  final isPosContextExpanded = false.obs;
 
-  // ── مؤشرات التحميل ──
-  final isLoadingNetworks = false.obs;
-  final isLoadingPos = false.obs;
+  // باقات الشبكة وسلة الفاتورة
+  final packages = <PackageEntity>[].obs;
   final isLoadingPackages = false.obs;
+  final packageSearchQuery = ''.obs;
+  final packageSearchController = TextEditingController();
+
+  // كميات الباقات ووحدات التحكم
+  final packageQuantities = <int, int>{}.obs;
+  final quantityControllers = <int, TextEditingController>{};
+
+  // نوع البيع (0 = نقدي، 1 = آجل)
+  final selectedSaleTypeIndex = 0.obs;
+
+  SaleType get selectedSaleType =>
+      selectedSaleTypeIndex.value == 0 ? SaleType.cash : SaleType.credit;
+
+  // حالة الإرسال
   final isSubmitting = false.obs;
-  final errorMessage = RxnString();
 
-  bool get canChangeTarget => !isSubmitting.value;
+  int? get activeNetworkId {
+    if (Get.isRegistered<WorkspaceService>()) {
+      return WorkspaceService.to.savedActiveNetworkId;
+    }
+    return null;
+  }
 
-  int get totalCartVouchers =>
-      cart.fold(0, (sum, line) => sum + line.voucherCount);
+  NetworkPosLinkEntity? get selectedPosLink =>
+      posLinks.firstWhereOrNull((link) => link.posId == selectedPosId.value);
+
+  int get cartPackagesCount =>
+      packageQuantities.values.where((count) => count > 0).length;
+
+  int get checkoutTotalVouchers => packageQuantities.values.fold<int>(
+    0,
+    (sum, count) => sum + (count > 0 ? count : 0),
+  );
+
+  double get checkoutGrossAmount {
+    var total = 0.0;
+    for (final entry in packageQuantities.entries) {
+      if (entry.value > 0) {
+        final pkg = packages.firstWhereOrNull((p) => p.packageId == entry.key);
+        if (pkg != null) {
+          total += pkg.resolvedBasePrice * entry.value;
+        }
+      }
+    }
+    return total;
+  }
+
+  double get checkoutDiscountAmount {
+    var discount = 0.0;
+    final isCash = selectedSaleType == SaleType.cash;
+    for (final entry in packageQuantities.entries) {
+      if (entry.value > 0) {
+        final pkg = packages.firstWhereOrNull((p) => p.packageId == entry.key);
+        if (pkg != null) {
+          final unitDiscount =
+              isCash ? pkg.resolvedCashDiscount : pkg.resolvedCreditDiscount;
+          discount += unitDiscount * entry.value;
+        }
+      }
+    }
+    return discount;
+  }
+
+  double get checkoutNetAmount {
+    final net = checkoutGrossAmount - checkoutDiscountAmount;
+    return net > 0 ? net : 0.0;
+  }
+
+  bool get canSubmitInvoice =>
+      selectedPosId.value != null &&
+      cartPackagesCount > 0 &&
+      !isSubmitting.value;
+
+  TextEditingController getQuantityController(int packageId) {
+    return quantityControllers.putIfAbsent(
+      packageId,
+      () => TextEditingController(text: '${packageQuantities[packageId] ?? 0}'),
+    );
+  }
+
+  void setPackageQuantity(int packageId, int quantity) {
+    final clamped = quantity < 0 ? 0 : quantity;
+    if (clamped == 0) {
+      packageQuantities.remove(packageId);
+    } else {
+      packageQuantities[packageId] = clamped;
+    }
+    final ctrl = quantityControllers[packageId];
+    if (ctrl != null && ctrl.text != '$clamped') {
+      ctrl.text = '$clamped';
+    }
+  }
+
+  void setSaleTypeIndex(int index) {
+    selectedSaleTypeIndex.value = index;
+  }
+
+  void selectPos(int posId) {
+    selectedPosId.value = posId;
+    isPosContextExpanded.value = false;
+  }
+
+  void togglePosContextExpansion() {
+    isPosContextExpanded.value = !isPosContextExpanded.value;
+  }
 
   @override
   void onInit() {
     super.onInit();
+    packageSearchController.addListener(() {
+      packageSearchQuery.value = packageSearchController.text.trim();
+    });
     loadInitialData();
   }
 
-  /// تحميل الشبكات المصرح بها
-  Future<void> loadInitialData() async {
-    isLoadingNetworks.value = true;
-    errorMessage.value = null;
-
-    try {
-      final networks = await getMyNetworksUseCase();
-      authorizedNetworks.assignAll(networks);
-
-      if (networks.isNotEmpty) {
-        final networkIds =
-            networks.map((n) => n.networkId).toList(growable: false);
-        final defaultId = WorkspaceService.to.resolveActiveNetworkId(networkIds) ??
-            networks.first.networkId;
-        await onNetworkSelected(defaultId);
-      }
-    } on AppException catch (e) {
-      errorMessage.value = e.message;
-      CustomSnackbar.show(
-        title: 'خطأ في جلب الشبكات',
-        message: e.message,
-        type: SnackType.error,
-      );
-    } catch (e) {
-      errorMessage.value = 'تعذر تحميل قائمة الشبكات: $e';
-    } finally {
-      isLoadingNetworks.value = false;
+  @override
+  void onClose() {
+    for (final ctrl in quantityControllers.values) {
+      ctrl.dispose();
     }
+    packageSearchController.dispose();
+    super.onClose();
   }
 
-  /// اختيار الشبكة وجلب نقاط البيع المرتبطة وباقات الكروت
-  Future<void> onNetworkSelected(int networkId) async {
-    if (selectedNetworkId.value == networkId && linkedPos.isNotEmpty) return;
-
-    selectedNetworkId.value = networkId;
-    selectedPosId.value = null;
-    cart.clear();
-
-    await Future.wait([
-      _loadLinkedPos(networkId),
-      _loadPackages(networkId),
-    ]);
+  Future<void> loadInitialData() async {
+    await Future.wait([loadPosList(), loadPackages()]);
   }
 
-  Future<void> _loadLinkedPos(int networkId) async {
-    isLoadingPos.value = true;
+  Future<void> loadPosList() async {
+    final netId = activeNetworkId;
+    if (netId == null || getNetworkPosListUseCase == null) return;
+
+    isLoadingPosList.value = true;
     try {
-      final posLinks = await getNetworkPosListUseCase(networkId: networkId);
-      final posList = posLinks.items
-          .map((link) => link.pos)
-          .whereType<PosEntity>()
-          .toList(growable: false);
-      linkedPos.assignAll(posList);
-      if (posList.isNotEmpty) {
-        selectedPosId.value = posList.first.posId;
+      final paginated = await getNetworkPosListUseCase!(networkId: netId);
+      posLinks.assignAll(paginated.items);
+      if (posLinks.isNotEmpty && selectedPosId.value == null) {
+        selectedPosId.value = posLinks.first.posId;
       }
     } catch (_) {
-      linkedPos.clear();
+      // التعامل بهدوء
     } finally {
-      isLoadingPos.value = false;
+      isLoadingPosList.value = false;
     }
   }
 
-  Future<void> _loadPackages(int networkId) async {
+  Future<void> loadPackages() async {
+    final netId = activeNetworkId;
+    if (netId == null || getPackagesUseCase == null) return;
+
     isLoadingPackages.value = true;
     try {
-      final paginatedPackages = await getPackagesUseCase(
-        networkId: networkId,
-        perPage: 50,
-      );
-      availablePackages.assignAll(paginatedPackages.items);
+      final paginated = await getPackagesUseCase!(networkId: netId);
+      packages.assignAll(paginated.items);
     } catch (_) {
-      availablePackages.clear();
+      // التعامل بهدوء
     } finally {
       isLoadingPackages.value = false;
     }
   }
 
-  /// اختيار نقطة البيع
-  void onPosSelected(int posId) {
-    selectedPosId.value = posId;
-  }
+  Future<void> submitDirectInvoice() async {
+    if (!canSubmitInvoice) return;
 
-  /// تعيين نوع البيع
-  void setSaleType(SaleType type) {
-    selectedSaleType.value = type;
-  }
-
-  /// إضافة باقة إلى السلة أو تحديث كميتها
-  void addOrUpdatePackageInCart(PackageEntity package, int count) {
-    if (count <= 0) {
-      removeFromCart(package.packageId);
-      return;
-    }
-
-    final existingIndex =
-        cart.indexWhere((line) => line.package.packageId == package.packageId);
-
-    if (existingIndex >= 0) {
-      cart[existingIndex] = cart[existingIndex].copyWith(voucherCount: count);
-    } else {
-      cart.add(DirectInvoiceCartLineEntity(package: package, voucherCount: count));
-    }
-  }
-
-  /// حذف باقة من السلة
-  void removeFromCart(int packageId) {
-    cart.removeWhere((line) => line.package.packageId == packageId);
-  }
-
-  /// إفراغ السلة
-  void clearCart() {
-    cart.clear();
-  }
-
-  /// إرسال وإنشاء الفاتورة السيادية
-  Future<void> submitInvoice() async {
-    final networkId = selectedNetworkId.value;
+    final netId = activeNetworkId;
     final posId = selectedPosId.value;
 
-    if (networkId == null) {
+    if (netId == null || posId == null) {
       CustomSnackbar.show(
-        title: 'تحديد الشبكة',
-        message: 'يرجى اختيار الشبكة الموردة.',
-        type: SnackType.warning,
+        title: 'بيانات غير مكتملة',
+        message: 'يرجى تحديد الشبكة ونقطة البيع المستلمة.',
+        type: SnackType.error,
       );
       return;
     }
 
-    if (posId == null) {
-      CustomSnackbar.show(
-        title: 'تحديد نقطة البيع',
-        message: 'يرجى اختيار نقطة البيع المستفيدة.',
-        type: SnackType.warning,
-      );
-      return;
+    final itemsPayload = <DirectSaleInvoiceItemInputEntity>[];
+    for (final entry in packageQuantities.entries) {
+      if (entry.value > 0) {
+        itemsPayload.add(
+          DirectSaleInvoiceItemInputEntity(
+            packageId: entry.key,
+            voucherCount: entry.value,
+          ),
+        );
+      }
     }
 
-    if (cart.isEmpty) {
+    if (itemsPayload.isEmpty) {
       CustomSnackbar.show(
         title: 'السلة فارغة',
-        message: 'يرجى إضافة باقة واحدة على الأقل لإنشاء الفاتورة.',
+        message: 'يرجى اختيار باقة واحدة على الأقل وتحديد كميتها.',
         type: SnackType.warning,
       );
       return;
     }
 
     isSubmitting.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: 'جاري إصدار وتثبيت الفاتورة على الخادم...',
-    );
 
     try {
-      final inputItems = cart
-          .map(
-            (line) => DirectInvoiceItemInputEntity(
-              packageId: line.package.packageId,
-              voucherCount: line.voucherCount,
-            ),
-          )
-          .toList(growable: false);
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إصدار فاتورة المبيعات المباشرة...',
+      );
 
-      final idempotencyKey = IdempotencyHelper.generate('inv');
+      final idempotencyKey = IdempotencyHelper.forSaleInvoice(posId);
 
       final createdInvoice = await createDirectSaleInvoiceUseCase(
-        networkId: networkId,
+        networkId: netId,
         posId: posId,
-        saleType: selectedSaleType.value,
-        items: inputItems,
+        saleType: selectedSaleType,
+        items: itemsPayload,
         idempotencyKey: idempotencyKey,
       );
 
-      CustomSnackbar.show(
-        title: 'تم إصدار الفاتورة',
-        message: 'تم إصدار الفاتورة #${createdInvoice.displayReference} بنجاح.',
-        type: SnackType.success,
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم تسجيل الفاتورة رقم ${createdInvoice.displayReference}',
       );
 
-      await Get.offNamed<void>(
+      Get.back<void>();
+      await Get.toNamed<void>(
         AppRoutes.saleInvoiceDetails,
-        arguments: createdInvoice,
+        arguments: {
+          'invoice_id': createdInvoice.invoiceId,
+          'invoice': createdInvoice,
+        },
       );
     } on AppException catch (e) {
       CustomSnackbar.show(
@@ -251,15 +271,15 @@ class NetworkDirectInvoiceController extends GetxController {
       );
     } catch (e) {
       CustomSnackbar.show(
-        title: 'خطأ غير متوقع',
-        message: 'تعذر إتمام عملية إصدار الفاتورة: $e',
+        title: 'تعذر إنشاء الفاتورة',
+        message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
     } finally {
-      isSubmitting.value = false;
       if (CustomAnimationOverlay.isShowing) {
         await CustomAnimationOverlay.hide();
       }
+      isSubmitting.value = false;
     }
   }
 }

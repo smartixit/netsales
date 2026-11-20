@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/invoices/presentation/controllers/invoice_details_controller.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_action_bar.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_hero.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_item_card.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_metrics_strip.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_details_parties_card.dart';
-import 'package:netsales/features/invoices/presentation/widgets/invoice_details/invoice_request_callout.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
+import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
+import 'package:netsales/widgets/document_details/custom_document_details_hero.dart';
+import 'package:netsales/widgets/document_details/custom_document_item_card.dart';
+import 'package:netsales/widgets/document_details/custom_document_metrics_strip.dart';
+import 'package:netsales/widgets/document_details/custom_document_parties_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
-/// شاشة استعراض تفاصيل الفاتورة المالية وبنودها والعمليات المستندية المعتمدة
+/// شاشة تفاصيل فاتورة المبيعات والمشتريات بالمعايير العالمية والعمق البصري الفاخر (InvoiceDetailsScreen)
+///
+/// تجسد المعمارية المؤسسية النظيفة لشاشات التفاصيل المستندية:
+/// - استهلاك مباشر وموحد للمكونات القيادية العامة [CustomDocumentDetailsHero],
+///   [CustomDocumentMetricsStrip], [CustomDocumentPartiesCard], [CustomDocumentItemCard], [CustomDocumentActionBar].
+/// - مطابقة تامة 100% لتنظيم وترتيب وتجربة شاشة تفاصيل طلب التوريد [ProcurementRequestDetailsScreen].
 class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
-  const InvoiceDetailsScreen({
-    super.key,
-    this.isNetworkPerspective = true,
-  });
+  const InvoiceDetailsScreen({super.key, this.isNetworkPerspective = true});
 
   final bool isNetworkPerspective;
 
@@ -29,10 +35,13 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
     final colors = context.colors;
 
     return Obx(() {
-      // 1. حالة التحميل الهيكلي (Skeleton Loading State)
+      // 1. حالة التحميل الهيكلي (Skeleton State)
       if (controller.isLoading.value && controller.invoice.value == null) {
         return CustomAppScaffold(
-          appBarTitle: 'تفاصيل الفاتورة',
+          appBar: AppBar(
+            title: const Text('تفاصيل الفاتورة'),
+            centerTitle: true,
+          ),
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: const CustomStateView.loading(
@@ -52,7 +61,10 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       // 2. حالة عدم العثور على الفاتورة
       if (invoice == null) {
         return CustomAppScaffold(
-          appBarTitle: 'تفاصيل الفاتورة',
+          appBar: AppBar(
+            title: const Text('تفاصيل الفاتورة'),
+            centerTitle: true,
+          ),
           body: Center(
             child: CustomEmptyState(
               icon: Icons.receipt_long_outlined,
@@ -66,102 +78,238 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       }
 
       final displayReference = invoice.displayReference;
+      final statusPres = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+        invoice.paymentStatus,
+        serverLabel: invoice.paymentStatusLabel,
+      );
+      final saleTypePres = EnumPresentationRegistry.resolveSaleType(
+        invoice.saleType,
+        serverLabel: invoice.saleTypeLabel,
+      );
 
-      // 3. عرض صفحة التفاصيل المتكاملة بالمعايير العالمية
+      // 3. عرض صفحة التفاصيل المتكاملة
       return CustomAppScaffold(
         appBarTitle: displayReference,
         showBackButton: true,
-        bottomNavigationBar: InvoiceDetailsActionBar(controller: controller),
-        body: RefreshIndicator.adaptive(
-          color: colors.primary,
-          backgroundColor: colors.surface,
-          strokeWidth: 2.5,
-          onRefresh: controller.refreshDetails,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
+        bottomNavigationBar: CustomDocumentActionBar(
+          child: Align(
+            alignment: Alignment.center,
+            heightFactor: 1.0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomButton.primary(
+                      text: 'طباعة الفاتورة',
+                      icon: Icons.print_rounded,
+                      size: AppButtonSize.medium,
+                      shape: AppButtonShape.pill,
+                      loading: controller.isPrinting.value,
+                      onPressed: controller.printCurrentInvoice,
+                    ),
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: CustomButton.secondary(
+                      text: 'مشاركة PDF',
+                      icon: Icons.share_rounded,
+                      size: AppButtonSize.medium,
+                      shape: AppButtonShape.pill,
+                      loading: controller.isSharing.value,
+                      onPressed: controller.shareCurrentInvoice,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.cardPadding,
-              AppSpacing.xl,
-            ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. الترويسة القيادية بالعمق اللوني المتكيف
-                    InvoiceDetailsHero(invoice: invoice),
-                    AppSpacing.vMd,
+          ),
+        ),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.cardPadding,
+            AppSpacing.cardPadding,
+            AppSpacing.cardPadding,
+            AppSpacing.xl,
+          ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. الترويسة القيادية بالعمق اللوني المتكيف (CustomDocumentDetailsHero)
+                  CustomDocumentDetailsHero(
+                    reference: displayReference,
+                    statusPresentation: statusPres,
+                    typePresentation: saleTypePres,
+                    dateLabel: invoice.formattedInvoiceDate,
+                    heroTitle: isNetworkPerspective
+                        ? 'فاتورة مبيعات كروت معتمدة'
+                        : 'فاتورة مشتريات كروت معتمدة',
+                    actorLabel: invoice.createdByName != null &&
+                            invoice.createdByName!.trim().isNotEmpty
+                        ? 'أُصدرت بواسطة: ${invoice.createdByName!.trim()}'
+                        : null,
+                    actorIcon: Icons.verified_user_outlined,
+                    actorColor: colors.emeraldDark,
+                    extraBadge: invoice.hasLinkedRequest
+                        ? CustomChip(
+                            label: 'طلب #${invoice.requestId}',
+                            icon: Icons.link_rounded,
+                            isCompact: true,
+                          )
+                        : null,
+                  ),
+                  AppSpacing.vMd,
 
-                    // 2. شريط المؤشرات المالية والتشغيلية والتفقيط
-                    InvoiceDetailsMetricsStrip(invoice: invoice),
-
-                    // 3. بطاقة التنبيه للربط بطلب التوريد المعتمد
-                    if (invoice.hasRequest) ...[
-                      AppSpacing.vMd,
-                      InvoiceRequestCallout(
-                        invoice: invoice,
-                        onOpenRequest: controller.openLinkedRequest,
+                  // 2. شريط المؤشرات المالية والتشغيلية الموحد (CustomDocumentMetricsStrip)
+                  CustomDocumentMetricsStrip(
+                    metrics: [
+                      CustomMetricCardData(
+                        label: 'إجمالي الفاتورة',
+                        value: AmountFormatter.formatValue(
+                          invoice.invoiceTotalAmount,
+                        ),
+                        unit: 'ر.ي',
+                        icon: Icons.account_balance_wallet_rounded,
+                        accentColor: colors.primary,
+                        isPrimary: true,
+                        caption: 'القيمة الإجمالية',
+                      ),
+                      CustomMetricCardData(
+                        label: 'المبلغ المدفوع',
+                        value: AmountFormatter.formatValue(invoice.paidAmount),
+                        unit: 'ر.ي',
+                        icon: Icons.payments_rounded,
+                        accentColor: colors.emeraldDeep,
+                        caption: 'سداد مقبوض',
+                      ),
+                      CustomMetricCardData(
+                        label: 'المبلغ المتبقي',
+                        value: AmountFormatter.formatValue(
+                          invoice.remainingAmount,
+                        ),
+                        unit: 'ر.ي',
+                        icon: Icons.pending_actions_rounded,
+                        accentColor: invoice.remainingAmount > 0
+                            ? colors.error
+                            : colors.onSurfaceVariant,
+                        caption: invoice.remainingAmount > 0
+                            ? 'مستحق السداد'
+                            : 'مسدد بالكامل',
+                      ),
+                      CustomMetricCardData(
+                        label: 'عدد الكروت',
+                        value: '${invoice.totalVouchers}',
+                        unit: 'كرت',
+                        icon: Icons.confirmation_number_rounded,
+                        accentColor: colors.skyAccent,
+                        caption: 'إجمالي الرصيد',
                       ),
                     ],
-                    AppSpacing.vMd,
+                  ),
+                  AppSpacing.vMd,
 
-                    // 4. بطاقة أطراف المعاملة المالية (المزود ونقطة البيع)
-                    InvoiceDetailsPartiesCard(invoice: invoice),
-                    AppSpacing.vLg,
+                  // 3. بطاقة أطراف المعاملة المالية الرسمية (CustomDocumentPartiesCard)
+                  CustomDocumentPartiesCard(
+                    title: 'أطراف المعاملة المالية',
+                    badgeText: 'طريقة السداد: ${saleTypePres.label}',
+                    firstParty: DocumentPartyData(
+                      roleLabel: 'الجهة المورّدة (مزود الشبكة)',
+                      name: invoice.displayNetworkName,
+                      phoneNumber: invoice.networkPhoneNumber,
+                      logoUrl: invoice.networkLogo,
+                      accentColor: colors.primary,
+                    ),
+                    flowLabel: 'توريد ومبيعات كروت الإنترنت',
+                    secondParty: DocumentPartyData(
+                      roleLabel: 'الجهة المستفيدة (نقطة البيع)',
+                      name: invoice.displayPosName,
+                      phoneNumber: invoice.posPhoneNumber,
+                      logoUrl: invoice.posLogo,
+                      accentColor: colors.emeraldDeep,
+                    ),
+                  ),
+                  AppSpacing.vLg,
 
-                    // 5. عنوان قسم الباقات المفصلة
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 18.r,
-                          color: colors.primary,
-                        ),
-                        AppSpacing.hXs,
-                        Expanded(
-                          child: Text(
-                            'بنود الفاتورة (${invoice.items.length})',
-                            style: AppTypography.titleMedium.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  // 4. عنوان قسم الباقات المعتمدة
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 18.r,
+                        color: colors.primary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          'تفاصيل الباقات المفوترة (${invoice.items.length})',
+                          style: AppTypography.titleSmall.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w800,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
+                      Text(
+                        '${invoice.totalVouchers} كرت (${invoice.formattedTotalSheets} ورقة)',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.vSm,
+
+                  // 5. قائمة بطاقات الباقات المعتمدة (CustomDocumentItemCard)
+                  for (int i = 0; i < invoice.items.length; i++) ...[
+                    if (i > 0) AppSpacing.vSm,
+                    CustomDocumentItemCard(
+                      index: i,
+                      title: invoice.items[i].packageName,
+                      subtitle:
+                          'سعة الورقة: ${invoice.items[i].sheetSize} كرت  •  ${invoice.items[i].formattedSheetsCount} ورقة',
+                      colorHex: invoice.items[i].packageColor,
+                      totalAmountFormatted: AmountFormatter.formatValue(
+                        invoice.items[i].itemTotalAmount,
+                      ),
+                      totalAmountSubtitle: 'الصافي',
+                      specBadges: [
+                        if (invoice.items[i].voucherPackage?.packageBalance !=
+                                null &&
+                            invoice.items[i].voucherPackage!.packageBalance > 0)
+                          CustomChip(
+                            label: invoice
+                                .items[i]
+                                .voucherPackage!
+                                .balanceDisplay,
+                            icon: Icons.data_usage_rounded,
+                            isCompact: true,
+                          ),
+                        CustomChip(
+                          label:
+                              '${invoice.items[i].voucherCount} كرت بسعر ${AmountFormatter.formatValue(invoice.items[i].voucherPrice)}',
+                          icon: Icons.tag_rounded,
+                          isCompact: true,
+                        ),
+                        if (invoice.items[i].hasDiscount)
+                          CustomChip(
+                            label:
+                                'خصم ${AmountFormatter.formatValue(invoice.items[i].itemDiscount)}',
+                            icon: Icons.discount_outlined,
+                            isCompact: true,
+                          ),
                       ],
                     ),
-                    AppSpacing.vSm,
-
-                    // 6. قائمة بطاقات بنود الفاتورة
-                    if (invoice.items.isEmpty)
-                      Container(
-                        padding: EdgeInsets.all(AppSpacing.cardPadding),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'لا توجد بنود تفصيلية معروضة لهذه الفاتورة.',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    else
-                      for (int i = 0; i < invoice.items.length; i++)
-                        Padding(
-                          padding: EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: InvoiceDetailsItemCard(
-                            item: invoice.items[i],
-                            index: i,
-                          ),
-                        ),
-
-                    AppSpacing.vLg,
                   ],
-                ),
+
+                  SizedBox(height: 80.h),
+                ],
               ),
             ),
           ),

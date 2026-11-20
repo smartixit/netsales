@@ -1,48 +1,58 @@
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/features/invoices/domain/entities/direct_invoice_item_input_entity.dart';
+import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
 
-/// حالة استخدام إنشاء فاتورة مبيعات مباشرة لمشغل الشبكة
+/// حالة استخدام إنشاء فاتورة بيع مباشرة جديدة
+///
+/// تفرض الفحص المسبق والتحقق الدفاعي للبيانات قبل الاتصال بالمستودع:
+/// - اشتراط معرفات موجبة للشبكة ونقطة البيع.
+/// - اشتراط نوع بيع صالح (نقدي أو آجل).
+/// - اشتراط قائمة بنود غير فارغة وبكميات كروت موجبة.
+/// - اشتراط مفتاح عزل تكرار (Idempotency Key) غير فارغ لحماية المعاملات المالية.
 class CreateDirectSaleInvoiceUseCase {
-  final InvoiceRepository repository;
+  final InvoiceRepository _repository;
 
-  const CreateDirectSaleInvoiceUseCase(this.repository);
+  const CreateDirectSaleInvoiceUseCase(this._repository);
 
   Future<InvoiceEntity> call({
     required int networkId,
     required int posId,
     required SaleType saleType,
-    required List<DirectInvoiceItemInputEntity> items,
+    required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   }) {
     if (networkId <= 0) {
-      throw ArgumentError('يجب تحديد شبكة صالحة لإصدار الفاتورة.');
+      throw ArgumentError.value(networkId, 'networkId', 'معرف الشبكة غير صالح');
     }
     if (posId <= 0) {
-      throw ArgumentError('يجب تحديد نقطة بيع صالحة كطرف مستفيد.');
+      throw ArgumentError.value(posId, 'posId', 'معرف نقطة البيع غير صالح');
     }
     if (saleType == SaleType.unknown) {
-      throw ArgumentError('يجب تحديد نوع بيع صالح (كاش أو آجل).');
+      throw ArgumentError.value(saleType, 'saleType', 'نوع البيع غير معروف');
+    }
+    if (idempotencyKey.trim().isEmpty) {
+      throw ArgumentError(
+        'مفتاح تكرار العملية (Idempotency Key) مطلوب ولا يمكن أن يكون فارغاً',
+      );
     }
     if (items.isEmpty) {
-      throw ArgumentError('لا يمكن إنشاء فاتورة مبيعات خالية من البنود.');
+      throw ArgumentError('يجب تحديد بند واحد على الأقل لإنشاء الفاتورة');
     }
     for (final item in items) {
       if (item.voucherCount <= 0) {
-        throw ArgumentError('يجب أن تكون كمية الكروت أكبر من الصفر.');
+        throw ArgumentError('يجب أن تكون كمية الكروت موجبة لكل بند');
       }
     }
-    if (idempotencyKey.trim().isEmpty) {
-      throw ArgumentError('مفتاح منع التكرار (Idempotency Key) مطلوب.');
-    }
 
-    return repository.createDirectInvoice(
+    return _repository.createDirectInvoice(
       networkId: networkId,
       posId: posId,
       saleType: saleType,
       items: items,
       idempotencyKey: idempotencyKey,
+      paidAmount: paidAmount,
     );
   }
 }

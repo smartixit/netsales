@@ -1,10 +1,9 @@
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 
 /// كيان بند فاتورة مبيعات الكروت (Sale Invoice Item Entity)
 ///
-/// يمثل بنداً مالياً معتمداً ومسجلاً رسمياً ضمن فاتورة المبيعات أو المشتريات.
-/// يخضع للحسابات السيادية من الخادم ولا يحتوي على أي منطق واجهة مستخدم أو اعتماديات خارجية.
+/// يمثل سطراً تعاقدياً معتمداً ومحسوباً سيادياً داخل الفاتورة.
 class InvoiceItemEntity {
   final int itemId;
   final int invoiceId;
@@ -13,11 +12,11 @@ class InvoiceItemEntity {
   final int voucherCount;
   final double itemDiscount;
   final double itemTotalAmount;
-  final String? packageName;
-  final String? packageColor;
-  final int sheetSize;
   final String? createdAt;
   final String? updatedAt;
+  final PackageEntity? voucherPackage;
+  final String? customPackageName;
+  final String? customPackageColor;
 
   const InvoiceItemEntity({
     required this.itemId,
@@ -27,52 +26,48 @@ class InvoiceItemEntity {
     required this.voucherCount,
     this.itemDiscount = 0.0,
     required this.itemTotalAmount,
-    this.packageName,
-    this.packageColor,
-    this.sheetSize = 0,
     this.createdAt,
     this.updatedAt,
+    this.voucherPackage,
+    this.customPackageName,
+    this.customPackageColor,
   });
 
-  /// التوصيف اللغوي الفصيح لكمية الكروت والأوراق وفق محرك النظام المركزي
-  String get sheetDescription {
-    if (sheetSize <= 0) return '$voucherCount كرت';
-    return VoucherSheetCalculator.describe(voucherCount, sheetSize);
+  /// سعة الورقة/الشيت بالكروت
+  int get sheetSize {
+    final count = voucherPackage?.packageVoucherCount ?? 0;
+    return count > 0 ? count : 100;
   }
 
-  /// التوصيف المزدوج الكامل للبند (الأوراق والكروت معاً)
-  String get fullQuantityLabel {
-    final desc = sheetDescription;
-    if (sheetSize <= 0) return desc;
-    return '$desc  •  $voucherCount كرت';
-  }
+  /// عدد الأوراق المحسوبة للبند
+  double get sheetsCount => sheetSize > 0 ? (voucherCount / sheetSize) : 0.0;
 
-  /// توصيف عدد الأوراق والشيتات بصيغة رقمية مقروءة
-  String get formattedSheetsCount {
-    if (sheetSize <= 0) return '0 ورقة';
-    final sheets = voucherCount / sheetSize;
-    return '${sheets.toStringAsFixed(1)} ورقة';
-  }
+  /// صيغة نصية منسقة لعدد الأوراق
+  String get formattedSheetsCount =>
+      sheetsCount.truncateToDouble() == sheetsCount
+      ? sheetsCount.toInt().toString()
+      : sheetsCount.toStringAsFixed(1);
 
-  /// سعر الكرت المفرد منسقاً
-  String get formattedVoucherPrice =>
-      AmountFormatter.format(voucherPrice.toString());
+  /// وصف التوزيع الورقي (شيت + كروت متبقية)
+  String get sheetDescription =>
+      VoucherSheetCalculator.describe(voucherCount, sheetSize);
 
-  /// إجمالي البند المالي منسقاً
-  String get formattedItemTotalAmount =>
-      AmountFormatter.format(itemTotalAmount.toString());
+  /// التوصيف الكامل المزدوج للبند (الأوراق والكروت)
+  String get fullQuantityLabel => '$sheetDescription  •  $voucherCount كرت';
 
-  /// قيمة الخصم المالي المطبق على البند منسقة
-  String get formattedDiscount =>
-      AmountFormatter.format(itemDiscount.toString());
+  /// المبلغ الإجمالي قبل الخصم
+  double get grossAmount => voucherPrice * voucherCount;
 
-  /// هل يحتوي البند على خصم مالي معتمد
-  bool get hasDiscount => itemDiscount > 0.001;
+  /// هل يحتوي البند على خصم؟
+  bool get hasDiscount => itemDiscount > 0;
 
-  /// إجمالي قيمة البند الإجمالية قبل الخصم
-  double get grossAmount => itemTotalAmount + itemDiscount;
+  /// اسم الباقة التوريدية
+  String get packageName =>
+      customPackageName ??
+      voucherPackage?.packageName ??
+      'باقة كروت #$packageId';
 
-  /// إجمالي قيمة البند قبل الخصم منسقة
-  String get formattedGrossAmount =>
-      AmountFormatter.format(grossAmount.toString());
+  /// لون تمييز الباقة التوريدية
+  String? get packageColor =>
+      customPackageColor ?? voucherPackage?.packageColor;
 }

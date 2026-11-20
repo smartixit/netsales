@@ -1,82 +1,122 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_network_invoices_use_case.dart';
+import 'package:netsales/features/invoices/domain/usecases/invoice_document_use_case.dart';
+import 'package:netsales/features/invoices/presentation/controllers/base_invoices_controller.dart';
+import 'package:netsales/features/invoices/presentation/widgets/invoice_card_actions.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم فواتير مبيعات الجملة لمشغل الشبكة (Network Wholesale Invoices Controller)
-///
-/// يدير حالة القائمة، الترقيم بالمؤشر، البحث المؤجل، الفلاتر المتعددة،
-/// مؤشرات الأداء اللحظية (KPIs)، وتوسيع البطاقات الحصري.
-class NetworkInvoicesController extends GetxController {
-  final GetNetworkInvoicesUseCase getNetworkInvoicesUseCase;
-  final GetMyNetworksUseCase? getMyNetworksUseCase;
-
+/// متحكم استعراض وإدارة فواتير مبيعات الجملة في مساحة عمل الشبكة (Network Wholesale Invoices)
+class NetworkInvoicesController extends BaseInvoicesController {
   NetworkInvoicesController({
     required this.getNetworkInvoicesUseCase,
-    this.getMyNetworksUseCase,
+    this.invoiceDocumentUseCase,
   });
 
-  // ── الحالة الأساسية والترقيم ──
-  final invoices = <InvoiceEntity>[].obs;
-  final isLoading = false.obs;
-  final isLoadingMore = false.obs;
-  final errorMessage = RxnString();
-  final loadMoreError = RxnString();
-  final nextCursor = RxnString();
+  final GetNetworkInvoicesUseCase getNetworkInvoicesUseCase;
+  final InvoiceDocumentUseCase? invoiceDocumentUseCase;
 
-  // ── حالة التوسيع الحصرية للبطاقات ──
-  final expandedInvoiceId = RxnInt();
+  @override
+  final RxList<InvoiceEntity> invoices = <InvoiceEntity>[].obs;
 
-  // ── فلاتر البحث والحالة ونوع البيع ──
-  final searchController = TextEditingController();
-  final searchQuery = ''.obs;
-  final statusFilter = RxnString();
-  final selectedSaleType = RxnString();
-  final selectedNetworkId = RxnInt();
-  final authorizedNetworks = <NetworkEntity>[].obs;
+  @override
+  final RxBool isLoading = false.obs;
 
-  final Set<int> _invoiceIds = {};
-  int _requestIdCounter = 0;
+  @override
+  final RxnString errorMessage = RxnString();
 
-  bool get hasMore => nextCursor.value != null;
+  @override
+  final RxBool isLoadingMore = false.obs;
 
-  bool get canCreateInvoice =>
-      PermissionService.to.can(AppPermissions.salesCreate);
+  @override
+  final RxnString loadMoreError = RxnString();
 
-  // ── مؤشرات الأداء المحسوبة (KPI Counters) ──
-  int get totalInvoicesCount => invoices.length;
+  @override
+  final RxnString paymentStatusFilter = RxnString();
 
-  int get paidInvoicesCount => invoices.where((i) => i.isPaid).length;
+  @override
+  final RxnString selectedSaleType = RxnString();
 
-  int get partiallyPaidInvoicesCount =>
-      invoices.where((i) => i.isPartiallyPaid).length;
+  @override
+  final RxString searchQuery = ''.obs;
 
-  int get unpaidInvoicesCount => invoices.where((i) => i.isUnpaid).length;
+  @override
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  final RxnInt expandedInvoiceId = RxnInt();
+
+  String? _nextCursor;
+
+  @override
+  bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
+
+  int? get activeNetworkId {
+    if (Get.isRegistered<WorkspaceService>()) {
+      return WorkspaceService.to.savedActiveNetworkId;
+    }
+    return null;
+  }
+
+  bool get canCreateDirectInvoice {
+    if (Get.isRegistered<PermissionService>()) {
+      return PermissionService.instance.can(AppPermissions.salesCreate);
+    }
+    return true;
+  }
+
+  @override
+  String get pageTitle => 'فواتير مبيعات الجملة';
+
+  @override
+  String get pageSubtitle =>
+      'سجل الفواتير الصادرة لمنافذ البيع، متابعة التحصيل، وتدقيق المستحقات المالية فورياً.';
+
+  @override
+  IconData get pageIcon => Icons.point_of_sale_rounded;
+
+  @override
+  Widget? get headerAction => canCreateDirectInvoice
+      ? CustomButton.primary(
+          text: 'فاتورة مباشرة +',
+          icon: Icons.add_rounded,
+          shape: AppButtonShape.pill,
+          size: AppButtonSize.small,
+          onPressed: () =>
+              Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
+        )
+      : null;
+
+  @override
+  String get searchHint => 'بحث برقم الفاتورة، المعرف، أو اسم نقطة البيع...';
 
   @override
   void onInit() {
     super.onInit();
-
     searchController.addListener(() {
-      searchQuery.value = searchController.text;
+      final value = searchController.text.trim();
+      if (searchQuery.value != value) {
+        searchQuery.value = value;
+      }
     });
 
-    debounce(
-      searchQuery,
-      (_) => loadInvoices(isRefresh: true),
-      time: const Duration(milliseconds: 300),
-    );
+    debounce<String>(searchQuery, (_) {
+      loadInvoices(isRefresh: true);
+    }, time: const Duration(milliseconds: 350));
 
-    loadNetworksAndInvoices();
+    loadInvoices();
   }
 
   @override
@@ -85,7 +125,89 @@ class NetworkInvoicesController extends GetxController {
     super.onClose();
   }
 
-  /// التوسيع أو الطي الحصري لبطاقة الفاتورة
+  @override
+  Future<void> loadInvoices({bool isRefresh = false}) async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      final result = await getNetworkInvoicesUseCase(
+        networkId: activeNetworkId,
+        paymentStatus: paymentStatusFilter.value,
+        saleType: selectedSaleType.value,
+        search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+      );
+
+      invoices.assignAll(result.items);
+      _nextCursor = result.nextCursor;
+    } catch (e) {
+      errorMessage.value = AppException.sanitizeMessage(e);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  @override
+  Future<void> loadMoreInvoices() async {
+    if (!hasMore || isLoadingMore.value) return;
+
+    isLoadingMore.value = true;
+    loadMoreError.value = null;
+
+    try {
+      final result = await getNetworkInvoicesUseCase(
+        networkId: activeNetworkId,
+        paymentStatus: paymentStatusFilter.value,
+        saleType: selectedSaleType.value,
+        search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+        cursor: _nextCursor,
+      );
+
+      final existingIds = invoices.map((e) => e.invoiceId).toSet();
+      final newItems =
+          result.items.where((e) => !existingIds.contains(e.invoiceId)).toList();
+
+      invoices.addAll(newItems);
+      _nextCursor = result.nextCursor;
+    } catch (e) {
+      loadMoreError.value = AppException.sanitizeMessage(e);
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  @override
+  void setPaymentStatusFilter(String? status) {
+    if (paymentStatusFilter.value == status) {
+      paymentStatusFilter.value = null;
+    } else {
+      paymentStatusFilter.value = status;
+    }
+    loadInvoices(isRefresh: true);
+  }
+
+  @override
+  void onSaleTypeChanged(String? saleType) {
+    if (selectedSaleType.value == saleType) {
+      selectedSaleType.value = null;
+    } else {
+      selectedSaleType.value = saleType;
+    }
+    loadInvoices(isRefresh: true);
+  }
+
+  @override
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    paymentStatusFilter.value = null;
+    selectedSaleType.value = null;
+    loadInvoices(isRefresh: true);
+  }
+
+  @override
   void toggleInvoiceExpansion(int invoiceId) {
     if (expandedInvoiceId.value == invoiceId) {
       expandedInvoiceId.value = null;
@@ -94,140 +216,145 @@ class NetworkInvoicesController extends GetxController {
     }
   }
 
-  /// تعيين فلتر حالة الفاتورة
-  void setStatusFilter(String? status) {
-    if (statusFilter.value == status) {
-      statusFilter.value = null;
-    } else {
-      statusFilter.value = status;
-    }
-    loadInvoices(isRefresh: true);
+  @override
+  void openInvoiceDetails(InvoiceEntity invoice) {
+    Get.toNamed<void>(
+      AppRoutes.saleInvoiceDetails,
+      arguments: {'invoice_id': invoice.invoiceId, 'invoice': invoice},
+    );
   }
 
-  /// تعيين فلتر نوع المعاملة
-  void onSaleTypeChanged(String? type) {
-    if (selectedSaleType.value == type) return;
-    selectedSaleType.value = type;
-    loadInvoices(isRefresh: true);
-  }
-
-  /// تغيير فلتر الشبكة
-  void onNetworkFilterChanged(int? networkId) {
-    if (selectedNetworkId.value == networkId) return;
-    selectedNetworkId.value = networkId;
-    if (networkId != null) {
-      WorkspaceService.to.saveActiveNetworkId(networkId);
-    }
-    loadInvoices(isRefresh: true);
-  }
-
-  /// إعادة تعيين كافة الفلاتر والبحث
-  void resetFilters() {
-    searchController.clear();
-    searchQuery.value = '';
-    statusFilter.value = null;
-    selectedSaleType.value = null;
-    loadInvoices(isRefresh: true);
-  }
-
-  /// تحديث قائمة الفواتير
-  Future<void> refreshInvoices() => loadInvoices(isRefresh: true);
-
-  /// تحميل شبكات المشغل ثم جلب الفواتير
-  Future<void> loadNetworksAndInvoices() async {
-    if (getMyNetworksUseCase != null) {
-      try {
-        final networks = await getMyNetworksUseCase!();
-        authorizedNetworks.assignAll(networks);
-        final networkIds = networks
-            .map((n) => n.networkId)
-            .toList(growable: false);
-        final resolvedId = WorkspaceService.to.resolveActiveNetworkId(
-          networkIds,
-        );
-        selectedNetworkId.value = resolvedId;
-        if (resolvedId != null) {
-          await WorkspaceService.to.saveActiveNetworkId(resolvedId);
-        }
-      } catch (_) {
-        // الاستمرار بالاعتماد على التحديد التلقائي من الخادم
-      }
-    }
-    await loadInvoices(isRefresh: true);
-  }
-
-  /// جلب فواتير مبيعات الجملة مع حماية الطلبات المتأخرة
-  Future<void> loadInvoices({bool isRefresh = false}) async {
-    if (isRefresh) {
-      isLoading.value = true;
-      errorMessage.value = null;
-      nextCursor.value = null;
-    }
-
-    final currentRequestId = ++_requestIdCounter;
-
+  @override
+  Future<void> printInvoice(InvoiceEntity invoice) async {
     try {
-      final PaginatedList<InvoiceEntity> result =
-          await getNetworkInvoicesUseCase(
-            networkId: selectedNetworkId.value,
-            saleType: selectedSaleType.value,
-            paymentStatus: statusFilter.value,
-            search: searchQuery.value,
-            cursor: isRefresh ? null : nextCursor.value,
-            perPage: 15,
-          );
-
-      if (currentRequestId != _requestIdCounter) return;
-
-      if (isRefresh) {
-        _invoiceIds.clear();
-        invoices.clear();
-      }
-
-      for (final inv in result.items) {
-        if (_invoiceIds.add(inv.invoiceId)) {
-          invoices.add(inv);
-        }
-      }
-
-      nextCursor.value = result.nextCursor;
-      errorMessage.value = null;
-    } on AppException catch (e) {
-      if (currentRequestId == _requestIdCounter) {
-        errorMessage.value = e.message;
-        CustomSnackbar.show(
-          title: 'خطأ في جلب الفواتير',
-          message: e.message,
-          type: SnackType.error,
-        );
+      final docUseCase = invoiceDocumentUseCase;
+      if (docUseCase != null) {
+        await docUseCase.printInvoice(invoice);
       }
     } catch (e) {
-      if (currentRequestId == _requestIdCounter) {
-        errorMessage.value = 'تعذر استرجاع فواتير المبيعات: $e';
-      }
-    } finally {
-      if (currentRequestId == _requestIdCounter) {
-        isLoading.value = false;
-        isLoadingMore.value = false;
-      }
+      CustomSnackbar.show(
+        title: 'تعذر الطباعة',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
     }
   }
 
-  /// تحميل الصفحة التالية من الفواتير بالمؤشر
-  Future<void> loadMoreInvoices() async {
-    if (isLoadingMore.value || !hasMore || isLoading.value) return;
-
-    isLoadingMore.value = true;
-    await loadInvoices(isRefresh: false);
+  @override
+  Future<void> shareInvoice(InvoiceEntity invoice) async {
+    try {
+      final docUseCase = invoiceDocumentUseCase;
+      if (docUseCase != null) {
+        await docUseCase.shareInvoice(invoice);
+      }
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'تعذر المشاركة',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    }
   }
 
-  /// الانتقال إلى واجهة إنشاء فاتورة مبيعات مباشرة
-  void navigateToCreateInvoice() {
-    Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
+  @override
+  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
+    final colors = context.colors;
+    final paidPres = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      InvoicePaymentStatus.paid,
+    );
+    final partiallyPaidPres =
+        EnumPresentationRegistry.resolveInvoicePaymentStatus(
+          InvoicePaymentStatus.partiallyPaid,
+        );
+    final unpaidPres = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      InvoicePaymentStatus.unpaid,
+    );
+
+    final totalCount = invoices.length;
+    final paidCount = invoices.where((inv) => inv.isPaid).length;
+    final partialCount = invoices.where((inv) => inv.isPartiallyPaid).length;
+    final unpaidCount = invoices.where((inv) => inv.isUnpaid).length;
+
+    return [
+      CustomKpiCardData(
+        label: 'الكل',
+        count: totalCount,
+        icon: Icons.all_inbox_rounded,
+        accentColor: colors.primary,
+        statusKey: null,
+      ),
+      CustomKpiCardData(
+        label: paidPres.label,
+        count: paidCount,
+        icon: paidPres.icon ?? Icons.check_circle_outline_rounded,
+        accentColor: paidPres.tone.color(context),
+        statusKey: InvoicePaymentStatus.paid.wireValue,
+      ),
+      CustomKpiCardData(
+        label: partiallyPaidPres.label,
+        count: partialCount,
+        icon: partiallyPaidPres.icon ?? Icons.timelapse_rounded,
+        accentColor: partiallyPaidPres.tone.color(context),
+        statusKey: InvoicePaymentStatus.partiallyPaid.wireValue,
+      ),
+      CustomKpiCardData(
+        label: unpaidPres.label,
+        count: unpaidCount,
+        icon: unpaidPres.icon ?? Icons.pending_actions_rounded,
+        accentColor: unpaidPres.tone.color(context),
+        statusKey: InvoicePaymentStatus.unpaid.wireValue,
+      ),
+    ];
   }
 
-  /// الانتقال إلى واجهة تفاصيل الفاتورة
-  void openInvoiceDetails(InvoiceEntity invoice) {
-    Get.toNamed<void>(AppRoutes.saleInvoiceDetails, arguments: invoice);
+  @override
+  List<CustomSearchFilterOption<String?>> buildFilterOptions(
+    BuildContext context,
+  ) {
+    final paidPres = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      InvoicePaymentStatus.paid,
+    );
+    final partiallyPaidPres =
+        EnumPresentationRegistry.resolveInvoicePaymentStatus(
+          InvoicePaymentStatus.partiallyPaid,
+        );
+    final unpaidPres = EnumPresentationRegistry.resolveInvoicePaymentStatus(
+      InvoicePaymentStatus.unpaid,
+    );
+
+    return [
+      const CustomSearchFilterOption<String?>(value: null, label: 'كافة الحالات'),
+      CustomSearchFilterOption<String?>(
+        value: InvoicePaymentStatus.paid.wireValue,
+        label: paidPres.label,
+        icon: Icons.check_circle_outline_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        value: InvoicePaymentStatus.partiallyPaid.wireValue,
+        label: partiallyPaidPres.label,
+        icon: Icons.timelapse_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        value: InvoicePaymentStatus.unpaid.wireValue,
+        label: unpaidPres.label,
+        icon: Icons.pending_actions_rounded,
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildExtraFilters(BuildContext context) {
+    return null;
+  }
+
+  @override
+  Widget buildCardActions(BuildContext context, InvoiceEntity invoice) {
+    return InvoiceCardActions(
+      invoice: invoice,
+      isNetworkPerspective: true,
+      onDetails: () => openInvoiceDetails(invoice),
+      onPrint: () => printInvoice(invoice),
+      onShare: () => shareInvoice(invoice),
+    );
   }
 }
