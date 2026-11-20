@@ -1,20 +1,18 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
+import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/utils/greeting_formatter.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/core/utils/greeting_formatter.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -26,60 +24,47 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
-import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
-import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
-import 'package:netsales/features/workspace/presentation/mappers/pos_network_package_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
-import 'package:netsales/features/workspace/presentation/models/pos_network_package_view_model.dart';
+import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 
-/// متحكم مساحة عمل نقطة البيع التفاعلي الشامل المرتبط كلياً بواجهات الـ API (PosWorkspaceController)
+/// Coordinates POS selection, linked supplier selection and dashboard data.
 class PosWorkspaceController extends GetxController {
   PosWorkspaceController({
     required this.getMyPosUseCase,
     required this.getPosNetworksListUseCase,
-    this.getPosInvoicesUseCase,
-    this.getRequestsUseCase,
-    this.getNetworkPackagesUseCase,
-    this.previewNetworkPosLinkChallengeUseCase,
-    this.confirmNetworkPosLinkChallengeUseCase,
+    required this.getPosInvoicesUseCase,
+    required this.getRequestsUseCase,
+    required this.previewNetworkPosLinkChallengeUseCase,
+    required this.confirmNetworkPosLinkChallengeUseCase,
   });
 
   final GetMyPosUseCase getMyPosUseCase;
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
-  final GetPosInvoicesUseCase? getPosInvoicesUseCase;
-  final GetRequestsUseCase? getRequestsUseCase;
-  final GetNetworkPackagesUseCase? getNetworkPackagesUseCase;
-  final PreviewNetworkPosLinkChallengeUseCase?
-  previewNetworkPosLinkChallengeUseCase;
-  final ConfirmNetworkPosLinkChallengeUseCase?
-  confirmNetworkPosLinkChallengeUseCase;
+  final GetPosInvoicesUseCase getPosInvoicesUseCase;
+  final GetRequestsUseCase getRequestsUseCase;
+  final PreviewNetworkPosLinkChallengeUseCase previewNetworkPosLinkChallengeUseCase;
+  final ConfirmNetworkPosLinkChallengeUseCase confirmNetworkPosLinkChallengeUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
   final Rxn<PosEntity> activePos = Rxn<PosEntity>();
-  final RxList<NetworkPosLinkEntity> networkLinks =
-      <NetworkPosLinkEntity>[].obs;
-  final Rxn<NetworkPosLinkEntity> selectedNetworkLink =
-      Rxn<NetworkPosLinkEntity>();
+  final RxList<NetworkPosLinkEntity> networkLinks = <NetworkPosLinkEntity>[].obs;
+  final Rxn<NetworkPosLinkEntity> selectedNetworkLink = Rxn<NetworkPosLinkEntity>();
 
-  // بيانات حية من الـ API: فواتير المشتريات، طلبات التوريد، وباقات الشبكة
   final RxList<InvoiceEntity> recentInvoices = <InvoiceEntity>[].obs;
   final RxList<RequestEntity> recentRequests = <RequestEntity>[].obs;
-  final RxList<PackageEntity> networkPackages = <PackageEntity>[].obs;
 
   final RxBool isLoadingPos = false.obs;
   final RxBool isLoadingNetworks = false.obs;
-  final RxBool isLoadingWallet = false.obs;
   final RxBool isLoadingMoreNetworks = false.obs;
   final RxBool isLoadingRecentData = false.obs;
-  final RxBool isLoadingPackages = false.obs;
 
   final RxnString posError = RxnString();
   final RxnString networksError = RxnString();
-  final RxnString walletError = RxnString();
-  final RxnString recentDataError = RxnString();
-  final RxnString packagesError = RxnString();
+  final RxnString recentInvoicesError = RxnString();
+  final RxnString recentRequestsError = RxnString();
 
   final RxnString networkCursor = RxnString();
   final RxBool hasMoreNetworks = false.obs;
@@ -87,7 +72,6 @@ class PosWorkspaceController extends GetxController {
 
   int _posGeneration = 0;
   int _networkGeneration = 0;
-  int _walletGeneration = 0;
   int _scopedDataGeneration = 0;
 
   String get userName {
@@ -95,67 +79,16 @@ class PosWorkspaceController extends GetxController {
     return name.isEmpty ? 'مرحباً بك' : name;
   }
 
-  String get welcomePeriod => GreetingFormatter.greeting();
-
   String get welcomeGreeting => GreetingFormatter.greeting();
-
   String get todayFormatted => DateFormatter.fullDate(DateTime.now());
+  String get activePosName => activePos.value?.posName ?? '';
+  String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
+  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
 
-  String get activePosName => activePos.value?.posName ?? 'نقطة البيع';
-
-  Future<NetworkPosLinkPreviewEntity?> previewNetworkLinkChallenge({
-    required String payload,
-    required int posId,
-  }) async {
-    final useCase =
-        previewNetworkPosLinkChallengeUseCase ??
-        (Get.isRegistered<PreviewNetworkPosLinkChallengeUseCase>()
-            ? Get.find<PreviewNetworkPosLinkChallengeUseCase>()
-            : null);
-    if (useCase == null) return null;
-
-    return previewNetworkPosLinkChallengeUseCase!(
-      payload: payload,
-      posId: posId,
-    );
-  }
-
-  Future<bool> confirmNetworkLinkChallenge({
-    required String challengeUuid,
-    required int posId,
-  }) async {
-    final useCase =
-        confirmNetworkPosLinkChallengeUseCase ??
-        (Get.isRegistered<ConfirmNetworkPosLinkChallengeUseCase>()
-            ? Get.find<ConfirmNetworkPosLinkChallengeUseCase>()
-            : null);
-    if (useCase == null) return false;
-
-    final newLink = await confirmNetworkPosLinkChallengeUseCase!(
-      challengeUuid: challengeUuid,
-      posId: posId,
-    );
-
-    final existingIndex = networkLinks.indexWhere(
-      (link) => link.networkId == newLink.networkId,
-    );
-    final selectedIndex = existingIndex < 0 ? 0 : existingIndex;
-
-    if (existingIndex < 0) {
-      networkLinks.insert(0, newLink);
-    } else {
-      networkLinks[existingIndex] = newLink;
-    }
-
-    await selectNetwork(newLink, index: selectedIndex);
-    return true;
-  }
-
-  /// كائن العرض الدلالي للدور الوظيفي لنقطة البيع
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
     final membership = user?.workspaceMemberships.firstWhereOrNull(
-      (m) => m.scope == RoleScope.pos,
+      (item) => item.scope == RoleScope.pos,
     );
     final rawRoleKey =
         membership?.roleKey ?? user?.role?.roleKey ?? user?.generalRoleKey;
@@ -163,55 +96,35 @@ class PosWorkspaceController extends GetxController {
         membership?.roleName ??
         user?.role?.roleName ??
         user?.role?.roleKeyLabel;
-    final typedRoleKey = RoleKey.fromWire(rawRoleKey);
     final presentation = EnumPresentationRegistry.resolveRoleKey(
-      typedRoleKey,
+      RoleKey.fromWire(rawRoleKey),
       serverLabel: serverLabel,
     );
-    if (presentation.isKnown) {
-      return presentation;
-    }
+    if (presentation.isKnown) return presentation;
     return EnumPresentationRegistry.resolveRoleScope(
       RoleScope.pos,
       serverLabel: serverLabel,
     );
   }
 
-  /// رتبة أو صفة المستخدم المستخرجة ديناميكياً من Enum الأدوار وسجل العرض
   String get userRole => rolePresentation.label;
-
-  List<PosNetworkPackageViewModel> get networkPackageItems =>
-      PosNetworkPackageMapper.map(networkPackages);
 
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
 
-  void openProcurementOrder(RequestEntity request) =>
-      Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
-
-  void openProcurementOrderForPackage(int packageId) {
-    Get.toNamed<void>(
-      AppRoutes.newProcurementOrder,
-      arguments: {'package_id': packageId},
-    );
-  }
-
-  /// قائمة حركات الحساب والمشتريات المحولة كـ ViewModels جاهزة للعرض
-  List<WorkspaceTransactionItemViewModel> get recentTransactionItems {
-    return PosWorkspaceTransactionMapper.map(
-      invoices: recentInvoices,
-      requests: recentRequests,
-      onOpenInvoice: (invoice) {
-        Get.toNamed<void>(AppRoutes.purchaseInvoiceDetails, arguments: invoice);
-      },
-      onOpenRequest: (request) {
-        Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
-      },
-    );
-  }
-
-  /// رابط صورة المستخدم
-  String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
+  List<WorkspaceTransactionItemViewModel> get recentTransactionItems =>
+      PosWorkspaceTransactionMapper.map(
+        invoices: recentInvoices,
+        requests: recentRequests,
+        onOpenInvoice: (invoice) => Get.toNamed<void>(
+          AppRoutes.purchaseInvoiceDetails,
+          arguments: invoice,
+        ),
+        onOpenRequest: (request) => Get.toNamed<void>(
+          AppRoutes.procurementOrders,
+          arguments: request,
+        ),
+      );
 
   @override
   void onInit() {
@@ -225,9 +138,7 @@ class PosWorkspaceController extends GetxController {
   Future<void> loadWorkspace() async {
     await loadPosTenants();
     final posId = activePos.value?.posId;
-    if (posId != null) {
-      await loadNetworks(posId);
-    }
+    if (posId != null) await loadNetworks(posId);
   }
 
   Future<void> loadPosTenants() async {
@@ -238,47 +149,57 @@ class PosWorkspaceController extends GetxController {
 
     try {
       final positions = await getMyPosUseCase();
-      if (generation != _posGeneration) return;
+      if (generation != _posGeneration || isClosed) return;
 
-      final previousPosId = activePos.value?.posId;
       availablePos.assignAll(positions);
+      final ids = positions.map((position) => position.posId).toList(growable: false);
+      final selectedId = WorkspaceService.to.resolveWorkspaceActivePosId(ids);
+      final selected = selectedId == null
+          ? null
+          : positions.firstWhereOrNull((position) => position.posId == selectedId);
 
-      final resolvedId = WorkspaceService.to.resolveActivePosId(
-        positions.map((p) => p.posId).toList(),
-      );
-      final resolvedPosition = resolvedId != null
-          ? positions.firstWhereOrNull((p) => p.posId == resolvedId)
-          : positions.firstOrNull;
-
-      if (resolvedPosition?.posId != previousPosId) {
+      if (activePos.value?.posId != selected?.posId) {
         _clearNetworkContext();
       }
-      activePos.value = resolvedPosition;
+      activePos.value = selected;
 
-      if (resolvedPosition != null) {
-        await WorkspaceService.to.saveActivePosId(resolvedPosition.posId);
+      if (selected == null) {
+        await WorkspaceService.to.clearActivePosId();
+        return;
       }
+      await WorkspaceService.to.saveActivePosId(selected.posId);
     } catch (error) {
-      if (generation == _posGeneration) {
-        posError.value = AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر تحميل نقاط البيع المصرح بها.',
-        );
-      }
+      if (generation != _posGeneration || isClosed) return;
+      availablePos.clear();
+      activePos.value = null;
+      _clearNetworkContext();
+      posError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل نقاط البيع المصرح بها.',
+      );
     } finally {
-      if (generation == _posGeneration) {
+      if (generation == _posGeneration && !isClosed) {
         isLoadingPos.value = false;
       }
     }
   }
 
   Future<void> selectPos(PosEntity pos) async {
+    if (!availablePos.any((item) => item.posId == pos.posId)) return;
     if (activePos.value?.posId == pos.posId) return;
 
     activePos.value = pos;
     _clearNetworkContext();
     await WorkspaceService.to.saveActivePosId(pos.posId);
     await loadNetworks(pos.posId);
+  }
+
+  Future<void> selectPosById(int? posId) async {
+    if (posId == null) return;
+    final selected = availablePos.firstWhereOrNull(
+      (position) => position.posId == posId,
+    );
+    if (selected != null) await selectPos(selected);
   }
 
   Future<void> loadNetworks(int posId, {bool refresh = true}) async {
@@ -296,10 +217,11 @@ class PosWorkspaceController extends GetxController {
       isLoadingMoreNetworks.value = false;
       networksError.value = null;
       networkLinks.clear();
+      selectedNetworkLink.value = null;
       networkCursor.value = null;
       hasMoreNetworks.value = false;
-      selectedNetworkLink.value = null;
       currentNetworkIndex.value = 0;
+      _clearScopedData();
     } else {
       isLoadingMoreNetworks.value = true;
     }
@@ -310,45 +232,47 @@ class PosWorkspaceController extends GetxController {
         cursor: refresh ? null : networkCursor.value,
         perPage: 10,
       );
-      if (generation != _networkGeneration || activePos.value?.posId != posId) {
+      if (generation != _networkGeneration ||
+          activePos.value?.posId != posId ||
+          isClosed) {
         return;
       }
 
       final knownIds = networkLinks.map((link) => link.networkId).toSet();
       for (final link in result.items) {
-        if (knownIds.add(link.networkId)) {
-          networkLinks.add(link);
-        }
+        if (knownIds.add(link.networkId)) networkLinks.add(link);
       }
       networkCursor.value = result.nextCursor;
       hasMoreNetworks.value = result.hasMore;
 
-      if (selectedNetworkLink.value == null && networkLinks.isNotEmpty) {
-        final savedNetworkId = StorageService.instance.getInt(
-          _networkStorageKey(posId),
+      if (refresh) {
+        final savedId = StorageService.instance.getInt(_networkStorageKey(posId));
+        final saved = networkLinks.firstWhereOrNull(
+          (link) => link.networkId == savedId && link.status,
         );
-        final savedLink = networkLinks.firstWhereOrNull(
-          (link) => link.networkId == savedNetworkId && link.status,
-        );
-        final initialLink =
-            savedLink ??
-            (networkLinks.length == 1 ? networkLinks.single : null);
-        if (initialLink != null) {
+        NetworkPosLinkEntity? initial;
+        if (saved != null) {
+          initial = saved;
+        } else if (!result.hasMore) {
+          final activeLinks = networkLinks.where((link) => link.status).toList();
+          if (activeLinks.length == 1) initial = activeLinks.single;
+        }
+
+        if (initial != null) {
           await selectNetwork(
-            initialLink,
-            index: networkLinks.indexOf(initialLink),
+            initial,
+            index: networkLinks.indexOf(initial),
           );
         }
       }
     } catch (error) {
-      if (generation == _networkGeneration) {
-        networksError.value = AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر تحميل الشبكات المرتبطة بنقطة البيع.',
-        );
-      }
+      if (generation != _networkGeneration || isClosed) return;
+      networksError.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل الشبكات المرتبطة بنقطة البيع.',
+      );
     } finally {
-      if (generation == _networkGeneration) {
+      if (generation == _networkGeneration && !isClosed) {
         isLoadingNetworks.value = false;
         isLoadingMoreNetworks.value = false;
       }
@@ -361,181 +285,146 @@ class PosWorkspaceController extends GetxController {
     bool forceRefresh = false,
   }) async {
     final posId = activePos.value?.posId;
-    if (posId == null || !link.status) return;
+    final authorizedLink = networkLinks.firstWhereOrNull(
+      (candidate) =>
+          candidate.networkId == link.networkId &&
+          candidate.networkPosId == link.networkPosId &&
+          candidate.status,
+    );
+    if (posId == null || authorizedLink == null) return;
 
-    final isSameNetwork =
-        selectedNetworkLink.value?.networkId == link.networkId;
-    if (isSameNetwork && !forceRefresh && (isLoadingWallet.value)) {
+    if (selectedNetworkLink.value?.networkId == link.networkId &&
+        !forceRefresh &&
+        isLoadingRecentData.value) {
       return;
     }
 
-    selectedNetworkLink.value = link;
-    currentNetworkIndex.value = index ?? networkLinks.indexOf(link);
-    walletError.value = null;
-
-    final generation = ++_walletGeneration;
-    isLoadingWallet.value = true;
-    try {
-      await StorageService.instance.setInt(
-        _networkStorageKey(posId),
-        link.networkId,
-      );
-      if (generation != _walletGeneration) return;
-
-      // جلب البيانات الحقيقية المرتبطة بالشبكة المحددة (فواتير، طلبات، باقات)
-      await loadNetworkScopedData(link.networkId);
-    } catch (error) {
-      if (generation == _walletGeneration) {
-        walletError.value = AppException.sanitizeMessage(
-          error,
-          fallback: 'تعذر تحميل الحساب المالي لهذه الشبكة.',
-        );
-      }
-    } finally {
-      if (generation == _walletGeneration) {
-        isLoadingWallet.value = false;
-      }
-    }
+    selectedNetworkLink.value = authorizedLink;
+    currentNetworkIndex.value = index ?? networkLinks.indexOf(authorizedLink);
+    await StorageService.instance.setInt(
+      _networkStorageKey(posId),
+      authorizedLink.networkId,
+    );
+    await loadNetworkScopedData(authorizedLink.networkId, posId: posId);
   }
 
-  /// تحميل البيانات الفعلية من الـ API الخاصة بالحركات والباقات للشبكة المحددة
-  Future<void> loadNetworkScopedData(int networkId) async {
-    final posId = activePos.value?.posId;
-    if (posId == null) return;
-
-    final scopedGen = ++_scopedDataGeneration;
+  Future<void> loadNetworkScopedData(
+    int networkId, {
+    required int posId,
+  }) async {
+    final generation = ++_scopedDataGeneration;
+    recentInvoices.clear();
+    recentRequests.clear();
+    recentInvoicesError.value = null;
+    recentRequestsError.value = null;
     isLoadingRecentData.value = true;
-    isLoadingPackages.value = true;
-    recentDataError.value = null;
-    packagesError.value = null;
 
-    // 1. فواتير المشتريات من الـ API
-    if (getPosInvoicesUseCase != null) {
-      try {
-        final invResult = await getPosInvoicesUseCase!(
-          posId: posId,
-          perPage: 5,
-        );
-        if (scopedGen == _scopedDataGeneration) {
-          recentInvoices.assignAll(invResult.items);
-        }
-      } catch (e) {
-        if (scopedGen == _scopedDataGeneration) {
-          recentDataError.value = AppException.sanitizeMessage(
-            e,
-            fallback: 'تعذر جلب فواتير التوريد من الخادم.',
-          );
-        }
-      } finally {
-        if (scopedGen == _scopedDataGeneration) {
-          isLoadingRecentData.value = false;
-        }
-      }
-    } else {
-      isLoadingRecentData.value = false;
-    }
+    try {
+      final results = await Future.wait([
+        getPosInvoicesUseCase(posId: posId, networkId: networkId, perPage: 5),
+        getRequestsUseCase(posId: posId, networkId: networkId, perPage: 5),
+      ]);
 
-    // 2. طلبات التوريد من الـ API
-    if (getRequestsUseCase != null) {
-      try {
-        final reqResult = await getRequestsUseCase!(
-          posId: posId,
-          networkId: networkId,
-          perPage: 5,
-        );
-        if (scopedGen == _scopedDataGeneration) {
-          recentRequests.assignAll(reqResult.items);
-        }
-      } catch (_) {
-        // Non-fatal fallback
+      if (generation != _scopedDataGeneration ||
+          activePos.value?.posId != posId ||
+          selectedNetworkLink.value?.networkId != networkId ||
+          isClosed) {
+        return;
       }
-    }
 
-    // 3. باقات الشبكة المعتمدة من الـ API
-    if (getNetworkPackagesUseCase != null) {
-      try {
-        final pkgs = await getNetworkPackagesUseCase!(networkId);
-        if (scopedGen == _scopedDataGeneration) {
-          networkPackages.assignAll(pkgs.items);
-        }
-      } catch (e) {
-        if (scopedGen == _scopedDataGeneration) {
-          packagesError.value = AppException.sanitizeMessage(
-            e,
-            fallback: 'تعذر جلب باقات الشبكة من الخادم.',
-          );
-        }
-      } finally {
-        if (scopedGen == _scopedDataGeneration) {
-          isLoadingPackages.value = false;
-        }
+      recentInvoices.assignAll(results[0].items);
+      recentRequests.assignAll(results[1].items);
+    } catch (error) {
+      if (generation != _scopedDataGeneration || isClosed) return;
+      final message = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل نشاط الشبكة المحددة.',
+      );
+      recentInvoicesError.value = message;
+      recentRequestsError.value = message;
+    } finally {
+      if (generation == _scopedDataGeneration && !isClosed) {
+        isLoadingRecentData.value = false;
       }
-    } else {
-      isLoadingPackages.value = false;
     }
   }
 
   Future<void> onNetworkPageChanged(int index) async {
     if (index < 0 || index >= networkLinks.length) return;
     await selectNetwork(networkLinks[index], index: index);
-
     if (index >= networkLinks.length - 2 && hasMoreNetworks.value) {
       final posId = activePos.value?.posId;
-      if (posId != null) {
-        await loadNetworks(posId, refresh: false);
-      }
+      if (posId != null) await loadNetworks(posId, refresh: false);
     }
   }
 
   Future<void> retryNetworks() async {
     final posId = activePos.value?.posId;
-    if (posId != null) {
-      await loadNetworks(posId);
-    }
+    if (posId != null) await loadNetworks(posId);
   }
 
-  Future<void> retrySelectedWallet() async {
-    final link = selectedNetworkLink.value;
-    if (link == null) return;
-    await selectNetwork(
-      link,
-      index: currentNetworkIndex.value,
-      forceRefresh: true,
-    );
+  Future<void> retryScopedData() async {
+    final posId = activePos.value?.posId;
+    final networkId = selectedNetworkLink.value?.networkId;
+    if (posId != null && networkId != null) {
+      await loadNetworkScopedData(networkId, posId: posId);
+    }
   }
 
   String _networkStorageKey(int posId) =>
       '${StorageKeys.activePosNetworkPrefix}_${SessionService.to.currentUser?.userId ?? 0}_$posId';
 
-  void _clearNetworkContext() {
-    ++_networkGeneration;
-    ++_walletGeneration;
+  void _clearScopedData() {
     ++_scopedDataGeneration;
-    networkLinks.clear();
-    selectedNetworkLink.value = null;
     recentInvoices.clear();
     recentRequests.clear();
-    networkPackages.clear();
+    recentInvoicesError.value = null;
+    recentRequestsError.value = null;
+    isLoadingRecentData.value = false;
+  }
+
+  void _clearNetworkContext() {
+    ++_networkGeneration;
+    networkLinks.clear();
+    selectedNetworkLink.value = null;
     networkCursor.value = null;
     hasMoreNetworks.value = false;
     currentNetworkIndex.value = 0;
     isLoadingNetworks.value = false;
     isLoadingMoreNetworks.value = false;
-    isLoadingWallet.value = false;
-    isLoadingRecentData.value = false;
-    isLoadingPackages.value = false;
     networksError.value = null;
-    walletError.value = null;
-    recentDataError.value = null;
-    packagesError.value = null;
+    _clearScopedData();
   }
 
-  Future<void> selectPosById(int? posId) async {
-    if (posId == null) return;
-    final selected = availablePos.firstWhereOrNull(
-      (position) => position.posId == posId,
+  Future<NetworkPosLinkPreviewEntity> previewNetworkLinkChallenge({
+    required String payload,
+    required int posId,
+  }) =>
+      previewNetworkPosLinkChallengeUseCase(payload: payload, posId: posId);
+
+  Future<bool> confirmNetworkLinkChallenge({
+    required String challengeUuid,
+    required int posId,
+  }) async {
+    final newLink = await confirmNetworkPosLinkChallengeUseCase(
+      challengeUuid: challengeUuid,
+      posId: posId,
     );
-    if (selected != null) await selectPos(selected);
+
+    final existingIndex = networkLinks.indexWhere(
+      (link) => link.networkId == newLink.networkId,
+    );
+    if (existingIndex < 0) {
+      networkLinks.insert(0, newLink);
+    } else {
+      networkLinks[existingIndex] = newLink;
+    }
+    await selectNetwork(
+      newLink,
+      index: existingIndex < 0 ? 0 : existingIndex,
+      forceRefresh: true,
+    );
+    return true;
   }
 
   void openNewProcurementOrder() =>
@@ -543,21 +432,8 @@ class PosWorkspaceController extends GetxController {
 
   void openPurchaseInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
 
-  void openPosDebtLedger() => Get.toNamed<void>(AppRoutes.posDebtLedger);
+  void openProcurementOrder(RequestEntity request) =>
+      Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
 
-  void openWalletStatement() {
-    final posId = activePos.value?.posId;
-    if (posId == null) return;
-    final networkId = selectedNetworkLink.value?.networkId;
-    final arguments = <String, dynamic>{'pos_id': posId};
-    if (networkId != null) arguments['network_id'] = networkId;
-    Get.toNamed<void>(AppRoutes.posWalletStatement, arguments: arguments);
-  }
-
-  String get userInitials =>
-      TextFormatter.avatarInitials(userName, maxChars: 2);
-
-  void onNavItemSelected(int index) {
-    selectedNavIndex.value = index;
-  }
+  void onNavItemSelected(int index) => selectedNavIndex.value = index;
 }

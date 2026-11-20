@@ -36,10 +36,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
           label: 'نقاط البيع',
           icon: Icons.storefront_outlined,
           activeIcon: Icons.storefront_rounded,
-          content: CommercialDirectoryScreen(
-            embedded: true,
-            isNetwork: true,
-          ),
+          content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
         ),
         const WorkspaceNavItem(
           label: 'الاشتراك والفوترة',
@@ -72,18 +69,19 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         ),
       ];
 
-      // القائمة المقلصة للتبويبات الأساسية الأربعة على أجهزة الجوال
       final mobileNavItems = [
-        navItems[0], // الرئيسية
-        navItems[1], // طلبات التوريد
-        navItems[2], // نقاط البيع
-        navItems[3], // المالية والديون
+        navItems[0],
+        navItems[1],
+        navItems[2],
+        navItems[3],
       ];
 
       final isAppBarLoading =
-          controller.isLoading.value && controller.selectedNetwork == null;
+          (controller.isLoadingNetworks.value ||
+              controller.isLoadingOverview.value) &&
+          controller.selectedNetwork == null;
       final networkTitle =
-          controller.selectedNetwork?.networkName ?? 'لوحة الشبكة';
+          controller.selectedNetwork?.networkName ?? 'اختر شبكة العمل';
 
       return AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
