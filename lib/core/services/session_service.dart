@@ -90,10 +90,6 @@ class SessionService extends GetxService {
         );
       }
 
-      if (Get.isRegistered<WorkspaceService>()) {
-        await WorkspaceService.to.syncWithUserMemberships(cachedUser);
-      }
-
       log(
         '🔑 [SessionService] Local session restored with ${cachedUser.workspaceMemberships.length} workspace memberships; awaiting server verification.',
       );
