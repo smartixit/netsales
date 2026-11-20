@@ -174,6 +174,9 @@ class PosWorkspaceController extends GetxController {
     final generation = ++_posGeneration;
     isLoadingPos.value = true;
     posError.value = null;
+    availablePos.clear();
+    activePos.value = null;
+    _clearNetworkContext();
 
     try {
       final positions = await getMyPosUseCase();
@@ -323,15 +326,27 @@ class PosWorkspaceController extends GetxController {
     }
 
     selectedNetworkLink.value = authorizedLink;
-    await StorageService.instance.setInt(
-      _networkStorageKey(posId),
-      authorizedLink.networkPosId,
-    );
-    await loadNetworkScopedData(
+
+    // Start the scoped load immediately so old-network rows are cleared before
+    // any persistence await can yield back to the frame scheduler.
+    final scopedLoad = loadNetworkScopedData(
       authorizedLink.networkId,
       posId: posId,
       networkPosId: authorizedLink.networkPosId,
     );
+
+    try {
+      await StorageService.instance.setInt(
+        _networkStorageKey(posId),
+        authorizedLink.networkPosId,
+      );
+    } catch (error) {
+      log(
+        '⚠️ [PosWorkspaceController] Could not persist linked-network preference: $error',
+      );
+    }
+
+    await scopedLoad;
   }
 
   Future<void> selectNetworkLink(int networkPosId) async {
@@ -385,7 +400,7 @@ class PosWorkspaceController extends GetxController {
         );
         if (generation == _scopedDataGeneration &&
             activePos.value?.posId == posId &&
-            selectedNetworkLink.value?.networkId == networkId &&
+            selectedNetworkLink.value?.networkPosId == networkPosId &&
             !isClosed) {
           recentRequests.assignAll(result.items);
         }
@@ -470,7 +485,7 @@ class PosWorkspaceController extends GetxController {
     );
 
     final existingIndex = networkLinks.indexWhere(
-      (link) => link.networkId == newLink.networkId,
+      (link) => link.networkPosId == newLink.networkPosId,
     );
     if (existingIndex < 0) {
       networkLinks.insert(0, newLink);
