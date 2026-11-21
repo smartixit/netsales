@@ -12,6 +12,12 @@ class ProfileIdentityCard extends StatelessWidget {
 
   final ProfileEntity profile;
 
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).toList();
+    if (parts.isEmpty) return '؟';
+    return parts.take(2).map((part) => part.characters.first).join();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
