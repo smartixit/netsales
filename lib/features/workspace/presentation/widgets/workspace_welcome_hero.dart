@@ -14,6 +14,8 @@ enum WorkspaceWelcomeArtwork { network, pos }
 ///
 /// The avatar is sourced from the authenticated user's profile, never from
 /// the active network/POS entity logo displayed by the workspace selector.
+/// The illustration is rendered in the background layer of the Stack, allowing
+/// the foreground details to occupy full width with generous breathing room.
 class WorkspaceWelcomeHero extends StatelessWidget {
   const WorkspaceWelcomeHero({
     super.key,
@@ -43,18 +45,21 @@ class WorkspaceWelcomeHero extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: Container(
-        constraints: BoxConstraints(minHeight: 174.h),
+        constraints: BoxConstraints(minHeight: 168.h),
         decoration: BoxDecoration(gradient: colors.executiveHeroGradient),
         child: Stack(
           children: [
+            // 1. خلفية التدرج والشبكة الهندسية
             const Positioned.fill(
               child: CustomPaint(painter: WorkspaceHeroBackdropPainter()),
             ),
+            // 2. الشريط التموجي المضيء
             const Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(painter: WorkspaceHeroRibbonPainter()),
               ),
             ),
+            // 3. التوهج النيوني المحيطي
             Positioned(
               left: -26.w,
               bottom: -48.h,
@@ -76,40 +81,34 @@ class WorkspaceWelcomeHero extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(
-                AppSpacing.md,
-                AppSpacing.md,
-                AppSpacing.md,
-                AppSpacing.md,
+            // 4. الرسمة التعبيرية المخصصة في خلفية الكرت (Background Watermark Artwork)
+            PositionedDirectional(
+              end: -12.w,
+              bottom: -15.h,
+              top: 5.h,
+              width: 175.w,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.85,
+                  child: CustomPaint(
+                    painter: WorkspaceHeroIllustrationPainter(
+                      isNetwork: artwork == WorkspaceWelcomeArtwork.network,
+                    ),
+                  ),
+                ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 6,
-                    child: WorkspaceWelcomeDetails(
-                      userName: userName,
-                      userAvatarUrl: userAvatarUrl,
-                      userInitials: userInitials,
-                      role: role,
-                      dateText: dateText,
-                      actionLabel: actionLabel,
-                      onAction: onAction,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 5,
-                    child: SizedBox(
-                      height: 142.h,
-                      child: CustomPaint(
-                        painter: WorkspaceHeroIllustrationPainter(
-                          isNetwork: artwork == WorkspaceWelcomeArtwork.network,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            ),
+            // 5. محتوى الكرت الترحيبي في الواجهة بكامل العرض والانسيابية (Foreground Content)
+            Padding(
+              padding: EdgeInsets.all(AppSpacing.cardPadding),
+              child: WorkspaceWelcomeDetails(
+                userName: userName,
+                userAvatarUrl: userAvatarUrl,
+                userInitials: userInitials,
+                role: role,
+                dateText: dateText,
+                actionLabel: actionLabel,
+                onAction: onAction,
               ),
             ),
           ],

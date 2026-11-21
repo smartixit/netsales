@@ -6,6 +6,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
+/// تفاصيل المحتوى الترحيبي داخل بطاقة الترحيب القيادية (WorkspaceWelcomeDetails)
 class WorkspaceWelcomeDetails extends StatelessWidget {
   const WorkspaceWelcomeDetails({
     super.key,
@@ -30,9 +31,10 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // 1. هوية المستخدم والأفاتار
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -40,21 +42,20 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               imageUrl: userAvatarUrl,
               initials: userInitials,
               size: AvatarBadgeSize.md,
-              customDimension: 44,
+              customDimension: 46.r,
               hasPulse: false,
               borderRadius: BorderRadius.circular(AppRadius.full),
               gradientColors: const [Color(0xFFFFE7AD), Color(0xFFE7B45D)],
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 10.w),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'مرحباً بعودتك',
                     maxLines: 1,
-                    textAlign: TextAlign.end,
                     style: AppTypography.titleSmall.copyWith(
                       color: Colors.white.withValues(alpha: 0.94),
                       fontWeight: FontWeight.w500,
@@ -65,10 +66,9 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                     userName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
                     style: AppTypography.titleLarge.copyWith(
                       color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       letterSpacing: 0,
                     ),
                   ),
@@ -77,29 +77,30 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 7.h),
+        SizedBox(height: 8.h),
+
+        // 2. شارة الدور ونقطة حالة الجلسة
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            Icon(
+              Icons.verified_user_rounded,
+              size: 14.r,
+              color: Colors.white.withValues(alpha: 0.92),
+            ),
+            SizedBox(width: 5.w),
             Flexible(
               child: Text(
                 role,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
                 style: AppTypography.bodySmall.copyWith(
                   color: Colors.white.withValues(alpha: 0.90),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            SizedBox(width: 5.w),
-            Icon(
-              Icons.verified_user_rounded,
-              size: 13.r,
-              color: Colors.white.withValues(alpha: 0.92),
-            ),
-            SizedBox(width: 7.w),
+            SizedBox(width: 8.w),
             Container(
               width: 3.r,
               height: 3.r,
@@ -108,7 +109,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            SizedBox(width: 7.w),
+            SizedBox(width: 8.w),
             Text(
               'جلسة نشطة',
               maxLines: 1,
@@ -118,70 +119,70 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
             ),
           ],
         ),
+
+        // 3. التاريخ الحالي إن وجد
         if (dateText != null) ...[
-          SizedBox(height: 9.h),
+          SizedBox(height: 6.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 14.r,
+                color: Colors.white.withValues(alpha: 0.92),
+              ),
+              SizedBox(width: 6.w),
               Flexible(
                 child: Text(
                   dateText!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
                   style: AppTypography.bodySmall.copyWith(
                     color: Colors.white.withValues(alpha: 0.92),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              SizedBox(width: 6.w),
-              Icon(
-                Icons.calendar_month_rounded,
-                size: 14.r,
-                color: Colors.white.withValues(alpha: 0.92),
-              ),
             ],
           ),
         ],
+
+        // 4. زر الإجراء التفاعلي (مثل ربط شبكة لنقطة البيع)
         if (actionLabel != null && onAction != null) ...[
           SizedBox(height: 10.h),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: CustomInteractiveBounce(
-              onTap: onAction,
-              child: Container(
-                constraints: BoxConstraints(minHeight: 35.h),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
+          CustomInteractiveBounce(
+            onTap: onAction,
+            child: Container(
+              constraints: BoxConstraints(minHeight: 35.h),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: const Color(0xFF63E6D0).withValues(alpha: 0.85),
+                  width: 1.2,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.07),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  border: Border.all(
-                    color: const Color(0xFF63E6D0).withValues(alpha: 0.82),
-                    width: 1,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.qr_code_scanner_rounded,
+                    size: 18.r,
+                    color: Colors.white,
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      actionLabel!,
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Icon(
-                      Icons.qr_code_scanner_rounded,
-                      size: 19.r,
+                  SizedBox(width: 6.w),
+                  Text(
+                    actionLabel!,
+                    style: AppTypography.labelMedium.copyWith(
                       color: Colors.white,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
