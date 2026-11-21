@@ -1,11 +1,11 @@
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
-import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 
 /// العقد التجريدي لمصدر البيانات البعيد للعلاقات التجارية
 abstract class CommercialRemoteDataSource {
