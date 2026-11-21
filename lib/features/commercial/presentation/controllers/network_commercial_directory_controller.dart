@@ -736,7 +736,12 @@ class NetworkCommercialDirectoryController
       }
       final networkName = challenge.network?.networkName.trim() ?? '';
       final posName = challenge.pos?.posName.trim() ?? '';
-      if (challenge.networkId != netId || challenge.posId != target.posId || networkName.isEmpty || posName.isEmpty || challenge.expiresAt == null) {
+      if (challenge.networkId != netId ||
+          challenge.posId != target.posId ||
+          challenge.pos?.posUuid != target.posUuid ||
+          networkName.isEmpty ||
+          posName.isEmpty ||
+          challenge.expiresAt == null) {
         throw const AppException('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
       }
       startInvitationMonitoring(challenge);
