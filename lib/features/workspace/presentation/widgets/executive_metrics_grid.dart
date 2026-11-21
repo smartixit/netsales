@@ -26,11 +26,20 @@ class ExecutiveMetricsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
+    // The reference dashboard has exactly three top-level operational KPIs.
+    // Sales is represented by the trend panel; secondary financial metrics
+    // are intentionally not duplicated in this compact mobile summary.
+    final summaryMetrics = items
+        .where((item) => const {'pos', 'requests', 'packages'}.contains(item.id))
+        .toList(growable: false);
+    if (summaryMetrics.isEmpty) return const SizedBox.shrink();
+
     return NetSalesDashboardMetricsThemeAdapter.wrap(
       context: context,
       child: DashboardMetricGrid(
-        metrics: items,
-        minimumCardWidth: 145.w,
+        metrics: summaryMetrics,
+        minimumCardWidth: 100.w,
+        maximumColumns: 3,
         onMetricTap: (id) {
           switch (id) {
             case 'pos':
