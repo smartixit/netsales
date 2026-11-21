@@ -274,9 +274,7 @@ class WorkspaceTransactionTile extends StatelessWidget {
           SizedBox(height: 4.h),
           _buildSubtitle(colors, compact: true),
         ],
-        if (trailingAction != null ||
-            showAmount && formattedAmount.isNotEmpty ||
-            true) ...[
+        ...[
           SizedBox(height: AppSpacing.xs),
           Wrap(
             alignment: WrapAlignment.spaceBetween,
