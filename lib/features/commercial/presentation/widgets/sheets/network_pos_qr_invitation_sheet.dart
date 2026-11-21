@@ -20,7 +20,7 @@ import 'package:netsales/widgets/qr/custom_qr_code.dart';
 
 /// عرض دعوة الربط؛ دورة الحياة والتحديث والتصدير مملوكة لمتحكم GetX.
 class NetworkPosQrInvitationSheet extends StatelessWidget {
-  const NetworkPosQrInvitationSheet({
+  NetworkPosQrInvitationSheet({
     super.key,
     required this.controller,
     required this.challenge,
