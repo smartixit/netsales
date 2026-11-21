@@ -1,24 +1,23 @@
-import 'package:equatable/equatable.dart';
-
-/// كيان ملخص وإحصائيات المصروفات التشغيلية (Expense Summary Entity)
-class ExpenseSummaryEntity extends Equatable {
+/// كائن الدومين النقي لملخص وإحصائيات المصروفات التشغيلية (ExpenseSummaryEntity)
+///
+/// يطابق عقد استجابة `GET /api/v1/expenses/summary` الصادر من الخادم.
+class ExpenseSummaryEntity {
   const ExpenseSummaryEntity({
-    required this.totalCount,
-    required this.totalAmount,
-    required this.thisMonthAmount,
-    required this.todayAmount,
+    this.totalCount = 0,
+    this.totalAmount = 0.0,
+    this.thisMonthAmount = 0.0,
+    this.todayAmount = 0.0,
   });
 
+  /// العدد الكلي لسندات المصروفات
   final int totalCount;
-  final double totalAmount;
-  final double thisMonthAmount;
-  final double todayAmount;
 
-  @override
-  List<Object?> get props => [
-        totalCount,
-        totalAmount,
-        thisMonthAmount,
-        todayAmount,
-      ];
+  /// المبلغ الكلي لجميع المصروفات المسجلة
+  final double totalAmount;
+
+  /// إجمالي مصروفات الشهر الحالي
+  final double thisMonthAmount;
+
+  /// إجمالي مصروفات اليوم
+  final double todayAmount;
 }

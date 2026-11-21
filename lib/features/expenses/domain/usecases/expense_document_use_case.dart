@@ -1,21 +1,29 @@
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_document_repository.dart';
 
-/// حالات استخدام مستندات وطباعة ومشاركة سندات صرف المصروفات
+/// حالة استخدام العمليات المستندية على سند المصروف (طباعة، مشاركة، تصدير وحفظ PDF)
 class ExpenseDocumentUseCase {
-  const ExpenseDocumentUseCase(this._repository);
-
   final ExpenseDocumentRepository _repository;
 
-  Future<bool> exportAndSave(ExpenseEntity expense) {
-    return _repository.exportAndSaveExpense(expense);
+  const ExpenseDocumentUseCase(this._repository);
+
+  /// طباعة سند المصروف
+  Future<bool> printExpense(ExpenseEntity expense) {
+    return _repository.printExpense(expense);
   }
 
-  Future<bool> share(ExpenseEntity expense) {
+  /// مشاركة سند المصروف
+  Future<bool> shareExpense(ExpenseEntity expense) {
     return _repository.shareExpense(expense);
   }
 
-  Future<bool> print(ExpenseEntity expense) {
-    return _repository.printExpense(expense);
+  /// تصدير وحفظ سند المصروف في الجهاز
+  Future<bool> exportAndSaveExpense(ExpenseEntity expense) {
+    return _repository.exportAndSaveExpense(expense);
+  }
+
+  /// الاسم البديل المعتمد لسهولة الاستدعاء
+  Future<bool> saveExpense(ExpenseEntity expense) {
+    return exportAndSaveExpense(expense);
   }
 }

@@ -1,342 +1,250 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
-import 'package:netsales/core/services/file_picker_service.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
+import 'package:netsales/features/expenses/domain/entities/new_expense_item_input_entity.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
-import 'package:netsales/features/expenses/domain/usecases/get_expense_details_use_case.dart';
 import 'package:netsales/features/expenses/domain/usecases/update_expense_use_case.dart';
+import 'package:netsales/features/expenses/presentation/controllers/expense_details_controller.dart';
+import 'package:netsales/features/expenses/presentation/controllers/network_expenses_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// سطر بند المصروف داخل نموذج الإدخال
-class ExpenseFormLineItem {
-  ExpenseFormLineItem({
-    required this.id,
-    String initialStatement = '',
-    String initialAmount = '',
-  })  : statementController = TextEditingController(text: initialStatement),
-        amountController = TextEditingController(text: initialAmount);
-
-  final String id;
-  final TextEditingController statementController;
-  final TextEditingController amountController;
-
-  void dispose() {
-    statementController.dispose();
-    amountController.dispose();
-  }
-}
-
-/// متحكم إنشاء وتعديل المصروف التشغيلي (Network Expense Form Controller)
+/// متحكم نموذج تسجيل وتعديل المصروفات التشغيلية (NetworkExpenseFormController)
+///
+/// يدير بنود المصروف ومرفقاته مباشرة عبر وحدات التحكم النصية [statementControllers] و [amountControllers]
+/// بدون أي كلاسات إضافية، متوافقاً تماماً مع أسلوب متحكمات الطلبات والفواتير.
 class NetworkExpenseFormController extends GetxController {
   NetworkExpenseFormController({
     required this.createExpenseUseCase,
     required this.updateExpenseUseCase,
-    required this.getExpenseDetailsUseCase,
-    this.getMyNetworksUseCase,
   });
 
   final CreateExpenseUseCase createExpenseUseCase;
   final UpdateExpenseUseCase updateExpenseUseCase;
-  final GetExpenseDetailsUseCase getExpenseDetailsUseCase;
-  final GetMyNetworksUseCase? getMyNetworksUseCase;
 
-  // ── وضع الشاشة (إنشاء أو تعديل) ──
-  final isEditMode = false.obs;
-  int? expenseId;
+  final formKey = GlobalKey<FormState>();
 
-  // ── الحقول والتحكم ──
-  final selectedNetworkId = RxnInt();
-  final authorizedNetworks = <NetworkEntity>[].obs;
-  final selectedDate = Rx<DateTime>(DateTime.now());
+  // حالة وضع التعديل (Edit Mode)
+  final isEditing = false.obs;
+  final editingExpenseId = RxnInt();
+  final initialExpense = Rxn<ExpenseEntity>();
 
-  // ── بنود المصروف الديناميكية ──
-  final lineItems = <ExpenseFormLineItem>[].obs;
+  bool get isEditMode => isEditing.value;
 
-  // ── المرفقات المحلية الجديدة ──
-  final attachmentPaths = <String>[].obs;
+  // وحدات التحكم النصية لبنود المصروف (Statement & Amount Controllers)
+  final statementControllers = <TextEditingController>[].obs;
+  final amountControllers = <TextEditingController>[].obs;
 
-  // ── حالات التحميل ──
-  final isLoading = false.obs;
+  // المرفقات والتاريخ وحالة الإرسال والإجمالي
+  final attachments = <AppPickedFileModel>[].obs;
+  final selectedDate = DateTime.now().obs;
   final isSubmitting = false.obs;
+  final totalAmount = 0.0.obs;
 
-  // ── الحساب اللحظي الإرشادي ──
-  final estimatedTotal = 0.0.obs;
+  int? get activeNetworkId {
+    if (initialExpense.value != null) {
+      return initialExpense.value!.networkId;
+    }
+    if (Get.isRegistered<WorkspaceService>()) {
+      return WorkspaceService.to.savedActiveNetworkId;
+    }
+    return null;
+  }
+
+  bool get canSubmit {
+    if (isSubmitting.value) return false;
+    if (activeNetworkId == null) return false;
+    if (statementControllers.isEmpty) return false;
+    for (int i = 0; i < statementControllers.length; i++) {
+      if (statementControllers[i].text.trim().isEmpty) return false;
+      final amt = double.tryParse(amountControllers[i].text.trim()) ?? 0.0;
+      if (amt <= 0) return false;
+    }
+    return true;
+  }
 
   @override
   void onInit() {
     super.onInit();
-
     final args = Get.arguments;
-    if (args is int) {
-      expenseId = args;
-      isEditMode.value = true;
-    } else if (args is ExpenseEntity) {
-      expenseId = args.expenseId;
-      isEditMode.value = true;
+    if (args is ExpenseEntity) {
+      _initFromExpense(args);
+    } else if (args is Map) {
+      if (args['expense'] is ExpenseEntity) {
+        _initFromExpense(args['expense'] as ExpenseEntity);
+      }
+    } else {
+      addItemRow();
     }
+  }
 
-    _initForm();
+  void _initFromExpense(ExpenseEntity exp) {
+    isEditing.value = true;
+    editingExpenseId.value = exp.expenseId;
+    initialExpense.value = exp;
+    if (exp.expenseDate != null) {
+      selectedDate.value = exp.expenseDate!;
+    }
+    if (exp.items.isNotEmpty) {
+      for (final item in exp.items) {
+        addItemRow(
+          statement: item.itemStatement,
+          amount: item.itemAmount.toString(),
+        );
+      }
+    } else {
+      addItemRow();
+    }
   }
 
   @override
   void onClose() {
-    for (final item in lineItems) {
-      item.dispose();
+    for (final ctrl in statementControllers) {
+      ctrl.dispose();
+    }
+    for (final ctrl in amountControllers) {
+      ctrl.dispose();
     }
     super.onClose();
   }
 
-  Future<void> _initForm() async {
-    isLoading.value = true;
-
-    // 1. جلب الشبكات المرخصة
-    if (getMyNetworksUseCase != null) {
-      try {
-        final networks = await getMyNetworksUseCase!();
-        authorizedNetworks.assignAll(networks);
-        final networkIds =
-            networks.map((n) => n.networkId).toList(growable: false);
-        final resolvedId =
-            WorkspaceService.to.resolveActiveNetworkId(networkIds);
-        selectedNetworkId.value = resolvedId;
-      } catch (_) {
-        // الاستمرار
-      }
-    }
-
-    // 2. إذا كان في وضع التعديل، تحميل بيانات المصروف القائم
-    if (isEditMode.value && expenseId != null) {
-      try {
-        final expense = await getExpenseDetailsUseCase(expenseId!);
-        selectedNetworkId.value = expense.networkId;
-        if (expense.expenseDate != null) {
-          selectedDate.value = expense.expenseDate!;
-        }
-
-        lineItems.clear();
-        for (final it in expense.items) {
-          _addLineItem(
-            statement: it.itemStatement,
-            amount: it.itemAmount > 0 ? it.itemAmount.toStringAsFixed(2) : '',
-          );
-        }
-      } catch (e) {
-        CustomSnackbar.show(
-          title: 'تعذر تحميل بيانات المصروف',
-          message: AppException.sanitizeMessage(e.toString()),
-          type: SnackType.error,
-        );
-      }
-    }
-
-    // إذا لم يكن هناك بنود بعد، أضف بنداً فارغاً افتراضياً
-    if (lineItems.isEmpty) {
-      _addLineItem();
-    }
-
-    _calculateTotal();
-    isLoading.value = false;
+  /// إضافة سطر بند جديد للنموذج
+  void addItemRow({String statement = '', String amount = ''}) {
+    final sCtrl = TextEditingController(text: statement);
+    final aCtrl = TextEditingController(text: amount);
+    sCtrl.addListener(() => statementControllers.refresh());
+    aCtrl.addListener(recalculateTotal);
+    statementControllers.add(sCtrl);
+    amountControllers.add(aCtrl);
+    recalculateTotal();
   }
 
-  void _addLineItem({String statement = '', String amount = ''}) {
-    final line = ExpenseFormLineItem(
-      id: UniqueKey().toString(),
-      initialStatement: statement,
-      initialAmount: amount,
-    );
-
-    line.amountController.addListener(_calculateTotal);
-    lineItems.add(line);
+  /// إزالة سطر بند محدد
+  void removeItemRow(int index) {
+    if (statementControllers.length <= 1) return;
+    statementControllers.removeAt(index).dispose();
+    amountControllers.removeAt(index).dispose();
+    recalculateTotal();
   }
 
-  /// إضافة سطر بند مصروف جديد
-  void addItem() {
-    _addLineItem();
-    _calculateTotal();
-  }
-
-  /// حذف سطر بند
-  void removeItem(int index) {
-    if (lineItems.length <= 1) {
-      CustomSnackbar.show(
-        title: 'تنبيه',
-        message: 'يجب أن يحتوي المصروف على بند واحد على الأقل.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
-    final removed = lineItems.removeAt(index);
-    removed.amountController.removeListener(_calculateTotal);
-    removed.dispose();
-    _calculateTotal();
-  }
-
-  /// حساب الإجمالي اللحظي التقديري
-  void _calculateTotal() {
+  /// إعادة احتساب إجمالي مبلغ المصروف
+  void recalculateTotal() {
     double sum = 0.0;
-    for (final line in lineItems) {
-      final cleaned = AmountFormatter.clean(line.amountController.text);
-      final val = double.tryParse(cleaned) ?? 0.0;
-      sum += val;
+    for (final ctrl in amountControllers) {
+      sum += double.tryParse(ctrl.text.trim()) ?? 0.0;
     }
-    estimatedTotal.value = sum;
+    totalAmount.value = sum;
+    statementControllers.refresh();
   }
 
-  /// اختيار تاريخ المصروف
+  /// تحديث قائمة المرفقات من منتقي الملفات
+  void onAttachmentsChanged(List<AppPickedFileModel> files) {
+    attachments.assignAll(files);
+  }
+
+  /// تغيير تاريخ المصروف
   void setDate(DateTime date) {
     selectedDate.value = date;
   }
 
-  /// اختيار مرفقات محلية من الذاكرة
-  Future<void> pickAttachments() async {
-    try {
-      final pickedFiles = await FilePickerService.instance.pickMultiFiles();
-      if (pickedFiles.isNotEmpty) {
-        final paths = pickedFiles
-            .map((f) => f.path)
-            .whereType<String>()
-            .where((p) => p.isNotEmpty)
-            .toList();
-        for (final p in paths) {
-          if (!attachmentPaths.contains(p)) {
-            attachmentPaths.add(p);
-          }
-        }
-      }
-    } catch (e) {
+  /// إرسال وحفظ سند المصروف (إنشاء أو تعديل) مع تسوية المحفظة
+  Future<void> submitExpense() async {
+    final networkId = activeNetworkId;
+    if (networkId == null) {
       CustomSnackbar.show(
-        title: 'فشل اختيار المرفق',
-        message: e.toString(),
+        title: 'خطأ',
+        message: 'لم يتم العثور على سياق شبكة نشط لإتمام عملية الصرف.',
         type: SnackType.error,
       );
+      return;
     }
-  }
 
-  /// إزالة مرفق محدد من القائمة المحلية
-  void removeAttachment(String path) {
-    attachmentPaths.remove(path);
-  }
-
-  /// إرسال النموذج وحفظ المصروف
-  Future<void> submit() async {
-    final netId = selectedNetworkId.value;
-    if (netId == null) {
+    if (!canSubmit) {
       CustomSnackbar.show(
         title: 'بيانات غير مكتملة',
-        message: 'يرجى اختيار الشبكة التابع لها المصروف.',
+        message: 'يرجى التأكد من ملء بيان ومبلغ صحيح لكافة بنود المصروف.',
         type: SnackType.warning,
       );
       return;
     }
-
-    final itemsPayload = <Map<String, dynamic>>[];
-    for (var i = 0; i < lineItems.length; i++) {
-      final line = lineItems[i];
-      final st = line.statementController.text.trim();
-      final cleaned = AmountFormatter.clean(line.amountController.text);
-      final am = double.tryParse(cleaned);
-
-      if (st.isEmpty && (am == null || am == 0)) {
-        continue;
-      }
-
-      if (st.isEmpty) {
-        CustomSnackbar.show(
-          title: 'بيان البند مفقود',
-          message: 'يرجى إدخال بيان المصروف للبند رقم ${i + 1}.',
-          type: SnackType.warning,
-        );
-        return;
-      }
-
-      if (am == null || am <= 0) {
-        CustomSnackbar.show(
-          title: 'مبلغ غير صحيح',
-          message: 'يرجى إدخال مبلغ صحيح وأكبر من الصفر للبند رقم ${i + 1}.',
-          type: SnackType.warning,
-        );
-        return;
-      }
-
-      itemsPayload.add({
-        'item_statement': st,
-        'item_amount': am,
-      });
-    }
-
-    if (itemsPayload.isEmpty) {
-      CustomSnackbar.show(
-        title: 'البنود فارغة',
-        message: 'يرجى إدخال بند واحد على الأقل مع البيان والمبلغ.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
-    final dateStr = DateFormatter.date(selectedDate.value);
 
     isSubmitting.value = true;
-    await CustomAnimationOverlay.showLoading(
-      message: isEditMode.value
-          ? 'جاري تحديث بيانات المصروف والتسوية...'
-          : 'جاري تسجيل المصروف والخصم من المحفظة...',
-    );
+
     try {
-      if (isEditMode.value && expenseId != null) {
-        await updateExpenseUseCase(
-          expenseId: expenseId!,
-          expenseDate: dateStr,
-          items: itemsPayload,
-          attachmentPaths: attachmentPaths,
-        );
-        if (CustomAnimationOverlay.isShowing) {
-          await CustomAnimationOverlay.hide();
-        }
-        CustomSnackbar.show(
-          title: 'تم التحديث بنجاح',
-          message: 'تم تحديث بيانات المصروف وتسوية المحفظة بنجاح.',
-          type: SnackType.success,
-        );
-      } else {
-        await createExpenseUseCase(
-          networkId: netId,
-          expenseDate: dateStr,
-          items: itemsPayload,
-          attachmentPaths: attachmentPaths,
-        );
-        if (CustomAnimationOverlay.isShowing) {
-          await CustomAnimationOverlay.hide();
-        }
-        CustomSnackbar.show(
-          title: 'تم تسجيل المصروف بنجاح',
-          message: 'تم تسجيل المصروف وخصم المبلغ من محفظة الشبكة بنجاح.',
-          type: SnackType.success,
+      final inputItems = <NewExpenseItemInputEntity>[];
+      for (int i = 0; i < statementControllers.length; i++) {
+        inputItems.add(
+          NewExpenseItemInputEntity(
+            itemStatement: statementControllers[i].text.trim(),
+            itemAmount: double.tryParse(amountControllers[i].text.trim()) ?? 0.0,
+          ),
         );
       }
 
-      Get.back(result: true);
-    } catch (e) {
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
+      if (isEditing.value) {
+        // وضع التعديل (Update Expense)
+        final targetId =
+            editingExpenseId.value ?? initialExpense.value!.expenseId;
+        final updatedExpense = await updateExpenseUseCase(
+          expenseId: targetId,
+          expenseDate: selectedDate.value,
+          items: inputItems,
+          attachments: attachments.isNotEmpty ? attachments.toList() : null,
+        );
+
+        if (Get.isRegistered<ExpenseDetailsController>()) {
+          await Get.find<ExpenseDetailsController>().loadExpenseDetails(
+            updatedExpense.expenseId,
+          );
+        }
+
+        if (Get.isRegistered<NetworkExpensesController>()) {
+          await Get.find<NetworkExpensesController>().loadExpenses(
+            isRefresh: true,
+          );
+        }
+
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم تحديث المصروف (${updatedExpense.displayReference}) بنجاح',
+        );
+
+        Get.back(result: true);
+      } else {
+        // وضع الإنشاء الجديد (Create Expense)
+        final idempotencyKey = IdempotencyHelper.forExpense(networkId);
+
+        final createdExpense = await createExpenseUseCase(
+          networkId: networkId,
+          expenseDate: selectedDate.value,
+          items: inputItems,
+          attachments: attachments.isNotEmpty ? attachments.toList() : null,
+          idempotencyKey: idempotencyKey,
+        );
+
+        if (Get.isRegistered<NetworkExpensesController>()) {
+          await Get.find<NetworkExpensesController>().loadExpenses(
+            isRefresh: true,
+          );
+        }
+
+        await CustomAnimationOverlay.showSuccess(
+          message: 'تم تسجيل المصروف (${createdExpense.displayReference})',
+        );
+
+        Get.back(result: true);
       }
+    } catch (e) {
       CustomSnackbar.show(
-        title: isEditMode.value ? 'فشل تحديث المصروف' : 'فشل تسجيل المصروف',
-        message: AppException.sanitizeMessage(e.toString()),
+        title: isEditing.value ? 'تعذر تحديث المصروف' : 'تعذر تسجيل المصروف',
+        message: AppException.sanitizeMessage(e),
         type: SnackType.error,
       );
     } finally {
       isSubmitting.value = false;
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
     }
   }
 }

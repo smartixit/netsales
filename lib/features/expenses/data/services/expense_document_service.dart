@@ -1,20 +1,25 @@
 import 'dart:typed_data';
-import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
+
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:netsales/core/services/file_export_service.dart';
+import 'package:netsales/core/services/share_service.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 
-/// خدمة توليد وتصدير وطباعة سند صرف المصروفات التشغيلية
+/// خدمة تصدير وطباعة ومشاركة سندات المصروفات الرسمية (ExpenseDocumentService)
+///
+/// تستهلك الخدمات الموحدة للنظام [FileExportService] و [ShareService]
+/// وتولد مستند PDF متوافقاً مع الهوية البصرية والخطوط المعتمدة (Cairo Font).
 class ExpenseDocumentService {
-  ExpenseDocumentService._();
-  static final ExpenseDocumentService instance = ExpenseDocumentService._();
+  const ExpenseDocumentService();
 
-  /// توليد بايتات مستند الـ PDF لسند الصرف
-  Future<Uint8List> generateExpensePdf(ExpenseEntity expense) async {
+  /// توليد مصفوفة بايتات مستند PDF لسند المصروف
+  Future<Uint8List> generateExpensePdfBytes(ExpenseEntity expense) async {
     final pdf = pw.Document();
+
     final font = await PdfGoogleFonts.cairoRegular();
     final boldFont = await PdfGoogleFonts.cairoBold();
 
@@ -24,18 +29,10 @@ class ExpenseDocumentService {
         textDirection: pw.TextDirection.rtl,
         theme: pw.ThemeData.withFont(base: font, bold: boldFont),
         build: (pw.Context context) {
-          final totalAmountFormatted =
-              '${AmountFormatter.format(expense.expenseTotalAmount.toString())} YER';
-          final dateStr = expense.expenseDate != null
-              ? DateFormatter.date(expense.expenseDate!)
-              : (expense.createdAt != null
-                  ? DateFormatter.date(expense.createdAt!)
-                  : '-');
-
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // ترويسة سند الصرف
+              // 1. ترويسة سند الصرف
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -43,156 +40,183 @@ class ExpenseDocumentService {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'سند صرف مصروفات تشغيلية',
+                        'سند صرف مصروف تشغيلي',
                         style: pw.TextStyle(
                           font: boldFont,
                           fontSize: 18,
+                          color: PdfColors.blueGrey900,
                         ),
                       ),
                       pw.SizedBox(height: 4),
                       pw.Text(
-                        'رقم القيد: ${expense.displayReference}',
-                        style: const pw.TextStyle(fontSize: 11),
+                        'رقم السند: ${expense.displayReference}',
+                        style: const pw.TextStyle(
+                          fontSize: 12,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                       pw.Text(
-                        'التاريخ: $dateStr',
-                        style: const pw.TextStyle(fontSize: 10),
+                        'تاريخ الصرف: ${expense.formattedExpenseDate}',
+                        style: const pw.TextStyle(
+                          fontSize: 11,
+                          color: PdfColors.grey600,
+                        ),
                       ),
                     ],
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      pw.Text(
-                        expense.displayNetworkName,
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 14,
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.blueGrey50,
+                          borderRadius: pw.BorderRadius.circular(6),
+                        ),
+                        child: pw.Text(
+                          'مصروف تشغيلي مخصوم',
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 11,
+                            color: PdfColors.blueGrey800,
+                          ),
                         ),
                       ),
-                      pw.SizedBox(height: 2),
-                      pw.Text(
-                        'خصم مباشر من محفظة الشبكة',
-                        style: const pw.TextStyle(
-                          fontSize: 10,
-                          color: PdfColors.grey700,
+                      if (expense.createdByName != null) ...[
+                        pw.SizedBox(height: 4),
+                        pw.Text(
+                          'سُجل بواسطة: ${expense.createdByName}',
+                          style: const pw.TextStyle(
+                            fontSize: 10,
+                            color: PdfColors.grey600,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 16),
-              pw.Divider(thickness: 1, color: PdfColors.grey300),
+              pw.Divider(color: PdfColors.grey300),
               pw.SizedBox(height: 12),
 
-              // ملخص القيد المالي
-              pw.Container(
-                padding: const pw.EdgeInsets.all(12),
-                decoration: pw.BoxDecoration(
-                  color: PdfColors.grey100,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-                  border: pw.Border.all(color: PdfColors.grey300),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
+              // 2. معلومات الشبكة التابع لها المصروف
+              if (expense.networkName != null) ...[
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(10),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.grey100,
+                    borderRadius: pw.BorderRadius.circular(8),
+                  ),
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'الشبكة: ${expense.networkName}',
+                        style: pw.TextStyle(font: boldFont, fontSize: 12),
+                      ),
+                      if (expense.networkPhoneNumber != null)
                         pw.Text(
-                          'المسؤول عن الصرف: ${expense.displayCreatorName}',
+                          'الهاتف: ${expense.networkPhoneNumber}',
                           style: const pw.TextStyle(fontSize: 11),
                         ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'عدد البنود المصروفة: ${expense.items.length}',
-                          style: const pw.TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    ),
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.Text(
-                          'إجمالي المبلغ المصروف',
-                          style: const pw.TextStyle(fontSize: 10),
-                        ),
-                        pw.SizedBox(height: 2),
-                        pw.Text(
-                          totalAmountFormatted,
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 14,
-                            color: PdfColors.red800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              pw.SizedBox(height: 20),
+                pw.SizedBox(height: 16),
+              ],
 
-              // جدول بنود المصروف
+              // 3. جدول بنود المصروف التفصيلية
               pw.Text(
-                'تفاصيل بنود الصرف',
+                'بيان البنود والمبالغ:',
                 style: pw.TextStyle(font: boldFont, fontSize: 13),
               ),
               pw.SizedBox(height: 8),
-
               pw.TableHelper.fromTextArray(
+                context: context,
                 border: pw.TableBorder.all(color: PdfColors.grey300),
                 headerStyle: pw.TextStyle(
                   font: boldFont,
-                  fontSize: 10,
+                  fontSize: 11,
                   color: PdfColors.white,
                 ),
                 headerDecoration: const pw.BoxDecoration(
                   color: PdfColors.blueGrey800,
                 ),
-                cellStyle: const pw.TextStyle(fontSize: 9),
-                cellPadding: const pw.EdgeInsets.all(6),
-                headers: <String>['#', 'بيان المصروف', 'المبلغ'],
-                data: expense.items.asMap().entries.map((entry) {
-                  final idx = entry.key + 1;
-                  final item = entry.value;
+                cellStyle: const pw.TextStyle(fontSize: 10),
+                cellAlignment: pw.Alignment.centerRight,
+                headers: <String>['#', 'بيان البند', 'المبلغ (ر.ي)'],
+                data: List<List<String>>.generate(expense.items.length, (
+                  index,
+                ) {
+                  final item = expense.items[index];
                   return [
-                    '$idx',
+                    '${index + 1}',
                     item.itemStatement,
-                    '${item.formattedAmount} YER',
+                    AmountFormatter.formatValue(item.itemAmount),
                   ];
-                }).toList(),
+                }),
               ),
+              pw.SizedBox(height: 16),
 
+              // 4. إجمالي المصروف
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Container(
+                    width: 220,
+                    padding: const pw.EdgeInsets.all(10),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.grey100,
+                      borderRadius: pw.BorderRadius.circular(8),
+                      border: pw.Border.all(color: PdfColors.grey300),
+                    ),
+                    child: pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text(
+                          'إجمالي المصروف:',
+                          style: pw.TextStyle(font: boldFont, fontSize: 13),
+                        ),
+                        pw.Text(
+                          AmountFormatter.formatValue(
+                            expense.expenseTotalAmount,
+                          ),
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 13,
+                            color: PdfColors.blueGrey900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               pw.Spacer(),
 
-              // مساحة التوقيعات والاعتماد
-              pw.Divider(thickness: 0.5, color: PdfColors.grey300),
-              pw.SizedBox(height: 8),
+              // 5. التذييل والختم الرسمي
+              pw.Divider(color: PdfColors.grey300),
+              pw.SizedBox(height: 6),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Column(
-                    children: [
-                      pw.Text('المحاسب المسؤول', style: const pw.TextStyle(fontSize: 10)),
-                      pw.SizedBox(height: 30),
-                      pw.Text('................................', style: const pw.TextStyle(fontSize: 8)),
-                    ],
+                  pw.Text(
+                    'تم إصدار هذا السند رسمياً عبر منصة NetSales لإدارة مبيعات الكروت',
+                    style: const pw.TextStyle(
+                      fontSize: 8,
+                      color: PdfColors.grey500,
+                    ),
                   ),
-                  pw.Column(
-                    children: [
-                      pw.Text('المستلم', style: const pw.TextStyle(fontSize: 10)),
-                      pw.SizedBox(height: 30),
-                      pw.Text('................................', style: const pw.TextStyle(fontSize: 8)),
-                    ],
-                  ),
-                  pw.Column(
-                    children: [
-                      pw.Text('إدارة الشبكة / الختم', style: const pw.TextStyle(fontSize: 10)),
-                      pw.SizedBox(height: 30),
-                      pw.Text('................................', style: const pw.TextStyle(fontSize: 8)),
-                    ],
+                  pw.Text(
+                    'التاريخ: ${expense.formattedExpenseDate}',
+                    style: const pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColors.grey600,
+                    ),
                   ),
                 ],
               ),
@@ -205,46 +229,42 @@ class ExpenseDocumentService {
     return pdf.save();
   }
 
-  /// تصدير وحفظ المستند كملف
-  Future<bool> exportAndSaveExpense(ExpenseEntity expense) async {
-    try {
-      final bytes = await generateExpensePdf(expense);
-      final filename = 'Expense_${expense.displayReference.replaceAll('#', '')}.pdf';
-      final result = await FileExportService.instance.saveFile(
-        bytes: bytes,
-        fileName: filename,
-        folderName: 'Expenses',
-      );
-      return result.isSuccess;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// إرسال المستند للطباعة
+  /// طباعة سند المصروف عبر الطابعة المتصلة
   Future<bool> printExpense(ExpenseEntity expense) async {
-    try {
-      final bytes = await generateExpensePdf(expense);
-      return await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => bytes,
-        name: 'Expense_${expense.displayReference}',
-      );
-    } catch (_) {
-      return false;
-    }
+    final bytes = await generateExpensePdfBytes(expense);
+    return Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => bytes,
+      name: 'سند_صرف_${expense.displayReference}.pdf',
+    );
   }
 
-  /// مشاركة ملف المستند
+  /// مشاركة سند المصروف عبر خدمة المشاركة الموحدة [ShareService]
   Future<bool> shareExpense(ExpenseEntity expense) async {
-    try {
-      final bytes = await generateExpensePdf(expense);
-      final filename = 'Expense_${expense.displayReference.replaceAll('#', '')}.pdf';
-      return await FileExportService.instance.shareBytes(
-        bytes: bytes,
-        fileName: filename,
-      );
-    } catch (_) {
-      return false;
-    }
+    final bytes = await generateExpensePdfBytes(expense);
+    final fileName = 'expense_${expense.expenseId}.pdf';
+
+    final result = await ShareService.instance.shareBytes(
+      bytes: bytes,
+      fileName: fileName,
+      mimeType: 'application/pdf',
+      text: 'سند صرف مصروف تشغيلي رقم ${expense.displayReference}',
+    );
+
+    return result.status == ShareResultStatus.success;
+  }
+
+  /// تصدير وحفظ سند المصروف عبر خدمة تصدير الملفات الموحدة [FileExportService]
+  Future<bool> exportAndSaveExpense(ExpenseEntity expense) async {
+    final bytes = await generateExpensePdfBytes(expense);
+    final fileName = 'expense_${expense.expenseId}.pdf';
+
+    final result = await FileExportService.instance.saveFile(
+      bytes: bytes,
+      fileName: fileName,
+      folderName: 'Expenses',
+      autoOpen: true,
+    );
+
+    return result.isSuccess;
   }
 }

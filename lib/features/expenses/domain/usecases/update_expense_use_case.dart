@@ -1,23 +1,25 @@
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
+import 'package:netsales/features/expenses/domain/entities/new_expense_item_input_entity.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 
-/// حالة استخدام تحديث مصروف تشغيلي قائم
+/// حالة استخدام تحديث بيانات مصروف تشغيلي مع تسوية فارق رصيد المحفظة (UpdateExpenseUseCase)
 class UpdateExpenseUseCase {
-  const UpdateExpenseUseCase(this._repository);
+  const UpdateExpenseUseCase(this.repository);
 
-  final ExpenseRepository _repository;
+  final ExpenseRepository repository;
 
   Future<ExpenseEntity> call({
     required int expenseId,
-    String? expenseDate,
-    List<Map<String, dynamic>>? items,
-    List<String> attachmentPaths = const [],
+    DateTime? expenseDate,
+    List<NewExpenseItemInputEntity>? items,
+    List<AppPickedFileModel>? attachments,
   }) {
-    return _repository.updateExpense(
+    return repository.updateExpense(
       expenseId: expenseId,
       expenseDate: expenseDate,
       items: items,
-      attachmentPaths: attachmentPaths,
+      attachments: attachments,
     );
   }
 }

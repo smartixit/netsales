@@ -42,9 +42,9 @@ import 'package:netsales/features/invoices/presentation/screens/invoice_details_
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/network_direct_invoice_screen.dart';
 import 'package:netsales/features/expenses/presentation/bindings/expense_binding.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_expense_details_screen.dart';
+import 'package:netsales/features/expenses/presentation/screens/expense_details_screen.dart';
+import 'package:netsales/features/expenses/presentation/screens/expenses_screen.dart';
 import 'package:netsales/features/expenses/presentation/screens/network_expense_form_screen.dart';
-import 'package:netsales/features/expenses/presentation/screens/network_operating_expenses_screen.dart';
 import 'package:netsales/features/notifications/presentation/bindings/notification_binding.dart';
 import 'package:netsales/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:netsales/features/onboarding/presentation/bindings/onboarding_binding.dart';
@@ -375,7 +375,7 @@ abstract final class AppPages {
     // قائمة وسجل المصروفات التشغيلية لمزود الشبكة
     GetPage(
       name: AppRoutes.operatingExpenses,
-      page: () => const NetworkOperatingExpensesScreen(),
+      page: () => const ExpensesScreen(),
       binding: ExpenseBinding(),
       middlewares: [
         AuthGuard(),
@@ -390,7 +390,7 @@ abstract final class AppPages {
     // تفاصيل سند المصروف التشغيلي ومرفقاته
     GetPage(
       name: AppRoutes.operatingExpenseDetails,
-      page: () => const NetworkExpenseDetailsScreen(),
+      page: () => const ExpenseDetailsScreen(),
       binding: ExpenseBinding(),
       middlewares: [
         AuthGuard(),

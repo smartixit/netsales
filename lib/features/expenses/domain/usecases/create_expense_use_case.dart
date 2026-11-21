@@ -1,7 +1,9 @@
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
+import 'package:netsales/features/expenses/domain/entities/new_expense_item_input_entity.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 
-/// حالة استخدام تسجيل مصروف تشغيلي جديد
+/// حالة استخدام تسجيل مصروف تشغيلي جديد وخصمه من المحفظة (CreateExpenseUseCase)
 class CreateExpenseUseCase {
   const CreateExpenseUseCase(this._repository);
 
@@ -9,15 +11,17 @@ class CreateExpenseUseCase {
 
   Future<ExpenseEntity> call({
     required int networkId,
-    String? expenseDate,
-    required List<Map<String, dynamic>> items,
-    List<String> attachmentPaths = const [],
+    DateTime? expenseDate,
+    required List<NewExpenseItemInputEntity> items,
+    List<AppPickedFileModel>? attachments,
+    String? idempotencyKey,
   }) {
     return _repository.createExpense(
       networkId: networkId,
       expenseDate: expenseDate,
       items: items,
-      attachmentPaths: attachmentPaths,
+      attachments: attachments,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

@@ -1,17 +1,27 @@
 import 'package:dio/dio.dart';
 import 'package:netsales/core/constants/api_constants.dart';
-import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/expenses/data/datasources/expense_remote_data_source.dart';
 import 'package:netsales/features/expenses/data/models/expense_model.dart';
 import 'package:netsales/features/expenses/data/models/expense_summary_model.dart';
+import 'package:netsales/features/expenses/domain/entities/new_expense_item_input_entity.dart';
 
-/// تطبيق مصدر البيانات البعيد للمصروفات عبر ApiService
+/// التنفيذ الفعلي لمصدر البيانات الشبكي للمصروفات (ExpenseRemoteDataSourceImpl)
 class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
-  const ExpenseRemoteDataSourceImpl();
+  ExpenseRemoteDataSourceImpl({ApiService? apiService})
+    : _apiService = apiService ?? ApiService.instance;
+
+  final ApiService _apiService;
+  String? _nextCursor;
 
   @override
-  Future<PaginatedList<ExpenseModel>> getExpenses({
+  String? get nextCursor => _nextCursor;
+
+  @override
+  Future<List<ExpenseModel>> getExpenses({
     int? networkId,
     String? fromDate,
     String? toDate,
@@ -24,44 +34,27 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       if (fromDate != null && fromDate.isNotEmpty) 'from_date': fromDate,
       if (toDate != null && toDate.isNotEmpty) 'to_date': toDate,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-      if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
-      'per_page': perPage ?? 15,
     };
 
-    final response = await ApiService.instance.get<List<ExpenseModel>>(
+    final response = await _apiService.getList<ExpenseModel>(
       ApiConstants.expenses,
       queryParameters: queryParams,
-      fromJson: (data) {
-        if (data is List) {
-          return data
-              .whereType<Map<String, dynamic>>()
-              .map(ExpenseModel.fromJson)
-              .toList(growable: false);
-        }
-        return const [];
-      },
+      cursor: cursor,
+      perPage: perPage ?? 15,
+      fromJson: (dynamic json) =>
+          ExpenseModel.fromJson(json as Map<String, dynamic>),
     );
 
-    return PaginatedList<ExpenseModel>(
-      items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
-      perPage: response.meta?['per_page'] as int? ?? perPage ?? 15,
-    );
-  }
-
-  @override
-  Future<ExpenseModel> getExpenseDetails(int expenseId) async {
-    final response = await ApiService.instance.get<ExpenseModel>(
-      ApiConstants.expense(expenseId),
-      fromJson: (data) => ExpenseModel.fromJson(data as Map<String, dynamic>),
-    );
-
-    final result = response.data;
-    if (result == null) {
-      throw Exception('لم يتم استرجاع بيانات المصروف من الخادم.');
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر جلب قائمة المصروفات التشغيلية',
+      );
     }
-    return result;
+
+    _nextCursor = response.nextCursor;
+    return response.data ?? [];
   }
 
   @override
@@ -76,163 +69,185 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       if (toDate != null && toDate.isNotEmpty) 'to_date': toDate,
     };
 
-    final response = await ApiService.instance.get<ExpenseSummaryModel>(
+    final response = await _apiService.get<ExpenseSummaryModel>(
       ApiConstants.expensesSummary,
       queryParameters: queryParams,
-      fromJson: (data) =>
-          ExpenseSummaryModel.fromJson(data as Map<String, dynamic>),
+      fromJson: (dynamic json) =>
+          ExpenseSummaryModel.fromJson(json as Map<String, dynamic>),
     );
 
-    return response.data ??
-        const ExpenseSummaryModel(
-          totalCount: 0,
-          totalAmount: 0.0,
-          thisMonthAmount: 0.0,
-          todayAmount: 0.0,
-        );
+    if (!response.success) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر جلب ملخص وإحصائيات المصروفات',
+      );
+    }
+
+    return response.data ?? const ExpenseSummaryModel();
+  }
+
+  @override
+  Future<ExpenseModel> getExpenseDetails(int expenseId) async {
+    final response = await _apiService.get<ExpenseModel>(
+      ApiConstants.expense(expenseId),
+      fromJson: (dynamic json) =>
+          ExpenseModel.fromJson(json as Map<String, dynamic>),
+    );
+
+    if (!response.success || response.data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر عرض بيانات المصروف المحدد',
+      );
+    }
+
+    return response.data!;
   }
 
   @override
   Future<ExpenseModel> createExpense({
     required int networkId,
-    String? expenseDate,
-    required List<Map<String, dynamic>> items,
-    List<String> attachmentPaths = const [],
+    DateTime? expenseDate,
+    required List<NewExpenseItemInputEntity> items,
+    List<AppPickedFileModel>? attachments,
+    String? idempotencyKey,
   }) async {
-    dynamic requestBody;
+    final formData = FormData();
+    formData.fields.add(MapEntry('network_id', networkId.toString()));
 
-    if (attachmentPaths.isNotEmpty) {
-      final formData = FormData();
-      formData.fields.add(MapEntry('network_id', networkId.toString()));
-      if (expenseDate != null) {
-        formData.fields.add(MapEntry('expense_date', expenseDate));
-      }
-
-      for (var i = 0; i < items.length; i++) {
-        final it = items[i];
-        formData.fields.add(
-          MapEntry('items[$i][item_statement]', it['item_statement'].toString()),
-        );
-        formData.fields.add(
-          MapEntry('items[$i][item_amount]', it['item_amount'].toString()),
-        );
-      }
-
-      for (final path in attachmentPaths) {
-        formData.files.add(
-          MapEntry('attachments[]', await MultipartFile.fromFile(path)),
-        );
-      }
-      requestBody = formData;
-    } else {
-      requestBody = {
-        'network_id': networkId,
-        'expense_date': ?expenseDate,
-        'items': items,
-      };
+    if (expenseDate != null) {
+      formData.fields.add(
+        MapEntry('expense_date', DateFormatter.iso(expenseDate)),
+      );
     }
 
-    final response = await ApiService.instance.post<ExpenseModel>(
+    for (int i = 0; i < items.length; i++) {
+      formData.fields.add(
+        MapEntry('items[$i][item_statement]', items[i].itemStatement),
+      );
+      formData.fields.add(
+        MapEntry('items[$i][item_amount]', items[i].itemAmount.toString()),
+      );
+    }
+
+    if (attachments != null && attachments.isNotEmpty) {
+      for (final file in attachments) {
+        if (file.bytes != null && file.bytes!.isNotEmpty) {
+          formData.files.add(
+            MapEntry(
+              'attachments[]',
+              MultipartFile.fromBytes(file.bytes!, filename: file.name),
+            ),
+          );
+        } else if (file.path.isNotEmpty) {
+          formData.files.add(
+            MapEntry(
+              'attachments[]',
+              await MultipartFile.fromFile(file.path, filename: file.name),
+            ),
+          );
+        }
+      }
+    }
+
+    final response = await _apiService.post<ExpenseModel>(
       ApiConstants.expenses,
-      data: requestBody,
-      fromJson: (data) => ExpenseModel.fromJson(data as Map<String, dynamic>),
+      data: formData,
+      idempotencyKey: idempotencyKey,
+      fromJson: (dynamic json) =>
+          ExpenseModel.fromJson(json as Map<String, dynamic>),
     );
 
-    final result = response.data;
-    if (result == null) {
-      throw Exception('تعذر حفظ المصروف التشغيلي.');
+    if (!response.success || response.data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تسجيل المصروف وخصمه من محفظة الشبكة',
+      );
     }
-    return result;
+
+    return response.data!;
   }
 
   @override
   Future<ExpenseModel> updateExpense({
     required int expenseId,
-    String? expenseDate,
-    List<Map<String, dynamic>>? items,
-    List<String> attachmentPaths = const [],
+    DateTime? expenseDate,
+    List<NewExpenseItemInputEntity>? items,
+    List<AppPickedFileModel>? attachments,
   }) async {
-    dynamic requestBody;
+    final formData = FormData();
+    formData.fields.add(const MapEntry('_method', 'PUT'));
 
-    if (attachmentPaths.isNotEmpty) {
-      final formData = FormData();
-      formData.fields.add(const MapEntry('_method', 'PUT'));
-      if (expenseDate != null) {
-        formData.fields.add(MapEntry('expense_date', expenseDate));
+    if (expenseDate != null) {
+      formData.fields.add(
+        MapEntry('expense_date', DateFormatter.iso(expenseDate)),
+      );
+    }
+
+    if (items != null) {
+      for (int i = 0; i < items.length; i++) {
+        formData.fields.add(
+          MapEntry('items[$i][item_statement]', items[i].itemStatement),
+        );
+        formData.fields.add(
+          MapEntry('items[$i][item_amount]', items[i].itemAmount.toString()),
+        );
       }
+    }
 
-      if (items != null) {
-        for (var i = 0; i < items.length; i++) {
-          final it = items[i];
-          formData.fields.add(
-            MapEntry('items[$i][item_statement]', it['item_statement'].toString()),
+    if (attachments != null && attachments.isNotEmpty) {
+      for (final file in attachments) {
+        if (file.bytes != null && file.bytes!.isNotEmpty) {
+          formData.files.add(
+            MapEntry(
+              'attachments[]',
+              MultipartFile.fromBytes(file.bytes!, filename: file.name),
+            ),
           );
-          formData.fields.add(
-            MapEntry('items[$i][item_amount]', it['item_amount'].toString()),
+        } else if (file.path.isNotEmpty) {
+          formData.files.add(
+            MapEntry(
+              'attachments[]',
+              await MultipartFile.fromFile(file.path, filename: file.name),
+            ),
           );
         }
       }
-
-      for (final path in attachmentPaths) {
-        formData.files.add(
-          MapEntry('attachments[]', await MultipartFile.fromFile(path)),
-        );
-      }
-      requestBody = formData;
-
-      final response = await ApiService.instance.post<ExpenseModel>(
-        ApiConstants.expense(expenseId),
-        data: requestBody,
-        fromJson: (data) => ExpenseModel.fromJson(data as Map<String, dynamic>),
-      );
-
-      final result = response.data;
-      if (result == null) {
-        throw Exception('تعذر تحديث بيانات المصروف.');
-      }
-      return result;
-    } else {
-      requestBody = {
-        'expense_date': ?expenseDate,
-        'items': ?items,
-      };
-
-      final response = await ApiService.instance.put<ExpenseModel>(
-        ApiConstants.expense(expenseId),
-        data: requestBody,
-        fromJson: (data) => ExpenseModel.fromJson(data as Map<String, dynamic>),
-      );
-
-      final result = response.data;
-      if (result == null) {
-        throw Exception('تعذر تحديث بيانات المصروف.');
-      }
-      return result;
     }
+
+    final response = await _apiService.post<ExpenseModel>(
+      ApiConstants.expense(expenseId),
+      data: formData,
+      fromJson: (dynamic json) =>
+          ExpenseModel.fromJson(json as Map<String, dynamic>),
+    );
+
+    if (!response.success || response.data == null) {
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر تحديث بيانات المصروف وتسوية المحفظة',
+      );
+    }
+
+    return response.data!;
   }
 
   @override
   Future<void> deleteExpense(int expenseId) async {
-    final response = await ApiService.instance.delete<dynamic>(
+    final response = await _apiService.delete<void>(
       ApiConstants.expense(expenseId),
     );
 
     if (!response.success) {
-      throw Exception(response.message);
-    }
-  }
-
-  @override
-  Future<void> deleteExpenseAttachment({
-    required int expenseId,
-    required int attachmentId,
-  }) async {
-    final response = await ApiService.instance.delete<dynamic>(
-      ApiConstants.expenseDeleteAttachment(expenseId, attachmentId),
-    );
-
-    if (!response.success) {
-      throw Exception(response.message);
+      throw AppException(
+        response.message.isNotEmpty
+            ? response.message
+            : 'تعذر حذف المصروف واسترجاع المبلغ لمحفظة الشبكة',
+      );
     }
   }
 }

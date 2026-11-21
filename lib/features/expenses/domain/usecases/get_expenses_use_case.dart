@@ -1,14 +1,13 @@
-import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/repositories/expense_repository.dart';
 
-/// حالة استخدام جلب قائمة المصروفات التشغيلية
+/// حالة استخدام جلب قائمة المصروفات التشغيلية (GetExpensesUseCase)
 class GetExpensesUseCase {
   const GetExpensesUseCase(this._repository);
 
   final ExpenseRepository _repository;
 
-  Future<PaginatedList<ExpenseEntity>> call({
+  Future<List<ExpenseEntity>> call({
     int? networkId,
     String? fromDate,
     String? toDate,
@@ -25,4 +24,6 @@ class GetExpensesUseCase {
       perPage: perPage,
     );
   }
+
+  String? get nextCursor => _repository.nextCursor;
 }

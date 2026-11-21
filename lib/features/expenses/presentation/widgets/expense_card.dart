@@ -1,101 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_card/expense_card_accordion.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_card/expense_card_actions.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_card/expense_card_header.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_card/expense_card_metrics_bar.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/features/expenses/presentation/widgets/expense_card_actions.dart';
+import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 
-/// بطاقة المصروف التشغيلي المتطورة (Operating Expense Card - Executive Edition)
+/// بطاقة المصروف التشغيلي المتطورة بنظام الأكورديون الأنيق (ExpenseCard)
+///
+/// تجسد المعمارية الموحدة للمصروفات عبر استهلاك المكون القيادي الموحد [CustomExecutiveTransactionCard]:
+/// حواف 24.r، ظلال مزدوجة بمسحة زمردية، شريط ترويسة بهوية السند وشعار واسم الشبكة
+/// مع معرّف الـ UUID كاملاً، أكورديون تفاعلي أنيق للبنود، وسكة قياس مالية متكاملة،
+/// وأزرار إجراءات موحدة ومتناسقة.
 class ExpenseCard extends StatelessWidget {
   const ExpenseCard({
     super.key,
     required this.expense,
-    required this.onTap,
+    required this.onDetails,
     this.isExpanded = false,
-    this.onToggleExpansion,
+    this.onToggleExpand,
+    this.onEdit,
+    this.onPrint,
+    this.onShare,
     this.onDelete,
-    this.canDelete = false,
+    this.actions,
   });
 
   final ExpenseEntity expense;
-  final VoidCallback onTap;
+  final VoidCallback onDetails;
   final bool isExpanded;
-  final VoidCallback? onToggleExpansion;
+  final VoidCallback? onToggleExpand;
+  final VoidCallback? onEdit;
+  final VoidCallback? onPrint;
+  final VoidCallback? onShare;
   final VoidCallback? onDelete;
-  final bool canDelete;
+  final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    const status = EnumPresentation(
+      label: 'مصروف تشغيلي',
+      tone: SemanticTone.info,
+      icon: Icons.receipt_long_rounded,
+    );
 
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(
-            color: colors.primary.withValues(alpha: .15),
-            width: 1.0,
+    final actorLabel =
+        expense.createdByName != null &&
+            expense.createdByName!.trim().isNotEmpty
+        ? 'سُجل بواسطة: ${expense.createdByName}'
+        : null;
+
+    return CustomExecutiveTransactionCard(
+      reference: expense.displayReference,
+      dateLabel: expense.formattedExpenseDate,
+      partyName: expense.networkName ?? 'الشبكة',
+      partyLogoUrl: expense.networkLogo,
+      partyPhone: expense.networkPhoneNumber,
+      isPartyVerified: false,
+      actorLabel: actorLabel,
+      statusPresentation: status,
+      items: expense.items
+          .map(
+            (item) => ExecutiveCardItemData(
+              title: item.itemStatement,
+              subtitle: 'بند صرف تشغيلي',
+              totalAmount: item.itemAmount,
+            ),
+          )
+          .toList(),
+      itemsHeaderTitle: 'بنود المصروف (${expense.items.length})',
+      visibleItemNames: expense.items
+          .map((item) => item.itemStatement)
+          .toList(),
+      metrics: [
+        ExecutiveCardMetricData(
+          label: 'إجمالي المصروف',
+          value: AmountFormatter.formatValue(expense.expenseTotalAmount),
+          isEmphasized: true,
+        ),
+        ExecutiveCardMetricData(
+          label: 'عدد البنود',
+          value: '${expense.items.length} بنود',
+        ),
+        ExecutiveCardMetricData(
+          label: 'المرفقات',
+          value: '${expense.attachments.length} ملفات',
+        ),
+      ],
+      actions:
+          actions ??
+          ExpenseCardActions(
+            expense: expense,
+            onDetails: onDetails,
+            onEdit: onEdit,
+            onPrint: onPrint,
+            onShare: onShare,
+            onDelete: onDelete,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.emeraldDeep.withValues(alpha: .065),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: .025),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 1. ترويسة هوية المصروف
-            ExpenseCardHeader(expense: expense),
-
-            // 2. المحتوى الداخلي للبطاقة
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 1. لوحة بنود المصروف بنظام الأكورديون الموحد
-                  ExpenseCardAccordion(
-                    expense: expense,
-                    isExpanded: isExpanded,
-                    onToggle: onToggleExpansion,
-                  ),
-                  AppSpacing.vSm,
-
-                  // 2. سكة قياس المبالغ والبنود
-                  ExpenseCardMetricsBar(expense: expense),
-                  AppSpacing.vSm,
-
-                  // 3. أزرار الإجراءات السريعة
-                  ExpenseCardActions(
-                    expense: expense,
-                    onTapDetails: onTap,
-                    onDelete: onDelete,
-                    canDelete: canDelete,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      isExpanded: isExpanded,
+      onToggleExpand: onToggleExpand,
+      onTap: onDetails,
     );
   }
 }

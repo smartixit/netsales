@@ -1,8 +1,7 @@
-import 'package:equatable/equatable.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-
-/// كيان بند المصروف التشغيلي (Expense Item Entity)
-class ExpenseItemEntity extends Equatable {
+/// كائن الدومين النقي لبند المصروف الفردي (ExpenseItemEntity)
+///
+/// يمثل بياناً ومبلغاً فرعياً ضمن سند المصروف التشغيلي.
+class ExpenseItemEntity {
   const ExpenseItemEntity({
     required this.itemId,
     required this.expenseId,
@@ -12,24 +11,21 @@ class ExpenseItemEntity extends Equatable {
     this.updatedAt,
   });
 
+  /// المعرف الرقمي للبند
   final int itemId;
+
+  /// معرف المصروف التابع له
   final int expenseId;
+
+  /// البيان النصي للبند (مثال: إيجار مقر، صيانة كوابل، اشتراك كهرباء)
   final String itemStatement;
+
+  /// المبلغ المخصص للبند
   final double itemAmount;
+
+  /// تاريخ الإضافة
   final DateTime? createdAt;
+
+  /// تاريخ التعديل
   final DateTime? updatedAt;
-
-  /// مبلغ البند منسقاً للعرض
-  String get formattedAmount =>
-      AmountFormatter.format(itemAmount.toString());
-
-  @override
-  List<Object?> get props => [
-        itemId,
-        expenseId,
-        itemStatement,
-        itemAmount,
-        createdAt,
-        updatedAt,
-      ];
 }

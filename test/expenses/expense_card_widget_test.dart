@@ -2,78 +2,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/themes/app_themes.dart';
-import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_item_entity.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_card.dart';
 
 void main() {
-  const sampleItem = ExpenseItemEntity(
-    itemId: 1,
-    expenseId: 101,
-    itemStatement: 'صيانة كابلات ألياف بصرية',
-    itemAmount: 12500.0,
-  );
-
-  const sampleAttachment = ExpenseAttachmentEntity(
-    attachmentId: 1,
-    expenseId: 101,
-    attachmentName: 'سند_قبض_فني.pdf',
-    attachmentPath: 'expenses/101/doc.pdf',
-    attachmentSize: 204800,
-    attachmentMime: 'application/pdf',
-    fileUrl: 'https://example.com/doc.pdf',
-  );
-
-  final sampleExpense = ExpenseEntity(
-    expenseId: 101,
-    networkId: 1,
-    expenseUuid: 'exp-uuid-101',
-    expenseTotalAmount: 12500.0,
-    expenseDate: DateTime(2026, 11, 20),
-    creatorName: 'أحمد علي',
-    networkName: 'شبكة السرعة',
-    items: const [sampleItem],
-    attachments: const [sampleAttachment],
-  );
-
-  Widget createTestWidget({
-    required bool isExpanded,
-    VoidCallback? onToggleExpansion,
-    VoidCallback? onTap,
-    VoidCallback? onDelete,
-  }) {
+  Widget buildTestableWidget(Widget child) {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
-      builder: (context, child) => MaterialApp(
+      builder: (context, _) => MaterialApp(
         theme: AppThemes.light,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ExpenseCard(
-              expense: sampleExpense,
-              isExpanded: isExpanded,
-              onToggleExpansion: onToggleExpansion,
-              onTap: onTap ?? () {},
-              onDelete: onDelete,
-            ),
-          ),
-        ),
+        darkTheme: AppThemes.dark,
+        home: Scaffold(body: SingleChildScrollView(child: child)),
       ),
     );
   }
 
-  testWidgets('ExpenseCard renders header, metrics, accordion and actions correctly', (tester) async {
-    await tester.pumpWidget(createTestWidget(isExpanded: false));
+  group('ExpenseCard Widget Tests', () {
+    testWidgets('Renders ExpenseCard with references, metrics, and items', (
+      tester,
+    ) async {
+      bool detailsCalled = false;
 
-    expect(find.text('exp-uuid-101'), findsOneWidget);
-    expect(find.text('شبكة السرعة'), findsOneWidget);
-    expect(find.text('بنود المصروف (1)'), findsOneWidget);
-    expect(find.text('عرض التفاصيل'), findsOneWidget);
-  });
+      final expense = ExpenseEntity(
+        expenseId: 77,
+        expenseUuid: 'EXP-77-TEST',
+        networkId: 1,
+        expenseTotalAmount: 4200.0,
+        networkName: 'شبكة الواحة الذكية',
+        items: const [
+          ExpenseItemEntity(
+            itemId: 1,
+            expenseId: 77,
+            itemStatement: 'صيانة كوابل ألياف ضوئية',
+            itemAmount: 4200.0,
+          ),
+        ],
+      );
 
-  testWidgets('ExpenseCard expands accordion when isExpanded is true', (tester) async {
-    await tester.pumpWidget(createTestWidget(isExpanded: true));
+      await tester.pumpWidget(
+        buildTestableWidget(
+          ExpenseCard(
+            expense: expense,
+            onDetails: () => detailsCalled = true,
+            onToggleExpand: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('صيانة كابلات ألياف بصرية'), findsOneWidget);
+      expect(find.text('EXP-77-TEST'), findsWidgets);
+      expect(find.text('شبكة الواحة الذكية'), findsWidgets);
+      expect(find.text('مصروف تشغيلي'), findsWidgets);
+      expect(find.text('تفاصيل المصروف'), findsOneWidget);
+
+      await tester.tap(find.text('تفاصيل المصروف'));
+      await tester.pumpAndSettle();
+
+      expect(detailsCalled, isTrue);
+    });
   });
 }
