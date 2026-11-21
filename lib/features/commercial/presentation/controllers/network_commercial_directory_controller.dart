@@ -101,7 +101,6 @@ class NetworkCommercialDirectoryController
   final authorizedNetworks = <NetworkEntity>[].obs;
 
   final TextEditingController invitationBusinessCodeController = TextEditingController();
-  final RxString invitationBusinessCode = ''.obs;
   final RxBool isResolvingInvitationTarget = false.obs;
   final Rxn<PosEntity> resolvedInvitationTarget = Rxn<PosEntity>();
 
@@ -499,7 +498,6 @@ class NetworkCommercialDirectoryController
 
 
   void onInvitationBusinessCodeChanged(String value) {
-    invitationBusinessCode.value = value;
     resolvedInvitationTarget.value = null;
   }
 
@@ -666,7 +664,6 @@ class NetworkCommercialDirectoryController
       return;
     }
     invitationBusinessCodeController.clear();
-    invitationBusinessCode.value = '';
     resolvedInvitationTarget.value = null;
     try {
       await CustomDialog.show(
