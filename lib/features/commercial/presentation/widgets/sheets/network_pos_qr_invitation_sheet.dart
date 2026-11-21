@@ -170,6 +170,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
               child: CustomQrCode(
                 data: challenge.payload,
                 size: 224.r,
+                errorCorrectLevel: QrCodeService.highErrorCorrectionLevel,
                 decoration: QrCodeService.brandDecoration,
                 semanticsLabel: 'رمز دعوة ربط تجارية',
               ),
