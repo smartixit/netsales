@@ -7,6 +7,7 @@ import 'package:netsales/features/workspace/presentation/models/workspace_transa
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_identity.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_leading.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_summary.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_action.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// Feature-level transaction row shared by Network and POS dashboards.
@@ -71,7 +72,7 @@ class WorkspaceTransactionTile extends StatelessWidget {
       trailingAction: customTrailingAction ??
           (item.onAction == null
               ? null
-              : _TransactionAction(
+              : WorkspaceTransactionAction(
                   label: item.actionLabel ?? 'إجراء',
                   onTap: item.onAction!,
                 )),
@@ -147,28 +148,3 @@ class WorkspaceTransactionTile extends StatelessWidget {
   }
 }
 
-class _TransactionAction extends StatelessWidget {
-  const _TransactionAction({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
-          vertical: AppSpacing.xxs,
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-      ),
-    );
-  }
-}
