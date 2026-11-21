@@ -121,6 +121,8 @@ class QrCodeService {
   /// إنشاء كائن QR قابل للعرض أو التصدير.
   ///
   /// لا يتم إنشاء QrImage داخل build مباشرة.
+  static const int highErrorCorrectionLevel = QrErrorCorrectLevel.H;
+
   static const PrettyQrDecoration brandDecoration = PrettyQrDecoration(
     background: Color(0xFFFFFFFF),
     quietZone: PrettyQrQuietZone.standard,
@@ -141,7 +143,7 @@ class QrCodeService {
         textDirection: TextDirection.ltr,
       );
 
-  static QrImage createQrImage({required String data}) {
+  static QrImage createQrImage({required String data, int errorCorrectLevel = 1}) {
     final cleanData = data.trim();
 
     if (cleanData.isEmpty) {
@@ -150,7 +152,7 @@ class QrCodeService {
 
     final qrCode = QrCode.fromData(
       data: cleanData,
-      errorCorrectLevel: QrErrorCorrectLevel.H,
+      errorCorrectLevel: errorCorrectLevel,
     );
 
     return QrImage(qrCode);
@@ -162,21 +164,18 @@ class QrCodeService {
 
   Future<QrCodeGenerationResult> generateImage({
     required String data,
-    PrettyQrDecoration decoration = brandDecoration,
+    PrettyQrDecoration decoration = const PrettyQrDecoration(),
     int? size,
     ImageConfiguration configuration = ImageConfiguration.empty,
   }) async {
     try {
       final qrImage = createQrImage(data: data);
-      final effectiveConfiguration = configuration == ImageConfiguration.empty
-          ? brandImageConfiguration()
-          : configuration;
 
       return await generateImageFromQrImage(
         qrImage: qrImage,
         decoration: decoration,
         size: size,
-        configuration: effectiveConfiguration,
+        configuration: configuration,
       );
     } catch (e) {
       return QrCodeGenerationResult.failure('تعذر إنشاء صورة QR.', error: e);
@@ -194,10 +193,6 @@ class QrCodeService {
   }) async {
     try {
       final exportSize = size ?? _config.defaultExportSize;
-      final effectiveConfiguration = configuration == ImageConfiguration.empty
-          ? brandImageConfiguration()
-          : configuration;
-
       if (exportSize <= 0) {
         return QrCodeGenerationResult.failure('أبعاد صورة QR غير صحيحة.');
       }
@@ -206,7 +201,7 @@ class QrCodeService {
         size: exportSize,
         format: ui.ImageByteFormat.png,
         decoration: decoration,
-        configuration: effectiveConfiguration,
+        configuration: configuration,
       );
 
       if (byteData == null) {
