@@ -13,12 +13,14 @@ class WorkspaceMembershipModel {
   final int tenantId;
   final String roleKey;
   final String roleName;
+  final List<String> permissions;
 
   const WorkspaceMembershipModel({
     required this.scope,
     required this.tenantId,
     required this.roleKey,
     required this.roleName,
+    this.permissions = const [],
   });
 
   RoleKey get typedRoleKey => RoleKey.fromWire(roleKey);
@@ -39,6 +41,9 @@ class WorkspaceMembershipModel {
       tenantId: tenantId,
       roleKey: json['role_key']?.toString() ?? '',
       roleName: json['role_name']?.toString() ?? '',
+      permissions: (json['permissions'] as List<dynamic>? ?? const [])
+          .map((value) => value.toString())
+          .toList(growable: false),
     );
   }
 
@@ -48,6 +53,7 @@ class WorkspaceMembershipModel {
       'tenant_id': tenantId,
       'role_key': roleKey,
       'role_name': roleName,
+      'permissions': permissions,
     };
   }
 
@@ -59,10 +65,20 @@ class WorkspaceMembershipModel {
           scope == other.scope &&
           tenantId == other.tenantId &&
           roleKey == other.roleKey &&
-          roleName == other.roleName;
+          roleName == other.roleName &&
+          _listEquals(permissions, other.permissions);
 
   @override
-  int get hashCode => Object.hash(scope, tenantId, roleKey, roleName);
+  int get hashCode => Object.hash(scope, tenantId, roleKey, roleName, Object.hashAll(permissions));
+
+  static bool _listEquals(List<String> a, List<String> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 
   @override
   String toString() =>
