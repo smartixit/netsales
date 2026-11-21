@@ -22,7 +22,11 @@ class NetworkWorkspaceTransactionMapper {
           final dateLabel = parsedDate == null
               ? ''
               : DateFormatter.smart(parsedDate);
-          final subtitle = dateLabel;
+          final saleTypeLabel = request.saleTypeLabel?.trim();
+          final subtitle = [
+            if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+            if (dateLabel.isNotEmpty) dateLabel,
+          ].join(' • ');
           void openRequest() => onOpenRequest(request.requestId);
 
           return WorkspaceTransactionItemViewModel(
