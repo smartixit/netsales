@@ -42,6 +42,20 @@ class _FakeCommercialRepository implements CommercialRepository {
   }
 
   @override
+  Future<PosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) async {
+    return const PosEntity(
+      posId: 30,
+      ownerId: 4,
+      posUuid: 'POS-2611-00030-A1B2',
+      posName: 'نقطة الاختبار',
+      posPhoneNumber: '770000000',
+    );
+  }
+
+  @override
   Future<List<PosEntity>> getMyPos() async => const [
         PosEntity(
           posId: 10,
