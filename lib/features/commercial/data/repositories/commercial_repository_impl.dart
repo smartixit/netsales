@@ -108,13 +108,11 @@ class CommercialRepositoryImpl implements CommercialRepository {
   @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) {
     return _remoteDataSource.createNetworkPosLinkChallenge(
       networkId: networkId,
-      posId: posId,
       posUuid: posUuid,
       durationMinutes: durationMinutes,
     );
