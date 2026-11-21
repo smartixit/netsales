@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/widgets/images/custom_brand_logo.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
 
 /// بطاقة دعوة قابلة للتصدير، لا تعرض أي بيانات تعريفية أو أمنية عن التحدي.
@@ -47,7 +46,19 @@ class CustomQrShareCard extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const CustomBrandLogo(size: BrandLogoSize.md),
+                        Container(
+                          width: 112,
+                          height: 112,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Image.asset(
+                            'assets/images/brand_icon.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                         const SizedBox(width: 28),
                         const Expanded(
                           child: Column(
