@@ -14,6 +14,7 @@ void main() {
         requestUuid: 'request-uuid-part-rest',
         posId: 7,
         posName: 'نقطة صنعاء',
+        saleTypeLabel: 'آجل',
         requestDate: '2026-11-16',
         requestTotalAmount: '1250.00',
         statusRaw: 'PENDING',
@@ -28,7 +29,7 @@ void main() {
       expect(items, hasLength(1));
       expect(items.single.title, 'نقطة صنعاء');
       expect(items.single.reference, 'request');
-      expect(items.single.subtitle, isNotEmpty);
+      expect(items.single.subtitle, contains('آجل'));
       expect(items.single.formattedAmount, contains('1,250'));
       expect(items.single.actionLabel, 'اعتماد');
 
@@ -50,6 +51,7 @@ void main() {
         networkId: 3,
         posId: 7,
         invoiceUuid: 'invoice-12345678',
+        saleTypeLabel: 'آجل',
         invoiceTotalAmount: 2500,
         invoiceDate: '2026-11-15',
       );
@@ -58,6 +60,7 @@ void main() {
         networkId: 3,
         posId: 7,
         requestUuid: 'request-12345678',
+        saleTypeLabel: 'نقدي',
         requestTotalAmount: 1250,
         statusRaw: 'PENDING',
         statusLabel: 'قيد الانتظار',
@@ -74,8 +77,10 @@ void main() {
       expect(items, hasLength(2));
       expect(items[0].title, 'طلب توريد');
       expect(items[0].reference, 'request-');
+      expect(items[0].subtitle, contains('نقدي'));
       expect(items[1].title, 'فاتورة توريد');
       expect(items[1].reference, 'invoice-');
+      expect(items[1].subtitle, contains('آجل'));
       expect(items[1].statusPresentation.label, 'فاتورة');
 
       items[1].onTap?.call();
