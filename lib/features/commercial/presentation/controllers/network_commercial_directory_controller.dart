@@ -497,6 +497,7 @@ class NetworkCommercialDirectoryController
   }
 
 
+
   void onInvitationBusinessCodeChanged(String value) {
     invitationBusinessCode.value = value;
     resolvedInvitationTarget.value = null;
@@ -504,81 +505,7 @@ class NetworkCommercialDirectoryController
 
   Future<void> resolveInvitationTarget() async {
     final code = invitationBusinessCodeController.text.trim().toUpperCase();
-    if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}
-    final netId = resolvedNetworkId;
-    if (netId == null) {
-      CustomSnackbar.show(
-        title: 'تنبيه',
-        message: 'يرجى اختيار الشبكة أولاً',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
-    try {
-      final target = await Get.dialog<PosEntity>(
-        NetworkPosInvitationTargetDialog(
-          onResolve: (businessCode) => resolveNetworkLinkablePosUseCase(
-            networkId: netId,
-            posBusinessCode: businessCode,
-          ),
-        ),
-        barrierDismissible: false,
-      );
-      if (target == null) return;
-
-      final challenge = await createNetworkPosLinkChallengeUseCase(
-        networkId: netId,
-        posUuid: target.posUuid,
-      );
-      final networkName = challenge.network?.networkName.trim() ?? '';
-      final posName = challenge.pos?.posName.trim() ?? '';
-      if (challenge.networkId != netId ||
-          challenge.posId != target.posId ||
-          networkName.isEmpty ||
-          posName.isEmpty ||
-          challenge.expiresAt == null) {
-        throw const AppException('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
-      }
-
-      await CustomBottomSheet.show<void>(
-        title: 'دعوة ربط نقطة بيع',
-        subtitle: 'دعوة موجهة حصرياً إلى نقطة البيع المحددة',
-        leadingIcon: Icons.qr_code_rounded,
-        child: NetworkPosQrInvitationSheet(
-          challenge: challenge,
-          networkName: networkName,
-          posName: posName,
-          getStatus: () =>
-              getNetworkPosLinkChallengeStatusUseCase(challenge.challengeUuid),
-          onRevoke: () => revokeChallenge(challenge.challengeUuid),
-        ),
-      );
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'فشل إنشاء الدعوة',
-        message: AppException.sanitizeMessage(e.toString()),
-        type: SnackType.error,
-      );
-    }
-  }
-
-  Future<void> revokeChallenge(String challengeUuid) async {
-    try {
-      await revokeNetworkPosLinkChallengeUseCase(challengeUuid);
-      await CustomAnimationOverlay.showSuccess(
-        message: 'تم إلغاء رمز الدعوة بنجاح',
-      );
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'خطأ',
-        message: AppException.sanitizeMessage(e.toString()),
-        type: SnackType.error,
-      );
-    }
-  }
-}
-).hasMatch(code)) {
+    if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}$').hasMatch(code)) {
       CustomSnackbar.show(title: 'تحقق من المعرف', message: 'أدخل المعرف التجاري لنقطة البيع بالصيغة الموجودة في ملفها.', type: SnackType.warning);
       return;
     }
@@ -635,7 +562,7 @@ class NetworkCommercialDirectoryController
     if (expiry == null) return 'تعذر تحديد وقت الانتهاء';
     final remaining = expiry.difference(invitationClock.value);
     if (remaining <= Duration.zero) return 'انتهت مدة الدعوة';
-    return 'متبقي \${remaining.inMinutes} دقيقة و\${remaining.inSeconds % 60} ثانية';
+    return 'متبقي ' + remaining.inMinutes.toString() + ' دقيقة و' + (remaining.inSeconds % 60).toString() + ' ثانية';
   }
 
   void _cancelInvitationTimers() {
@@ -694,7 +621,9 @@ class NetworkCommercialDirectoryController
     try {
       final bytes = await captureInvitationCard(context);
       final result = await ShareService.instance.shareBytes(bytes: bytes, fileName: 'NetSales_Invitation.png', mimeType: 'image/png', subject: 'دعوة ربط عبر NetSales', text: 'امسح رمز الدعوة من داخل تطبيق NetSales.');
-      if (result.status == ShareResultStatus.success) CustomSnackbar.show(title: 'تمت المشاركة', message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.', type: SnackType.success);
+      if (result.status == ShareResultStatus.success) {
+        CustomSnackbar.show(title: 'تمت المشاركة', message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.', type: SnackType.success);
+      }
     } catch (error) {
       CustomSnackbar.show(title: 'تعذرت المشاركة', message: AppException.sanitizeMessage(error), type: SnackType.error);
     } finally {
@@ -745,7 +674,7 @@ class NetworkCommercialDirectoryController
         title: 'تحديد نقطة البيع المستهدفة',
         content: NetworkPosInvitationTargetDialog(controller: this),
         cancelLabel: 'إلغاء',
-        canPop: false,
+        canPop: true,
         maxWidth: 480,
       );
       final target = resolvedInvitationTarget.value;
@@ -771,21 +700,6 @@ class NetworkCommercialDirectoryController
       CustomSnackbar.show(title: 'فشل إنشاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
     } finally {
       resolvedInvitationTarget.value = null;
-    }
-  }
-
-  Future<void> revokeChallenge(String challengeUuid) async {
-    try {
-      await revokeNetworkPosLinkChallengeUseCase(challengeUuid);
-      await CustomAnimationOverlay.showSuccess(
-        message: 'تم إلغاء رمز الدعوة بنجاح',
-      );
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'خطأ',
-        message: AppException.sanitizeMessage(e.toString()),
-        type: SnackType.error,
-      );
     }
   }
 }
