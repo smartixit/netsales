@@ -45,7 +45,12 @@ class WorkspaceWelcomeHero extends StatelessWidget {
         child: Stack(
           children: [
             const Positioned.fill(
-              child: CustomPaint(painter: const WorkspaceHeroBackdropPainter()),
+              child: CustomPaint(painter: WorkspaceHeroBackdropPainter()),
+            ),
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(painter: WorkspaceHeroRibbonPainter()),
+              ),
             ),
             Positioned(
               left: -26.w,
