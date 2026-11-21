@@ -140,12 +140,7 @@ class _FakeCommercialRepository implements CommercialRepository {
       challengeUuid: 'CH-123',
       payload: 'PAYLOAD-123',
       networkId: 1,
-      network: NetworkEntity(
-        networkId: 1,
-        ownerId: 10,
-        networkName: 'الشبكة المركزية',
-        networkPhoneNumber: '771111111',
-      ),
+      networkName: 'الشبكة المركزية',
     );
   }
 
