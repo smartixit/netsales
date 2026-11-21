@@ -4,8 +4,10 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/document_details/custom_document_timeline_node.dart';
 import 'package:netsales/widgets/document_details/models/document_timeline_node_data.dart';
 
+export 'package:netsales/widgets/document_details/custom_document_timeline_node.dart';
 export 'package:netsales/widgets/document_details/models/document_timeline_node_data.dart';
 
 /// مسار التدقيق والتسلسل الزمني لمراحل دورة حياة المعاملة (CustomDocumentTimeline)
@@ -76,103 +78,7 @@ class CustomDocumentTimeline extends StatelessWidget {
           AppSpacing.vMd,
 
           for (var i = 0; i < nodes.length; i++)
-            _TimelineNodeWidget(node: nodes[i]),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimelineNodeWidget extends StatelessWidget {
-  const _TimelineNodeWidget({required this.node});
-
-  final DocumentTimelineNodeData node;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final color =
-        node.iconColor ??
-        (node.isCompleted ? colors.success : colors.onSurfaceVariant);
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // العمود الرأسي: الأيقونة والخط الواصل
-          Column(
-            children: [
-              Container(
-                width: 26.r,
-                height: 26.r,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.45),
-                    width: 1.2,
-                  ),
-                ),
-                child: Icon(node.icon, size: 14.r, color: color),
-              ),
-              if (!node.isLast)
-                Expanded(
-                  child: Container(
-                    width: 2.w,
-                    margin: EdgeInsets.symmetric(vertical: 4.h),
-                    color: colors.outlineVariant.withValues(alpha: 0.45),
-                  ),
-                ),
-            ],
-          ),
-          AppSpacing.hSm,
-
-          // محتوى العقدة: العنوان، الوصف الفرعي، والوقت
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: node.isLast ? 0 : 16.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          node.title,
-                          style: AppTypography.labelMedium.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (node.timestamp != null &&
-                          node.timestamp!.isNotEmpty) ...[
-                        AppSpacing.hXs,
-                        Text(
-                          node.timestamp!,
-                          style: AppTypography.caption.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 10.sp,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    node.subtitle,
-                    style: AppTypography.caption.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 10.5.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+            CustomDocumentTimelineNode(node: nodes[i]),
         ],
       ),
     );
