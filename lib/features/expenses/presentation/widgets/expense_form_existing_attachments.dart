@@ -20,8 +20,6 @@ class ExpenseFormExistingAttachments
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Obx(() {
       final attachments = controller.existingAttachments;
       if (attachments.isEmpty) {
