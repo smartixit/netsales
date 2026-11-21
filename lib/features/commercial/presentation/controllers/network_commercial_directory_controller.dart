@@ -14,6 +14,7 @@ import 'package:netsales/features/commercial/domain/usecases/create_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
@@ -39,6 +40,7 @@ class NetworkCommercialDirectoryController
     required this.createNetworkPosLinkChallengeUseCase,
     required this.revokeNetworkPosLinkChallengeUseCase,
     this.getMyNetworksUseCase,
+    required this.getNetworkPosLinkChallengeStatusUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -49,6 +51,8 @@ class NetworkCommercialDirectoryController
   final RevokeNetworkPosLinkChallengeUseCase
   revokeNetworkPosLinkChallengeUseCase;
   final GetMyNetworksUseCase? getMyNetworksUseCase;
+  final GetNetworkPosLinkChallengeStatusUseCase
+  getNetworkPosLinkChallengeStatusUseCase;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -472,12 +476,19 @@ class NetworkCommercialDirectoryController
       final challenge = await createNetworkPosLinkChallengeUseCase(
         networkId: netId,
       );
+      final networkName = challenge.network?.networkName.trim() ?? '';
+      if (challenge.networkId != netId || networkName.isEmpty) {
+        throw StateError('تعذر ربط الدعوة بالشبكة المحددة بشكل موثوق.');
+      }
       await CustomBottomSheet.show<void>(
         title: 'دعوة نقطة بيع عبر رمز QR',
         subtitle: 'امسح الرمز المباشر لإتمام الارتباط التجاري',
         leadingIcon: Icons.qr_code_rounded,
         child: NetworkPosQrInvitationSheet(
           challenge: challenge,
+          networkName: networkName,
+          getStatus: () =>
+              getNetworkPosLinkChallengeStatusUseCase(challenge.challengeUuid),
           onRevoke: () => revokeChallenge(challenge.challengeUuid),
         ),
       );
