@@ -180,7 +180,7 @@ class _NetworkChoices extends StatelessWidget {
                         color: colors.onSurface,
                         fontWeight: link.networkPosId == selectedNetworkPosId
                             ? FontWeight.bold
-                            : FontWeight.medium,
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
