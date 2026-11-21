@@ -173,8 +173,7 @@ class _FakeCommercialRepository implements CommercialRepository {
   @override
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) async {
     return const NetworkPosLinkEntity(
       networkPosId: 99,
