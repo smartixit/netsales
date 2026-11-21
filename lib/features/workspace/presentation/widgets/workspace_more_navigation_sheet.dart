@@ -67,7 +67,7 @@ class WorkspaceMoreNavigationSheet extends StatelessWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: items.length,
-                separatorBuilder: (_, __) => AppSpacing.vXs,
+                separatorBuilder: (_, _) => AppSpacing.vXs,
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final isSelected = identical(item, selectedItem);
