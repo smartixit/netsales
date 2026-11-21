@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -61,9 +60,12 @@ class PosWorkspaceTransactionMapper {
         ? '${invoice.totalVouchersCount} كرت'
         : null;
 
-    final saleTypeLabel = invoice.saleTypeLabel?.trim();
+    final saleTypeLabel = _resolveSaleTypeLabel(
+      invoice.saleType,
+      invoice.saleTypeLabel,
+    );
     final subtitleParts = [
-      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+      if (saleTypeLabel != null) saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
       ?voucherDetail,
     ];
@@ -74,9 +76,9 @@ class PosWorkspaceTransactionMapper {
       subtitle: subtitleParts.join(' • '),
       formattedAmount:
           '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)}',
-      statusPresentation: const EnumPresentation(
-        label: 'فاتورة',
-        tone: SemanticTone.neutral,
+      statusPresentation: EnumPresentationRegistry.resolveInvoicePaymentStatus(
+        invoice.paymentStatus,
+        serverLabel: invoice.paymentStatusLabel,
       ),
       icon: Icons.inventory_2_rounded,
       onTap: () => onOpenInvoice(invoice),
@@ -91,9 +93,12 @@ class PosWorkspaceTransactionMapper {
       request.requestDate ?? request.createdAt ?? '',
     );
     final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
-    final saleTypeLabel = request.saleTypeLabel?.trim();
+    final saleTypeLabel = _resolveSaleTypeLabel(
+      request.saleType,
+      request.saleTypeLabel,
+    );
     final subtitle = [
-      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+      if (saleTypeLabel != null) saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
     ].join(' • ');
 
@@ -110,6 +115,20 @@ class PosWorkspaceTransactionMapper {
       icon: Icons.send_rounded,
       onTap: () => onOpenRequest(request),
     );
+  }
+
+
+  static String? _resolveSaleTypeLabel(SaleType type, String? serverLabel) {
+    final normalizedServerLabel = serverLabel?.trim();
+    if (!type.isKnown &&
+        (normalizedServerLabel == null || normalizedServerLabel.isEmpty)) {
+      return null;
+    }
+
+    return EnumPresentationRegistry.resolveSaleType(
+      type,
+      serverLabel: normalizedServerLabel,
+    ).label;
   }
 
   static String _shortReference(String? value, String fallback) {
