@@ -181,7 +181,10 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     );
 
     final result = response.data;
-    if (result == null || result.posId <= 0) {
+    if (result == null ||
+        result.posId <= 0 ||
+        result.posUuid.trim().isEmpty ||
+        result.posName.trim().isEmpty) {
       throw AppException('تعذر التحقق من نقطة البيع المستهدفة.');
     }
     return result;
