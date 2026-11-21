@@ -7,6 +7,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/features/profile/presentation/bindings/profile_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/active_sessions_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
@@ -16,6 +17,7 @@ import 'package:netsales/features/auth/presentation/bindings/reset_password_bind
 import 'package:netsales/features/auth/presentation/bindings/security_settings_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
+import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/active_sessions_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
@@ -202,6 +204,13 @@ abstract final class AppPages {
       name: AppRoutes.securitySettings,
       page: () => const SecuritySettingsScreen(),
       binding: SecuritySettingsBinding(),
+      middlewares: [AuthGuard()],
+    ),
+
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileScreen(),
+      binding: ProfileBinding(),
       middlewares: [AuthGuard()],
     ),
 

@@ -20,6 +20,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     this.posId,
     this.organizationName,
     this.logoUrl,
+    this.embedded = false,
     super.key,
   });
 
@@ -28,6 +29,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
   final String? organizationName;
   final String? logoUrl;
   final bool isNetworkWorkspace;
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +45,7 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
       );
     });
 
-    return CustomAppScaffold(
-      body: Padding(
+    final content = Padding(
         padding: EdgeInsets.all(AppSpacing.cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +116,12 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
             ),
           ],
         ),
-      ),
-    );
+      );
+
+    if (embedded) {
+      return content;
+    }
+
+    return CustomAppScaffold(body: content);
   }
 }

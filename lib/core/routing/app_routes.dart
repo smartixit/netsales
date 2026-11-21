@@ -89,6 +89,7 @@ abstract final class AppRoutes {
   // ----------------------------------------------------------------------------
   static const String activeSessions = '/security/active-sessions';
   static const String securitySettings = '/security/settings';
+  static const String profile = '/profile';
 
   /// Developer-only reusable DataGrid showcase.
   static const String dataGridShowcase = '/dev/data-grid';

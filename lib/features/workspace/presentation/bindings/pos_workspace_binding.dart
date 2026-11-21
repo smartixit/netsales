@@ -8,6 +8,7 @@ import 'package:netsales/features/commercial/presentation/bindings/commercial_bi
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
+import 'package:netsales/features/profile/presentation/bindings/profile_binding.dart';
 import 'package:netsales/features/reports/presentation/bindings/operational_reports_binding.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
 import 'package:netsales/features/requests/presentation/bindings/pos_procurement_orders_binding.dart';
@@ -24,6 +25,7 @@ class PosWorkspaceBinding extends Bindings {
     OperationalReportsBinding().dependencies();
     InvoiceBinding().dependencies();
     MembershipBinding().dependencies();
+    ProfileBinding().dependencies();
     PosProcurementOrdersBinding().dependencies();
 
     registerLazyIfAbsent<PosWorkspaceController>(

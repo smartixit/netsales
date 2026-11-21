@@ -33,6 +33,7 @@ class NetworkWorkspaceController extends GetxController {
   final GetNetworkWorkspaceOverviewUseCase getOverviewUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
+  final RxInt selectedMobileNavIndex = 0.obs;
   final RxList<NetworkEntity> networks = <NetworkEntity>[].obs;
   final RxnInt selectedNetworkId = RxnInt();
   final Rxn<NetworkWorkspaceOverviewEntity> overview =
@@ -132,13 +133,22 @@ class NetworkWorkspaceController extends GetxController {
   void openPackagesCatalog() =>
       Get.toNamed<void>(AppRoutes.voucherPackagesCatalog);
 
-  void openWholesaleInvoices() =>
-      Get.toNamed<void>(AppRoutes.wholesaleInvoices);
-
   void openCreateSaleInvoice() =>
       Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
 
-  void onNavItemSelected(int index) => selectedNavIndex.value = index;
+  void onNavItemSelected(int index) {
+    if (index < 0) return;
+    selectedNavIndex.value = index;
+    if (index < 4) selectedMobileNavIndex.value = index;
+  }
+
+  void openProfile() => onNavItemSelected(3);
+  void openWholesaleInvoices() => onNavItemSelected(4);
+  void openOperatingExpenses() => onNavItemSelected(5);
+  void openPlatformBilling() => onNavItemSelected(6);
+  void openBillingReports() => onNavItemSelected(7);
+  void openTeamManagement() => onNavItemSelected(8);
+  void openOperationalReports() => onNavItemSelected(9);
 
   Future<void> loadWorkspace() async {
     final revision = ++_revision;
