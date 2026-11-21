@@ -148,7 +148,7 @@ class CustomQrShareCard extends StatelessWidget {
                     ),
                     child: CustomQrCode(
                       data: payload,
-                      size: 440,
+                      size: 380,
                       decoration: QrCodeService.brandDecoration,
                     ),
                   ),
