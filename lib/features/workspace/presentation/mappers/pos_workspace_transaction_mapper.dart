@@ -95,7 +95,7 @@ class PosWorkspaceTransactionMapper {
       reference: _shortReference(request.requestUuid, 'طلب توريد'),
       subtitle: dateLabel,
       formattedAmount:
-          '${AmountFormatter.formatValue(request.requestTotalAmount)}',
+          AmountFormatter.formatValue(request.requestTotalAmount),
       statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
         request.status,
         serverLabel: request.statusLabel,
