@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Paints the luminous teal atmosphere and connected-node motif used by both
@@ -210,7 +212,13 @@ class WorkspaceHeroIllustrationPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
     canvas.save();
-    canvas.scale(size.width / 1000, size.height / 700);
+    // Preserve the illustration's original 10:7 proportions. Independent
+    // x/y scaling visibly flattens the buildings on narrow mobile layouts.
+    final scale = math.min(size.width / 1000, size.height / 700);
+    final horizontalOffset = (size.width - 1000 * scale) / 2;
+    final verticalOffset = size.height - 700 * scale;
+    canvas.translate(horizontalOffset, verticalOffset);
+    canvas.scale(scale);
     if (isNetwork) {
       _paintNetwork(canvas);
     } else {
