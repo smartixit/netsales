@@ -32,6 +32,8 @@ void main() {
       expect(items.single.subtitle, contains('آجل'));
       expect(items.single.formattedAmount, contains('1,250'));
       expect(items.single.actionLabel, 'اعتماد');
+      expect(items.single.statusPresentation.label, 'بانتظار الاعتماد');
+      expect(items.single.statusPresentation.isKnown, isTrue);
 
       items.single.onTap?.call();
       expect(openedRequestId, 41);
