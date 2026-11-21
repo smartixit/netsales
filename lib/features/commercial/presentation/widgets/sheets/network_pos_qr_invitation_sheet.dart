@@ -117,6 +117,10 @@ class _NetworkPosQrInvitationSheetState
   }
 
   Future<Uint8List?> _captureShareCard() async {
+    await precacheImage(
+      const AssetImage('assets/images/brand_icon.png'),
+      context,
+    );
     await WidgetsBinding.instance.endOfFrame;
     final renderObject =
         _shareCardKey.currentContext?.findRenderObject();
