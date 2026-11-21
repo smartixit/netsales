@@ -20,10 +20,7 @@ class WorkspaceNetworkPickerMapper {
         id: network.networkId,
         name: network.networkName,
         logoUrl: network.networkProfileLogoUrl,
-        initials: TextFormatter.avatarInitials(
-          network.networkName,
-          maxChars: 2,
-        ),
+        initials: TextFormatter.avatarInitials(network.networkName),
         subtitle: location.isNotEmpty
             ? location
             : network.networkPhoneNumber.isNotEmpty

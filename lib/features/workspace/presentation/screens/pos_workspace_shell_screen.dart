@@ -38,7 +38,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         content: InvoicesScreen(embedded: true, isNetwork: false),
       ),
       const WorkspaceNavItem(
-        label: 'الملف الشخصي',
+        label: 'البروفايل',
         icon: Icons.account_circle_outlined,
         activeIcon: Icons.account_circle_rounded,
         content: ProfileScreen(embedded: true),

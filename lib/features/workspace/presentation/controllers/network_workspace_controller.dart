@@ -87,8 +87,7 @@ class NetworkWorkspaceController extends GetxController {
   String get welcomeGreeting => GreetingFormatter.greeting();
   String get todayFormatted => DateFormatter.fullDate(DateTime.now());
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
-  String get userInitials =>
-      TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials => TextFormatter.avatarInitials(userName);
 
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);

@@ -34,7 +34,7 @@ class ProfileScreen extends GetView<ProfileController> {
 
       if (controller.errorMessage.value != null && profile == null) {
         return CustomErrorState.boxed(
-          title: 'تعذر تحميل الملف الشخصي',
+          title: 'تعذر تحميل البروفايل',
           subtitle: controller.errorMessage.value,
           onRetry: controller.loadProfile,
         );
@@ -43,7 +43,7 @@ class ProfileScreen extends GetView<ProfileController> {
       if (profile == null) {
         return CustomErrorState.boxed(
           title: 'بيانات الحساب غير متاحة',
-          subtitle: 'لم تصل استجابة صالحة من خدمة الملف الشخصي.',
+          subtitle: 'لم تصل استجابة صالحة من خدمة البروفايل.',
           onRetry: controller.loadProfile,
         );
       }
@@ -89,7 +89,7 @@ class ProfileScreen extends GetView<ProfileController> {
     }
 
     return CustomAppScaffold(
-      appBarTitle: 'الملف الشخصي',
+      appBarTitle: 'البروفايل',
       appBarSubtitle: 'بيانات الحساب والعضويات والأمان',
       body: content,
     );

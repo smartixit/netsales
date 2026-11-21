@@ -51,7 +51,7 @@ void main() {
           _FakeAuthRemoteDataSource(
             ApiResponse(
               success: true,
-              message: 'تم جلب الملف الشخصي.',
+              message: 'تم جلب البروفايل.',
               data: {
                 'user': {
                   'user_id': 42,
@@ -97,33 +97,24 @@ void main() {
       },
     );
 
-    test(
-      'rejects malformed /auth/me response rather than displaying empty account data',
-      () async {
-        final dataSource = ProfileRemoteDataSourceImpl(
-          _FakeAuthRemoteDataSource(
-            ApiResponse(
-              success: true,
-              message: 'OK',
-              data: {'user': 'not-a-map'},
-            ),
+    test('rejects malformed /auth/me response rather than displaying empty account data', () async {
+      final dataSource = ProfileRemoteDataSourceImpl(
+        _FakeAuthRemoteDataSource(
+          ApiResponse(
+            success: true,
+            message: 'OK',
+            data: {'user': 'not-a-map'},
           ),
-        );
+        ),
+      );
 
-        await expectLater(
-          dataSource.getProfile(),
-          throwsA(isA<AppException>()),
-        );
-      },
-    );
+      await expectLater(dataSource.getProfile(), throwsA(isA<AppException>()));
+    });
 
     test('rejects unsuccessful profile response', () async {
       final dataSource = ProfileRemoteDataSourceImpl(
         _FakeAuthRemoteDataSource(
-          ApiResponse(
-            success: false,
-            message: 'انتهت صلاحية الجلسة.',
-          ),
+          ApiResponse(success: false, message: 'انتهت صلاحية الجلسة.'),
         ),
       );
 
@@ -141,43 +132,46 @@ void main() {
   });
 
   group('Profile repository and controller', () {
-    test('maps server status and scoped memberships into profile domain', () async {
-      final user = UserModel.fromJson({
-        'user_id': 8,
-        'user_full_name': 'صاحب حساب',
-        'user_phone_number': '771111111',
-        'user_2fa_enabled': false,
-        'status': 'ACTIVE',
-        'workspace_roles': [
-          {
-            'scope': 'NETWORK',
-            'tenant_id': 101,
-            'role_key': 'NETWORK_OWNER',
-            'role_name': 'مالك الشبكة',
-          },
-          {
-            'scope': 'POS',
-            'tenant_id': 202,
-            'role_key': 'POS_AGENT',
-            'role_name': 'وكيل نقطة البيع',
-          },
-        ],
-      });
+    test(
+      'maps server status and scoped memberships into profile domain',
+      () async {
+        final user = UserModel.fromJson({
+          'user_id': 8,
+          'user_full_name': 'صاحب حساب',
+          'user_phone_number': '771111111',
+          'user_2fa_enabled': false,
+          'status': 'ACTIVE',
+          'workspace_roles': [
+            {
+              'scope': 'NETWORK',
+              'tenant_id': 101,
+              'role_key': 'NETWORK_OWNER',
+              'role_name': 'مالك الشبكة',
+            },
+            {
+              'scope': 'POS',
+              'tenant_id': 202,
+              'role_key': 'POS_AGENT',
+              'role_name': 'وكيل نقطة البيع',
+            },
+          ],
+        });
 
-      final repository = ProfileRepositoryImpl(
-        _FakeProfileRemoteDataSource(user),
-      );
-      final profile = await repository.getProfile();
+        final repository = ProfileRepositoryImpl(
+          _FakeProfileRemoteDataSource(user),
+        );
+        final profile = await repository.getProfile();
 
-      expect(profile.userId, 8);
-      expect(profile.statusLabel, 'مفعّل');
-      expect(profile.twoFactorEnabled, isFalse);
-      expect(profile.memberships, hasLength(2));
-      expect(profile.memberships[0].scope, 'NETWORK');
-      expect(profile.memberships[0].tenantId, 101);
-      expect(profile.memberships[1].scope, 'POS');
-      expect(profile.memberships[1].tenantId, 202);
-    });
+        expect(profile.userId, 8);
+        expect(profile.statusLabel, 'مفعّل');
+        expect(profile.twoFactorEnabled, isFalse);
+        expect(profile.memberships, hasLength(2));
+        expect(profile.memberships[0].scope, 'NETWORK');
+        expect(profile.memberships[0].tenantId, 101);
+        expect(profile.memberships[1].scope, 'POS');
+        expect(profile.memberships[1].tenantId, 202);
+      },
+    );
 
     test('loads profile into observable controller state', () async {
       const expected = ProfileEntity(

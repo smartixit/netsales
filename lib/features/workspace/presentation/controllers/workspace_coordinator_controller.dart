@@ -69,7 +69,7 @@ class WorkspaceCoordinatorController extends GetxController {
   }
 
   String get currentUserInitials =>
-      TextFormatter.avatarInitials(currentUserName, maxChars: 2);
+      TextFormatter.avatarInitials(currentUserName,);
 
   String? get currentUserPhoneNumber =>
       SessionService.to.currentUser?.userPhoneNumber;

@@ -92,8 +92,7 @@ class PosWorkspaceController extends GetxController {
   String get todayFormatted => DateFormatter.fullDate(DateTime.now());
   String get activePosName => activePos.value?.posName ?? '';
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
-  String get userInitials =>
-      TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials => TextFormatter.avatarInitials(userName);
 
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
