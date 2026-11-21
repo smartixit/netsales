@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -8,103 +7,78 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/flows/pos_network_linking_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_linked_network_selector.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
-/// الشاشة الرئيسية لمساحة عمل نقطة البيع (PosHomeDashboard)
-/// متوافقة هندسياً ومعمارياً بنسبة 100% مع معايير مساحات العمل وشاشة NetworkWorkspaceDashboard
 class PosHomeDashboard extends StatelessWidget {
   const PosHomeDashboard({super.key, required this.controller});
+
   final PosWorkspaceController controller;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return CustomRefreshablePage(
+      embedded: true,
       onRefresh: controller.loadWorkspace,
-      maxContentWidth: 760,
+      maxContentWidth: 920,
       child: Obx(() {
-        if (controller.isLoadingPos.value &&
-            controller.activePos.value == null) {
-          return const Column(
-            children: [
-              CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.cards,
-                  itemCount: 1,
-                  cardHeight: 126,
-                  maxColumns: 1,
-                  minItemWidth: 180,
-                ),
-              ),
-              SizedBox(height: 20),
-              CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.cards,
-                  itemCount: 1,
-                  cardHeight: 210,
-                  maxColumns: 1,
-                  minItemWidth: 180,
-                ),
-              ),
-              SizedBox(height: 16),
-              CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.cards,
-                  itemCount: 1,
-                  cardHeight: 156,
-                  maxColumns: 1,
-                  minItemWidth: 180,
-                ),
-              ),
-            ],
+        if (controller.isLoadingPos.value && controller.activePos.value == null) {
+          return const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.cards,
+              itemCount: 3,
+              cardHeight: 150,
+              maxColumns: 1,
+              minItemWidth: 180,
+            ),
           );
         }
+
         if (controller.posError.value != null &&
             controller.activePos.value == null) {
           return CustomErrorState.boxed(
             title: 'تعذر تحميل نقاط البيع',
-            subtitle: 'تحقق من الاتصال ثم أعد المحاولة.',
+            subtitle: controller.posError.value,
             onRetry: controller.loadPosTenants,
           );
         }
+
         if (controller.activePos.value == null) {
           return const CustomEmptyState(
             icon: Icons.storefront_outlined,
-            title: 'لا توجد نقطة بيع مرتبطة بحسابك',
-            subtitle:
-                'لا يمكن عرض مؤشرات مساحة العمل قبل توفر نقطة بيع مصرح بها.',
+            title: 'اختر نقطة البيع',
+            subtitle: 'لا توجد نقطة بيع محددة حالياً لعرض بياناتها.',
           );
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. كرت الترحيب القيادي لنقطة البيع
             PosWelcomeHeader(
               controller: controller,
               onQrTap: PosNetworkLinkingFlow(controller).start,
             ),
             AppSpacing.vLg,
-
-            // 3. متابعة طلبات التوريد المفتوحة من الـ API الحقيقي
-            PosActiveSupplyOrderTracker(controller: controller),
+            PosLinkedNetworkSelector(controller: controller),
             AppSpacing.vLg,
-
-            // 4. لوحة العمليات السريعة المتكاملة
+            if (controller.selectedNetworkLink.value != null) ...[
+              PosActiveSupplyOrderTracker(controller: controller),
+              AppSpacing.vLg,
+            ],
             Padding(
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Row(
                 children: [
                   Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   Text(
                     'العمليات السريعة',
                     style: AppTypography.titleSmall.copyWith(
@@ -137,32 +111,9 @@ class PosHomeDashboard extends StatelessWidget {
                 ),
               ],
             ),
-            AppSpacing.vMd,
-            Row(
-              children: [
-                Expanded(
-                  child: PosQuickActionCard(
-                    icon: Icons.payment_rounded,
-                    title: 'سداد دفعة للشبكة',
-                    subtitle: 'تسوية ديون وزيادة السقف',
-                    onTap: controller.openPosDebtLedger,
-                  ),
-                ),
-                AppSpacing.hMd,
-                Expanded(
-                  child: PosQuickActionCard(
-                    icon: Icons.account_balance_wallet_rounded,
-                    title: 'كشف الحساب',
-                    subtitle: 'حركات المحفظة بالتفصيل',
-                    onTap: controller.openWalletStatement,
-                  ),
-                ),
-              ],
-            ),
             AppSpacing.vLg,
-
-            // 5. قسم آخر العمليات والحركات الحية من الـ API الحقيقي
-            PosRecentTransactionsSection(controller: controller),
+            if (controller.selectedNetworkLink.value != null)
+              PosRecentTransactionsSection(controller: controller),
           ],
         );
       }),

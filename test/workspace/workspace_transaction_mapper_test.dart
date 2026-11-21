@@ -14,9 +14,9 @@ void main() {
         requestUuid: 'request-uuid-part-rest',
         posId: 7,
         posName: 'نقطة صنعاء',
-        saleTypeLabel: 'نقدي',
+        saleTypeLabel: 'آجل',
         requestDate: '2026-11-16',
-        requestTotalAmount: 1250,
+        requestTotalAmount: '1250.00',
         statusRaw: 'PENDING',
         statusLabel: 'بانتظار الاعتماد',
       );
@@ -29,6 +29,7 @@ void main() {
       expect(items, hasLength(1));
       expect(items.single.title, 'نقطة صنعاء');
       expect(items.single.reference, 'request');
+      expect(items.single.subtitle, contains('آجل'));
       expect(items.single.formattedAmount, contains('1,250'));
       expect(items.single.actionLabel, 'اعتماد');
 
@@ -42,7 +43,7 @@ void main() {
   });
 
   group('PosWorkspaceTransactionMapper', () {
-    test('maps invoices and requests and preserves navigation callbacks', () {
+    test('merges invoices and requests in global date order', () {
       final openedInvoices = <int>[];
       final openedRequests = <int>[];
       final invoice = InvoiceEntity(
@@ -50,10 +51,8 @@ void main() {
         networkId: 3,
         posId: 7,
         invoiceUuid: 'invoice-12345678',
-        invoiceTotalAmount: 2500,
-        paymentStatusRaw: 'UNPAID',
-        paymentStatusLabel: 'غير مدفوعة',
         saleTypeLabel: 'آجل',
+        invoiceTotalAmount: 2500,
         invoiceDate: '2026-11-15',
       );
       final request = RequestEntity(
@@ -61,10 +60,10 @@ void main() {
         networkId: 3,
         posId: 7,
         requestUuid: 'request-12345678',
+        saleTypeLabel: 'نقدي',
         requestTotalAmount: 1250,
         statusRaw: 'PENDING',
         statusLabel: 'قيد الانتظار',
-        saleTypeLabel: 'نقدي',
         requestDate: '2026-11-16',
       );
 
@@ -76,13 +75,16 @@ void main() {
       );
 
       expect(items, hasLength(2));
-      expect(items[0].title, 'فاتورة توريد');
-      expect(items[0].reference, 'invoice-');
-      expect(items[1].title, 'طلب توريد');
-      expect(items[1].reference, 'request-');
+      expect(items[0].title, 'طلب توريد');
+      expect(items[0].reference, 'request-');
+      expect(items[0].subtitle, contains('نقدي'));
+      expect(items[1].title, 'فاتورة توريد');
+      expect(items[1].reference, 'invoice-');
+      expect(items[1].subtitle, contains('آجل'));
+      expect(items[1].statusPresentation.label, 'فاتورة');
 
-      items[0].onTap?.call();
       items[1].onTap?.call();
+      items[0].onTap?.call();
 
       expect(openedInvoices, [11]);
       expect(openedRequests, [41]);

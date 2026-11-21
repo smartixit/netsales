@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
@@ -47,7 +49,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(80.h);
+  Size get preferredSize => Size.fromHeight(AppSpacing.appBarHeight + AppSpacing.sm);
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: EdgeInsets.only(
           left: AppBreakpoints.screenMargin(context),
           right: AppBreakpoints.screenMargin(context),
-          top: 8.h,
+          top: AppSpacing.sm,
           // bottom: 6.h,
         ),
         child: ClipRRect(
@@ -77,26 +79,18 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
             child: Container(
-              height: 100.h,
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              height: AppSpacing.appBarHeight,
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF0F172A).withValues(alpha: 0.85)
-                    : colors.surface.withValues(alpha: 0.88),
+                color: colors.surface.withValues(alpha: isDark ? 0.92 : 0.94),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.12)
+                      ? colors.onSurface.withValues(alpha: 0.12)
                       : colors.outlineVariant.withValues(alpha: 0.6),
                   width: 1.2.w,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.shadow.withValues(alpha: isDark ? 0.3 : 0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
+                boxShadow: AppElevation.level3(context),
               ),
               child: Row(
                 children: [
@@ -126,7 +120,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                             effectivePresentation,
                           ),
                     ),
-                  SizedBox(width: 10.w),
+                  AppSpacing.hSm,
 
                   // هوية المساحة والشبكة
                   Expanded(
@@ -148,7 +142,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 5.h),
+                              AppSpacing.vXs,
                               CustomSkeletonShimmer(
                                 child: Container(
                                   width: 108.w,
@@ -180,7 +174,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     isCompact: true,
                                     showDot: true,
                                   ),
-                                  SizedBox(height: 3.h),
+                                  AppSpacing.vXxs,
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -193,11 +187,10 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                               .copyWith(
                                                 color: colors.onSurface,
                                                 fontWeight: FontWeight.w800,
-                                                fontSize: 14.sp,
-                                              ),
+                                                                                              ),
                                         ),
                                       ),
-                                      SizedBox(width: 4.w),
+                                      AppSpacing.hXxs,
                                       Icon(
                                         Icons.keyboard_arrow_down_rounded,
                                         size: 16.r,
@@ -215,7 +208,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // الإجراءات: شارة الإشعارات الحقيقية + زر التحكم القيادي
                   ...?actions,
                   const NotificationBadgeButton(),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   CustomInteractiveBounce(
                     onTap:
                         onProfileTap ??
@@ -227,13 +220,11 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       width: 42.r,
                       height: 42.r,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF131D2E)
-                            : colors.surfaceContainerLow,
+                        color: colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: isDark
-                              ? Colors.white.withValues(alpha: 0.1)
+                              ? colors.onSurface.withValues(alpha: 0.1)
                               : colors.outlineVariant,
                         ),
                       ),

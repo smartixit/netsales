@@ -1,13 +1,26 @@
+import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
 
-/// كيان ملخص مساحة عمل الشبكة (NetworkWorkspaceOverviewEntity)
+/// Typed operational overview for one authorized network.
 class NetworkWorkspaceOverviewEntity {
   const NetworkWorkspaceOverviewEntity({
     required this.networkId,
     required this.networkName,
     required this.generatedAt,
     required this.periodKey,
-    required this.metrics,
+    required this.timezone,
+    required this.periodDays,
+    required this.periodFrom,
+    required this.periodTo,
+    required this.sales,
+    required this.pointsOfSale,
+    required this.requests,
+    required this.packages,
+    required this.expenses,
     required this.recentPendingRequests,
   });
 
@@ -15,29 +28,14 @@ class NetworkWorkspaceOverviewEntity {
   final String networkName;
   final String generatedAt;
   final String periodKey;
-  final Map<String, dynamic> metrics;
+  final String timezone;
+  final int periodDays;
+  final String periodFrom;
+  final String periodTo;
+  final NetworkSalesMetricsEntity? sales;
+  final NetworkPointsOfSaleMetricsEntity? pointsOfSale;
+  final NetworkRequestsMetricsEntity? requests;
+  final NetworkPackagesMetricsEntity? packages;
+  final NetworkExpensesMetricsEntity? expenses;
   final List<NetworkPendingRequestEntity> recentPendingRequests;
-
-  Map<String, dynamic>? metric(String group) {
-    final value = metrics[group];
-    return value is Map<String, dynamic>
-        ? Map<String, dynamic>.from(value)
-        : null;
-  }
-
-  String count(String group, String key) {
-    final value = metric(group)?[key];
-    if (value is! num) {
-      throw FormatException('قيمة المؤشر $group.$key غير صالحة.');
-    }
-    return value.toInt().toString();
-  }
-
-  String amount(String group, String key) {
-    final value = metric(group)?[key];
-    if (value is! String) {
-      throw FormatException('قيمة المبلغ $group.$key غير صالحة.');
-    }
-    return value;
-  }
 }

@@ -22,9 +22,11 @@ class NetworkWorkspaceTransactionMapper {
           final dateLabel = parsedDate == null
               ? ''
               : DateFormatter.smart(parsedDate);
-          final subtitle = dateLabel.isEmpty
-              ? request.saleTypeLabel
-              : '${request.saleTypeLabel} • $dateLabel';
+          final saleTypeLabel = request.saleTypeLabel?.trim();
+          final subtitle = [
+            if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+            if (dateLabel.isNotEmpty) dateLabel,
+          ].join(' • ');
           void openRequest() => onOpenRequest(request.requestId);
 
           return WorkspaceTransactionItemViewModel(
@@ -32,7 +34,7 @@ class NetworkWorkspaceTransactionMapper {
             reference: reference,
             subtitle: subtitle,
             formattedAmount:
-                '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
+                AmountFormatter.format(request.requestTotalAmount),
             statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
               request.status,
               serverLabel: request.statusLabel,

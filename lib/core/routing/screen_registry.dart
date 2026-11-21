@@ -130,15 +130,6 @@ abstract final class ScreenRegistry {
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
-      screenId: 'NET-04',
-      route: AppRoutes.networkWalletStatement,
-      titleAr: 'كشف حركات محفظة الشبكة والحسابات',
-      titleEn: 'Network Wallet Statement',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networkWalletsView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
       screenId: 'NET-05',
       route: AppRoutes.posDirectory,
       titleAr: 'دليل وكلاء نقاط البيع المرتبطين',
@@ -202,25 +193,6 @@ abstract final class ScreenRegistry {
       isBalanceMutation: true,
       implementationState: ScreenImplementationState.implemented,
     ),
-    ScreenDescriptor(
-      screenId: 'NET-13',
-      route: AppRoutes.repaymentCollection,
-      titleAr: 'تحصيل سداد مديونيات نقاط البيع',
-      titleEn: 'Collect POS Debt Repayments',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.posWalletsCreate,
-      isBalanceMutation: true,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'NET-14',
-      route: AppRoutes.repaymentHistory,
-      titleAr: 'سجل سندات السداد والتسويات',
-      titleEn: 'Repayment History',
-      workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.networkWalletsView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
 
     // -------------------------------------------------------------------------
     // شاشات مساحة عمل نقطة البيع والوكيل (POS Workspace Screens - Phase 3.1 / 4)
@@ -251,15 +223,6 @@ abstract final class ScreenRegistry {
       titleEn: 'Purchase Invoices',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.salesView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'POS-04',
-      route: AppRoutes.posWalletStatement,
-      titleAr: 'كشف الحساب الجاري والمديونية',
-      titleEn: 'POS Wallet Statement',
-      workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.posWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
@@ -305,15 +268,6 @@ abstract final class ScreenRegistry {
       titleEn: 'Purchase Invoice Details',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.salesView,
-      implementationState: ScreenImplementationState.implemented,
-    ),
-    ScreenDescriptor(
-      screenId: 'POS-10',
-      route: AppRoutes.posDebtLedger,
-      titleAr: 'كشف الذمم والفواتير المستحقة',
-      titleEn: 'Debt Ledger and Outstanding Invoices',
-      workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.posWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
 

@@ -60,6 +60,85 @@ void main() {
       );
     });
 
+    test('uses the exact backend primary role when dual scope has no saved preference', () {
+      final networkPrimary = UserModel.fromJson({
+        'user_id': 13,
+        'user_full_name': 'Network Primary',
+        'user_phone_number': '700000013',
+        'role_key': 'NETWORK_OWNER',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 17,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'مالك الشبكة',
+          },
+          {
+            'scope': 'POS',
+            'tenant_id': 21,
+            'role_key': 'POS_USER',
+            'role_name': 'مستخدم نقطة بيع',
+          },
+        ],
+      });
+      final posPrimary = UserModel.fromJson({
+        'user_id': 14,
+        'user_full_name': 'POS Primary',
+        'user_phone_number': '700000014',
+        'role_key': 'POS_AGENT',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 17,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'مالك الشبكة',
+          },
+          {
+            'scope': 'POS',
+            'tenant_id': 21,
+            'role_key': 'POS_AGENT',
+            'role_name': 'وكيل نقطة بيع',
+          },
+        ],
+      });
+
+      expect(
+        WorkspaceService.instance.resolveWorkspaceForUser(networkPrimary),
+        AppWorkspace.network,
+      );
+      expect(
+        WorkspaceService.instance.resolveWorkspaceForUser(posPrimary),
+        AppWorkspace.pos,
+      );
+    });
+
+    test('does not guess a workspace for dual scope without backend preference', () {
+      final user = UserModel.fromJson({
+        'user_id': 15,
+        'user_full_name': 'Dual Scope Without Primary Role',
+        'user_phone_number': '700000015',
+        'workspace_roles': [
+          {
+            'scope': 'NETWORK',
+            'tenant_id': 17,
+            'role_key': 'NETWORK_OWNER',
+            'role_name': 'مالك الشبكة',
+          },
+          {
+            'scope': 'POS',
+            'tenant_id': 21,
+            'role_key': 'POS_USER',
+            'role_name': 'مستخدم نقطة بيع',
+          },
+        ],
+      });
+
+      expect(
+        () => WorkspaceService.instance.resolveWorkspaceForUser(user),
+        throwsStateError,
+      );
+    });
+
     test('honors the saved workspace when the account has both scopes', () {
       final user = UserModel.fromJson({
         'user_id': 11,

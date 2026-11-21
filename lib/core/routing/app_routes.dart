@@ -41,9 +41,6 @@ abstract final class AppRoutes {
   /// مساحة عمل نقطة البيع والوكيل المعتمد (POS Workspace)
   static const String posWorkspace = '/pos-workspace';
 
-  /// شاشة حظر وتوجيه حسابات إدارة المنصة العامة (Platform Scope Exclusion)
-  // static const String unsupportedPlatform = '/unsupported-platform';
-
   // ----------------------------------------------------------------------------
   // مسارات تشغيلية فرعية لمساحة عمل مزود الشبكة (Network Sub-Routes)
   // ----------------------------------------------------------------------------

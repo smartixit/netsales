@@ -46,8 +46,6 @@ class PosNetworkLinkingFlow {
         payload: payload,
         posId: posId,
       );
-      if (preview == null) return;
-
       final confirmed = await NetworkPosLinkConfirmSheet.show(
         preview: preview,
         onConfirm: () async {

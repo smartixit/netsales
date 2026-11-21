@@ -22,7 +22,6 @@ Map<String, dynamic> _validOverview({
     'request_uuid': 'REQ-90',
     'pos_id': 7,
     'pos_name': 'نقطة الاختبار',
-    'sale_type': 'CREDIT',
     'sale_type_label': 'آجل',
     'status': 'PENDING',
     'status_label': 'قيد الانتظار',
@@ -54,15 +53,12 @@ Map<String, dynamic> _validOverview({
           'sales': {
             'invoice_count': 9,
             'total_amount': '15000.00',
-            'paid_amount': '9000.00',
-            'outstanding_amount': '6000.00',
+            'growth_rate': 12.5,
+            'trend': [
+              {'date': '2026-11-08', 'count': 2, 'total': 15000.0},
+            ],
           },
           'expenses': {'count': 2, 'total_amount': '500.00'},
-          'wallet': {
-            'wallet_id': 4,
-            'balance': '1200.00',
-            'is_active': true,
-          },
           'packages': {'total': 5, 'active': 4, 'inactive': 1},
         },
     'recent_pending_requests': [request],
@@ -83,22 +79,72 @@ void main() {
       expect(model.networkId, 12);
       expect(model.networkName, 'شبكة الاختبار');
       expect(model.periodKey, '30d');
-      expect(model.count('points_of_sale', 'active'), '6');
-      expect(model.amount('sales', 'outstanding_amount'), '6000.00');
+      expect(model.timezone, 'Asia/Aden');
+      expect(model.periodDays, 30);
+      expect(model.periodFrom, '2026-10-11T00:00:00+03:00');
+      expect(model.periodTo, '2026-11-09T10:00:00+03:00');
+      expect(model.pointsOfSale?.active, 6);
+      expect(model.sales?.totalAmount, '15000.00');
+      expect(model.sales?.invoiceCount, 9);
+      expect(model.sales?.growthRate, 12.5);
+      expect(model.sales?.trend.single.invoiceCount, 2);
+      expect(model.expenses?.totalAmount, '500.00');
       expect(model.recentPendingRequests.single.requestId, 90);
+      expect(model.recentPendingRequests.single.saleTypeLabel, 'آجل');
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
-        900.00,
+        '900.00',
       );
     });
 
-    test('preserves an explicitly null wallet from the server', () {
-      final model = NetworkWorkspaceOverviewModel.fromJson(
-        _validOverview(metrics: {'wallet': null}),
-      );
+    test(
+      'maps only declared typed operational metric groups',
+      () {
+        final model = NetworkWorkspaceOverviewModel.fromJson(
+          _validOverview(
+            metrics: {
+              'sales': {
+                'invoice_count': 1,
+                'total_amount': '100.00',
+                'growth_rate': 0,
+                'trend': <dynamic>[],
+              },
+              'unrecognized_metric_group': {'value': 'ignored'},
+            },
+          ),
+        );
 
-      expect(model.metrics.containsKey('wallet'), isTrue);
-      expect(model.metrics['wallet'], isNull);
+        expect(model.sales?.totalAmount, '100.00');
+        expect(model.sales?.invoiceCount, 1);
+        expect(model.pointsOfSale, isNull);
+        expect(model.expenses, isNull);
+      },
+    );
+
+    test(
+      'preserves the exact server amount string without double conversion',
+      () {
+        final model = NetworkWorkspaceOverviewModel.fromJson(
+          _validOverview(),
+        );
+
+        expect(
+          model.recentPendingRequests.single.requestTotalAmount,
+          '900.00',
+        );
+      },
+    );
+
+    test('rejects malformed pending request amount strings', () {
+      final response = _validOverview();
+      final requests = response['recent_pending_requests'] as List;
+      (requests.single as Map<String, dynamic>)['request_total_amount'] =
+          '900.00invalid';
+
+      expect(
+        () => NetworkWorkspaceOverviewModel.fromJson(response),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('rejects an incomplete top-level overview contract', () {
@@ -156,6 +202,17 @@ void main() {
         () => NetworkWorkspaceOverviewModel.fromJson(
           _validOverview(metrics: {'sales': 'not-an-object'}),
         ),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('rejects non-pending statuses in the pending request collection', () {
+      final response = _validOverview();
+      final requests = response['recent_pending_requests'] as List;
+      (requests.single as Map<String, dynamic>)['status'] = 'APPROVED';
+
+      expect(
+        () => NetworkWorkspaceOverviewModel.fromJson(response),
         throwsA(isA<FormatException>()),
       );
     });

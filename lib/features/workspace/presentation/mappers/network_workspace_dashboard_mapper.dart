@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
@@ -13,82 +18,38 @@ class NetworkWorkspaceDashboardMapper {
   ) {
     if (overview == null) return _empty();
 
-    final metrics = overview.metrics;
-    final wallet = overview.metric('wallet');
-    final sales = overview.metric('sales');
-    final pos = overview.metric('points_of_sale');
-    final hasWallet = wallet != null;
-    final hasSales = sales != null;
+    final sales = overview.sales;
+    final pointsOfSale = overview.pointsOfSale;
+    final requests = overview.requests;
+    final packages = overview.packages;
+    final expenses = overview.expenses;
 
-    final balance = hasWallet
-        ? AmountFormatter.format(overview.amount('wallet', 'balance'))
-        : hasSales
-        ? AmountFormatter.format(overview.amount('sales', 'total_amount'))
-        : '0.00';
-    final rawGrowth = sales?['growth_rate'];
-    final growthRate = rawGrowth is num ? rawGrowth.toDouble() : 0.0;
-    final posTotal = pos == null
-        ? '0'
-        : overview.count('points_of_sale', 'total');
-    final posActive = pos == null
-        ? '0'
-        : overview.count('points_of_sale', 'active');
-
-    final liquidity = (
-      balance: balance,
-      hasWallet: hasWallet,
-      isWalletActive: wallet?['is_active'] == true,
-      hasSales: hasSales,
-      growthRate: growthRate,
-      growthLabel: _growthLabel(growthRate),
-      cashSales: hasSales
-          ? AmountFormatter.format(overview.amount('sales', 'paid_amount'))
-          : '0.00',
-      outstandingReceivables: hasSales
-          ? AmountFormatter.format(
-              overview.amount('sales', 'outstanding_amount'),
+    final points = sales?.trend
+            .map(
+              (point) => ChartDataPoint(
+                x: _formatChartDate(point.date),
+                y: point.totalAmount,
+              ),
             )
-          : '0.00',
-      posCoverage: '$posActive/$posTotal',
-    );
-
-    final invoiceCountValue = sales?['invoice_count'];
-    final salesSummary = (
-      totalSales: sales?['total_amount'] == null
-          ? '0.00'
-          : AmountFormatter.format(sales!['total_amount'].toString()),
-      invoiceCount: invoiceCountValue is num
-          ? invoiceCountValue.toInt()
-          : int.tryParse(invoiceCountValue?.toString() ?? '0') ?? 0,
-      growthRate: growthRate,
-    );
-
-    final trend = sales?['trend'];
-    final points = <ChartDataPoint>[];
-    if (trend is List) {
-      for (final item in trend) {
-        if (item is! Map) continue;
-        final rawDate = item['date']?.toString() ?? '';
-        final rawTotal = item['total'];
-        final total = rawTotal is num
-            ? rawTotal.toDouble()
-            : double.tryParse(rawTotal?.toString() ?? '0') ?? 0.0;
-        points.add(ChartDataPoint(x: _formatChartDate(rawDate), y: total));
-      }
-    }
+            .toList(growable: false) ??
+        const <ChartDataPoint>[];
 
     return NetworkWorkspaceDashboardViewModel(
-      showLiquiditySection: hasWallet || hasSales,
-      showSalesSection: hasSales,
-      pendingRequestsCount: _pendingRequestsCount(overview),
-      liquiditySummary: liquidity,
-      salesVelocitySummary: salesSummary,
+      showSalesSection: sales != null,
+      pendingRequestsCount: requests?.pending,
+      salesTrendSummary: (
+        totalSales: sales == null
+            ? ''
+            : AmountFormatter.format(sales.totalAmount),
+        invoiceCount: sales?.invoiceCount ?? 0,
+        growthRate: sales?.growthRate ?? 0,
+      ),
       salesChartDefinition: ChartDefinition(
         family: ChartFamily.cartesian,
         type: ChartType.splineArea,
         series: [
           ChartSeries(
-            id: 'sales_velocity',
+            id: 'sales_trend',
             name: 'المبيعات',
             data: points,
             strokeWidth: 2.8,
@@ -103,199 +64,123 @@ class NetworkWorkspaceDashboardMapper {
         ),
         state: points.isEmpty ? ChartState.empty : ChartState.data,
         stateMessage: points.isEmpty
-            ? 'لا توجد فواتير مبيعات مسجلة في هذه الفترة'
+            ? 'لا توجد بيانات مبيعات لهذه الفترة'
             : null,
       ),
-      kpiMetrics: _mapMetrics(overview, metrics),
+      kpiMetrics: _mapMetrics(
+        pointsOfSale: pointsOfSale,
+        requests: requests,
+        packages: packages,
+        sales: sales,
+        expenses: expenses,
+      ),
     );
   }
 
-  static String formatNetworkSales(
-    NetworkWorkspaceOverviewEntity? overview, {
-    required bool isSelected,
-  }) {
-    if (!isSelected) return '••••';
-    final sales = overview?.metric('sales');
-    final total = sales?['total_amount'] ?? sales?['total'];
-    if (total is num) {
-      return AmountFormatter.formatValue(total, decimalPlaces: 0);
-    }
-    return '0';
-  }
-
-  static String formatNetworkPosCount(
-    NetworkWorkspaceOverviewEntity? overview, {
-    required bool isSelected,
-  }) {
-    if (!isSelected) return 'وكلاء معتمدين';
-    final total =
-        overview?.metric('points_of_sale')?['total'] ??
-        overview?.metric('pos')?['total'];
-    return total == null ? 'وكلاء معتمدين' : '$total نقطة بيع';
-  }
-
-  static NetworkWorkspaceDashboardViewModel _empty() {
-    return NetworkWorkspaceDashboardViewModel(
-      showLiquiditySection: false,
-      showSalesSection: false,
-      pendingRequestsCount: 0,
-      liquiditySummary: (
-        balance: '0.00',
-        hasWallet: false,
-        isWalletActive: false,
-        hasSales: false,
-        growthRate: 0,
-        growthLabel: '0.0% استقرار',
-        cashSales: '0.00',
-        outstandingReceivables: '0.00',
-        posCoverage: '0/0',
-      ),
-      salesVelocitySummary: (
-        totalSales: '0.00',
-        invoiceCount: 0,
-        growthRate: 0,
-      ),
-      salesChartDefinition: ChartDefinition(
-        family: ChartFamily.cartesian,
-        type: ChartType.splineArea,
-        series: const [],
-        options: const ChartOptions(
-          showMarkers: true,
-          showTooltip: true,
-          enableTrackball: false,
-          showMajorGridLines: false,
+  static NetworkWorkspaceDashboardViewModel _empty() =>
+      NetworkWorkspaceDashboardViewModel(
+        showSalesSection: false,
+        pendingRequestsCount: null,
+        salesTrendSummary: (
+          totalSales: '',
+          invoiceCount: 0,
+          growthRate: 0,
         ),
-        state: ChartState.empty,
-        stateMessage: 'لا توجد فواتير مبيعات مسجلة في هذه الفترة',
-      ),
-      kpiMetrics: const [],
-    );
-  }
+        salesChartDefinition: ChartDefinition(
+          family: ChartFamily.cartesian,
+          type: ChartType.splineArea,
+          series: const [],
+          options: const ChartOptions(
+            showMarkers: true,
+            showTooltip: true,
+            enableTrackball: false,
+            showMajorGridLines: false,
+          ),
+          state: ChartState.empty,
+          stateMessage: 'لا توجد بيانات مبيعات لهذه الفترة',
+        ),
+        kpiMetrics: const [],
+      );
 
-  static String _growthLabel(double growthRate) {
-    if (growthRate > 0) return '+${growthRate.toStringAsFixed(1)}% نمو';
-    if (growthRate < 0) return '${growthRate.toStringAsFixed(1)}% تراجع';
-    return '0.0% استقرار';
-  }
-
-  static int _pendingRequestsCount(NetworkWorkspaceOverviewEntity overview) {
-    final value = overview.metric('requests')?['pending'];
-    if (value is num) return value.toInt();
-    return int.tryParse(value?.toString() ?? '0') ?? 0;
-  }
-
-  static List<DashboardMetricData> _mapMetrics(
-    NetworkWorkspaceOverviewEntity overview,
-    Map<String, dynamic> metrics,
-  ) {
+  static List<DashboardMetricData> _mapMetrics({
+    required NetworkPointsOfSaleMetricsEntity? pointsOfSale,
+    required NetworkRequestsMetricsEntity? requests,
+    required NetworkPackagesMetricsEntity? packages,
+    required NetworkSalesMetricsEntity? sales,
+    required NetworkExpensesMetricsEntity? expenses,
+  }) {
     final items = <DashboardMetricData>[];
 
-    if (metrics.containsKey('points_of_sale')) {
-      final total = overview.count('points_of_sale', 'total');
-      final active = overview.count('points_of_sale', 'active');
-      final inactive = overview.count('points_of_sale', 'inactive');
+    if (pointsOfSale != null) {
       items.add(
         DashboardMetricData(
           id: 'pos',
           title: 'نقاط البيع',
-          value: total,
+          value: pointsOfSale.total.toString(),
           unit: 'نقطة',
           icon: Icons.storefront_rounded,
           tone: DashboardMetricTone.primary,
           variant: DashboardMetricVariant.standard,
-          description: 'نشطة $active · غير نشطة $inactive',
+          description:
+              'نشطة ${pointsOfSale.active} · غير نشطة ${pointsOfSale.inactive}',
         ),
       );
     }
 
-    if (metrics.containsKey('requests')) {
-      final total = overview.count('requests', 'total');
-      final pending = overview.count('requests', 'pending');
+    if (requests != null) {
       items.add(
         DashboardMetricData(
           id: 'requests',
           title: 'طلبات التوريد',
-          value: total,
+          value: requests.total.toString(),
           unit: 'طلب',
           icon: Icons.inbox_rounded,
           tone: DashboardMetricTone.warning,
           variant: DashboardMetricVariant.standard,
-          description: 'بانتظار الاعتماد $pending',
+          description: 'بانتظار الاعتماد ${requests.pending}',
         ),
       );
     }
 
-    if (metrics.containsKey('packages')) {
-      final total = overview.count('packages', 'total');
-      final active = overview.count('packages', 'active');
+    if (packages != null) {
       items.add(
         DashboardMetricData(
           id: 'packages',
           title: 'باقات الكتالوج',
-          value: total,
+          value: packages.total.toString(),
           unit: 'باقة',
           icon: Icons.widgets_rounded,
           tone: DashboardMetricTone.info,
           variant: DashboardMetricVariant.standard,
-          description: 'باقات نشطة: $active',
+          description: 'باقات نشطة: ${packages.active}',
         ),
       );
     }
 
-    if (metrics.containsKey('sales')) {
-      final invoiceCount = overview.count('sales', 'invoice_count');
-      final totalAmount = AmountFormatter.format(
-        overview.amount('sales', 'total_amount'),
-      );
+    if (sales != null) {
       items.add(
         DashboardMetricData(
           id: 'sales',
           title: 'فواتير المبيعات',
-          value: totalAmount,
-          unit: 'ر.ي',
+          value: AmountFormatter.format(sales.totalAmount),
           icon: Icons.receipt_long_rounded,
           tone: DashboardMetricTone.success,
           variant: DashboardMetricVariant.standard,
-          description: '$invoiceCount فاتورة معتمدة',
+          description: '${sales.invoiceCount} فاتورة',
         ),
       );
     }
 
-    if (metrics.containsKey('expenses')) {
-      final expenseCount = overview.count('expenses', 'count');
-      final totalAmount = AmountFormatter.format(
-        overview.amount('expenses', 'total_amount'),
-      );
+    if (expenses != null) {
       items.add(
         DashboardMetricData(
           id: 'expenses',
           title: 'مصروفات الشبكة',
-          value: totalAmount,
-          unit: 'ر.ي',
+          value: AmountFormatter.format(expenses.totalAmount),
           icon: Icons.trending_down_rounded,
           tone: DashboardMetricTone.danger,
           variant: DashboardMetricVariant.standard,
-          description: '$expenseCount سند موثق',
-        ),
-      );
-    }
-
-    final wallet = overview.metric('wallet');
-    if (wallet != null) {
-      final isActive = wallet['is_active'] == true;
-      items.add(
-        DashboardMetricData(
-          id: 'wallet',
-          title: 'رصيد المحفظة',
-          value: AmountFormatter.format(overview.amount('wallet', 'balance')),
-          unit: 'ر.ي',
-          icon: Icons.account_balance_wallet_rounded,
-          tone: isActive
-              ? DashboardMetricTone.primary
-              : DashboardMetricTone.danger,
-          variant: DashboardMetricVariant.status,
-          statusLabel: isActive ? 'المحفظة نشطة' : 'المحفظة معطلة',
-          description: isActive ? 'جاهزة للعمليات' : 'غير مفعلة',
+          description: '${expenses.count} سند موثق',
         ),
       );
     }

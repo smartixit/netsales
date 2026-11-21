@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -6,7 +8,7 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 
-/// Converts POS-scoped invoices and procurement requests into dashboard rows.
+/// Maps invoice and procurement activity into one globally chronological list.
 class PosWorkspaceTransactionMapper {
   const PosWorkspaceTransactionMapper._();
 
@@ -16,17 +18,40 @@ class PosWorkspaceTransactionMapper {
     required void Function(InvoiceEntity invoice) onOpenInvoice,
     required void Function(RequestEntity request) onOpenRequest,
   }) {
-    return [
-      ...invoices.map((invoice) => _mapInvoice(invoice, onOpenInvoice)),
-      ...requests.map((request) => _mapRequest(request, onOpenRequest)),
-    ];
+    final entries = <({DateTime? date, WorkspaceTransactionItemViewModel item})>[];
+
+    for (final invoice in invoices) {
+      entries.add((
+        date: DateFormatter.tryParse(
+          invoice.invoiceDate ?? invoice.createdAt ?? '',
+        ),
+        item: _mapInvoice(invoice, onOpenInvoice),
+      ));
+    }
+
+    for (final request in requests) {
+      entries.add((
+        date: DateFormatter.tryParse(
+          request.requestDate ?? request.createdAt ?? '',
+        ),
+        item: _mapRequest(request, onOpenRequest),
+      ));
+    }
+
+    entries.sort((a, b) {
+      if (a.date == null && b.date == null) return 0;
+      if (a.date == null) return 1;
+      if (b.date == null) return -1;
+      return b.date!.compareTo(a.date!);
+    });
+
+    return List.unmodifiable(entries.map((entry) => entry.item));
   }
 
   static WorkspaceTransactionItemViewModel _mapInvoice(
     InvoiceEntity invoice,
     void Function(InvoiceEntity invoice) onOpenInvoice,
   ) {
-    final saleType = invoice.saleTypeLabel ?? 'شراء';
     final parsedDate = DateFormatter.tryParse(
       invoice.invoiceDate ?? invoice.createdAt ?? '',
     );
@@ -36,8 +61,9 @@ class PosWorkspaceTransactionMapper {
         ? '${invoice.totalVouchersCount} كرت'
         : null;
 
+    final saleTypeLabel = invoice.saleTypeLabel?.trim();
     final subtitleParts = [
-      saleType,
+      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
       ?voucherDetail,
     ];
@@ -47,11 +73,10 @@ class PosWorkspaceTransactionMapper {
       reference: reference,
       subtitle: subtitleParts.join(' • '),
       formattedAmount:
-          '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)} ر.ي',
-      amountColor: const Color(0xFFDC2626),
-      statusPresentation: EnumPresentationRegistry.resolveInvoicePaymentStatus(
-        invoice.paymentStatus,
-        serverLabel: invoice.paymentStatusLabel,
+          '- ${AmountFormatter.formatValue(invoice.invoiceTotalAmount)}',
+      statusPresentation: const EnumPresentation(
+        label: 'فاتورة',
+        tone: SemanticTone.neutral,
       ),
       icon: Icons.inventory_2_rounded,
       onTap: () => onOpenInvoice(invoice),
@@ -62,19 +87,22 @@ class PosWorkspaceTransactionMapper {
     RequestEntity request,
     void Function(RequestEntity request) onOpenRequest,
   ) {
-    final saleType = request.saleTypeLabel ?? 'طلب شراء';
     final parsedDate = DateFormatter.tryParse(
       request.requestDate ?? request.createdAt ?? '',
     );
     final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
-    final reference = _shortReference(request.requestUuid, 'طلب توريد');
+    final saleTypeLabel = request.saleTypeLabel?.trim();
+    final subtitle = [
+      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+      if (dateLabel.isNotEmpty) dateLabel,
+    ].join(' • ');
 
     return WorkspaceTransactionItemViewModel(
       title: 'طلب توريد',
-      reference: reference,
-      subtitle: dateLabel.isEmpty ? saleType : '$saleType • $dateLabel',
+      reference: _shortReference(request.requestUuid, 'طلب توريد'),
+      subtitle: subtitle,
       formattedAmount:
-          '${AmountFormatter.formatValue(request.requestTotalAmount)} ر.ي',
+          AmountFormatter.formatValue(request.requestTotalAmount),
       statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
         request.status,
         serverLabel: request.statusLabel,

@@ -394,8 +394,35 @@ void main() {
       expect(user.isNetworkOwner, isFalse);
       expect(user.isPosAgent, isFalse);
       expect(
-        WorkspaceService.instance.resolveWorkspaceForUser(user),
-        equals(AppWorkspace.network),
+        () => WorkspaceService.instance.resolveWorkspaceForUser(user),
+        throwsStateError,
+      );
+    });
+
+    test('Empty operational membership does not block session profile synchronization', () async {
+      final user = UserModel(
+        userId: 1112,
+        userFullName: 'مستخدم دون مساحة تشغيلية',
+        userPhoneNumber: '770001112',
+      );
+      await StorageService.instance.setString(
+        StorageKeys.activeWorkspaceKey,
+        AppWorkspace.network.name,
+      );
+
+      await SessionService.instance.syncSessionProfile(
+        user: user,
+        permissions: const [],
+      );
+
+      expect(SessionService.instance.currentUser?.userId, 1112);
+      expect(
+        StorageService.instance.getString(StorageKeys.activeWorkspaceKey),
+        isNull,
+      );
+      expect(
+        () => WorkspaceService.instance.resolveWorkspaceForUser(user),
+        throwsStateError,
       );
     });
 

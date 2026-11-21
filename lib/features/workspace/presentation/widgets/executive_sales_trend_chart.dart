@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/charts/charting.dart';
-import 'package:netsales/widgets/indicators/custom_pulsing_indicator.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// كرت منحنى وتيرة المبيعات والتدفقات النقدية (ExecutiveSalesVelocityChart)
+/// بطاقة اتجاه المبيعات (ExecutiveSalesTrendChart)
 /// يعتمد 100% على منظومة الرسوم البيانية المركزية الموحدة في lib/widgets/charts/
-class ExecutiveSalesVelocityChart extends StatelessWidget {
+class ExecutiveSalesTrendChart extends StatelessWidget {
   final ChartDefinition chartDefinition;
   final String selectedPeriod;
   final ValueChanged<String> onPeriodChanged;
-  final ({String totalSales, int invoiceCount, double growthRate}) summary;
+  final NetworkSalesTrendSummary summary;
 
-  const ExecutiveSalesVelocityChart({
+  const ExecutiveSalesTrendChart({
     super.key,
     required this.chartDefinition,
     required this.selectedPeriod,
@@ -36,7 +38,6 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return CustomSurfaceCard(
       padding: EdgeInsets.all(AppSpacing.md),
@@ -46,34 +47,32 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
           // 1. رأس البطاقة المتجاوب (العنوان ومحدد الفترة)
           LayoutBuilder(
             builder: (context, constraints) {
-              final isCompact = constraints.maxWidth < 360;
+              final isCompact = constraints.maxWidth < AppBreakpoints.mobileSmallMax;
 
               final titleSection = Row(
                 children: [
-                  CustomPulsingIndicator(color: colors.primary, size: 8.r),
-                  SizedBox(width: 8.w),
+                  Icon(Icons.show_chart_rounded, color: colors.primary, size: 18.r),
+                  AppSpacing.hSm,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'منحنى وتيرة المبيعات والطلبات',
+                          'اتجاه المبيعات',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleMedium.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
-                            fontSize: 13.5.sp,
-                          ),
+                                                      ),
                         ),
                         Text(
-                          'حجم الفواتير الصادرة وسرعة التدفقات النقدية الفعلية',
+                          'اتجاه إجمالي المبيعات والفواتير الصادرة',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 10.5.sp,
-                          ),
+                                                      ),
                         ),
                       ],
                     ),
@@ -82,11 +81,9 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
               );
 
               final periodSelector = Container(
-                padding: const EdgeInsets.all(2.5),
+                padding: EdgeInsets.all(AppSpacing.xxs),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF0F172A)
-                      : colors.surfaceContainer,
+                  color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.4),
@@ -131,7 +128,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(child: titleSection),
-                  SizedBox(width: 8.w),
+                  AppSpacing.hSm,
                   periodSelector,
                 ],
               );
@@ -146,9 +143,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF0B132B).withValues(alpha: 0.6)
-                  : colors.surfaceContainerHighest.withValues(alpha: 0.45),
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: colors.outlineVariant.withValues(alpha: 0.3),
@@ -168,8 +163,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelSmall.copyWith(
                           color: colors.onSurfaceVariant,
-                          fontSize: 9.5.sp,
-                        ),
+                                                  ),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -182,17 +176,7 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                               style: AppTypography.titleMedium.copyWith(
                                 color: colors.onSurface,
                                 fontWeight: FontWeight.w900,
-                                fontSize: 13.sp,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 3.w),
-                          Text(
-                            'ر.ي',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 9.sp,
+                                                              ),
                             ),
                           ),
                         ],
@@ -202,35 +186,33 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 28.h,
+                  height: AppSpacing.xxl,
                   color: colors.outlineVariant.withValues(alpha: 0.3),
                 ),
                 // عدد الفواتير
                 Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'عدد العمليات',
+                          'عدد الفواتير',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 9.5.sp,
-                          ),
+                                                      ),
                         ),
                         Text(
-                          '${summary.invoiceCount} عملية',
+                          '${summary.invoiceCount} فاتورة',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleSmall.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
-                            fontSize: 12.sp,
-                          ),
+                                                      ),
                         ),
                       ],
                     ),
@@ -238,25 +220,24 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 28.h,
+                  height: AppSpacing.xxl,
                   color: colors.outlineVariant.withValues(alpha: 0.3),
                 ),
-                // وتيرة النمو
+                // نمو المبيعات
                 Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 6.w),
+                    padding: EdgeInsets.only(right: AppSpacing.xs),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'وتيرة النمو',
+                          'نمو المبيعات',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(
                             color: colors.onSurfaceVariant,
-                            fontSize: 9.5.sp,
-                          ),
+                                                      ),
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -266,23 +247,18 @@ class ExecutiveSalesVelocityChart extends StatelessWidget {
                                   ? Icons.trending_up_rounded
                                   : Icons.trending_down_rounded,
                               size: 13.r,
-                              color: summary.growthRate >= 0
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFF43F5E),
+                              color: summary.growthRate >= 0 ? colors.success : colors.error,
                             ),
-                            SizedBox(width: 2.w),
+                            AppSpacing.hXxs,
                             Flexible(
                               child: Text(
                                 '${summary.growthRate >= 0 ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: summary.growthRate >= 0
-                                      ? const Color(0xFF10B981)
-                                      : const Color(0xFFF43F5E),
+                                  color: summary.growthRate >= 0 ? colors.success : colors.error,
                                   fontWeight: FontWeight.w900,
-                                  fontSize: 10.5.sp,
-                                ),
+                                                                  ),
                               ),
                             ),
                           ],
@@ -328,30 +304,21 @@ class _PeriodPill extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.5.h),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? colors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colors.primary.withValues(alpha: 0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
+          boxShadow: isSelected ? AppElevation.tinted(context, colors.primary, alpha: 0.18, blur: 6, dy: 1) : AppElevation.level0(context),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.badgeText.copyWith(
-            color: isSelected ? Colors.white : colors.onSurfaceVariant,
+            color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
             fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-            fontSize: 9.5.sp,
-          ),
+                      ),
         ),
       ),
     );

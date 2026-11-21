@@ -1,28 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_more_navigation_sheet.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
 
-/// الهيكل التكيفي الموحد لمساحات العمل (AdaptiveWorkspaceScaffold)
-/// يتكيف تلقائياً بين شاشات الهواتف (CustomFloatingBottomNavBar بتصميم زجاجي عائم فخم مع زر إجراء مركزي)
-/// والأجهزة اللوحية (NavigationRail المتجاوبة)
+/// Shared adaptive shell: bottom bar on portrait phones, rail on compact-height
+/// phones/tablets, and a persistent drawer on desktop-sized windows.
 class AdaptiveWorkspaceScaffold extends StatelessWidget {
-  final WorkspaceAppBar appBar;
-  final List<WorkspaceNavItem> items;
-  final List<WorkspaceNavItem>? mobileItems;
-  final int currentIndex;
-  final ValueChanged<int> onIndexChanged;
-  final VoidCallback? onCenterActionTap;
-  final IconData centerActionIcon;
-  final String? centerActionTooltip;
-
   const AdaptiveWorkspaceScaffold({
     super.key,
     required this.appBar,
     required this.items,
     this.mobileItems,
+    this.mobileMoreItems,
     required this.currentIndex,
     required this.onIndexChanged,
     this.onCenterActionTap,
@@ -30,34 +25,55 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
     this.centerActionTooltip,
   });
 
+  final WorkspaceAppBar appBar;
+  final List<WorkspaceNavItem> items;
+  final List<WorkspaceNavItem>? mobileItems;
+  final List<WorkspaceNavItem>? mobileMoreItems;
+  final int currentIndex;
+  final ValueChanged<int> onIndexChanged;
+  final VoidCallback? onCenterActionTap;
+  final IconData centerActionIcon;
+  final String? centerActionTooltip;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isMobile = AppBreakpoints.isMobile(context);
-    final activeIndex = (currentIndex >= 0 && currentIndex < items.length)
+    final activeIndex = currentIndex >= 0 && currentIndex < items.length
         ? currentIndex
         : 0;
 
-    if (isMobile) {
+    if (AppBreakpoints.usesBottomBar(context)) {
       final effectiveNavList = mobileItems ?? items;
-      final floatingItems = effectiveNavList.map((item) {
-        return CustomFloatingNavItem(
-          icon: item.icon,
-          activeIcon: item.activeIcon,
-          label: item.label,
-          badgeCount: item.badgeCount,
-          tooltip: item.tooltip,
+      final hasMoreItems = mobileMoreItems?.isNotEmpty == true;
+      final floatingItems = effectiveNavList
+          .map(
+            (item) => CustomFloatingNavItem(
+              icon: item.icon,
+              activeIcon: item.activeIcon,
+              label: item.label,
+              badgeCount: item.badgeCount,
+              tooltip: item.tooltip,
+            ),
+          )
+          .toList(growable: true);
+      if (hasMoreItems) {
+        floatingItems.add(
+          const CustomFloatingNavItem(
+            icon: Icons.more_horiz_rounded,
+            activeIcon: Icons.more_horiz_rounded,
+            label: 'المزيد',
+            tooltip: 'المزيد من أقسام مساحة العمل',
+          ),
         );
-      }).toList();
-
-      // حساب الفهرس النشط في قائمة الجوال المقلصة
-      int mobileActiveIndex = -1;
-      if (mobileItems != null) {
-        final currentItem = items[activeIndex];
-        mobileActiveIndex = mobileItems!.indexOf(currentItem);
-      } else {
-        mobileActiveIndex = activeIndex;
       }
+
+      final currentItem = items[activeIndex];
+      final currentMobileIndex = mobileItems == null
+          ? activeIndex
+          : mobileItems!.indexOf(currentItem);
+      final mobileActiveIndex = currentMobileIndex >= 0
+          ? currentMobileIndex
+          : (hasMoreItems ? effectiveNavList.length : 0);
 
       return Scaffold(
         extendBody: true,
@@ -70,16 +86,33 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
           child: items[activeIndex].content,
         ),
         bottomNavigationBar: CustomFloatingBottomNavBar(
-          currentIndex: mobileActiveIndex,
-          onTap: (navIdx) {
-            if (mobileItems != null) {
-              final targetItem = mobileItems![navIdx];
-              final realIdx = items.indexOf(targetItem);
-              if (realIdx != -1) {
-                onIndexChanged(realIdx);
-              }
-            } else {
-              onIndexChanged(navIdx);
+          currentIndex: mobileActiveIndex < 0 ? 0 : mobileActiveIndex,
+          onTap: (navIndex) {
+            if (hasMoreItems && navIndex == effectiveNavList.length) {
+              unawaited(
+                Get.bottomSheet<void>(
+                  WorkspaceMoreNavigationSheet(
+                    items: mobileMoreItems!,
+                    selectedItem: mobileMoreItems!.contains(currentItem)
+                        ? currentItem
+                        : null,
+                    onSelected: (item) {
+                      Get.back<void>();
+                      final target = items.indexOf(item);
+                      if (target >= 0) onIndexChanged(target);
+                    },
+                  ),
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                ),
+              );
+              return;
+            }
+            final target = mobileItems == null
+                ? navIndex
+                : items.indexOf(mobileItems![navIndex]);
+            if (target >= 0 && target < items.length) {
+              onIndexChanged(target);
             }
           },
           items: floatingItems,
@@ -90,26 +123,65 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
       );
     }
 
-    // للشاشات اللوحية والمكتبية (Tablet & Desktop): استخدام Navigation Rail
+    final navigation = AppBreakpoints.usesNavigationDrawer(context)
+        ? SizedBox(
+            width: AppBreakpoints.maxDrawerWidth,
+            child: NavigationDrawer(
+              selectedIndex: activeIndex,
+              onDestinationSelected: onIndexChanged,
+              children: [
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    AppBreakpoints.screenMargin(context),
+                    AppBreakpoints.screenMargin(context),
+                    AppBreakpoints.screenMargin(context),
+                    AppBreakpoints.gridGutter(context),
+                  ),
+                  child: Text(
+                    'مساحات العمل',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                for (final item in items)
+                  NavigationDrawerDestination(
+                    icon: Icon(item.icon),
+                    selectedIcon: Icon(item.activeIcon),
+                    label: SizedBox(
+                      width: AppBreakpoints.maxDrawerWidth - 112,
+                      child: Text(
+                        item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          )
+        : NavigationRail(
+            selectedIndex: activeIndex,
+            onDestinationSelected: onIndexChanged,
+            backgroundColor: colors.surface,
+            indicatorColor: colors.primary.withValues(alpha: 0.15),
+            labelType: NavigationRailLabelType.all,
+            destinations: items
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon, color: colors.onSurfaceVariant),
+                    selectedIcon: Icon(item.activeIcon, color: colors.primary),
+                    label: Text(item.label),
+                  ),
+                )
+                .toList(growable: false),
+          );
+
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: appBar,
       body: SafeArea(
         child: Row(
           children: [
-            NavigationRail(
-              selectedIndex: activeIndex,
-              onDestinationSelected: onIndexChanged,
-              backgroundColor: colors.surface,
-              indicatorColor: colors.primary.withValues(alpha: 0.15),
-              labelType: NavigationRailLabelType.all,
-              destinations: items.map((item) {
-                return NavigationRailDestination(
-                  icon: Icon(item.icon, color: colors.onSurfaceVariant),
-                  selectedIcon: Icon(item.activeIcon, color: colors.primary),
-                  label: Text(item.label),
-                );
-              }).toList(),
-            ),
+            navigation,
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(
               child: Center(

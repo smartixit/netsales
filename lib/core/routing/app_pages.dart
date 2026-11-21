@@ -188,12 +188,6 @@ abstract final class AppPages {
       ],
     ),
 
-    // شاشة حظر وتوجيه حسابات إدارة المنصة العامة (Platform Scope Exclusion)
-    // GetPage(
-    //   name: AppRoutes.unsupportedPlatform,
-    //   page: () => const UnsupportedPlatformScreen(),
-    //   middlewares: [AuthGuard()],
-    // ),
 
     // ========================================================================
     // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)

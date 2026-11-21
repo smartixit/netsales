@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
-import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
@@ -26,11 +24,7 @@ class PosWorkspaceBinding extends Bindings {
     OperationalReportsBinding().dependencies();
     InvoiceBinding().dependencies();
     MembershipBinding().dependencies();
-    // The orders screen is embedded in this workspace shell, not opened
-    // through AppRoutes.procurementOrders. Register its controller here so
-    // the embedded tab resolves it and its lifetime follows the workspace route.
     PosProcurementOrdersBinding().dependencies();
-    PackageCatalogBinding().dependencies();
 
     registerLazyIfAbsent<PosWorkspaceController>(
       () => PosWorkspaceController(
@@ -38,7 +32,6 @@ class PosWorkspaceBinding extends Bindings {
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
         getPosInvoicesUseCase: Get.find<GetPosInvoicesUseCase>(),
         getRequestsUseCase: Get.find<GetRequestsUseCase>(),
-        getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),
         previewNetworkPosLinkChallengeUseCase:
             Get.find<PreviewNetworkPosLinkChallengeUseCase>(),
         confirmNetworkPosLinkChallengeUseCase:
