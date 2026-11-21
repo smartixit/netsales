@@ -32,6 +32,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
   final NetworkPosLinkChallengeEntity challenge;
   final String networkName;
   final String posName;
+  final GlobalKey _shareCardKey = GlobalKey();
 
   Future<Uint8List> _captureShareCard(BuildContext context) async {
     await precacheImage(
@@ -40,7 +41,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
     );
     await WidgetsBinding.instance.endOfFrame;
     final renderObject =
-        controller.invitationShareCardKey.currentContext?.findRenderObject();
+        _shareCardKey.currentContext?.findRenderObject();
     if (renderObject is! RenderRepaintBoundary) {
       throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
     }
