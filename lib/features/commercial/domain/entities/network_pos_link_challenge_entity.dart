@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
-import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 
 /// كيان تحدي ودعوة ربط نقطة البيع بالشبكة عبر رمز QR
 class NetworkPosLinkChallengeEntity extends Equatable {
@@ -17,7 +16,7 @@ class NetworkPosLinkChallengeEntity extends Equatable {
     this.consumedAt,
     this.createdAt,
     this.updatedAt,
-    this.network,
+    this.networkName,
     this.pos,
   });
 
@@ -32,8 +31,8 @@ class NetworkPosLinkChallengeEntity extends Equatable {
   final String? consumedAt;
   final String? createdAt;
   final String? updatedAt;
-  final NetworkEntity? network;
-  final PosEntity? pos;
+  final String? networkName;
+  final NetworkLinkablePosEntity? pos;
 
   LinkingChallengeStatus get typedStatus =>
       LinkingChallengeStatus.fromWire(status);
@@ -56,7 +55,7 @@ class NetworkPosLinkChallengeEntity extends Equatable {
     consumedAt,
     createdAt,
     updatedAt,
-    network,
+    networkName,
     pos,
   ];
 }
