@@ -187,7 +187,7 @@ class QrCodeService {
   /// استخدام هذه الدالة يسمح بتصدير نفس كائن QR المستخدم في العرض.
   Future<QrCodeGenerationResult> generateImageFromQrImage({
     required QrImage qrImage,
-    PrettyQrDecoration decoration = brandDecoration,
+    PrettyQrDecoration decoration = const PrettyQrDecoration(),
     int? size,
     ImageConfiguration configuration = ImageConfiguration.empty,
   }) async {
@@ -233,7 +233,7 @@ class QrCodeService {
   Future<FileExportResult> saveQrCode({
     required String data,
     String? fileName,
-    PrettyQrDecoration decoration = brandDecoration,
+    PrettyQrDecoration decoration = const PrettyQrDecoration(),
     int? size,
     String? folderName,
     FileNamingStrategy namingStrategy = FileNamingStrategy.enterprise,
@@ -274,7 +274,7 @@ class QrCodeService {
     String? fileName,
     String? shareTitle,
     String? shareText,
-    PrettyQrDecoration decoration = brandDecoration,
+    PrettyQrDecoration decoration = const PrettyQrDecoration(),
     int? size,
     ImageConfiguration configuration = ImageConfiguration.empty,
     Rect? sharePositionOrigin,
