@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/charts/charting.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 
-/// بطاقة اتجاه المبيعات (ExecutiveSalesTrendChart)
-/// يعتمد 100% على منظومة الرسوم البيانية المركزية الموحدة في lib/widgets/charts/
+/// Sales trend panel arranged to match the mobile dashboard reference:
+/// compact period selector, chart, server-provided total and growth.
 class ExecutiveSalesTrendChart extends StatelessWidget {
-  final ChartDefinition chartDefinition;
-  final String selectedPeriod;
-  final ValueChanged<String> onPeriodChanged;
-  final NetworkSalesTrendSummary summary;
-
   const ExecutiveSalesTrendChart({
     super.key,
     required this.chartDefinition,
@@ -27,299 +20,193 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
     required this.summary,
   });
 
-  /// الفترات المعتمدة من الباكيند API
+  final ChartDefinition chartDefinition;
+  final String selectedPeriod;
+  final ValueChanged<String> onPeriodChanged;
+  final NetworkSalesTrendSummary summary;
+
   static const List<ChartPeriodOption> periodOptions = [
-    ChartPeriodOption(id: '7d', label: '7 أيام'),
-    ChartPeriodOption(id: '30d', label: '30 يوماً'),
-    ChartPeriodOption(id: '90d', label: '3 أشهر'),
-    ChartPeriodOption(id: '12m', label: 'سنة'),
+    ChartPeriodOption(id: '7d', label: 'آخر 7 أيام'),
+    ChartPeriodOption(id: '30d', label: 'آخر 30 يوماً'),
+    ChartPeriodOption(id: '90d', label: 'آخر 3 أشهر'),
+    ChartPeriodOption(id: '12m', label: 'آخر سنة'),
   ];
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final period = periodOptions.firstWhere(
+      (item) => item.id == selectedPeriod,
+      orElse: () => periodOptions[1],
+    );
+    final isGrowthPositive = summary.growthRate >= 0;
 
     return CustomSurfaceCard(
       padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. رأس البطاقة المتجاوب (العنوان ومحدد الفترة)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isCompact = constraints.maxWidth < AppBreakpoints.mobileSmallMax;
-
-              final titleSection = Row(
-                children: [
-                  Icon(Icons.show_chart_rounded, color: colors.primary, size: 18.r),
-                  AppSpacing.hSm,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'اتجاه المبيعات',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleMedium.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w800,
-                                                      ),
-                        ),
-                        Text(
-                          'اتجاه إجمالي المبيعات والفواتير الصادرة',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                                                      ),
-                        ),
-                      ],
+          Row(
+            children: [
+              Icon(Icons.trending_up_rounded, color: colors.primary, size: 19.r),
+              AppSpacing.hSm,
+              Expanded(
+                child: Text(
+                  'اتجاه المبيعات',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              CustomPopupMenu<String>(
+                minWidth: 150.w,
+                trigger: Container(
+                  constraints: BoxConstraints(minHeight: 34.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.65),
                     ),
                   ),
-                ],
-              );
-
-              final periodSelector = Container(
-                padding: EdgeInsets.all(AppSpacing.xxs),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainer,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: isCompact ? MainAxisSize.max : MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: periodOptions
-                      .map((option) {
-                        final isSelected = selectedPeriod == option.id;
-                        return isCompact
-                            ? Expanded(
-                                child: _PeriodPill(
-                                  label: option.label,
-                                  isSelected: isSelected,
-                                  onTap: () => onPeriodChanged(option.id),
-                                ),
-                              )
-                            : _PeriodPill(
-                                label: option.label,
-                                isSelected: isSelected,
-                                onTap: () => onPeriodChanged(option.id),
-                              );
-                      })
-                      .toList(growable: false),
-                ),
-              );
-
-              if (isCompact) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    titleSection,
-                    SizedBox(height: AppSpacing.sm),
-                    periodSelector,
-                  ],
-                );
-              }
-
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(child: titleSection),
-                  AppSpacing.hSm,
-                  periodSelector,
-                ],
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-
-          // 2. شريط المؤشرات القيادي السريع المدمج مع المنحنى
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                // مبيعات الفترة
-                Expanded(
-                  flex: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'إجمالي مبيعات الفترة',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        period.label,
                         style: AppTypography.labelSmall.copyWith(
-                          color: colors.onSurfaceVariant,
-                                                  ),
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              summary.totalSales,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: colors.onSurface,
-                                fontWeight: FontWeight.w900,
-                                                              ),
-                            ),
-                          ),
-                        ],
+                      AppSpacing.hXs,
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16.r,
+                        color: colors.onSurfaceVariant,
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: AppSpacing.xxl,
-                  color: colors.outlineVariant.withValues(alpha: 0.3),
-                ),
-                // عدد الفواتير
-                Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'عدد الفواتير',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                                                      ),
+                items: periodOptions
+                    .map(
+                      (option) => CustomPopupItem<String>(
+                        value: option.id,
+                        label: option.label,
+                        icon: Icons.calendar_today_rounded,
+                        trailing: option.id == selectedPeriod
+                            ? Icon(
+                                Icons.check_rounded,
+                                size: 17.r,
+                                color: colors.primary,
+                              )
+                            : null,
+                      ),
+                    )
+                    .toList(growable: false),
+                onSelected: onPeriodChanged,
+              ),
+            ],
+          ),
+          AppSpacing.vMd,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(end: AppSpacing.xs),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'إجمالي المبيعات',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                         ),
-                        Text(
-                          '${summary.invoiceCount} فاتورة',
+                      ),
+                      SizedBox(height: 5.h),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Text(
+                          summary.totalSales.isEmpty ? '—' : summary.totalSales,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleSmall.copyWith(
+                          style: AppTypography.headlineSmall.copyWith(
                             color: colors.onSurface,
-                            fontWeight: FontWeight.w800,
-                                                      ),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.4,
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: AppSpacing.xxl,
-                  color: colors.outlineVariant.withValues(alpha: 0.3),
-                ),
-                // نمو المبيعات
-                Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: AppSpacing.xs),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'نمو المبيعات',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                                                      ),
+                      ),
+                      SizedBox(height: 9.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
                         ),
-                        Row(
+                        decoration: BoxDecoration(
+                          color: (isGrowthPositive
+                                  ? colors.success
+                                  : colors.error)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              summary.growthRate >= 0
+                              isGrowthPositive
                                   ? Icons.trending_up_rounded
                                   : Icons.trending_down_rounded,
-                              size: 13.r,
-                              color: summary.growthRate >= 0 ? colors.success : colors.error,
+                              size: 15.r,
+                              color: isGrowthPositive
+                                  ? colors.success
+                                  : colors.error,
                             ),
-                            AppSpacing.hXxs,
-                            Flexible(
-                              child: Text(
-                                '${summary.growthRate >= 0 ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: summary.growthRate >= 0 ? colors.success : colors.error,
-                                  fontWeight: FontWeight.w900,
-                                                                  ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              '${isGrowthPositive ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
+                              style: AppTypography.labelMedium.copyWith(
+                                color: isGrowthPositive
+                                    ? colors.success
+                                    : colors.error,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-
-          // 3. مساحة الرسم البياني التفاعلي عبر محرك ChartRenderer المركزي
-          SizedBox(
-            height: 185.h,
-            child: NetSalesChartsThemeAdapter.wrap(
-              context: context,
-              child: ChartRenderer(definition: chartDefinition),
-            ),
+              ),
+              AppSpacing.hSm,
+              Expanded(
+                flex: 6,
+                child: SizedBox(
+                  height: 148.h,
+                  child: NetSalesChartsThemeAdapter.wrap(
+                    context: context,
+                    child: ChartRenderer(definition: chartDefinition),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// كبسولة تبديل الفترة الزمنية
-class _PeriodPill extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _PeriodPill({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? colors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          boxShadow: isSelected ? AppElevation.tinted(context, colors.primary, alpha: 0.18, blur: 6, dy: 1) : AppElevation.level0(context),
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.badgeText.copyWith(
-            color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
-            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                      ),
-        ),
       ),
     );
   }

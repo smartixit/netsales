@@ -51,8 +51,11 @@ void main() {
         networkId: 3,
         posId: 7,
         invoiceUuid: 'invoice-12345678',
+        saleTypeRaw: 'CREDIT',
         saleTypeLabel: 'آجل',
         invoiceTotalAmount: 2500,
+        paymentStatusRaw: 'PAID',
+        paymentStatusLabel: 'مسدد بالكامل',
         invoiceDate: '2026-11-15',
       );
       final request = RequestEntity(
@@ -60,6 +63,7 @@ void main() {
         networkId: 3,
         posId: 7,
         requestUuid: 'request-12345678',
+        saleTypeRaw: 'CASH',
         saleTypeLabel: 'نقدي',
         requestTotalAmount: 1250,
         statusRaw: 'PENDING',
@@ -81,13 +85,55 @@ void main() {
       expect(items[1].title, 'فاتورة توريد');
       expect(items[1].reference, 'invoice-');
       expect(items[1].subtitle, contains('آجل'));
-      expect(items[1].statusPresentation.label, 'فاتورة');
+      expect(items[1].statusPresentation.label, 'مسدد بالكامل');
+      expect(items[1].statusPresentation.isKnown, isTrue);
 
       items[1].onTap?.call();
       items[0].onTap?.call();
 
       expect(openedInvoices, [11]);
       expect(openedRequests, [41]);
+    });
+
+    test('uses the centralized unknown invoice status fallback', () {
+      final invoice = InvoiceEntity(
+        invoiceId: 12,
+        networkId: 3,
+        posId: 7,
+        invoiceTotalAmount: 900,
+        paymentStatusRaw: 'FUTURE_STATUS',
+      );
+
+      final items = PosWorkspaceTransactionMapper.map(
+        invoices: [invoice],
+        requests: const [],
+        onOpenInvoice: (_) {},
+        onOpenRequest: (_) {},
+      );
+
+      expect(items, hasLength(1));
+      expect(items.single.statusPresentation.isKnown, isFalse);
+      expect(items.single.statusPresentation.label, 'حالة غير معروفة');
+    });
+
+    test('uses centralized sale type fallback when server label is absent', () {
+      final request = RequestEntity(
+        requestId: 42,
+        networkId: 3,
+        posId: 7,
+        requestTotalAmount: 300,
+        saleTypeRaw: 'CASH',
+        statusRaw: 'PENDING',
+      );
+
+      final items = PosWorkspaceTransactionMapper.map(
+        invoices: const [],
+        requests: [request],
+        onOpenInvoice: (_) {},
+        onOpenRequest: (_) {},
+      );
+
+      expect(items.single.subtitle, 'نقدي');
     });
   });
 }

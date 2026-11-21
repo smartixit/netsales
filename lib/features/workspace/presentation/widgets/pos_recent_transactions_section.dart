@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_tile.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
@@ -29,7 +29,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
           skeleton: CustomStateSkeleton(
             layout: CustomStateSkeletonLayout.list,
             itemCount: 3,
-            cardHeight: 78,
+            cardHeight: 68,
             maxColumns: 1,
           ),
         );
@@ -37,18 +37,35 @@ class PosRecentTransactionsSection extends StatelessWidget {
 
       if (error != null && items.isEmpty) {
         return CustomErrorState.boxed(
-          title: 'تعذر تحميل نشاط الشبكة',
+          title: 'تعذر تحميل آخر العمليات',
           subtitle: error,
           onRetry: controller.retryScopedData,
         );
       }
 
+      final colors = context.colors;
       return CustomSurfaceCard(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHeader(context),
+            Row(
+              children: [
+                Icon(
+                  Icons.view_list_rounded,
+                  color: colors.primary,
+                  size: 19.r,
+                ),
+                AppSpacing.hSm,
+                Text(
+                  'آخر العمليات',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
             AppSpacing.vSm,
             if (items.isEmpty)
               const CustomEmptyState(
@@ -57,59 +74,26 @@ class PosRecentTransactionsSection extends StatelessWidget {
                 subtitle: 'لم يُرجع الخادم فواتير أو طلبات لهذه الشبكة.',
               )
             else
-              for (final item in items)
-                WorkspaceTransactionTile.fromItem(item),
+              for (var index = 0; index < items.length; index++) ...[
+                if (index > 0)
+                  Divider(
+                    height: 1,
+                    color: colors.outlineVariant.withValues(alpha: 0.45),
+                  ),
+                WorkspaceTransactionTile.fromItem(items[index]),
+              ],
             if (error != null && items.isNotEmpty) ...[
               AppSpacing.vSm,
               Text(
                 'تعذر تحديث بعض البيانات: $error',
                 style: AppTypography.bodySmall.copyWith(
-                  color: context.colors.error,
+                  color: colors.error,
                 ),
-              ),
-              AppSpacing.vXs,
-              CustomButton.text(
-                text: 'إعادة المحاولة',
-                onPressed: controller.retryScopedData,
               ),
             ],
           ],
         ),
       );
     });
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'آخر فواتير وطلبات التوريد',
-                style: AppTypography.titleMedium.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: AppSpacing.xxs),
-              Text(
-                'آخر البيانات التي أعادها الخادم للشبكة المحددة',
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        CustomButton.text(
-          text: 'عرض الفواتير',
-          suffix: Icons.chevron_right_rounded,
-          onPressed: controller.openPurchaseInvoices,
-        ),
-      ],
-    );
   }
 }

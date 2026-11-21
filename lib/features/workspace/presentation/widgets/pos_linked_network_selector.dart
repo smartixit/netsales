@@ -5,13 +5,15 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/workspace/presentation/models/pos_linked_network_option_view_model.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 
+/// Compact supplier-network selector. Selection rules remain in the controller:
+/// a single active link may be selected automatically, multiple links require
+/// an explicit choice, and the saved relationship is preserved.
 class PosLinkedNetworkSelector extends StatelessWidget {
   const PosLinkedNetworkSelector({super.key, required this.controller});
 
@@ -20,6 +22,7 @@ class PosLinkedNetworkSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Obx(() {
       if (controller.isLoadingNetworks.value &&
           controller.linkedNetworkOptions.isEmpty) {
@@ -28,16 +31,16 @@ class PosLinkedNetworkSelector extends StatelessWidget {
           child: Row(
             children: [
               SizedBox(
-                width: 18.r,
-                height: 18.r,
+                width: 17.r,
+                height: 17.r,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: colors.primary,
                 ),
               ),
-              AppSpacing.hMd,
+              AppSpacing.hSm,
               Text(
-                'جارٍ تحميل الشبكات المرتبطة',
+                'جارٍ تحميل شبكات التوريد',
                 style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -69,7 +72,6 @@ class PosLinkedNetworkSelector extends StatelessWidget {
       }
 
       final activeLinks = controller.linkedNetworkOptions;
-
       if (activeLinks.isEmpty) {
         return const CustomEmptyState(
           icon: Icons.hub_outlined,
@@ -78,117 +80,111 @@ class PosLinkedNetworkSelector extends StatelessWidget {
         );
       }
 
-      final selectedNetworkPosId = controller.selectedNetworkPosId;
-      return CustomSurfaceCard(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              selectedNetworkPosId == null ? 'اختر الشبكة المورّدة' : 'الشبكة المورّدة',
-              style: AppTypography.titleSmall.copyWith(
-                color: colors.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (selectedNetworkPosId == null) ...[
-              AppSpacing.vXs,
-              Text(
-                'لديك أكثر من شبكة مرتبطة. اختر الشبكة التي تريد عرض نشاطها.',
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-            AppSpacing.vMd,
-            _NetworkChoices(
-              links: activeLinks,
-              selectedNetworkPosId: selectedNetworkPosId,
-              onSelected: controller.selectNetworkLink,
-            ),
-            if (controller.hasMoreNetworks.value) ...[
-              AppSpacing.vSm,
-              CustomButton.text(
-                text: 'تحميل المزيد من الشبكات',
-                onPressed: controller.loadMoreNetworks,
-              ),
-            ],
-          ],
-        ),
+      final selectedId = controller.selectedNetworkPosId;
+      final selected = activeLinks.firstWhereOrNull(
+        (link) => link.networkPosId == selectedId,
       );
-    });
-  }
-}
 
-class _NetworkChoices extends StatelessWidget {
-  const _NetworkChoices({
-    required this.links,
-    required this.selectedNetworkPosId,
-    required this.onSelected,
-  });
-
-  final List<PosLinkedNetworkOptionViewModel> links;
-  final int? selectedNetworkPosId;
-  final Future<void> Function(int networkPosId) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: [
-        for (final link in links)
-          CustomInteractiveBounce(
-            onTap: () => onSelected(link.networkPosId),
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 240.w),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: Row(
+              children: [
+                Icon(Icons.hub_rounded, color: colors.primary, size: 19.r),
+                AppSpacing.hSm,
+                Text(
+                  'شبكة التوريد',
+                  style: AppTypography.titleSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AppSpacing.vXs,
+          CustomPopupMenu<int>(
+            enabled: activeLinks.length > 1,
+            minWidth: 220.w,
+            trigger: Container(
+              constraints: BoxConstraints(minHeight: 48.h),
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: link.networkPosId == selectedNetworkPosId
-                    ? colors.primary.withValues(alpha: 0.12)
-                    : colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(
-                  color: link.networkPosId == selectedNetworkPosId
-                      ? colors.primary
-                      : colors.outlineVariant,
+                  color: colors.outlineVariant.withValues(alpha: 0.7),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.shadow.withValues(alpha: 0.035),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 3.h),
+                  ),
+                ],
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    link.networkPosId == selectedNetworkPosId
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
-                    size: 16.r,
-                    color: link.networkPosId == selectedNetworkPosId
-                        ? colors.primary
-                        : colors.onSurfaceVariant,
+                    Icons.account_tree_rounded,
+                    color: colors.primary,
+                    size: 18.r,
                   ),
                   AppSpacing.hSm,
-                  Flexible(
+                  Expanded(
                     child: Text(
-                      link.displayName,
+                      selected?.displayName ?? 'اختر شبكة التوريد',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelMedium.copyWith(
+                      style: AppTypography.bodyMedium.copyWith(
                         color: colors.onSurface,
-                        fontWeight: link.networkPosId == selectedNetworkPosId
-                            ? FontWeight.bold
-                            : FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: colors.onSurfaceVariant,
+                    size: 21.r,
                   ),
                 ],
               ),
             ),
+            items: activeLinks
+                .map(
+                  (link) => CustomPopupItem<int>(
+                    value: link.networkPosId,
+                    label: link.displayName,
+                    icon: Icons.hub_outlined,
+                    trailing: link.networkPosId == selectedId
+                        ? Icon(
+                            Icons.check_circle_rounded,
+                            color: colors.primary,
+                            size: 17.r,
+                          )
+                        : null,
+                  ),
+                )
+                .toList(growable: false),
+            onSelected: controller.selectNetworkLink,
           ),
-      ],
-    );
+          if (controller.hasMoreNetworks.value) ...[
+            AppSpacing.vXs,
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: CustomButton.text(
+                text: 'تحميل المزيد من الشبكات',
+                onPressed: controller.loadMoreNetworks,
+              ),
+            ),
+          ],
+        ],
+      );
+    });
   }
 }

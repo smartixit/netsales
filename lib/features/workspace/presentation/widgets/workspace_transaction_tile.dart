@@ -10,21 +10,9 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// سطر موحد لعرض حركة أو عملية تنفيذية في لوحة التحكم (WorkspaceTransactionTile)
-/// مخصص لمساحات العمل كـ Pure Stateless Component يعاد استخدامه للفواتير، طلبات التوريد، والسندات
+/// Flat transaction row for use inside a containing dashboard section.
+/// The parent owns the surface and separators, avoiding nested mini-cards.
 class WorkspaceTransactionTile extends StatelessWidget {
-  final String title;
-  final String? reference;
-  final String? subtitle;
-  final String formattedAmount;
-  final EnumPresentation statusPresentation;
-  final IconData? icon;
-  final String? initials;
-  final String? imageUrl;
-  final Color? amountColor;
-  final VoidCallback? onTap;
-  final Widget? trailingAction;
-
   const WorkspaceTransactionTile({
     super.key,
     required this.title,
@@ -40,7 +28,18 @@ class WorkspaceTransactionTile extends StatelessWidget {
     this.trailingAction,
   });
 
-  /// إنشاء مباشر من نموذج العرض المجرد (WorkspaceTransactionItem)
+  final String title;
+  final String? reference;
+  final String? subtitle;
+  final String formattedAmount;
+  final EnumPresentation statusPresentation;
+  final IconData? icon;
+  final String? initials;
+  final String? imageUrl;
+  final Color? amountColor;
+  final VoidCallback? onTap;
+  final Widget? trailingAction;
+
   factory WorkspaceTransactionTile.fromItem(
     WorkspaceTransactionItemViewModel item, {
     Key? key,
@@ -58,8 +57,7 @@ class WorkspaceTransactionTile extends StatelessWidget {
       imageUrl: item.imageUrl,
       icon: item.icon,
       onTap: item.onTap,
-      trailingAction:
-          customTrailingAction ??
+      trailingAction: customTrailingAction ??
           (item.onAction != null
               ? _ActionBadge(
                   label: item.actionLabel ?? 'إجراء',
@@ -72,55 +70,43 @@ class WorkspaceTransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
-    final leadingWidget = initials != null
+    final leading = initials != null
         ? CustomAvatarBadge(
             initials: initials!,
             imageUrl: imageUrl,
             size: AvatarBadgeSize.sm,
-            customDimension: 40,
+            customDimension: 34,
             hasPulse: false,
             borderRadius: BorderRadius.circular(AppRadius.md),
           )
         : Container(
-            width: 42.r,
-            height: 42.r,
+            width: 34.r,
+            height: 34.r,
             decoration: BoxDecoration(
               color: (amountColor ?? colors.primary).withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: (amountColor ?? colors.primary).withValues(alpha: 0.20),
-                width: 0.8,
-              ),
             ),
+            alignment: Alignment.center,
             child: Icon(
               icon ?? Icons.receipt_long_rounded,
               color: amountColor ?? colors.primary,
-              size: 20.r,
+              size: 18.r,
             ),
           );
 
     return CustomInteractiveBounce(
       onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 3.h),
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.25),
-            width: 0.6,
-          ),
-        ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            leadingWidget,
-            AppSpacing.hMd,
+            leading,
+            AppSpacing.hSm,
             Expanded(
+              flex: 6,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
@@ -129,38 +115,35 @@ class WorkspaceTransactionTile extends StatelessWidget {
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleSmall.copyWith(
+                          style: AppTypography.labelMedium.copyWith(
                             color: colors.onSurface,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                       if (reference != null && reference!.isNotEmpty) ...[
-                        AppSpacing.hSm,
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 1.5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(4.r),
-                            border: Border.all(
-                              color: colors.outlineVariant.withValues(
-                                alpha: 0.35,
-                              ),
-                              width: 0.5,
+                        SizedBox(width: AppSpacing.xs),
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xs,
+                              vertical: AppSpacing.xxs,
                             ),
-                          ),
-                          child: Text(
-                            reference!,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontSize: 9.5.sp,
-                              fontWeight: FontWeight.w600,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                            ),
+                            child: Text(
+                              reference!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: colors.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -168,43 +151,50 @@ class WorkspaceTransactionTile extends StatelessWidget {
                     ],
                   ),
                   if (subtitle != null && subtitle!.isNotEmpty) ...[
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 3.h),
                     Text(
                       subtitle!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodySmall.copyWith(
+                      style: AppTypography.labelSmall.copyWith(
                         color: colors.onSurfaceVariant,
-                        fontSize: 11.sp,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
-            AppSpacing.hSm,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  formattedAmount,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: amountColor ?? colors.onSurface,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.3,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+            SizedBox(width: AppSpacing.xs),
+            Flexible(
+              flex: 4,
+              child: Align(
+                alignment: AlignmentDirectional.center,
+                child: trailingAction ??
+                    CustomStatusBadge.fromPresentation(
+                      statusPresentation,
+                      isCompact: true,
+                    ),
+              ),
+            ),
+            SizedBox(width: AppSpacing.xs),
+            Flexible(
+              flex: 3,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    formattedAmount,
+                    maxLines: 1,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: amountColor ?? colors.onSurface,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
-                SizedBox(height: 3.h),
-                if (trailingAction != null)
-                  trailingAction!
-                else
-                  CustomStatusBadge.fromPresentation(
-                    statusPresentation,
-                    isCompact: true,
-                  ),
-              ],
+              ),
             ),
           ],
         ),
@@ -214,10 +204,10 @@ class WorkspaceTransactionTile extends StatelessWidget {
 }
 
 class _ActionBadge extends StatelessWidget {
+  const _ActionBadge({required this.label, required this.onTap});
+
   final String label;
   final VoidCallback onTap;
-
-  const _ActionBadge({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -225,30 +215,21 @@ class _ActionBadge extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-        decoration: BoxDecoration(
-          color: colors.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.xxs,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: AppTypography.badgeText.copyWith(
-                color: colors.primary,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            SizedBox(width: 2.w),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 12.r,
-              color: colors.primary,
-            ),
-          ],
+        decoration: BoxDecoration(
+          color: colors.warning.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          style: AppTypography.labelSmall.copyWith(
+            color: colors.warning,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
