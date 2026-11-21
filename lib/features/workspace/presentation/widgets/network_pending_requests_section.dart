@@ -38,7 +38,7 @@ class NetworkPendingRequestsSection extends StatelessWidget {
               AppSpacing.hSm,
               Expanded(
                 child: Text(
-                  'طلبات التوريد بانتظار الاعتماد',
+                  'طلبات تحتاج متابعة',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleMedium.copyWith(

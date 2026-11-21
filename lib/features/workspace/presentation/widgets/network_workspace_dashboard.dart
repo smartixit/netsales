@@ -11,8 +11,6 @@ import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
-/// Network workspace overview. Embedded spacing is owned by
-/// CustomRefreshablePage, matching the embedded procurement screen.
 class NetworkWorkspaceDashboard extends StatelessWidget {
   const NetworkWorkspaceDashboard({super.key, required this.controller});
 
@@ -97,21 +95,22 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
         }
 
         final dashboard = controller.dashboardViewModel;
+        final pendingItems = controller.recentPendingOrderItems;
+
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ExecutiveWelcomeHeroCard(
-              controller: controller,
-              onPendingTap: () => controller.onNavItemSelected(1),
-            ),
+            ExecutiveWelcomeHeroCard(controller: controller),
             AppSpacing.vLg,
-            NetworkPendingRequestsSection(
-              items: controller.recentPendingOrderItems,
-              totalPendingCount: dashboard.pendingRequestsCount,
-              onViewAll: () => controller.onNavItemSelected(1),
+            ExecutiveMetricsGrid(
+              items: dashboard.kpiMetrics,
+              onPointsOfSaleTap: () => controller.onNavItemSelected(2),
+              onRequestsTap: () => controller.onNavItemSelected(1),
+              onPackagesTap: controller.openPackagesCatalog,
+              onSalesTap: controller.openWholesaleInvoices,
+              onExpensesTap: () => controller.onNavItemSelected(3),
             ),
-            if (controller.recentPendingOrderItems.isNotEmpty)
-              AppSpacing.vLg,
+            if (dashboard.kpiMetrics.isNotEmpty) AppSpacing.vLg,
             if (dashboard.showSalesSection) ...[
               ExecutiveSalesTrendChart(
                 chartDefinition: dashboard.salesChartDefinition,
@@ -121,13 +120,10 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               ),
               AppSpacing.vLg,
             ],
-            ExecutiveMetricsGrid(
-              items: dashboard.kpiMetrics,
-              onPointsOfSaleTap: () => controller.onNavItemSelected(2),
-              onRequestsTap: () => controller.onNavItemSelected(1),
-              onPackagesTap: controller.openPackagesCatalog,
-              onSalesTap: controller.openWholesaleInvoices,
-              onExpensesTap: () => controller.onNavItemSelected(3),
+            NetworkPendingRequestsSection(
+              items: pendingItems,
+              totalPendingCount: dashboard.pendingRequestsCount,
+              onViewAll: () => controller.onNavItemSelected(1),
             ),
           ],
         );

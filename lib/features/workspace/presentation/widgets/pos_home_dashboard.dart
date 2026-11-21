@@ -96,7 +96,6 @@ class PosHomeDashboard extends StatelessWidget {
                   child: PosQuickActionCard(
                     icon: Icons.add_shopping_cart_rounded,
                     title: 'طلب توريد',
-                    subtitle: 'اطلب باقات بالجملة',
                     onTap: controller.openNewProcurementOrder,
                   ),
                 ),
@@ -105,7 +104,6 @@ class PosHomeDashboard extends StatelessWidget {
                   child: PosQuickActionCard(
                     icon: Icons.receipt_long_rounded,
                     title: 'فواتيري',
-                    subtitle: 'سجل مشترياتك',
                     onTap: controller.openPurchaseInvoices,
                   ),
                 ),
