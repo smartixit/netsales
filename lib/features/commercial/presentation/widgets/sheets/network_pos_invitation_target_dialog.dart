@@ -4,18 +4,25 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// نافذة عرض فقط؛ التحقق والحل والحالة مملوكة لمتحكم مساحة العمل.
+/// نافذة عرض فقط؛ الحالة والتحقق والطلبات تظل مملوكة لمتحكم مساحة العمل.
 class NetworkPosInvitationTargetDialog extends StatelessWidget {
   const NetworkPosInvitationTargetDialog({
     super.key,
-    required this.controller,
+    required this.codeController,
+    required this.isResolving,
+    required this.onChanged,
+    required this.onResolve,
+    required this.onCancel,
   });
 
-  final NetworkCommercialDirectoryController controller;
+  final TextEditingController codeController;
+  final RxBool isResolving;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onResolve;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -36,19 +43,19 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
           SizedBox(height: AppSpacing.md),
           Obx(
             () => CustomTextField(
-              controller: controller.invitationBusinessCodeController,
+              controller: codeController,
               label: 'المعرف التجاري لنقطة البيع',
               hint: 'POS-YYMM-00001-AB12',
               prefixIcon: const Icon(Icons.storefront_rounded),
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
-              enabled: !controller.isResolvingInvitationTarget.value,
+              enabled: !isResolving.value,
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9-]')),
                 LengthLimitingTextInputFormatter(19),
               ],
-              onChanged: controller.onInvitationBusinessCodeChanged,
-              onFieldSubmitted: (_) => controller.resolveInvitationTarget(),
+              onChanged: onChanged,
+              onFieldSubmitted: (_) => onResolve(),
             ),
           ),
           SizedBox(height: AppSpacing.sm),
@@ -61,15 +68,13 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.md),
           Obx(() {
-            final isResolving = controller.isResolvingInvitationTarget.value;
+            final resolving = isResolving.value;
             return Row(
               children: [
                 Expanded(
                   child: CustomButton.outline(
                     text: 'إلغاء',
-                    onPressed: isResolving
-                        ? null
-                        : controller.cancelInvitationTargetDialog,
+                    onPressed: resolving ? null : onCancel,
                   ),
                 ),
                 SizedBox(width: AppSpacing.sm),
@@ -77,11 +82,9 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                   child: CustomButton.primary(
                     text: 'التحقق والمتابعة',
                     icon: Icons.verified_user_rounded,
-                    loading: isResolving,
-                    enabled: !isResolving,
-                    onPressed: isResolving
-                        ? null
-                        : controller.resolveInvitationTarget,
+                    loading: resolving,
+                    enabled: !resolving,
+                    onPressed: resolving ? null : onResolve,
                   ),
                 ),
               ],
