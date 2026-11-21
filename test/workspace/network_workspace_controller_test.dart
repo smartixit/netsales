@@ -34,13 +34,28 @@ class _MultipleNetworksRepository implements CommercialRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _UnusedOverviewRepository implements NetworkWorkspaceRepository {
+class _NetworkOverviewRepository implements NetworkWorkspaceRepository {
   @override
   Future<NetworkWorkspaceOverviewEntity> getOverview(
     int networkId, {
     required String period,
-  }) {
-    throw StateError('No overview should load before explicit network selection.');
+  }) async {
+    return NetworkWorkspaceOverviewEntity(
+      networkId: networkId,
+      networkName: 'شبكة الاختبار',
+      generatedAt: '2026-11-21T10:00:00+03:00',
+      periodKey: period,
+      timezone: 'Asia/Aden',
+      periodDays: 30,
+      periodFrom: '2026-10-22',
+      periodTo: '2026-11-21',
+      sales: null,
+      pointsOfSale: null,
+      requests: null,
+      packages: null,
+      expenses: null,
+      recentPendingRequests: const [],
+    );
   }
 }
 
@@ -61,13 +76,13 @@ void main() {
 
   tearDown(Get.reset);
 
-  test('clears stale overview loading when refresh requires explicit tenant choice', () async {
+  test('selects the first authorized network when the saved network is no longer available', () async {
     await WorkspaceService.instance.saveActiveNetworkId(999);
 
     final controller = NetworkWorkspaceController(
       getMyNetworksUseCase: GetMyNetworksUseCase(_MultipleNetworksRepository()),
       getOverviewUseCase: GetNetworkWorkspaceOverviewUseCase(
-        _UnusedOverviewRepository(),
+        _NetworkOverviewRepository(),
       ),
     );
     controller.isLoadingOverview.value = true;
@@ -75,9 +90,27 @@ void main() {
     await controller.loadWorkspace();
 
     expect(controller.networks, hasLength(2));
-    expect(controller.selectedNetworkId.value, isNull);
-    expect(controller.overview.value, isNull);
+    expect(controller.selectedNetworkId.value, 10);
+    expect(controller.overview.value?.networkId, 10);
+    expect(controller.networksError.value, isNull);
+    expect(controller.overviewError.value, isNull);
     expect(controller.isLoadingNetworks.value, isFalse);
     expect(controller.isLoadingOverview.value, isFalse);
+  });
+
+  test('keeps the saved network when it is still authorized', () async {
+    await WorkspaceService.instance.saveActiveNetworkId(20);
+
+    final controller = NetworkWorkspaceController(
+      getMyNetworksUseCase: GetMyNetworksUseCase(_MultipleNetworksRepository()),
+      getOverviewUseCase: GetNetworkWorkspaceOverviewUseCase(
+        _NetworkOverviewRepository(),
+      ),
+    );
+
+    await controller.loadWorkspace();
+
+    expect(controller.selectedNetworkId.value, 20);
+    expect(controller.overview.value?.networkId, 20);
   });
 }
