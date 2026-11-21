@@ -82,14 +82,18 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                       size: 22.r,
                     ),
                     SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'بيانات مزود الشبكة المعتمد',
-                      style: AppTypography.titleSmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.primary,
+                    Expanded(
+                      child: Text(
+                        'بيانات مزود الشبكة المعتمد',
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colors.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Spacer(),
+                    SizedBox(width: AppSpacing.xs),
                     CustomStatusBadge(
                       label: statusPres.label,
                       tone: statusPres.tone,

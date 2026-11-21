@@ -38,12 +38,17 @@ class CommercialDetailRow extends StatelessWidget {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            const Spacer(),
-            Text(
-              value,
-              style: AppTypography.bodySmall.copyWith(
-                fontWeight: FontWeight.w600,
-                color: onTap != null ? colors.primary : colors.onSurface,
+            SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: onTap != null ? colors.primary : colors.onSurface,
+                ),
               ),
             ),
             if (onTap != null) ...[
