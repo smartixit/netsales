@@ -241,6 +241,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           Obx(() {
             final isActive = isInvitationActive();
             final isExporting = isExportingInvitation.value;
+            final isRevoking = isRevokingInvitation.value;
             return Row(
               children: [
                 Expanded(
@@ -249,7 +250,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     icon: Icons.share_rounded,
                     size: AppButtonSize.medium,
                     loading: isExporting,
-                    onPressed: isActive && !isExporting
+                    onPressed: isActive && !isExporting && !isRevoking
                         ? () => onShare(
                             () => _captureShareCard(context),
                           )
@@ -263,7 +264,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     icon: Icons.download_rounded,
                     size: AppButtonSize.medium,
                     loading: isExporting,
-                    onPressed: isActive && !isExporting
+                    onPressed: isActive && !isExporting && !isRevoking
                         ? () => onSave(
                             () => _captureShareCard(context),
                           )
@@ -276,7 +277,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           SizedBox(height: AppSpacing.sm),
           Obx(() {
             if (isInvitationActive()) {
-              final revoking = isRevokingInvitation.value;
+              final revoking = isRevokingInvitation.value || isExportingInvitation.value;
               return CustomButton.outline(
                 text: 'إلغاء الدعوة',
                 icon: Icons.block_rounded,
