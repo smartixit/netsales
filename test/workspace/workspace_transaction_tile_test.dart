@@ -32,7 +32,7 @@ void main() {
           const WorkspaceTransactionTile(
             title: 'فاتورة توريد #105',
             reference: 'INV-105',
-            subtitle: 'فاتورة توريد • منذ 10 دقائق',
+            subtitle: 'شراء آجل • منذ 10 دقائق',
             formattedAmount: '15,000 ر.ي',
             statusPresentation: dummyPresentation,
           ),
