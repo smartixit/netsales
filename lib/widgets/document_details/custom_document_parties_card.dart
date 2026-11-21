@@ -245,15 +245,15 @@ class _DocumentPartyTile extends StatelessWidget {
                       size: 13.r,
                       color: colors.primary,
                     ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      party.phoneNumber!.trim(),
-                      style: AppTypography.caption.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10.sp,
-                      ),
-                    ),
+                    // SizedBox(width: 4.w),
+                    // Text(
+                    //   party.phoneNumber!.trim(),
+                    //   style: AppTypography.caption.copyWith(
+                    //     color: colors.onSurface,
+                    //     fontWeight: FontWeight.w700,
+                    //     fontSize: 10.sp,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

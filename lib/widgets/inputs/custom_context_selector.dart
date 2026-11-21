@@ -146,17 +146,57 @@ class CustomContextSelector extends StatelessWidget {
                       ],
                     ),
                     AppSpacing.vSm,
-                    CustomContextSelectedIdentity(
-                      name: selectedName,
-                      detail: selectedDetail,
-                      initial: selectedInitial,
-                      logoUrl: selectedLogoUrl,
-                      accent: accent,
-                      isExpanded: isExpanded,
-                      canExpand: canExpand,
-                      isReadOnly: isReadOnly,
-                      readOnlyBadgeText: readOnlyBadgeText,
-                    ),
+                    if (isLoading)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: 10.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainer.withValues(alpha: .5),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: .55),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40.r,
+                              height: 40.r,
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                            AppSpacing.hSm,
+                            const Expanded(
+                              child: CustomStateView.loading(
+                                presentation:
+                                    CustomStatePresentation.skeletonOnly,
+                                skeleton: CustomStateSkeleton(
+                                  layout: CustomStateSkeletonLayout.text,
+                                  lineCount: 2,
+                                  spacing: 8,
+                                  showCardSurface: false,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      CustomContextSelectedIdentity(
+                        name: selectedName,
+                        detail: selectedDetail,
+                        initial: selectedInitial,
+                        logoUrl: selectedLogoUrl,
+                        accent: accent,
+                        isExpanded: isExpanded,
+                        canExpand: canExpand,
+                        isReadOnly: isReadOnly,
+                        readOnlyBadgeText: readOnlyBadgeText,
+                      ),
                   ],
                 ),
               ),
@@ -183,7 +223,7 @@ class CustomContextSelector extends StatelessWidget {
                       color: colors.outlineVariant.withValues(alpha: .4),
                     ),
                     AppSpacing.vSm,
-                    if (isLoading)
+                    if (isExpanded && isLoading)
                       const CustomStateView.loading(
                         presentation: CustomStatePresentation.skeletonOnly,
                         skeleton: CustomStateSkeleton(

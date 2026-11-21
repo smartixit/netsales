@@ -378,6 +378,7 @@ class ProcurementRequestDetailsScreen
                         formattedSheetsCount:
                             request.items[i].formattedSheetsCount,
                         sheetDescription: request.items[i].sheetDescription,
+                        sheetSize: request.items[i].sheetSize,
                         voucherPrice: request.items[i].voucherPrice,
                         hasDiscount: request.items[i].hasDiscount,
                         itemDiscount: request.items[i].itemDiscount,

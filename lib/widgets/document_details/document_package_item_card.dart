@@ -23,6 +23,7 @@ class DocumentPackageItemCard extends StatelessWidget {
   final int voucherCount;
   final String formattedSheetsCount;
   final String sheetDescription;
+  final int? sheetSize;
   final double voucherPrice;
   final bool hasDiscount;
   final double itemDiscount;
@@ -46,6 +47,7 @@ class DocumentPackageItemCard extends StatelessWidget {
     required this.voucherCount,
     required this.formattedSheetsCount,
     required this.sheetDescription,
+    this.sheetSize,
     required this.voucherPrice,
     this.hasDiscount = false,
     this.itemDiscount = 0.0,
@@ -92,10 +94,15 @@ class DocumentPackageItemCard extends StatelessWidget {
           ),
         ];
 
+    final resolvedSubtitle = subtitle ??
+        ((sheetSize != null && sheetSize! > 0)
+            ? 'سعة الورقة: $sheetSize كرت'
+            : null);
+
     return CustomDocumentItemCard(
       index: index,
       title: title,
-      subtitle: subtitle ?? 'سعة الورقة: ${sheetDescription.isNotEmpty ? sheetDescription : "$voucherCount كرت"}',
+      subtitle: resolvedSubtitle,
       colorHex: colorHex,
       totalAmountFormatted: AmountFormatter.formatValue(totalAmount),
       totalAmountSubtitle: 'الصافي',

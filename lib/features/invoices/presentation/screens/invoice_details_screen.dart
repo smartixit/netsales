@@ -280,6 +280,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         formattedSheetsCount:
                             invoice.items[i].formattedSheetsCount,
                         sheetDescription: invoice.items[i].sheetDescription,
+                        sheetSize: invoice.items[i].sheetSize,
                         voucherPrice: invoice.items[i].voucherPrice,
                         hasDiscount: invoice.items[i].hasDiscount,
                         itemDiscount: invoice.items[i].itemDiscount,
