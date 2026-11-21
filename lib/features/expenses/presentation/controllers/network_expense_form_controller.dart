@@ -4,6 +4,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
+import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/new_expense_item_input_entity.dart';
 import 'package:netsales/features/expenses/domain/usecases/create_expense_use_case.dart';
@@ -41,6 +42,9 @@ class NetworkExpenseFormController extends GetxController {
 
   // المرفقات والتاريخ وحالة الإرسال والإجمالي
   final attachments = <AppPickedFileModel>[].obs;
+  // المرفقات المسجلة مسبقاً في وضع التعديل والمعرفات المطلوب حذفها (Pattern 1)
+  final existingAttachments = <ExpenseAttachmentEntity>[].obs;
+  final deletedAttachmentIds = <int>[].obs;
   final selectedDate = DateTime.now().obs;
   final isSubmitting = false.obs;
   final totalAmount = 0.0.obs;
@@ -86,6 +90,8 @@ class NetworkExpenseFormController extends GetxController {
     isEditing.value = true;
     editingExpenseId.value = exp.expenseId;
     initialExpense.value = exp;
+    existingAttachments.assignAll(exp.attachments);
+    deletedAttachmentIds.clear();
     if (exp.expenseDate != null) {
       selectedDate.value = exp.expenseDate!;
     }
@@ -151,6 +157,14 @@ class NetworkExpenseFormController extends GetxController {
     selectedDate.value = date;
   }
 
+  /// إزالة مرفق حالي مسجل ووسمه للحذف عند حفظ التعديلات (Pattern 1)
+  void removeExistingAttachment(int attachmentId) {
+    if (!deletedAttachmentIds.contains(attachmentId)) {
+      deletedAttachmentIds.add(attachmentId);
+    }
+    existingAttachments.removeWhere((att) => att.attachmentId == attachmentId);
+  }
+
   /// إرسال وحفظ سند المصروف (إنشاء أو تعديل) مع تسوية المحفظة
   Future<void> submitExpense() async {
     final networkId = activeNetworkId;
@@ -194,6 +208,9 @@ class NetworkExpenseFormController extends GetxController {
           expenseDate: selectedDate.value,
           items: inputItems,
           attachments: attachments.isNotEmpty ? attachments.toList() : null,
+          deletedAttachmentIds: deletedAttachmentIds.isNotEmpty
+              ? deletedAttachmentIds.toList()
+              : null,
         );
 
         if (Get.isRegistered<ExpenseDetailsController>()) {

@@ -207,7 +207,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                         caption: 'بيانات الصرف',
                       ),
                       CustomMetricCardData(
-                        label: 'المرفقات الثبوتية',
+                        label: 'المرفقات',
                         value: '${expense.attachments.length}',
                         unit: 'ملف',
                         icon: Icons.attach_file_rounded,
@@ -282,7 +282,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                   ],
                   AppSpacing.vLg,
 
-                  // 5. المرفقات والمستندات الثبوتية مع تكامل MediaGalleryViewer
+                  // 5. المرفقات والمستندات مع تكامل MediaGalleryViewer
                   if (expense.attachments.isNotEmpty) ...[
                     Row(
                       children: [
@@ -294,7 +294,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                         SizedBox(width: 6.w),
                         Expanded(
                           child: Text(
-                            'المستندات والمرفقات الثبوتية (${expense.attachments.length})',
+                            'المستندات والمرفقات (${expense.attachments.length})',
                             style: AppTypography.titleSmall.copyWith(
                               color: colors.onSurface,
                               fontWeight: FontWeight.w800,

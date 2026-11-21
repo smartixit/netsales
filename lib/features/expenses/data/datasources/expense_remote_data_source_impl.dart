@@ -177,6 +177,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     DateTime? expenseDate,
     List<NewExpenseItemInputEntity>? items,
     List<AppPickedFileModel>? attachments,
+    List<int>? deletedAttachmentIds,
   }) async {
     final formData = FormData();
     formData.fields.add(const MapEntry('_method', 'PUT'));
@@ -194,6 +195,17 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
         );
         formData.fields.add(
           MapEntry('items[$i][item_amount]', items[i].itemAmount.toString()),
+        );
+      }
+    }
+
+    if (deletedAttachmentIds != null && deletedAttachmentIds.isNotEmpty) {
+      for (int i = 0; i < deletedAttachmentIds.length; i++) {
+        formData.fields.add(
+          MapEntry(
+            'deleted_attachment_ids[$i]',
+            deletedAttachmentIds[i].toString(),
+          ),
         );
       }
     }

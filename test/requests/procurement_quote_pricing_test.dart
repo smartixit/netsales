@@ -144,6 +144,7 @@ class FakeQuoteRequestRepository implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) async => throw UnimplementedError();
 
   @override

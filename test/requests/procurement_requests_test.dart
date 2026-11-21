@@ -198,6 +198,7 @@ class MockRequestRepository implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) async {
     final index = _requests.indexWhere((r) => r.requestId == requestId);
     if (index >= 0) {

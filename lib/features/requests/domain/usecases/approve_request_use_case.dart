@@ -12,11 +12,13 @@ class ApproveRequestUseCase {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) {
     return _repository.approveRequest(
       requestId,
       requestNote: requestNote,
       items: items,
+      paidAmount: paidAmount,
     );
   }
 }

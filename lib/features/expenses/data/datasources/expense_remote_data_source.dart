@@ -34,12 +34,13 @@ abstract class ExpenseRemoteDataSource {
     String? idempotencyKey,
   });
 
-  /// تحديث بيانات مصروف تشغيلي مع تسوية فارق الرصيد في محفظة الشبكة
+  /// تحديث بيانات مصروف تشغيلي مع تسوية فارق الرصيد في محفظة الشبكة وحذف المرفقات المحددة
   Future<ExpenseModel> updateExpense({
     required int expenseId,
     DateTime? expenseDate,
     List<NewExpenseItemInputEntity>? items,
     List<AppPickedFileModel>? attachments,
+    List<int>? deletedAttachmentIds,
   });
 
   /// حذف مصروف تشغيلي ناعماً واسترداد مبلغه للمحفظة

@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_package_selection_section.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_pos_context_section.dart';
@@ -153,15 +154,12 @@ class NetworkDirectInvoiceScreen
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                             ],
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) return null;
-                              final amt = double.tryParse(val.trim());
-                              if (amt == null || amt < 0) return 'يرجى إدخال مبلغ صحيح';
-                              if (amt > controller.checkoutNetAmount) {
-                                return 'لا يمكن أن تتجاوز الدفعة صافي الفاتورة';
-                              }
-                              return null;
-                            },
+                            validator: FormValidators.amountValidator(
+                              fieldName: 'المبلغ المقبوض كاش',
+                              isRequired: false,
+                              minValue: 0,
+                              maxValue: controller.checkoutNetAmount,
+                            ),
                           ),
                         ],
                         AppSpacing.vLg,

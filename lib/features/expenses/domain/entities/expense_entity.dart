@@ -62,7 +62,7 @@ class ExpenseEntity {
   /// بنود المصروف التفصيلية
   final List<ExpenseItemEntity> items;
 
-  /// المرفقات والمستندات الثبوتية
+  /// المرفقات والمستندات
   final List<ExpenseAttachmentEntity> attachments;
 
   /// المعرف المعروض المعتمد

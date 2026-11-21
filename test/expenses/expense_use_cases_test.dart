@@ -78,6 +78,7 @@ class MockExpenseRepository implements ExpenseRepository {
     DateTime? expenseDate,
     List<NewExpenseItemInputEntity>? items,
     List<AppPickedFileModel>? attachments,
+    List<int>? deletedAttachmentIds,
   }) async {
     return ExpenseEntity(
       expenseId: expenseId,

@@ -37,6 +37,7 @@ class _FakeApproveRequestUseCase implements ApproveRequestUseCase {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) async => throw UnimplementedError();
 }
 

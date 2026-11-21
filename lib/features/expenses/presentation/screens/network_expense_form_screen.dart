@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_expense_form_controller.dart';
+import 'package:netsales/features/expenses/presentation/widgets/expense_form_existing_attachments.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_form_item_row.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
@@ -157,12 +158,17 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                         ],
                         AppSpacing.vLg,
 
-                        // 4. المرفقات الثبوتية عبر المكون الموحد CustomFilePicker
+                        // 4. المرفقات الحالية المسجلة مسبقاً (في وضع التعديل)
+                        const ExpenseFormExistingAttachments(),
+
+                        // 5. المرفقات الجديدة عبر المكون الموحد CustomFilePicker
                         CustomSectionHeading(
-                          title:
-                              'المرفقات والمستندات الثبوتية (${controller.attachments.length})',
-                          subtitle:
-                              'أرفق صور الفواتير أو الإيصالات أو مستندات الصرف الرسمية',
+                          title: controller.isEditMode
+                              ? 'إضافة مرفقات ومستندات جديدة (${controller.attachments.length})'
+                              : 'المرفقات والمستندات (${controller.attachments.length})',
+                          subtitle: controller.isEditMode
+                              ? 'أرفق مستندات إضافية للمصروف (سيتم رفعها مع حفظ التعديلات)'
+                              : 'أرفق صور الفواتير أو الإيصالات أو مستندات الصرف الرسمية',
                           icon: Icons.attach_file_rounded,
                         ),
                         AppSpacing.vXs,
@@ -171,8 +177,7 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                           maxFiles: 8,
                           preset: FileTypePreset.anySafe,
                           displayMode: FilePickerDisplayMode.dropzone,
-                          hint:
-                              'اسحب المستندات هنا أو اضغط لاختيار الملفات (PDF / صور)',
+                          hint: 'اسحب المستندات هنا أو اضغط لاختيار الملفات (PDF / صور)',
                           onFilesChanged: controller.onAttachmentsChanged,
                         ),
                         AppSpacing.vXxl,

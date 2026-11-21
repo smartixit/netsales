@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
+import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_item_entity.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_summary_entity.dart';
@@ -97,6 +98,7 @@ class MockExpenseRepository implements ExpenseRepository {
     DateTime? expenseDate,
     List<NewExpenseItemInputEntity>? items,
     List<AppPickedFileModel>? attachments,
+    List<int>? deletedAttachmentIds,
   }) async {
     return ExpenseEntity(
       expenseId: expenseId,
@@ -281,6 +283,55 @@ void main() {
       controller.removeItemRow(1);
       expect(controller.statementControllers.length, 1);
       expect(controller.totalAmount.value, 5000.0);
+    });
+
+    test('Initializes with existing attachments and tracks deletions for atomic payload', () {
+      final initialExpense = ExpenseEntity(
+        expenseId: 42,
+        expenseUuid: 'EXP-42',
+        networkId: 1,
+        expenseTotalAmount: 3000.0,
+        attachments: const [
+          ExpenseAttachmentEntity(
+            attachmentId: 101,
+            expenseId: 42,
+            attachmentName: 'bill_oct.pdf',
+            attachmentPath: 'expenses/bill_oct.pdf',
+            attachmentSize: 10240,
+            attachmentMime: 'application/pdf',
+          ),
+          ExpenseAttachmentEntity(
+            attachmentId: 102,
+            expenseId: 42,
+            attachmentName: 'receipt.png',
+            attachmentPath: 'expenses/receipt.png',
+            attachmentSize: 20480,
+            attachmentMime: 'image/png',
+          ),
+        ],
+      );
+
+      // Set arguments to mimic Get.arguments in edit mode
+      final controller = NetworkExpenseFormController(
+        createExpenseUseCase: CreateExpenseUseCase(mockRepo),
+        updateExpenseUseCase: UpdateExpenseUseCase(mockRepo),
+      );
+
+      // Inject arguments before onInit
+      Get.routing.args = initialExpense;
+      controller.onInit();
+
+      expect(controller.isEditMode, isTrue);
+      expect(controller.editingExpenseId.value, 42);
+      expect(controller.existingAttachments.length, 2);
+      expect(controller.deletedAttachmentIds, isEmpty);
+
+      // User marks the first attachment for deletion
+      controller.removeExistingAttachment(101);
+
+      expect(controller.existingAttachments.length, 1);
+      expect(controller.existingAttachments.first.attachmentId, 102);
+      expect(controller.deletedAttachmentIds, contains(101));
     });
   });
 }

@@ -14,12 +14,14 @@ class UpdateExpenseUseCase {
     DateTime? expenseDate,
     List<NewExpenseItemInputEntity>? items,
     List<AppPickedFileModel>? attachments,
+    List<int>? deletedAttachmentIds,
   }) {
     return repository.updateExpense(
       expenseId: expenseId,
       expenseDate: expenseDate,
       items: items,
       attachments: attachments,
+      deletedAttachmentIds: deletedAttachmentIds,
     );
   }
 }

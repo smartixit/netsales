@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
@@ -734,18 +736,48 @@ class _NetworkRequestApprovalNotesSection
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomTextField(
-          controller: controller.modificationNoteController,
-          label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
-          hint: 'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
-          maxLines: 2,
-          isRequired: false,
-        ),
-      ],
-    );
+    return Obx(() {
+      final isCredit =
+          controller.editingRequest.value?.saleType == SaleType.credit;
+      final maxAmount = controller.currentPreview.value?.previewTotalAmount ??
+          controller.editingRequest.value?.requestTotalAmount;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isCredit) ...[
+            CustomTextField(
+              controller: controller.modificationPaidAmountController,
+              label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
+              hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
+              isRequired: false,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              prefixIcon: const Icon(Icons.payments_outlined),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
+              validator: FormValidators.amountValidator(
+                fieldName: 'المبلغ المقبوض كاش',
+                isRequired: false,
+                minValue: 0,
+                maxValue: maxAmount,
+              ),
+            ),
+            AppSpacing.vSm,
+          ],
+          CustomTextField(
+            controller: controller.modificationNoteController,
+            label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
+            hint:
+                'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
+            maxLines: 2,
+            isRequired: false,
+            validator: FormValidators.descriptionValidator(isRequired: false),
+          ),
+        ],
+      );
+    });
   }
 }
 
