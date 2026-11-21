@@ -16,6 +16,8 @@ void main() {
       expect(model.expiresAt, isNotNull);
       expect(model.expiresAt!.isUtc, isTrue);
       expect(model.expiresAt, DateTime.utc(2026, 11, 21, 15, 30));
+      expect(model.isActiveAt(DateTime.utc(2026, 11, 21, 15, 29)), isTrue);
+      expect(model.isActiveAt(DateTime.utc(2026, 11, 21, 15, 30)), isFalse);
     });
 
     test('parses terminal challenge states without secret fields', () {
