@@ -143,6 +143,7 @@ void main() {
       final pendingConfirmation = controller.confirmNetworkLinkChallenge(
         challengeUuid: 'challenge-uuid',
         posId: 10,
+        posUuid: 'pos-10',
       );
       confirmation.complete(_link(posId: 20));
 
