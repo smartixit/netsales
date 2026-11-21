@@ -501,6 +501,12 @@ class NetworkCommercialDirectoryController
     resolvedInvitationTarget.value = null;
   }
 
+  void cancelInvitationTargetDialog() {
+    if (isResolvingInvitationTarget.value) return;
+    resolvedInvitationTarget.value = null;
+    Get.back<void>();
+  }
+
   Future<void> resolveInvitationTarget() async {
     final code = invitationBusinessCodeController.text.trim().toUpperCase();
     if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}$').hasMatch(code)) {
@@ -670,8 +676,7 @@ class NetworkCommercialDirectoryController
         type: DialogType.custom,
         title: 'تحديد نقطة البيع المستهدفة',
         content: NetworkPosInvitationTargetDialog(controller: this),
-        cancelLabel: 'إلغاء',
-        canPop: true,
+        canPop: false,
         maxWidth: 480,
       );
       final target = resolvedInvitationTarget.value;
