@@ -224,8 +224,8 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 ),
               ),
             SizedBox(height: AppSpacing.md),
-            Offstage(
-              offstage: true,
+            Transform.translate(
+              offset: const Offset(-2000, 0),
               child: UnconstrainedBox(
                 alignment: Alignment.topLeft,
                 child: RepaintBoundary(
