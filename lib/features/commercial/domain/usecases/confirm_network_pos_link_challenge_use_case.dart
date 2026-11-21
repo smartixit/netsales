@@ -9,12 +9,10 @@ class ConfirmNetworkPosLinkChallengeUseCase {
 
   Future<NetworkPosLinkEntity> call({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) {
     return _repository.confirmNetworkPosLinkChallenge(
       challengeUuid: challengeUuid,
-      posId: posId,
       posUuid: posUuid,
     );
   }
