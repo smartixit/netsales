@@ -14,6 +14,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/share_service.dart';
+import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -495,7 +496,15 @@ class NetworkCommercialDirectoryController
     );
   }
 
-  Future<void> openCreateQrInvitation() async {
+
+  void onInvitationBusinessCodeChanged(String value) {
+    invitationBusinessCode.value = value;
+    resolvedInvitationTarget.value = null;
+  }
+
+  Future<void> resolveInvitationTarget() async {
+    final code = invitationBusinessCodeController.text.trim().toUpperCase();
+    if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}
     final netId = resolvedNetworkId;
     if (netId == null) {
       CustomSnackbar.show(
@@ -551,6 +560,217 @@ class NetworkCommercialDirectoryController
         message: AppException.sanitizeMessage(e.toString()),
         type: SnackType.error,
       );
+    }
+  }
+
+  Future<void> revokeChallenge(String challengeUuid) async {
+    try {
+      await revokeNetworkPosLinkChallengeUseCase(challengeUuid);
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إلغاء رمز الدعوة بنجاح',
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: AppException.sanitizeMessage(e.toString()),
+        type: SnackType.error,
+      );
+    }
+  }
+}
+).hasMatch(code)) {
+      CustomSnackbar.show(title: 'تحقق من المعرف', message: 'أدخل المعرف التجاري لنقطة البيع بالصيغة الموجودة في ملفها.', type: SnackType.warning);
+      return;
+    }
+    if (isResolvingInvitationTarget.value) return;
+    final networkId = resolvedNetworkId;
+    if (networkId == null) {
+      CustomSnackbar.show(title: 'تعذر تحديد الشبكة', message: 'اختر الشبكة التي ستصدر الدعوة باسمها أولاً.', type: SnackType.warning);
+      return;
+    }
+    isResolvingInvitationTarget.value = true;
+    try {
+      final target = await resolveNetworkLinkablePosUseCase(networkId: networkId, posBusinessCode: code);
+      if (target.posId <= 0 || target.posUuid.trim().isEmpty) {
+        throw const AppException('لم يُرجع الخادم هوية صالحة لنقطة البيع المستهدفة.');
+      }
+      resolvedInvitationTarget.value = target;
+      Get.back<void>();
+    } catch (error) {
+      CustomSnackbar.show(title: 'لم يتم العثور على جهة مؤهلة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    } finally {
+      isResolvingInvitationTarget.value = false;
+    }
+  }
+
+  void startInvitationMonitoring(NetworkPosLinkChallengeEntity challenge) {
+    stopInvitationMonitoring();
+    _activeInvitation = challenge;
+    invitationStatus.value = challenge.typedStatus;
+    invitationExpiresAt.value = DateTime.tryParse(challenge.expiresAt ?? '');
+    invitationClock.value = DateTime.now();
+    invitationStatusRefreshError.value = null;
+    _refreshInvitationStatus();
+    if (invitationStatus.value == LinkingChallengeStatus.pending) {
+      _invitationStatusTimer = Timer.periodic(const Duration(seconds: 10), (_) => _refreshInvitationStatus());
+      _invitationClockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        invitationClock.value = DateTime.now();
+        if (invitationStatus.value != LinkingChallengeStatus.pending) _cancelInvitationTimers();
+      });
+    }
+  }
+
+  bool get isInvitationActive {
+    final expiry = invitationExpiresAt.value;
+    return invitationStatus.value == LinkingChallengeStatus.pending && expiry != null && expiry.isAfter(invitationClock.value);
+  }
+
+  String get invitationExpiresAtLabel {
+    final expiry = invitationExpiresAt.value;
+    return expiry == null ? 'غير متاح' : DateFormatter.dateTime(expiry.toLocal());
+  }
+
+  String get invitationRemainingLabel {
+    final expiry = invitationExpiresAt.value;
+    if (expiry == null) return 'تعذر تحديد وقت الانتهاء';
+    final remaining = expiry.difference(invitationClock.value);
+    if (remaining <= Duration.zero) return 'انتهت مدة الدعوة';
+    return 'متبقي \${remaining.inMinutes} دقيقة و\${remaining.inSeconds % 60} ثانية';
+  }
+
+  void _cancelInvitationTimers() {
+    _invitationStatusTimer?.cancel();
+    _invitationStatusTimer = null;
+    _invitationClockTimer?.cancel();
+    _invitationClockTimer = null;
+  }
+
+  void stopInvitationMonitoring() {
+    _cancelInvitationTimers();
+    _activeInvitation = null;
+    _isInvitationStatusRequestInFlight = false;
+  }
+
+  Future<void> _refreshInvitationStatus() async {
+    final challenge = _activeInvitation;
+    if (challenge == null || invitationStatus.value != LinkingChallengeStatus.pending || _isInvitationStatusRequestInFlight) return;
+    _isInvitationStatusRequestInFlight = true;
+    try {
+      final latest = await getNetworkPosLinkChallengeStatusUseCase(challenge.challengeUuid);
+      if (_activeInvitation?.challengeUuid != challenge.challengeUuid) return;
+      invitationStatus.value = latest.status;
+      invitationExpiresAt.value = latest.expiresAt ?? invitationExpiresAt.value;
+      invitationStatusRefreshError.value = null;
+      if (latest.status != LinkingChallengeStatus.pending) _cancelInvitationTimers();
+    } catch (error) {
+      if (_activeInvitation?.challengeUuid == challenge.challengeUuid) {
+        invitationStatusRefreshError.value = AppException.sanitizeMessage(error);
+      }
+    } finally {
+      _isInvitationStatusRequestInFlight = false;
+    }
+  }
+
+  Future<Uint8List> captureInvitationCard(BuildContext context) async {
+    await precacheImage(const AssetImage('assets/images/brand_icon.png'), context);
+    await WidgetsBinding.instance.endOfFrame;
+    final renderObject = invitationShareCardKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
+    final image = await renderObject.toImage(pixelRatio: 1);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) throw const AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
+      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      if (bytes.isEmpty) throw const AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
+      return bytes;
+    } finally {
+      image.dispose();
+    }
+  }
+
+  Future<void> shareInvitation(BuildContext context) async {
+    if (!isInvitationActive || isExportingInvitation.value) return;
+    isExportingInvitation.value = true;
+    try {
+      final bytes = await captureInvitationCard(context);
+      final result = await ShareService.instance.shareBytes(bytes: bytes, fileName: 'NetSales_Invitation.png', mimeType: 'image/png', subject: 'دعوة ربط عبر NetSales', text: 'امسح رمز الدعوة من داخل تطبيق NetSales.');
+      if (result.status == ShareResultStatus.success) CustomSnackbar.show(title: 'تمت المشاركة', message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.', type: SnackType.success);
+    } catch (error) {
+      CustomSnackbar.show(title: 'تعذرت المشاركة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    } finally {
+      isExportingInvitation.value = false;
+    }
+  }
+
+  Future<void> saveInvitation(BuildContext context) async {
+    if (!isInvitationActive || isExportingInvitation.value) return;
+    isExportingInvitation.value = true;
+    try {
+      final bytes = await captureInvitationCard(context);
+      final result = await FileExportService.instance.saveFile(bytes: bytes, fileName: 'NetSales_Invitation', extension: 'png', folderName: 'NetSales', autoOpen: false, showFeedback: false);
+      CustomSnackbar.show(title: result.isSuccess ? 'تم حفظ الدعوة' : 'تعذر حفظ الدعوة', message: result.isSuccess ? 'تم حفظ بطاقة الدعوة في مجلد تنزيلات NetSales.' : (result.errorMessage ?? 'لم نتمكن من حفظ صورة الدعوة.'), type: result.isSuccess ? SnackType.success : SnackType.error);
+    } catch (error) {
+      CustomSnackbar.show(title: 'تعذر حفظ الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    } finally {
+      isExportingInvitation.value = false;
+    }
+  }
+
+  Future<void> revokeActiveInvitation() async {
+    final challenge = _activeInvitation;
+    if (challenge == null || invitationStatus.value != LinkingChallengeStatus.pending) return;
+    try {
+      await revokeNetworkPosLinkChallengeUseCase(challenge.challengeUuid);
+      invitationStatus.value = LinkingChallengeStatus.revoked;
+      _cancelInvitationTimers();
+      await CustomAnimationOverlay.showSuccess(message: 'تم إلغاء رمز الدعوة بنجاح');
+      Get.back<void>();
+    } catch (error) {
+      CustomSnackbar.show(title: 'تعذر إلغاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    }
+  }
+
+  Future<void> openCreateQrInvitation() async {
+    final netId = resolvedNetworkId;
+    if (netId == null) {
+      CustomSnackbar.show(title: 'تنبيه', message: 'يرجى اختيار الشبكة أولاً', type: SnackType.warning);
+      return;
+    }
+    invitationBusinessCodeController.clear();
+    invitationBusinessCode.value = '';
+    resolvedInvitationTarget.value = null;
+    try {
+      await CustomDialog.show(
+        type: DialogType.custom,
+        title: 'تحديد نقطة البيع المستهدفة',
+        content: NetworkPosInvitationTargetDialog(controller: this),
+        cancelLabel: 'إلغاء',
+        canPop: false,
+        maxWidth: 480,
+      );
+      final target = resolvedInvitationTarget.value;
+      if (target == null) return;
+      final challenge = await createNetworkPosLinkChallengeUseCase(networkId: netId, posUuid: target.posUuid);
+      final networkName = challenge.network?.networkName.trim() ?? '';
+      final posName = challenge.pos?.posName.trim() ?? '';
+      if (challenge.networkId != netId || challenge.posId != target.posId || networkName.isEmpty || posName.isEmpty || challenge.expiresAt == null) {
+        throw const AppException('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
+      }
+      startInvitationMonitoring(challenge);
+      try {
+        await CustomBottomSheet.show<void>(
+          title: 'دعوة ربط نقطة بيع',
+          subtitle: 'دعوة موجهة حصرياً إلى نقطة البيع المحددة',
+          leadingIcon: Icons.qr_code_rounded,
+          child: NetworkPosQrInvitationSheet(controller: this, challenge: challenge, networkName: networkName, posName: posName),
+        );
+      } finally {
+        stopInvitationMonitoring();
+      }
+    } catch (error) {
+      CustomSnackbar.show(title: 'فشل إنشاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    } finally {
+      resolvedInvitationTarget.value = null;
     }
   }
 
