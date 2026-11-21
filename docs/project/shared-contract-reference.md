@@ -105,3 +105,20 @@ The POS procurement package catalogue request must include the active `pos_id` w
 The POS procurement UI may use these snapshot inputs for a non-binding display-only line estimate and cart summary. Recalculate locally on quantity/payment-type changes; do not call a quote endpoint to refresh totals before new-request submission. Submit package IDs, quantities, and each item's `pricing_snapshot_token` only. Laravel validates each token against current tariff/discount state and computes the final request totals. This exception is limited to the new POS procurement workspace and does not weaken server financial authority in any other domain.
 
 When a cart snapshot expires, refreshing the tariff must request the cart's package IDs through the same network/POS-scoped catalogue endpoint (`package_ids[]`, maximum 50 per request), replace each cart line's package snapshot only after every requested active package is returned with a current signed token, and preserve the selected voucher quantities. A partial/failed refresh must leave the existing cart untouched and the expired-pricing state visible.
+
+## Network–POS targeted QR invitations — 2026-11-22
+
+The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, section **M4 POS–Network Linking Challenge API Contracts (Targeted QR Workflow)**.
+
+- A Network invitation always targets exactly one Network and one POS. Never expose or call a public POS directory/search endpoint.
+- Resolve a POS by its commercial business code using `POST /network-pos/challenges/resolve-target` with `network_id` and `pos_uuid`. The value called `pos_uuid` on the wire is the formatted business code (for example `POS-YYMM-00001-AB12`), not an RFC UUID.
+- The minimal resolve response includes `pos_id`, `pos_uuid`, `pos_name`, and optional governorate/directorate names. The `pos_uuid` field is required by Flutter's subsequent create-challenge call; do not infer it from `pos_id`.
+- Create challenge with the same `network_id` and resolved `pos_uuid`. The API requires exactly one of `pos_id` or `pos_uuid`; never create an untargeted challenge.
+- The encrypted QR payload is the only challenge payload rendered in the QR. Do not expose internal IDs, nonce, or secret fields on the share card.
+- Read challenge lifecycle from `GET /network-pos/challenges/{uuid}`; the safe response contains only `status`, `status_label`, and `expires_at`. It must not include challenge UUID, target IDs, or encrypted payload.
+- Parse challenge expiry as an ISO-8601 instant. Display the server-confirmed status and exact expiry; client countdown is presentation only and never changes server status.
+- The target-selection dialog and QR invitation sheet are presentation-only `StatelessWidget` views. The owning GetX controller manages form state, validation, target resolution, challenge creation, polling/timers, revocation, export/share state, and asynchronous errors.
+- Open dialogs through `CustomDialog` and sheets through `CustomBottomSheet.show`. Use `CustomTextField`, `CustomButton`, `CustomSnackbar`, and the canonical file/share services. No raw `AlertDialog`, `Get.dialog`, local `StatefulWidget`, `setState`, or feature-local duplicate of shared QR primitives.
+- The invitation share-card composition is Commercial-specific and belongs under `features/commercial/presentation/widgets`; generic QR rendering remains in `lib/widgets/qr`.
+- The server remains the sole authority for Network/POS eligibility, tenant authorization, target binding, challenge lifecycle, and expiry.
+
