@@ -37,6 +37,11 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> deleteNetworkPosLink(int networkPosId);
 
+  Future<PosModel> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  });
+
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
