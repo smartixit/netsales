@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
 
 /// بطاقة دعوة قابلة للتصدير، لا تعرض أي بيانات تعريفية أو أمنية عن التحدي.
