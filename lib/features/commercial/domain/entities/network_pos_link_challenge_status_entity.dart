@@ -18,9 +18,9 @@ class NetworkPosLinkChallengeStatusEntity extends Equatable {
   bool get isExpired => status == LinkingChallengeStatus.expired;
   bool get isRevoked => status == LinkingChallengeStatus.revoked;
 
-  bool get isActive {
+  bool isActiveAt(DateTime referenceTime) {
     final expiry = expiresAt;
-    return isPending && expiry != null && expiry.isAfter(DateTime.now());
+    return isPending && expiry != null && expiry.isAfter(referenceTime);
   }
 
   @override
