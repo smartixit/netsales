@@ -701,6 +701,7 @@ class NetworkCommercialDirectoryController
             invitationStatus: invitationStatus,
             invitationStatusRefreshError: invitationStatusRefreshError,
             isExportingInvitation: isExportingInvitation,
+            isRevokingInvitation: isRevokingInvitation,
             isInvitationActive: () => isInvitationActive,
             invitationRemainingLabel: () => invitationRemainingLabel,
             invitationExpiresAtLabel: () => invitationExpiresAtLabel,
