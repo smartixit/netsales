@@ -57,18 +57,33 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.md),
-          Obx(
-            () => CustomButton.primary(
-              text: 'التحقق والمتابعة',
-              icon: Icons.verified_user_rounded,
-              loading: controller.isResolvingInvitationTarget.value,
-              enabled: !controller.isResolvingInvitationTarget.value,
-              width: double.infinity,
-              onPressed: controller.isResolvingInvitationTarget.value
-                  ? null
-                  : controller.resolveInvitationTarget,
-            ),
-          ),
+          Obx(() {
+            final isResolving = controller.isResolvingInvitationTarget.value;
+            return Row(
+              children: [
+                Expanded(
+                  child: CustomButton.outline(
+                    text: 'إلغاء',
+                    onPressed: isResolving
+                        ? null
+                        : controller.cancelInvitationTargetDialog,
+                  ),
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: CustomButton.primary(
+                    text: 'التحقق والمتابعة',
+                    icon: Icons.verified_user_rounded,
+                    loading: isResolving,
+                    enabled: !isResolving,
+                    onPressed: isResolving
+                        ? null
+                        : controller.resolveInvitationTarget,
+                  ),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
