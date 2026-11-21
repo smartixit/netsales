@@ -9,7 +9,7 @@ import 'package:netsales/features/reports/presentation/screens/operational_repor
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_home_dashboard.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_workspace_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 
@@ -23,7 +23,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         label: 'الرئيسية',
         icon: Icons.storefront_outlined,
         activeIcon: Icons.storefront_rounded,
-        content: PosHomeDashboard(controller: controller),
+        content: PosWorkspaceDashboard(controller: controller),
       ),
       const WorkspaceNavItem(
         label: 'الطلبات',

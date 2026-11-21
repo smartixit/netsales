@@ -14,8 +14,8 @@ import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
-class PosHomeDashboard extends StatelessWidget {
-  const PosHomeDashboard({super.key, required this.controller});
+class PosWorkspaceDashboard extends StatelessWidget {
+  const PosWorkspaceDashboard({super.key, required this.controller});
 
   final PosWorkspaceController controller;
 
