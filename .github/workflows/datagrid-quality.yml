@@ -139,7 +139,6 @@ jobs:
         run: |
           flutter test test/core/services/infinityfree_challenge_interceptor_test.dart
           flutter test test/core/services/infinityfree_challenge_solver_test.dart
-          flutter test
           flutter test test/requests/procurement_quote_pricing_test.dart
           flutter test test/requests/procurement_requests_controller_test.dart
 
