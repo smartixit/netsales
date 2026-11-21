@@ -165,6 +165,27 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<PosModel> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) async {
+    final response = await ApiService.instance.post<PosModel>(
+      ApiConstants.networkPosChallengesResolveTarget,
+      data: {
+        'network_id': networkId,
+        'pos_uuid': posBusinessCode.trim().toUpperCase(),
+      },
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+    );
+
+    final result = response.data;
+    if (result == null || result.posId <= 0) {
+      throw Exception('تعذر التحقق من نقطة البيع المستهدفة.');
+    }
+    return result;
+  }
+
+  @override
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
