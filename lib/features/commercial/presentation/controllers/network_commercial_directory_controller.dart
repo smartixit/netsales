@@ -508,6 +508,15 @@ class NetworkCommercialDirectoryController
     Get.back<void>();
   }
 
+  void confirmInvitationTarget() {
+    if (!_isInvitationTargetDialogOpen ||
+        resolvedInvitationTarget.value == null) {
+      return;
+    }
+    _isInvitationTargetDialogOpen = false;
+    Get.back<void>();
+  }
+
   Future<void> resolveInvitationTarget() async {
     final code = invitationBusinessCodeController.text.trim().toUpperCase();
     if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}$').hasMatch(code)) {
@@ -528,8 +537,6 @@ class NetworkCommercialDirectoryController
         throw const AppException('لم يُرجع الخادم هوية صالحة لنقطة البيع المستهدفة.');
       }
       resolvedInvitationTarget.value = target;
-      _isInvitationTargetDialogOpen = false;
-      Get.back<void>();
     } catch (error) {
       CustomSnackbar.show(title: 'لم يتم العثور على جهة مؤهلة', message: AppException.sanitizeMessage(error), type: SnackType.error);
     } finally {
@@ -672,8 +679,10 @@ class NetworkCommercialDirectoryController
           content: NetworkPosInvitationTargetDialog(
             codeController: invitationBusinessCodeController,
             isResolving: isResolvingInvitationTarget,
+            resolvedTarget: resolvedInvitationTarget,
             onChanged: onInvitationBusinessCodeChanged,
             onResolve: resolveInvitationTarget,
+            onConfirm: confirmInvitationTarget,
             onCancel: cancelInvitationTargetDialog,
           ),
           canPop: true,
