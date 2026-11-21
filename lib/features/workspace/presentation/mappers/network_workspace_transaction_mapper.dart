@@ -1,7 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 
@@ -15,36 +14,30 @@ class NetworkWorkspaceTransactionMapper {
   }) {
     return requests
         .map((request) {
-          final reference = request.requestUuid.isEmpty
-              ? ''
-              : request.requestUuid.split('-').first;
           final parsedDate = DateFormatter.tryParse(request.requestDate);
           final dateLabel = parsedDate == null
               ? ''
               : DateFormatter.smart(parsedDate);
-          final saleTypeLabel = request.saleTypeLabel?.trim();
           final subtitle = [
-            if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+            request.posName,
+            if (request.saleTypeLabel?.trim().isNotEmpty ?? false)
+              request.saleTypeLabel!.trim(),
             if (dateLabel.isNotEmpty) dateLabel,
           ].join(' • ');
           void openRequest() => onOpenRequest(request.requestId);
+          final statusPresentation =
+              EnumPresentationRegistry.resolveRequestStatus(
+            request.status,
+            serverLabel: request.statusLabel,
+          );
 
           return WorkspaceTransactionItemViewModel(
-            title: request.posName,
-            reference: reference,
+            title: 'طلب توريد',
+            reference: '#${request.requestId}',
             subtitle: subtitle,
-            formattedAmount:
-                AmountFormatter.format(request.requestTotalAmount),
-            statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
-              request.status,
-              serverLabel: request.statusLabel,
-            ),
-            initials: TextFormatter.avatarInitials(
-              request.posName,
-              maxChars: 2,
-            ),
-            actionLabel: 'اعتماد',
-            onAction: openRequest,
+            formattedAmount: '',
+            statusPresentation: statusPresentation,
+            icon: Icons.inventory_2_rounded,
             onTap: openRequest,
           );
         })

@@ -48,6 +48,56 @@ void main() {
       expect(find.text('معتمدة'), findsOneWidget);
     });
 
+    testWidgets(
+      'keeps long Arabic transaction content inside narrow and wide cards',
+      (tester) async {
+        for (final width in [320.0, 375.0, 600.0]) {
+          tester.view.physicalSize = Size(width, 900);
+          tester.view.devicePixelRatio = 1;
+          await tester.pumpWidget(
+            buildTestableWidget(
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: WorkspaceTransactionTile(
+                  title: 'فاتورة توريد من نقطة البيع الرئيسية',
+                  reference: 'INV-2026-00000000125',
+                  subtitle: 'شراء نقدي • 77 كرت • منذ 10 دقائق • نقطة بيع صنعاء',
+                  formattedAmount: '- 125,000,000 ر.ي',
+                  statusPresentation: EnumPresentation(
+                    label: 'بانتظار مراجعة واعتماد الشبكة',
+                    tone: SemanticTone.warning,
+                    icon: Icons.hourglass_top_rounded,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull, reason: 'width: $width');
+          expect(find.text('فاتورة توريد من نقطة البيع الرئيسية'), findsOneWidget);
+          expect(find.text('بانتظار مراجعة واعتماد الشبكة'), findsOneWidget);
+          expect(find.text('- 125,000,000 ر.ي'), findsOneWidget);
+
+          final tileRect = tester.getRect(find.byType(WorkspaceTransactionTile));
+          for (final target in [
+            find.text('فاتورة توريد من نقطة البيع الرئيسية'),
+            find.text('بانتظار مراجعة واعتماد الشبكة'),
+            find.text('- 125,000,000 ر.ي'),
+          ]) {
+            expect(
+              tileRect.contains(tester.getRect(target).topLeft) &&
+                  tileRect.contains(tester.getRect(target).bottomRight),
+              isTrue,
+              reason: 'content must remain inside tile at width $width',
+            );
+          }
+        }
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+      },
+    );
+
     testWidgets('triggers onTap callback when tapped', (tester) async {
       var tapped = false;
       await tester.pumpWidget(

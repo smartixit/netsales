@@ -27,18 +27,18 @@ void main() {
       );
 
       expect(items, hasLength(1));
-      expect(items.single.title, 'نقطة صنعاء');
-      expect(items.single.reference, 'request');
+      expect(items.single.title, 'طلب توريد');
+      expect(items.single.reference, '#41');
       expect(items.single.subtitle, contains('آجل'));
-      expect(items.single.formattedAmount, contains('1,250'));
-      expect(items.single.actionLabel, 'اعتماد');
+      expect(items.single.formattedAmount, isEmpty);
+      expect(items.single.icon, isNotNull);
+      expect(items.single.onAction, isNull);
+      expect(items.single.statusPresentation.label, 'بانتظار الاعتماد');
+      expect(items.single.statusPresentation.isKnown, isTrue);
 
       items.single.onTap?.call();
       expect(openedRequestId, 41);
 
-      openedRequestId = 0;
-      items.single.onAction?.call();
-      expect(openedRequestId, 41);
     });
   });
 

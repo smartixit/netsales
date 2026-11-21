@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_identity.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_leading.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_summary.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_action.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// Flat transaction row for use inside a containing dashboard section.
-/// The parent owns the surface and separators, avoiding nested mini-cards.
+/// Feature-level transaction row shared by Network and POS dashboards.
+///
+/// The containing section owns the card surface and separators. This widget
+/// owns only the row layout and delegates identity, leading and summary
+/// rendering to focused presentation components.
 class WorkspaceTransactionTile extends StatelessWidget {
   const WorkspaceTransactionTile({
     super.key,
@@ -26,6 +28,9 @@ class WorkspaceTransactionTile extends StatelessWidget {
     this.amountColor,
     this.onTap,
     this.trailingAction,
+    this.showAmount = true,
+    this.showChevron = false,
+    this.showLeading = true,
   });
 
   final String title;
@@ -39,11 +44,17 @@ class WorkspaceTransactionTile extends StatelessWidget {
   final Color? amountColor;
   final VoidCallback? onTap;
   final Widget? trailingAction;
+  final bool showAmount;
+  final bool showChevron;
+  final bool showLeading;
 
   factory WorkspaceTransactionTile.fromItem(
     WorkspaceTransactionItemViewModel item, {
     Key? key,
     Widget? customTrailingAction,
+    bool showAmount = true,
+    bool showChevron = false,
+    bool showLeading = true,
   }) {
     return WorkspaceTransactionTile(
       key: key,
@@ -58,180 +69,81 @@ class WorkspaceTransactionTile extends StatelessWidget {
       icon: item.icon,
       onTap: item.onTap,
       trailingAction: customTrailingAction ??
-          (item.onAction != null
-              ? _ActionBadge(
+          (item.onAction == null
+              ? null
+              : WorkspaceTransactionAction(
                   label: item.actionLabel ?? 'إجراء',
                   onTap: item.onAction!,
-                )
-              : null),
+                )),
+      showAmount: showAmount,
+      showChevron: showChevron,
+      showLeading: showLeading,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final leading = initials != null
-        ? CustomAvatarBadge(
-            initials: initials!,
-            imageUrl: imageUrl,
-            size: AvatarBadgeSize.sm,
-            customDimension: 34,
-            hasPulse: false,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-          )
-        : Container(
-            width: 34.r,
-            height: 34.r,
-            decoration: BoxDecoration(
-              color: (amountColor ?? colors.primary).withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              icon ?? Icons.receipt_long_rounded,
-              color: amountColor ?? colors.primary,
-              size: 18.r,
-            ),
-          );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < AppBreakpoints.mobileSmallMax;
+        final identity = WorkspaceTransactionIdentity(
+          title: title,
+          reference: reference,
+          subtitle: subtitle,
+          compact: compact,
+        );
+        final summary = WorkspaceTransactionSummary(
+          statusPresentation: statusPresentation,
+          formattedAmount: formattedAmount,
+          showAmount: showAmount,
+          showChevron: showChevron,
+          compact: compact,
+          amountColor: amountColor,
+          trailingAction: trailingAction,
+        );
 
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Row(
-          children: [
-            leading,
-            AppSpacing.hSm,
-            Expanded(
-              flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        final content = compact
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.labelMedium.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (reference != null && reference!.isNotEmpty) ...[
-                        SizedBox(width: AppSpacing.xs),
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: AppSpacing.xxs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(AppRadius.xs),
-                            ),
-                            child: Text(
-                              reference!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.labelSmall.copyWith(
-                                color: colors.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (subtitle != null && subtitle!.isNotEmpty) ...[
-                    SizedBox(height: 3.h),
-                    Text(
-                      subtitle!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  identity,
+                  SizedBox(height: AppSpacing.xs),
+                  summary,
                 ],
-              ),
-            ),
-            SizedBox(width: AppSpacing.xs),
-            Flexible(
-              flex: 4,
-              child: Align(
-                alignment: AlignmentDirectional.center,
-                child: trailingAction ??
-                    CustomStatusBadge.fromPresentation(
-                      statusPresentation,
-                      isCompact: true,
-                    ),
-              ),
-            ),
-            SizedBox(width: AppSpacing.xs),
-            Flexible(
-              flex: 3,
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: Text(
-                    formattedAmount,
-                    maxLines: 1,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: amountColor ?? colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(flex: 5, child: identity),
+                  SizedBox(width: AppSpacing.sm),
+                  Flexible(flex: 4, child: summary),
+                ],
+              );
+
+        return CustomInteractiveBounce(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (showLeading) ...[
+                  WorkspaceTransactionLeading(
+                    icon: icon,
+                    accentColor: amountColor,
+                    initials: initials,
+                    imageUrl: imageUrl,
                   ),
-                ),
-              ),
+                  SizedBox(width: AppSpacing.sm),
+                ],
+                Expanded(child: content),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionBadge extends StatelessWidget {
-  const _ActionBadge({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
-          vertical: AppSpacing.xxs,
-        ),
-        decoration: BoxDecoration(
-          color: colors.warning.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(AppRadius.full),
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          style: AppTypography.labelSmall.copyWith(
-            color: colors.warning,
-            fontWeight: FontWeight.w700,
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
+

@@ -312,6 +312,7 @@ class PosWorkspaceController extends GetxController {
       (candidate) =>
           candidate.networkId == link.networkId &&
           candidate.networkPosId == link.networkPosId &&
+          candidate.posId == posId &&
           candidate.status,
     );
     if (posId == null || authorizedLink == null) return;
@@ -469,17 +470,45 @@ class PosWorkspaceController extends GetxController {
   Future<NetworkPosLinkPreviewEntity> previewNetworkLinkChallenge({
     required String payload,
     required int posId,
-  }) =>
-      previewNetworkPosLinkChallengeUseCase(payload: payload, posId: posId);
+  }) {
+    if (activePos.value?.posId != posId) {
+      throw const AppException(
+        'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
+      );
+    }
+
+    return previewNetworkPosLinkChallengeUseCase(
+      payload: payload,
+      posId: posId,
+    );
+  }
 
   Future<bool> confirmNetworkLinkChallenge({
     required String challengeUuid,
     required int posId,
   }) async {
+    if (activePos.value?.posId != posId) {
+      throw const AppException(
+        'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
+      );
+    }
+
     final newLink = await confirmNetworkPosLinkChallengeUseCase(
       challengeUuid: challengeUuid,
       posId: posId,
     );
+
+    if (newLink.posId != posId) {
+      throw const AppException(
+        'لم تتطابق نقطة البيع في استجابة ربط الشبكة مع الطلب.',
+      );
+    }
+
+    // The challenge is bound to the POS captured when scanning started.
+    // If the user switched POS while the request was in flight, the server
+    // confirmation may succeed, but its relationship must not contaminate the
+    // newly selected POS state or persisted network preference.
+    if (activePos.value?.posId != posId) return true;
 
     final existingIndex = networkLinks.indexWhere(
       (link) => link.networkPosId == newLink.networkPosId,

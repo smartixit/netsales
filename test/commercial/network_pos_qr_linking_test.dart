@@ -103,5 +103,42 @@ void main() {
       expect(find.text('شبكة النجوم'), findsOneWidget);
       expect(find.text('تأكيد وإتمام الارتباط'), findsOneWidget);
     });
+
+    testWidgets('NetworkPosLinkConfirmSheet fits compact mobile widths', (tester) async {
+      final preview = NetworkPosLinkPreviewModel.fromJson({
+        'challenge_uuid': 'test-challenge-uuid',
+        'is_targeted': false,
+        'network': {
+          'network_id': 10,
+          'owner_id': 1,
+          'network_name': 'شبكة النجوم',
+          'network_phone_number': '770000000',
+          'network_address': 'شارع الزبيري',
+        },
+      });
+
+      for (final width in [320.0, 375.0]) {
+        tester.view.physicalSize = Size(width, 812);
+        tester.view.devicePixelRatio = 1;
+        await tester.pumpWidget(
+          ScreenUtilInit(
+            designSize: const Size(375, 812),
+            builder: (context, _) => MaterialApp(
+              theme: AppThemes.light,
+              home: Scaffold(
+                body: NetworkPosLinkConfirmSheet(
+                  preview: preview,
+                  onConfirm: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull, reason: 'width: $width');
+        expect(find.text('شبكة النجوم'), findsOneWidget);
+      }
+    });
   });
 }

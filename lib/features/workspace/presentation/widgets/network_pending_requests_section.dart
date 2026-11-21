@@ -58,7 +58,11 @@ class NetworkPendingRequestsSection extends StatelessWidget {
           for (var index = 0; index < items.length; index++) ...[
             if (index > 0)
               Divider(color: colors.outlineVariant.withValues(alpha: 0.3)),
-            WorkspaceTransactionTile.fromItem(items[index]),
+            WorkspaceTransactionTile.fromItem(
+              items[index],
+              showAmount: false,
+              showChevron: true,
+            ),
           ],
         ],
       ),

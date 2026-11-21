@@ -94,16 +94,24 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: AppSpacing.xs),
-                    CustomStatusBadge(
-                      label: statusPres.label,
-                      tone: statusPres.tone,
-                      icon: statusPres.icon,
+                    Flexible(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: CustomStatusBadge(
+                          label: statusPres.label,
+                          tone: statusPres.tone,
+                          icon: statusPres.icon,
+                          isCompact: true,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.sm),
                 Text(
                   preview.displayNetworkName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colors.onSurface,

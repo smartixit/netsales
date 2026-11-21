@@ -32,10 +32,15 @@ class CommercialDetailRow extends StatelessWidget {
           children: [
             Icon(icon, size: 16.r, color: colors.primary),
             SizedBox(width: AppSpacing.xs),
-            Text(
-              label,
-              style: AppTypography.bodySmall.copyWith(
-                color: colors.onSurfaceVariant,
+            Flexible(
+              flex: 3,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
             ),
             SizedBox(width: AppSpacing.xs),

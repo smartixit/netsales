@@ -8,6 +8,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 
@@ -26,26 +27,13 @@ class PosLinkedNetworkSelector extends StatelessWidget {
     return Obx(() {
       if (controller.isLoadingNetworks.value &&
           controller.linkedNetworkOptions.isEmpty) {
-        return CustomSurfaceCard(
-          padding: EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 17.r,
-                height: 17.r,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colors.primary,
-                ),
-              ),
-              AppSpacing.hSm,
-              Text(
-                'جارٍ تحميل شبكات التوريد',
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
+        return const CustomStateView.loading(
+          presentation: CustomStatePresentation.skeletonOnly,
+          skeleton: CustomStateSkeleton(
+            layout: CustomStateSkeletonLayout.list,
+            itemCount: 1,
+            cardHeight: 56,
+            maxColumns: 1,
           ),
         );
       }
@@ -175,13 +163,24 @@ class PosLinkedNetworkSelector extends StatelessWidget {
           ),
           if (controller.hasMoreNetworks.value) ...[
             AppSpacing.vXs,
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: CustomButton.text(
-                text: 'تحميل المزيد من الشبكات',
-                onPressed: controller.loadMoreNetworks,
+            if (controller.isLoadingMoreNetworks.value)
+              const CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 2,
+                  cardHeight: 48,
+                  maxColumns: 1,
+                ),
+              )
+            else
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: CustomButton.text(
+                  text: 'تحميل المزيد من الشبكات',
+                  onPressed: controller.loadMoreNetworks,
+                ),
               ),
-            ),
           ],
         ],
       );
