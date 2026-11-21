@@ -105,6 +105,7 @@ class NetworkCommercialDirectoryController
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
   final Rx<DateTime> invitationClock = DateTime.now().obs;
   final RxBool isExportingInvitation = false.obs;
+  final RxBool isRevokingInvitation = false.obs;
   final RxnString invitationStatusRefreshError = RxnString();
   Timer? _invitationStatusTimer;
   Timer? _invitationClockTimer;
@@ -636,7 +637,12 @@ class NetworkCommercialDirectoryController
 
   Future<void> revokeActiveInvitation() async {
     final challenge = _activeInvitation;
-    if (challenge == null || invitationStatus.value != LinkingChallengeStatus.pending) return;
+    if (challenge == null ||
+        invitationStatus.value != LinkingChallengeStatus.pending ||
+        isRevokingInvitation.value) {
+      return;
+    }
+    isRevokingInvitation.value = true;
     try {
       await revokeNetworkPosLinkChallengeUseCase(challenge.challengeUuid);
       invitationStatus.value = LinkingChallengeStatus.revoked;
@@ -645,6 +651,8 @@ class NetworkCommercialDirectoryController
       Get.back<void>();
     } catch (error) {
       CustomSnackbar.show(title: 'تعذر إلغاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+    } finally {
+      isRevokingInvitation.value = false;
     }
   }
 
