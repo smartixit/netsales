@@ -14,6 +14,7 @@ import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
@@ -29,12 +30,14 @@ class NetworkPosQrInvitationSheet extends StatefulWidget {
     super.key,
     required this.challenge,
     required this.networkName,
+    required this.posName,
     required this.getStatus,
     required this.onRevoke,
   });
 
   final NetworkPosLinkChallengeEntity challenge;
   final String networkName;
+  final String posName;
   final Future<NetworkPosLinkChallengeStatusEntity> Function() getStatus;
   final VoidCallback onRevoke;
 
@@ -109,6 +112,12 @@ class _NetworkPosQrInvitationSheetState
     } finally {
       _isRefreshingStatus = false;
     }
+  }
+
+  String get _expiresAtLabel {
+    final expiry = _expiresAt;
+    if (expiry == null) return 'غير متاح';
+    return DateFormatter.dateTime(expiry.toLocal());
   }
 
   String get _remainingLabel {
@@ -254,7 +263,7 @@ class _NetworkPosQrInvitationSheetState
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        widget.networkName,
+                        '${widget.networkName} • ${widget.posName}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.titleSmall.copyWith(
@@ -381,7 +390,12 @@ class _NetworkPosQrInvitationSheetState
               alignment: Alignment.topLeft,
               child: RepaintBoundary(
                 key: _shareCardKey,
-                child: CustomQrShareCard(payload: widget.challenge.payload),
+                child: CustomQrShareCard(
+                  payload: widget.challenge.payload,
+                  networkName: widget.networkName,
+                  posName: widget.posName,
+                  expiresAtLabel: _expiresAtLabel,
+                ),
               ),
             ),
           ),
