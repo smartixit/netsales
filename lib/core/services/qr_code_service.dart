@@ -200,6 +200,9 @@ class QrCodeService {
   }) async {
     try {
       final exportSize = size ?? _config.defaultExportSize;
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
 
       if (exportSize <= 0) {
         return QrCodeGenerationResult.failure('أبعاد صورة QR غير صحيحة.');
@@ -209,7 +212,7 @@ class QrCodeService {
         size: exportSize,
         format: ui.ImageByteFormat.png,
         decoration: decoration,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
 
       if (byteData == null) {
