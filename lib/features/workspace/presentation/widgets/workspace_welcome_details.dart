@@ -6,8 +6,8 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-class _WelcomeDetails extends StatelessWidget {
-  const _WelcomeDetails({
+class WorkspaceWelcomeDetails extends StatelessWidget {
+  const WorkspaceWelcomeDetails({
     required this.userName,
     required this.userAvatarUrl,
     required this.userInitials,
