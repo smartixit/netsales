@@ -69,6 +69,11 @@ class ProfileController extends GetxController {
     if (workspace == null) return;
 
     await WorkspaceService.to.setActiveWorkspace(workspace);
+    if (workspace == AppWorkspace.network) {
+      await WorkspaceService.to.saveActiveNetworkId(membership.tenantId);
+    } else {
+      await WorkspaceService.to.saveActivePosId(membership.tenantId);
+    }
     await Get.offAllNamed<void>(
       workspace == AppWorkspace.network
           ? AppRoutes.networkWorkspace
