@@ -22,6 +22,7 @@ Map<String, dynamic> _validOverview({
     'request_uuid': 'REQ-90',
     'pos_id': 7,
     'pos_name': 'نقطة الاختبار',
+    'sale_type_label': 'آجل',
     'status': 'PENDING',
     'status_label': 'قيد الانتظار',
   };
@@ -89,6 +90,7 @@ void main() {
       expect(model.sales?.trend.single.invoiceCount, 2);
       expect(model.expenses?.totalAmount, '500.00');
       expect(model.recentPendingRequests.single.requestId, 90);
+      expect(model.recentPendingRequests.single.saleTypeLabel, 'آجل');
       expect(
         model.recentPendingRequests.single.requestTotalAmount,
         '900.00',
