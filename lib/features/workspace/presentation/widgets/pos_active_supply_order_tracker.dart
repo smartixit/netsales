@@ -120,7 +120,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
     final active = colors.warning;
     final rejected = colors.error;
     final decisionLabel = switch (status) {
-      RequestStatus.approved => 'تم الاعتماد',
+      RequestStatus.approved => 'تمت المراجعة',
       RequestStatus.rejected => 'تم الرفض',
       RequestStatus.cancelled => 'تم الإلغاء',
       RequestStatus.pending || RequestStatus.unknown => 'بانتظار الاعتماد',
@@ -171,7 +171,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
           child: Container(
             height: 2.h,
             width: 20.w,
-            color: inactive.withValues(alpha: 0.8),
+            color: (status == RequestStatus.approved ? complete : inactive).withValues(alpha: 0.8),
           ),
         ),
         Expanded(
