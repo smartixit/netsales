@@ -40,7 +40,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
         ),
       );
       canvas.drawPath(
-        _polygon(const [
+        artwork.polygon(const [
           Offset(54, 391),
           Offset(166, 347),
           Offset(244, 379),
@@ -53,7 +53,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
           const Rect.fromLTWH(91, 437, 47, 75),
           const Radius.circular(3),
         ),
-        _solid(const Color(0xFF084C5A)),
+        artwork.solid(const Color(0xFF084C5A)),
       );
   
       // Dark hills and stylized trees behind the storefront.
@@ -69,14 +69,14 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
         ..close();
       canvas.drawPath(
         rearFoliage,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(0, 360, 1000, 200),
           const [Color(0xFF0A6C61), Color(0xFF03444A)],
         ),
       );
   
       // Main shop body, beveled right side and ground plinth.
-      final side = _polygon(const [
+      final side = artwork.polygon(const [
         Offset(665, 313),
         Offset(765, 352),
         Offset(765, 610),
@@ -85,12 +85,12 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
       canvas.drawShadow(side, const Color(0xFF001F27), 20, true);
       canvas.drawPath(
         side,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(665, 313, 100, 315),
           const [Color(0xFF8CCFC0), Color(0xFF367D79)],
         ),
       );
-      final body = _polygon(const [
+      final body = artwork.polygon(const [
         Offset(195, 315),
         Offset(665, 315),
         Offset(665, 628),
@@ -99,7 +99,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
       canvas.drawShadow(body, const Color(0xFF001D28), 24, true);
       canvas.drawPath(
         body,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(195, 315, 470, 313),
           const [Color(0xFFE7FFF6), Color(0xFFB7E9D9), Color(0xFF6EB8AC)],
         ),
@@ -111,7 +111,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
           ..lineTo(665, 340)
           ..lineTo(195, 340)
           ..close(),
-        _solid(const Color(0xFFF5FFF9)),
+        artwork.solid(const Color(0xFFF5FFF9)),
       );
   
       // Left display window with thick teal frame and reflective glass.
@@ -119,13 +119,13 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
         const Rect.fromLTWH(255, 405, 245, 177),
         const Radius.circular(9),
       );
-      canvas.drawRRect(displayFrame, _solid(const Color(0xFF0A4C5A)));
+      canvas.drawRRect(displayFrame, artwork.solid(const Color(0xFF0A4C5A)));
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           const Rect.fromLTWH(267, 417, 221, 153),
           const Radius.circular(5),
         ),
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(267, 417, 221, 153),
           const [Color(0xFF167F89), Color(0xFF084F61)],
         ),
@@ -143,7 +143,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
           ..lineTo(362, 429)
           ..lineTo(362, 450)
           ..lineTo(298, 557),
-        _solid(const Color(0xFFB8F8EB).withValues(alpha: 0.24)),
+        artwork.solid(const Color(0xFFB8F8EB).withValues(alpha: 0.24)),
       );
   
       // Narrow entrance door and its inset glass panel.
@@ -152,14 +152,14 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
           const Rect.fromLTWH(540, 384, 104, 235),
           const Radius.circular(5),
         ),
-        _solid(const Color(0xFF174F58)),
+        artwork.solid(const Color(0xFF174F58)),
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           const Rect.fromLTWH(551, 397, 82, 204),
           const Radius.circular(3),
         ),
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(551, 397, 82, 204),
           const [Color(0xFF2B9091), Color(0xFF0A5864)],
         ),
@@ -174,11 +174,11 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
       canvas.drawCircle(
         const Offset(618, 510),
         5,
-        _solid(const Color(0xFFE7D6A6)),
+        artwork.solid(const Color(0xFFE7D6A6)),
       );
   
       // Canopy roof: dimensional top, alternating fabric panels and scallops.
-      final canopyTop = _polygon(const [
+      final canopyTop = artwork.polygon(const [
         Offset(130, 300),
         Offset(238, 178),
         Offset(700, 178),
@@ -187,19 +187,19 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
       canvas.drawShadow(canopyTop, const Color(0xFF001B25), 18, true);
       canvas.drawPath(
         canopyTop,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(130, 178, 682, 122),
           const [Color(0xFFEFFFF8), Color(0xFF8BCFC0), Color(0xFF3A9A8B)],
         ),
       );
       canvas.drawPath(
-        _polygon(const [
+        artwork.polygon(const [
           Offset(228, 190),
           Offset(700, 190),
           Offset(783, 291),
           Offset(148, 291),
         ]),
-        _solid(const Color(0xFFEEFFF8)),
+        artwork.solid(const Color(0xFFEEFFF8)),
       );
   
       const stripeColors = <Color>[
@@ -238,7 +238,7 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
           ..close();
         canvas.drawPath(
           stripe,
-          _linear(
+          artwork.linear(
             Rect.fromLTWH(left, 190, right - left, 150),
             [stripeColors[index], stripeColors[index].withValues(alpha: 0.84)],
             begin: Alignment.topLeft,
@@ -278,9 +278,9 @@ class WorkspacePosIllustrationPainter extends CustomPainter {
   
       // Foreground shrubs overlap the base of the shop, as in the reference art.
       artwork.drawBush( const Offset(122, 600), 275, 122);
-      _drawBush(canvas, const Offset(355, 639), 285, 112);
-      _drawBush(canvas, const Offset(690, 622), 270, 125);
-      _drawBush(canvas, const Offset(950, 642), 190, 105);
+      artwork.drawBush( const Offset(355, 639), 285, 112);
+      artwork.drawBush( const Offset(690, 622), 270, 125);
+      artwork.drawBush( const Offset(950, 642), 190, 105);
   
       canvas.drawOval(
         const Rect.fromLTWH(140, 640, 680, 24),
