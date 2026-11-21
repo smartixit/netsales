@@ -1,73 +1,80 @@
-import 'package:netsales/core/enums/membership_status.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:flutter/material.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// نوافذ الحوار التفاعلية لقرارات إدارة أعضاء مساحة العمل (MembershipActionDialogs)
-///
-/// تلتزم كلياً بنظام [CustomDialog] الموحد في `lib/widgets/dialogs/`
-/// وتستهلك محرك الحالات [EnumPresentationRegistry] للحصول على المسميات الدلالية الموحدة.
+/// نوافذ الحوار التفاعلية لقرارات إدارة وتعديل عضويات مساحات العمل
 class MembershipActionDialogs {
   MembershipActionDialogs._();
 
-  /// نافذة تأكيد تغيير حالة العضوية (تجميد أو إعادة تفعيل)
+  /// نافذة حوار تأكيد تعديل حالة تفعيل العضو (تجميد / إعادة تنشيط)
   static Future<void> showToggleStatusDialog({
     required String memberName,
-    required bool isCurrentlyActive,
-    required Future<void> Function() onConfirm,
+    required bool willSuspend,
+    required Future<void> Function(String? reason) onConfirm,
   }) async {
-    final targetStatus = isCurrentlyActive
-        ? MembershipStatus.suspended
-        : MembershipStatus.active;
-    final presentation = EnumPresentationRegistry.resolveMembershipStatus(
-      targetStatus,
+    final reasonController = TextEditingController();
+
+    await CustomDialog.show(
+      type: willSuspend ? DialogType.warning : DialogType.confirmation,
+      title: willSuspend ? 'إيقاف عضوية $memberName' : 'إعادة تفعيل عضوية $memberName',
+      message: willSuspend
+          ? 'سيتم إيقاف صلاحيات هذا العضو مؤقتاً ومنعه من الوصول إلى مساحة العمل.'
+          : 'سيتم إعادة تفعيل صلاحيات العضو والسماح له بالوصول إلى مساحة العمل مجدداً.',
+      confirmLabel: willSuspend ? 'تأكيد الإيقاف' : 'تأكيد التفعيل',
+      cancelLabel: 'تراجع',
+      content: Padding(
+        padding: EdgeInsets.only(top: AppSpacing.sm),
+        child: CustomTextField(
+          controller: reasonController,
+          label: 'سبب التعديل (اختياري)',
+          hint: 'أدخل ملاحظة أو سبب التعديل لتوثيقها في سجل التدقيق...',
+          maxLines: 2,
+          isRequired: false,
+          validator: FormValidators.descriptionValidator(isRequired: false),
+        ),
+      ),
+      onConfirm: () async {
+        final reason = reasonController.text.trim().isEmpty
+            ? null
+            : reasonController.text.trim();
+        await onConfirm(reason);
+      },
     );
-
-    final title = isCurrentlyActive ? 'تجميد عضوية' : 'إعادة تفعيل عضوية';
-    final actionText = isCurrentlyActive
-        ? 'تأكيد ${presentation.label}'
-        : 'تأكيد ${presentation.label}';
-    final message = isCurrentlyActive
-        ? 'هل أنت متأكد من رغبتك في تجميد عضوية "$memberName"؟ لن يتمكن من الوصول أو تنفيذ أي عمليات حتى يُعاد تنشيطه.'
-        : 'هل أنت متأكد من رغبتك في إعادة تفعيل عضوية "$memberName" واستعادة صلاحياته التشغيلية؟';
-
-    if (isCurrentlyActive) {
-      final confirmed = await CustomDialog.showWarning(
-        title: title,
-        message: message,
-        confirmLabel: actionText,
-        cancelLabel: 'تراجع',
-      );
-      if (confirmed == true) {
-        await onConfirm();
-      }
-    } else {
-      final confirmed = await CustomDialog.showConfirmation(
-        title: title,
-        message: message,
-        confirmLabel: actionText,
-        cancelLabel: 'تراجع',
-      );
-      if (confirmed == true) {
-        await onConfirm();
-      }
-    }
   }
 
-  /// نافذة تأكيد حذف أو استبعاد العضو من المنشأة
+  /// نافذة حوار تأكيد إنهاء وإزالة عضوية المستخدم
   static Future<void> showRemoveMemberDialog({
     required String memberName,
-    required Future<void> Function() onConfirm,
+    required Future<void> Function(String? reason) onConfirm,
   }) async {
-    final confirmed = await CustomDialog.showDanger(
-      title: 'استبعاد العضو نهائياً',
-      message:
-          'هل أنت متأكد من رغبتك في حذف "$memberName" من فريق العمل؟ سيتم إلغاء كافة صلاحيات الوصول المرتبطة بهذه المنشأة.',
-      confirmLabel: 'تأكيد الحذف',
-      cancelLabel: 'إلغاء',
-    );
+    final reasonController = TextEditingController();
 
-    if (confirmed == true) {
-      await onConfirm();
-    }
+    await CustomDialog.show(
+      type: DialogType.error,
+      title: 'إنهاء عضوية $memberName',
+      message:
+          'هل أنت متأكد من إنهاء عضوية "$memberName" نهائياً؟\nسيتم سحب كافة الصلاحيات وإزالة حسابه من قائمة العاملين بمساحة العمل.',
+      confirmLabel: 'تأكيد إنهاء العضوية',
+      cancelLabel: 'إلغاء',
+      content: Padding(
+        padding: EdgeInsets.only(top: AppSpacing.sm),
+        child: CustomTextField(
+          controller: reasonController,
+          label: 'سبب الإنهاء (اختياري)',
+          hint: 'أدخل سبب إنهاء العضوية لتوثيقه في السجل الأمني...',
+          maxLines: 2,
+          isRequired: false,
+          validator: FormValidators.descriptionValidator(isRequired: false),
+        ),
+      ),
+      onConfirm: () async {
+        final reason = reasonController.text.trim().isEmpty
+            ? null
+            : reasonController.text.trim();
+        await onConfirm(reason);
+      },
+    );
   }
 }

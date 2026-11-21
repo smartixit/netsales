@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/inputs/custom_phone_field.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// شيت إضافة عضو جديد لمساحة العمل (AddMemberSheet)
-///
-/// ودجت عرض نقي 100% يستهلك المكون القياسي [CustomPhoneField]
-/// مع إسناد الصلاحيات من خلال [CustomDropdown].
+/// واجهة سفلية تصريحية بحتة لإدخال بيانات العضو الجديد (Add Member Presentation Sheet)
 class AddMemberSheet extends StatelessWidget {
   const AddMemberSheet({
     super.key,
+    required this.assignableRoles,
     required this.formKey,
     required this.phoneController,
-    required this.selectedRoleId,
-    required this.roles,
+    required this.roleNotifier,
+    required this.statusNotifier,
     required this.isSubmitting,
     required this.onSubmit,
   });
 
+  final List<MembershipRoleEntity> assignableRoles;
   final GlobalKey<FormState> formKey;
   final TextEditingController phoneController;
-  final RxnInt selectedRoleId;
-  final List<MembershipRoleEntity> roles;
+  final ValueNotifier<int?> roleNotifier;
+  final ValueNotifier<String?> statusNotifier;
   final RxBool isSubmitting;
   final VoidCallback onSubmit;
 
@@ -37,41 +37,65 @@ class AddMemberSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // حقل رقم الهاتف المؤسسي الموحد من lib/widgets/inputs/
-          CustomPhoneField(
+          CustomTextField(
             controller: phoneController,
             label: 'رقم هاتف المستخدم',
-            hint: '77XXXXXXX',
-            validator: FormValidators.phoneValidator(
-              fieldName: 'رقم هاتف المستخدم',
-            ),
+            hint: 'أدخل رقم هاتف العضو المسجل بالمنظومة...',
+            keyboardType: TextInputType.phone,
+            prefixIcon: const Icon(Icons.phone_outlined),
+            isRequired: true,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^[0-9+]*$')),
+            ],
+            validator: FormValidators.phoneValidator(fieldName: 'رقم الهاتف'),
           ),
-          AppSpacing.vSm,
-
-          // قائمة اختيار الدور الوظيفي المتاح للإسناد
+          AppSpacing.vMd,
           CustomDropdown<int>(
-            label: 'الدور الوظيفي المعتمد',
-            searchEnabled: false,
-            rxValue: selectedRoleId,
-            items: roles
+            label: 'الدور الوظيفي',
+            hint: 'اختر الدور والصلاحيات الممنوحة للعضو',
+            valueListenable: roleNotifier,
+            items: assignableRoles
                 .map(
                   (role) => DropdownItem<int>(
                     value: role.roleId,
-                    child: Text(role.displayName),
+                    child: Text(role.roleName),
                   ),
                 )
                 .toList(),
-            onChanged: (val) => selectedRoleId.value = val,
+            onChanged: (val) {
+              if (val != null) roleNotifier.value = val;
+            },
           ),
           AppSpacing.vMd,
-
-          // زر تأكيد الإضافة
+          CustomDropdown<String>(
+            label: 'حالة التفعيل الأولية',
+            hint: 'اختر حالة الحساب عند الإضافة',
+            valueListenable: statusNotifier,
+            items: const [
+              DropdownItem(
+                value: 'ACTIVE',
+                child: Text('نشط ومفعل فورياً'),
+              ),
+              DropdownItem(
+                value: 'INVITED',
+                child: Text('بانتظار التأكيد (مدعو)'),
+              ),
+              DropdownItem(
+                value: 'SUSPENDED',
+                child: Text('موقوف مؤقتاً'),
+              ),
+            ],
+            onChanged: (val) {
+              if (val != null) statusNotifier.value = val;
+            },
+          ),
+          AppSpacing.vLg,
           Obx(
             () => CustomButton.primary(
-              text: 'تأكيد إضافة العضو',
-              icon: Icons.person_add_rounded,
+              text: 'إضافة العضو',
+              icon: Icons.check_rounded,
               loading: isSubmitting.value,
-              onPressed: isSubmitting.value ? null : onSubmit,
+              onPressed: onSubmit,
             ),
           ),
         ],

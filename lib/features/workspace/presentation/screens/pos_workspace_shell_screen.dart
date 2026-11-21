@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
-import 'package:netsales/features/membership/presentation/views/pos_members_view.dart';
+import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -40,7 +40,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
           activeIcon: Icons.groups_rounded,
-          content: PosMembersView(embedded: true),
+          content: MembershipsScreen(embedded: true, isNetwork: false),
         ),
         WorkspaceNavItem(
           label: 'التقارير',

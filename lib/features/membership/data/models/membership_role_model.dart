@@ -1,21 +1,32 @@
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 
-/// نموذج بيانات الدور التشغيلي القابل للإسناد للعضو (Data Model)
+/// نموذج بيانات الدور الوظيفي لعضو مساحة العمل للتحويل من وإلى JSON
 class MembershipRoleModel extends MembershipRoleEntity {
   const MembershipRoleModel({
     required super.roleId,
+    required super.roleName,
     required super.roleKey,
-    required super.name,
+    required super.scope,
+    super.description,
   });
 
-  factory MembershipRoleModel.fromJson(Map<String, dynamic> json) =>
-      MembershipRoleModel(
-        roleId: json['role_id'] is int
-            ? json['role_id'] as int
-            : int.tryParse(json['role_id']?.toString() ?? '') ?? 0,
-        roleKey: json['role_key']?.toString() ?? '',
-        name: json['role_key_label']?.toString() ??
-            json['role_name']?.toString() ??
-            '',
-      );
+  factory MembershipRoleModel.fromJson(Map<String, dynamic> json) {
+    return MembershipRoleModel(
+      roleId: json['role_id'] as int? ?? json['id'] as int? ?? 0,
+      roleName: json['role_name'] as String? ?? '',
+      roleKey: json['role_key'] as String? ?? '',
+      scope: json['scope'] as String? ?? '',
+      description: json['description'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'role_id': roleId,
+      'role_name': roleName,
+      'role_key': roleKey,
+      'scope': scope,
+      'description': description,
+    };
+  }
 }

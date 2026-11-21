@@ -1,9 +1,9 @@
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 
-/// العقد المجرد لمستودع إدارة أعضاء مساحات العمل (Domain Repository)
+/// واجهة مستودع إدارة أعضاء مساحات العمل الموحد
 abstract interface class MembershipRepository {
-  // ── عمليات مساحة عمل الشبكة (Network Workspace) ──
+  // ── مساحة عمل الشبكة (Network Workspace) ──
   Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId);
 
   Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(int networkId);
@@ -12,7 +12,7 @@ abstract interface class MembershipRepository {
     required int networkId,
     required String phoneNumber,
     required int roleId,
-    String status = 'ACTIVE',
+    String? status,
   });
 
   Future<WorkspaceMemberEntity> updateNetworkMemberRole({
@@ -35,7 +35,7 @@ abstract interface class MembershipRepository {
     String? reason,
   });
 
-  // ── عمليات مساحة عمل نقطة البيع (POS Workspace) ──
+  // ── مساحة عمل نقطة البيع (POS Workspace) ──
   Future<List<WorkspaceMemberEntity>> getPosMembers(int posId);
 
   Future<List<MembershipRoleEntity>> getPosAssignableRoles(int posId);
@@ -44,7 +44,7 @@ abstract interface class MembershipRepository {
     required int posId,
     required String phoneNumber,
     required int roleId,
-    String status = 'ACTIVE',
+    String? status,
   });
 
   Future<WorkspaceMemberEntity> updatePosMemberRole({

@@ -8,6 +8,7 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_app_b
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_more_navigation_sheet.dart';
 import 'package:netsales/widgets/navigations/custom_floating_bottom_nav_bar.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// Shared adaptive shell: bottom bar on portrait phones, rail on compact-height
 /// phones/tablets, and a persistent drawer on desktop-sized windows.
@@ -90,8 +91,8 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
           onTap: (navIndex) {
             if (hasMoreItems && navIndex == effectiveNavList.length) {
               unawaited(
-                Get.bottomSheet<void>(
-                  WorkspaceMoreNavigationSheet(
+                CustomBottomSheet.show(
+                  child: WorkspaceMoreNavigationSheet(
                     items: mobileMoreItems!,
                     selectedItem: mobileMoreItems!.contains(currentItem)
                         ? currentItem
@@ -103,7 +104,6 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
                     },
                   ),
                   isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
                 ),
               );
               return;

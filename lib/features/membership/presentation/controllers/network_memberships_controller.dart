@@ -1,0 +1,524 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/membership_status.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
+import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
+import 'package:netsales/features/membership/domain/usecases/add_network_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_network_assignable_roles_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_network_members_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/remove_network_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_network_member_role_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_network_member_status_use_case.dart';
+import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_action_dialogs.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
+import 'package:netsales/features/membership/presentation/widgets/sheets/add_member_sheet.dart';
+import 'package:netsales/features/membership/presentation/widgets/sheets/change_member_role_sheet.dart';
+import 'package:netsales/features/membership/presentation/widgets/sheets/member_details_sheet.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+
+/// متحكم إدارة أعضاء وموظفي الشبكة (Network Memberships Controller)
+class NetworkMembershipsController extends BaseMembershipsController {
+  NetworkMembershipsController({
+    required this.getNetworkMembersUseCase,
+    required this.getNetworkAssignableRolesUseCase,
+    required this.addNetworkMemberUseCase,
+    required this.updateNetworkMemberRoleUseCase,
+    required this.updateNetworkMemberStatusUseCase,
+    required this.removeNetworkMemberUseCase,
+  });
+
+  final GetNetworkMembersUseCase getNetworkMembersUseCase;
+  final GetNetworkAssignableRolesUseCase getNetworkAssignableRolesUseCase;
+  final AddNetworkMemberUseCase addNetworkMemberUseCase;
+  final UpdateNetworkMemberRoleUseCase updateNetworkMemberRoleUseCase;
+  final UpdateNetworkMemberStatusUseCase updateNetworkMemberStatusUseCase;
+  final RemoveNetworkMemberUseCase removeNetworkMemberUseCase;
+
+  @override
+  String get pageTitle => 'إدارة أعضاء الشبكة';
+
+  @override
+  String get pageSubtitle =>
+      'إدارة وتعيين صلاحيات موظفي ومشغلي الشبكة، والتحكم بحالات تفعيل العضويات فورياً.';
+
+  @override
+  IconData get pageIcon => Icons.people_alt_rounded;
+
+  @override
+  bool get isNetworkView => true;
+
+  @override
+  Widget? get headerAction => canManageMembers
+      ? CustomButton.primary(
+          text: 'إضافة عضو',
+          icon: Icons.person_add_alt_1_rounded,
+          shape: AppButtonShape.pill,
+          size: AppButtonSize.small,
+          onPressed: openAddMemberSheet,
+        )
+      : null;
+
+  @override
+  String get searchHint => 'بحث باسم العضو، رقم الهاتف، أو المعرف...';
+
+  @override
+  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
+    final colors = context.colors;
+    final activePres = EnumPresentationRegistry.resolveMembershipStatus(
+      MembershipStatus.active,
+    );
+    final suspendedPres = EnumPresentationRegistry.resolveMembershipStatus(
+      MembershipStatus.suspended,
+    );
+    final invitedPres = EnumPresentationRegistry.resolveMembershipStatus(
+      MembershipStatus.invited,
+    );
+
+    return [
+      CustomKpiCardData(
+        label: 'الكل',
+        count: totalMembersCount,
+        icon: Icons.people_alt_rounded,
+        accentColor: colors.primary,
+        statusKey: null,
+      ),
+      CustomKpiCardData(
+        label: activePres.label,
+        count: activeMembersCount,
+        icon: activePres.icon ?? Icons.check_circle_rounded,
+        accentColor: activePres.tone.color(context),
+        statusKey: MembershipStatus.active.wireValue,
+      ),
+      CustomKpiCardData(
+        label: suspendedPres.label,
+        count: suspendedMembersCount,
+        icon: suspendedPres.icon ?? Icons.pause_circle_outline_rounded,
+        accentColor: suspendedPres.tone.color(context),
+        statusKey: MembershipStatus.suspended.wireValue,
+      ),
+      CustomKpiCardData(
+        label: invitedPres.label,
+        count: invitedMembersCount,
+        icon: invitedPres.icon ?? Icons.hourglass_top_rounded,
+        accentColor: invitedPres.tone.color(context),
+        statusKey: MembershipStatus.invited.wireValue,
+      ),
+    ];
+  }
+
+  @override
+  List<CustomSearchFilterOption<String?>> buildFilterOptions(
+    BuildContext context,
+  ) {
+    return [
+      const CustomSearchFilterOption<String?>(
+        label: 'جميع الحالات',
+        value: null,
+        icon: Icons.all_inbox_rounded,
+      ),
+      for (final MembershipStatus status in MembershipStatus.values.where(
+        (MembershipStatus s) => s != MembershipStatus.unknown,
+      ))
+        CustomSearchFilterOption<String?>(
+          label: EnumPresentationRegistry.resolveMembershipStatus(status).label,
+          value: status.wireValue,
+          icon:
+              EnumPresentationRegistry.resolveMembershipStatus(status).icon ??
+              Icons.label_outline_rounded,
+        ),
+    ];
+  }
+
+  @override
+  Widget? buildExtraFilters(BuildContext context) => null;
+
+  @override
+  Widget buildCardActions(BuildContext context, WorkspaceMemberEntity member) {
+    return MembershipCardActions(
+      member: member,
+      isNetworkView: true,
+      onDetails: () => openMemberDetails(member),
+      onChangeRole: canManageMembers && !member.isOwner
+          ? () => openChangeRoleSheet(member)
+          : null,
+      onToggleStatus: canManageMembers && !member.isOwner
+          ? () => promptToggleMemberStatus(member)
+          : null,
+      onRemove: canManageMembers && !member.isOwner
+          ? () => promptRemoveMember(member)
+          : null,
+    );
+  }
+
+  // ── الحالة التفاعلية ──
+  final _allMembers = <WorkspaceMemberEntity>[].obs;
+  @override
+  final members = <WorkspaceMemberEntity>[].obs;
+  final assignableRoles = <MembershipRoleEntity>[].obs;
+
+  @override
+  final isLoading = true.obs;
+  @override
+  final errorMessage = RxnString();
+  @override
+  final statusFilter = RxnString();
+  @override
+  final searchQuery = ''.obs;
+  @override
+  final searchController = TextEditingController();
+  @override
+  final expandedMemberId = RxnInt();
+
+  int _listRevision = 0;
+
+  int get totalMembersCount => _allMembers.length;
+  int get activeMembersCount =>
+      _allMembers.where((m) => m.isActive).length;
+  int get suspendedMembersCount =>
+      _allMembers.where((m) => m.isSuspended).length;
+  int get invitedMembersCount =>
+      _allMembers.where((m) => m.isInvited).length;
+
+  bool get canManageMembers =>
+      PermissionService.to.can(AppPermissions.networksEdit);
+
+  int? get resolvedNetworkId =>
+      WorkspaceService.to.resolveActiveNetworkId([]);
+
+  @override
+  void onInit() {
+    super.onInit();
+    searchController.addListener(() {
+      searchQuery.value = searchController.text;
+    });
+    debounce(
+      searchQuery,
+      (_) => _applyFilters(),
+      time: const Duration(milliseconds: 350),
+    );
+    loadInitialData();
+  }
+
+  @override
+  void onClose() {
+    _listRevision++;
+    searchController.dispose();
+    super.onClose();
+  }
+
+  @override
+  Future<void> refreshMembers() async {
+    await Future.wait([
+      loadMembers(),
+      loadAssignableRoles(),
+    ]);
+  }
+
+  Future<void> loadInitialData() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    await refreshMembers();
+  }
+
+  Future<void> loadMembers() async {
+    final revision = ++_listRevision;
+    final networkId = resolvedNetworkId;
+    if (networkId == null) {
+      isLoading.value = false;
+      errorMessage.value = 'لم يتم تحديد شبكة نشطة لعرض أعضائها.';
+      return;
+    }
+
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      final result = await getNetworkMembersUseCase(networkId);
+      if (revision != _listRevision) return;
+      _allMembers.assignAll(result);
+      _applyFilters();
+    } catch (e) {
+      if (revision != _listRevision) return;
+      errorMessage.value = 'تعذر استرجاع أعضاء الشبكة: ${e.toString()}';
+    } finally {
+      if (revision == _listRevision) {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  Future<void> loadAssignableRoles() async {
+    final networkId = resolvedNetworkId;
+    if (networkId == null) return;
+
+    try {
+      final roles = await getNetworkAssignableRolesUseCase(networkId);
+      assignableRoles.assignAll(roles);
+    } catch (_) {
+      // Fallback
+    }
+  }
+
+  void _applyFilters() {
+    final query = searchQuery.value.trim().toLowerCase();
+    final filter = statusFilter.value;
+
+    final filtered = _allMembers.where((member) {
+      final matchesStatus =
+          filter == null || member.status.wireValue == filter;
+      final matchesQuery = query.isEmpty ||
+          member.displayFullName.toLowerCase().contains(query) ||
+          member.displayPhoneNumber.contains(query) ||
+          member.displayReference.toLowerCase().contains(query) ||
+          member.displayRoleName.toLowerCase().contains(query);
+
+      return matchesStatus && matchesQuery;
+    }).toList(growable: false);
+
+    members.assignAll(filtered);
+  }
+
+  @override
+  void setStatusFilter(String? status) {
+    statusFilter.value = status;
+    _applyFilters();
+  }
+
+  @override
+  void resetFilters() {
+    statusFilter.value = null;
+    searchController.clear();
+    searchQuery.value = '';
+    _applyFilters();
+  }
+
+  @override
+  void toggleAccordion(int memberId) {
+    if (expandedMemberId.value == memberId) {
+      expandedMemberId.value = null;
+    } else {
+      expandedMemberId.value = memberId;
+    }
+  }
+
+  @override
+  void openMemberDetails(WorkspaceMemberEntity member) {
+    CustomBottomSheet.show<void>(
+      title: 'الملف التعريفي للعضو',
+      subtitle: 'تفاصيل الحساب والصلاحيات وتاريخ الانضمام',
+      leadingIcon: Icons.badge_outlined,
+      child: MemberDetailsSheet(
+        member: member,
+        onClose: () => Get.back<void>(),
+      ),
+    );
+  }
+
+  void openAddMemberSheet() {
+    final formKey = GlobalKey<FormState>();
+    final phoneController = TextEditingController();
+    final roleNotifier = ValueNotifier<int?>(
+      assignableRoles.isNotEmpty ? assignableRoles.first.roleId : null,
+    );
+    final statusNotifier = ValueNotifier<String?>('ACTIVE');
+    final isSubmitting = false.obs;
+
+    CustomBottomSheet.show<void>(
+      title: 'إضافة عضو جديد',
+      subtitle: 'أدخل رقم هاتف العضو المسجل وحدد الدور والصلاحيات',
+      leadingIcon: Icons.person_add_alt_1_rounded,
+      child: AddMemberSheet(
+        assignableRoles: assignableRoles,
+        formKey: formKey,
+        phoneController: phoneController,
+        roleNotifier: roleNotifier,
+        statusNotifier: statusNotifier,
+        isSubmitting: isSubmitting,
+        onSubmit: () async {
+          if (!formKey.currentState!.validate()) return;
+          if (roleNotifier.value == null) {
+            CustomSnackbar.show(
+              title: 'تنبيه',
+              message: 'يرجى اختيار الدور الوظيفي للعضو.',
+              type: SnackType.warning,
+            );
+            return;
+          }
+
+          final networkId = resolvedNetworkId;
+          if (networkId == null) return;
+
+          isSubmitting.value = true;
+          try {
+            await addNetworkMemberUseCase(
+              networkId: networkId,
+              phoneNumber: phoneController.text.trim(),
+              roleId: roleNotifier.value!,
+              status: statusNotifier.value,
+            );
+            Get.back<void>();
+            CustomSnackbar.show(
+              title: 'تمت الإضافة بنجاح',
+              message: 'تمت إضافة العضو للشبكة وتعيين الدور بنجاح.',
+              type: SnackType.success,
+            );
+            await loadMembers();
+          } catch (e) {
+            CustomSnackbar.show(
+              title: 'فشلت إضافة العضو',
+              message: e.toString(),
+              type: SnackType.error,
+            );
+          } finally {
+            isSubmitting.value = false;
+          }
+        },
+      ),
+    );
+  }
+
+  void openChangeRoleSheet(WorkspaceMemberEntity member) {
+    final formKey = GlobalKey<FormState>();
+    final reasonController = TextEditingController();
+    final roleNotifier = ValueNotifier<int?>(
+      assignableRoles.any((r) => r.roleId == member.roleId)
+          ? member.roleId
+          : (assignableRoles.isNotEmpty ? assignableRoles.first.roleId : null),
+    );
+    final isSubmitting = false.obs;
+
+    CustomBottomSheet.show<void>(
+      title: 'تعديل الدور الوظيفي',
+      subtitle: 'ترقية أو تغيير صلاحيات ${member.displayFullName}',
+      leadingIcon: Icons.manage_accounts_rounded,
+      child: ChangeMemberRoleSheet(
+        member: member,
+        assignableRoles: assignableRoles,
+        formKey: formKey,
+        reasonController: reasonController,
+        roleNotifier: roleNotifier,
+        isSubmitting: isSubmitting,
+        onSubmit: () async {
+          if (!formKey.currentState!.validate()) return;
+          if (roleNotifier.value == null) {
+            CustomSnackbar.show(
+              title: 'تنبيه',
+              message: 'يرجى اختيار الدور الجديد.',
+              type: SnackType.warning,
+            );
+            return;
+          }
+
+          final networkId = resolvedNetworkId;
+          if (networkId == null) return;
+
+          isSubmitting.value = true;
+          try {
+            await updateNetworkMemberRoleUseCase(
+              networkId: networkId,
+              userId: member.userId,
+              roleId: roleNotifier.value!,
+              reason: reasonController.text.trim().isNotEmpty
+                  ? reasonController.text.trim()
+                  : null,
+            );
+            Get.back<void>();
+            CustomSnackbar.show(
+              title: 'تم تحديث الدور',
+              message: 'تم تحديث دور وصلاحيات العضو ${member.displayFullName} بنجاح.',
+              type: SnackType.success,
+            );
+            await loadMembers();
+          } catch (e) {
+            CustomSnackbar.show(
+              title: 'فشل تحديث الدور',
+              message: e.toString(),
+              type: SnackType.error,
+            );
+          } finally {
+            isSubmitting.value = false;
+          }
+        },
+      ),
+    );
+  }
+
+  void promptToggleMemberStatus(WorkspaceMemberEntity member) {
+    final willSuspend = member.isActive;
+    final nextStatus = willSuspend ? 'SUSPENDED' : 'ACTIVE';
+
+    MembershipActionDialogs.showToggleStatusDialog(
+      memberName: member.displayFullName,
+      willSuspend: willSuspend,
+      onConfirm: (reason) async {
+        final networkId = resolvedNetworkId;
+        if (networkId == null) return;
+
+        try {
+          await updateNetworkMemberStatusUseCase(
+            networkId: networkId,
+            userId: member.userId,
+            status: nextStatus,
+            reason: reason,
+          );
+          CustomSnackbar.show(
+            title: willSuspend ? 'تم إيقاف العضوية' : 'تم تفعيل العضوية',
+            message: willSuspend
+                ? 'تم إيقاف صلاحيات ${member.displayFullName} مؤقتاً.'
+                : 'تمت إعادة تفعيل حساب ${member.displayFullName} بنجاح.',
+            type: SnackType.success,
+          );
+          await loadMembers();
+        } catch (e) {
+          CustomSnackbar.show(
+            title: 'فشل تعديل حالة العضوية',
+            message: e.toString(),
+            type: SnackType.error,
+          );
+        }
+      },
+    );
+  }
+
+  void promptRemoveMember(WorkspaceMemberEntity member) {
+    MembershipActionDialogs.showRemoveMemberDialog(
+      memberName: member.displayFullName,
+      onConfirm: (reason) async {
+        final networkId = resolvedNetworkId;
+        if (networkId == null) return;
+
+        try {
+          await removeNetworkMemberUseCase(
+            networkId: networkId,
+            userId: member.userId,
+            reason: reason,
+          );
+          CustomSnackbar.show(
+            title: 'تم إنهاء العضوية',
+            message: 'تمت إزالة ${member.displayFullName} من قائمة أعضاء الشبكة بنجاح.',
+            type: SnackType.success,
+          );
+          await loadMembers();
+        } catch (e) {
+          CustomSnackbar.show(
+            title: 'فشل إنهاء العضوية',
+            message: e.toString(),
+            type: SnackType.error,
+          );
+        }
+      },
+    );
+  }
+}

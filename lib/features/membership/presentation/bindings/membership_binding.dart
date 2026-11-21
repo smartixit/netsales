@@ -1,32 +1,30 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/membership/data/datasources/membership_remote_data_source.dart';
 import 'package:netsales/features/membership/data/datasources/membership_remote_data_source_impl.dart';
 import 'package:netsales/features/membership/data/repositories/membership_repository_impl.dart';
 import 'package:netsales/features/membership/domain/repositories/membership_repository.dart';
-import 'package:netsales/features/membership/domain/usecases/network/add_network_member_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/network/get_network_assignable_roles_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/network/get_network_members_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/network/remove_network_member_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/network/update_network_member_role_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/network/update_network_member_status_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/add_pos_member_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/get_pos_assignable_roles_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/get_pos_members_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/remove_pos_member_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/update_pos_member_role_use_case.dart';
-import 'package:netsales/features/membership/domain/usecases/pos/update_pos_member_status_use_case.dart';
-import 'package:netsales/features/membership/presentation/controllers/network_members_controller.dart';
-import 'package:netsales/features/membership/presentation/controllers/pos_members_controller.dart';
+import 'package:netsales/features/membership/domain/usecases/add_network_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/add_pos_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_network_assignable_roles_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_network_members_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_pos_assignable_roles_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/get_pos_members_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/remove_network_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/remove_pos_member_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_network_member_role_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_network_member_status_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_pos_member_role_use_case.dart';
+import 'package:netsales/features/membership/domain/usecases/update_pos_member_status_use_case.dart';
+import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
+import 'package:netsales/features/membership/presentation/controllers/network_memberships_controller.dart';
+import 'package:netsales/features/membership/presentation/controllers/pos_memberships_controller.dart';
 
-/// نطاق حقن التبعيات النظيف لإدارة أعضاء مساحات العمل
+/// ربط التبعيات لدورة حياة إدارة أعضاء مساحات العمل
 class MembershipBinding extends Bindings {
-  MembershipBinding();
-
   @override
   void dependencies() {
+    // 1. Data Source & Repository
     registerLazyIfAbsent<MembershipRemoteDataSource>(
       () => const MembershipRemoteDataSourceImpl(),
       fenix: true,
@@ -36,7 +34,7 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
 
-    // ── حالات استخدام شبكة التزويد ──
+    // 2. حالات استخدام شبكة التزويد
     registerLazyIfAbsent<GetNetworkMembersUseCase>(
       () => GetNetworkMembersUseCase(Get.find<MembershipRepository>()),
       fenix: true,
@@ -62,7 +60,7 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
 
-    // ── حالات استخدام نقطة البيع ──
+    // 3. حالات استخدام نقطة البيع
     registerLazyIfAbsent<GetPosMembersUseCase>(
       () => GetPosMembersUseCase(Get.find<MembershipRepository>()),
       fenix: true,
@@ -88,10 +86,9 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
 
-    // ── المتحكمات المستقلة ──
-    registerLazyIfAbsent<NetworkMembersController>(
-      () => NetworkMembersController(
-        getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
+    // 4. المتحكمات الملموسة
+    registerLazyIfAbsent<NetworkMembershipsController>(
+      () => NetworkMembershipsController(
         getNetworkMembersUseCase: Get.find<GetNetworkMembersUseCase>(),
         getNetworkAssignableRolesUseCase:
             Get.find<GetNetworkAssignableRolesUseCase>(),
@@ -105,9 +102,8 @@ class MembershipBinding extends Bindings {
       fenix: true,
     );
 
-    registerLazyIfAbsent<PosMembersController>(
-      () => PosMembersController(
-        getMyPosUseCase: Get.find<GetMyPosUseCase>(),
+    registerLazyIfAbsent<PosMembershipsController>(
+      () => PosMembershipsController(
         getPosMembersUseCase: Get.find<GetPosMembersUseCase>(),
         getPosAssignableRolesUseCase:
             Get.find<GetPosAssignableRolesUseCase>(),
@@ -118,6 +114,14 @@ class MembershipBinding extends Bindings {
             Get.find<UpdatePosMemberStatusUseCase>(),
         removePosMemberUseCase: Get.find<RemovePosMemberUseCase>(),
       ),
+      fenix: true,
+    );
+
+    // 5. الاستراتيجية الافتراضية
+    registerLazyIfAbsent<BaseMembershipsController>(
+      () => Get.isRegistered<PosMembershipsController>()
+          ? Get.find<PosMembershipsController>()
+          : Get.find<NetworkMembershipsController>(),
       fenix: true,
     );
   }

@@ -3,13 +3,13 @@ import 'package:netsales/features/membership/domain/entities/membership_role_ent
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 import 'package:netsales/features/membership/domain/repositories/membership_repository.dart';
 
-/// تطبيق مستودع دورة حياة أعضاء مساحات العمل بنظام NetSales (مطابق لنمط RequestRepositoryImpl)
+/// تطبيق مستودع إدارة أعضاء مساحات العمل الموحد
 class MembershipRepositoryImpl implements MembershipRepository {
   final MembershipRemoteDataSource _remoteDataSource;
 
   const MembershipRepositoryImpl(this._remoteDataSource);
 
-  // ── شبكة التزويد ──
+  // ── مساحة عمل الشبكة (Network Workspace) ──
 
   @override
   Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId) async {
@@ -18,8 +18,10 @@ class MembershipRepositoryImpl implements MembershipRepository {
   }
 
   @override
-  Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(int networkId) async {
-    final response = await _remoteDataSource.getNetworkRoles(networkId);
+  Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(
+    int networkId,
+  ) async {
+    final response = await _remoteDataSource.getNetworkAssignableRoles(networkId);
     return response.data ?? [];
   }
 
@@ -28,14 +30,14 @@ class MembershipRepositoryImpl implements MembershipRepository {
     required int networkId,
     required String phoneNumber,
     required int roleId,
-    String status = 'ACTIVE',
+    String? status,
   }) async {
     final response = await _remoteDataSource.addNetworkMember(
       networkId,
-      {
+      data: {
         'user_phone_number': phoneNumber,
         'role_id': roleId,
-        'status': status,
+        'status': status ?? 'ACTIVE',
       },
     );
     return response.data!;
@@ -51,7 +53,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
     final response = await _remoteDataSource.updateNetworkMemberRole(
       networkId,
       userId,
-      {
+      data: {
         'role_id': roleId,
         if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
       },
@@ -69,7 +71,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
     final response = await _remoteDataSource.updateNetworkMemberStatus(
       networkId,
       userId,
-      {
+      data: {
         'status': status,
         if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
       },
@@ -92,7 +94,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
     );
   }
 
-  // ── نقطة البيع ──
+  // ── مساحة عمل نقطة البيع (POS Workspace) ──
 
   @override
   Future<List<WorkspaceMemberEntity>> getPosMembers(int posId) async {
@@ -102,7 +104,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
 
   @override
   Future<List<MembershipRoleEntity>> getPosAssignableRoles(int posId) async {
-    final response = await _remoteDataSource.getPosRoles(posId);
+    final response = await _remoteDataSource.getPosAssignableRoles(posId);
     return response.data ?? [];
   }
 
@@ -111,14 +113,14 @@ class MembershipRepositoryImpl implements MembershipRepository {
     required int posId,
     required String phoneNumber,
     required int roleId,
-    String status = 'ACTIVE',
+    String? status,
   }) async {
     final response = await _remoteDataSource.addPosMember(
       posId,
-      {
+      data: {
         'user_phone_number': phoneNumber,
         'role_id': roleId,
-        'status': status,
+        'status': status ?? 'ACTIVE',
       },
     );
     return response.data!;
@@ -134,7 +136,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
     final response = await _remoteDataSource.updatePosMemberRole(
       posId,
       userId,
-      {
+      data: {
         'role_id': roleId,
         if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
       },
@@ -152,7 +154,7 @@ class MembershipRepositoryImpl implements MembershipRepository {
     final response = await _remoteDataSource.updatePosMemberStatus(
       posId,
       userId,
-      {
+      data: {
         'status': status,
         if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
       },

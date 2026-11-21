@@ -5,11 +5,11 @@ import 'package:netsales/features/membership/data/datasources/membership_remote_
 import 'package:netsales/features/membership/data/models/membership_role_model.dart';
 import 'package:netsales/features/membership/data/models/workspace_member_model.dart';
 
-/// تطبيق مصدر البيانات عن بُعد لإدارة أعضاء مساحات العمل عبر ApiService
+/// تطبيق مصدر البيانات البعيد لعضويات مساحات العمل عبر ApiService وApiConstants
 class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   const MembershipRemoteDataSourceImpl();
 
-  // ── شبكة التزويد (Network Workspace) ──
+  // ── مساحة عمل الشبكة (Network Workspace) ──
 
   @override
   Future<ApiResponse<List<WorkspaceMemberModel>>> getNetworkMembers(
@@ -23,6 +23,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
               .map(
                 (item) => WorkspaceMemberModel.fromJson(
                   item as Map<String, dynamic>,
+                  defaultTenantId: networkId,
                 ),
               )
               .toList();
@@ -33,7 +34,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<List<MembershipRoleModel>>> getNetworkRoles(
+  Future<ApiResponse<List<MembershipRoleModel>>> getNetworkAssignableRoles(
     int networkId,
   ) {
     return ApiService.instance.get<List<MembershipRoleModel>>(
@@ -55,14 +56,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
 
   @override
   Future<ApiResponse<WorkspaceMemberModel>> addNetworkMember(
-    int networkId,
-    Map<String, dynamic> data,
-  ) {
+    int networkId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.post<WorkspaceMemberModel>(
       ApiConstants.networkMembers(networkId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: networkId,
       ),
     );
   }
@@ -70,14 +72,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   @override
   Future<ApiResponse<WorkspaceMemberModel>> updateNetworkMemberRole(
     int networkId,
-    int userId,
-    Map<String, dynamic> data,
-  ) {
+    int userId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.put<WorkspaceMemberModel>(
       ApiConstants.networkMemberRole(networkId, userId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: networkId,
       ),
     );
   }
@@ -85,14 +88,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   @override
   Future<ApiResponse<WorkspaceMemberModel>> updateNetworkMemberStatus(
     int networkId,
-    int userId,
-    Map<String, dynamic> data,
-  ) {
+    int userId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.put<WorkspaceMemberModel>(
       ApiConstants.networkMemberStatus(networkId, userId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: networkId,
       ),
     );
   }
@@ -109,7 +113,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
     );
   }
 
-  // ── نقطة البيع (POS Workspace) ──
+  // ── مساحة عمل نقطة البيع (POS Workspace) ──
 
   @override
   Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(
@@ -123,6 +127,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
               .map(
                 (item) => WorkspaceMemberModel.fromJson(
                   item as Map<String, dynamic>,
+                  defaultTenantId: posId,
                 ),
               )
               .toList();
@@ -133,7 +138,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse<List<MembershipRoleModel>>> getPosRoles(
+  Future<ApiResponse<List<MembershipRoleModel>>> getPosAssignableRoles(
     int posId,
   ) {
     return ApiService.instance.get<List<MembershipRoleModel>>(
@@ -155,14 +160,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
 
   @override
   Future<ApiResponse<WorkspaceMemberModel>> addPosMember(
-    int posId,
-    Map<String, dynamic> data,
-  ) {
+    int posId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.post<WorkspaceMemberModel>(
       ApiConstants.posMembers(posId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: posId,
       ),
     );
   }
@@ -170,14 +176,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   @override
   Future<ApiResponse<WorkspaceMemberModel>> updatePosMemberRole(
     int posId,
-    int userId,
-    Map<String, dynamic> data,
-  ) {
+    int userId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.put<WorkspaceMemberModel>(
       ApiConstants.posMemberRole(posId, userId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: posId,
       ),
     );
   }
@@ -185,14 +192,15 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   @override
   Future<ApiResponse<WorkspaceMemberModel>> updatePosMemberStatus(
     int posId,
-    int userId,
-    Map<String, dynamic> data,
-  ) {
+    int userId, {
+    required Map<String, dynamic> data,
+  }) {
     return ApiService.instance.put<WorkspaceMemberModel>(
       ApiConstants.posMemberStatus(posId, userId),
       data: data,
       fromJson: (resData) => WorkspaceMemberModel.fromJson(
         resData as Map<String, dynamic>,
+        defaultTenantId: posId,
       ),
     );
   }
