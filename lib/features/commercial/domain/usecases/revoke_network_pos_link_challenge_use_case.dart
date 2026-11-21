@@ -1,5 +1,6 @@
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
+/// حالة استخدام إلغاء وإبطال دعوة الربط المشفرة
 class RevokeNetworkPosLinkChallengeUseCase {
   const RevokeNetworkPosLinkChallengeUseCase(this._repository);
 

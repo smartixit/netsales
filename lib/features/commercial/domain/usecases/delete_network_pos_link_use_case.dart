@@ -1,5 +1,6 @@
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
+/// حالة استخدام فك الارتباط التجاري
 class DeleteNetworkPosLinkUseCase {
   const DeleteNetworkPosLinkUseCase(this._repository);
 

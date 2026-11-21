@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/enums/network_status.dart';
+import 'package:netsales/core/enums/pos_status.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -35,6 +37,18 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
         isNetworkView ? link.posOwnerName : link.networkOwnerName;
     final location =
         isNetworkView ? link.posLocation : link.networkLocation;
+
+    final statusPres = isNetworkView
+        ? EnumPresentationRegistry.resolvePosStatus(
+            link.pos?.typedStatus ??
+                (link.status ? PosStatus.active : PosStatus.inactive),
+            serverLabel: link.pos?.statusLabel,
+          )
+        : EnumPresentationRegistry.resolveNetworkStatus(
+            link.network?.typedStatus ??
+                (link.status ? NetworkStatus.active : NetworkStatus.inactive),
+            serverLabel: link.network?.statusLabel,
+          );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -75,15 +89,13 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
                   partnerRef,
                   style: AppTypography.labelSmall.copyWith(
                     color: colors.onSurfaceVariant,
-                    fontFamily: 'monospace',
                   ),
                 ),
                 SizedBox(height: AppSpacing.xs),
                 CustomStatusBadge(
-                  label: link.isActive ? 'ارتباط نشط' : 'ارتباط مجمد',
-                  tone: link.isActive
-                      ? SemanticTone.success
-                      : SemanticTone.warning,
+                  label: statusPres.label,
+                  tone: statusPres.tone,
+                  icon: statusPres.icon,
                 ),
               ],
             ),
@@ -110,24 +122,27 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
                   onTap: () => UrlLauncherService.callPhone(phone),
                 ),
                 Divider(
-                    color: colors.outlineVariant.withValues(alpha: .4),
-                    height: 12.h),
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
                 CommercialDetailRow(
                   icon: Icons.person_outline_rounded,
                   label: 'المسؤول التجاري',
                   value: manager,
                 ),
                 Divider(
-                    color: colors.outlineVariant.withValues(alpha: .4),
-                    height: 12.h),
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
                 CommercialDetailRow(
                   icon: Icons.place_outlined,
                   label: 'العنوان والموقع',
                   value: location,
                 ),
                 Divider(
-                    color: colors.outlineVariant.withValues(alpha: .4),
-                    height: 12.h),
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
                 CommercialDetailRow(
                   icon: Icons.event_available_rounded,
                   label: 'تاريخ بدء الارتباط',
@@ -142,6 +157,7 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
           CustomButton.primary(
             text: 'إغلاق',
             size: AppButtonSize.medium,
+            shape: AppButtonShape.pill,
             onPressed: () => Get.back<void>(),
           ),
           SizedBox(height: AppSpacing.md),

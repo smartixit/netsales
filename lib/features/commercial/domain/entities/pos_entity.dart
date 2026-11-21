@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -44,7 +42,6 @@ class PosEntity extends Equatable {
   final String? createdAt;
   final String? updatedAt;
 
-  /// مرجع نقطة البيع الأصلي للعرض والنسخ (UUID المعتمد أو المعرف الرقمي)
   String get displayReference {
     if (posUuid.trim().isNotEmpty) {
       return posUuid.trim();
@@ -52,22 +49,18 @@ class PosEntity extends Equatable {
     return '#$posId';
   }
 
-  /// الاسم المنسق للعرض
   String get displayName =>
       posName.trim().isNotEmpty ? posName.trim() : 'نقطة بيع #$posId';
 
-  /// هاتف التواصل المنسق
   String get displayPhone => posPhoneNumber.trim().isNotEmpty
       ? posPhoneNumber.trim()
       : 'غير متوفر';
 
-  /// اسم المسؤول أو المالك المنسق
   String get displayOwnerName =>
       ownerName != null && ownerName!.trim().isNotEmpty
           ? ownerName!.trim()
           : 'غير محدد';
 
-  /// العنوان والموقع الجغرافي المنسق
   String get displayLocation {
     final segments = <String>[
       if (governorateName != null && governorateName!.trim().isNotEmpty)
@@ -82,17 +75,11 @@ class PosEntity extends Equatable {
     }
     if (area.isNotEmpty) return area;
     if (addr != null && addr.isNotEmpty) return addr;
-    log(directorateName.toString());
-    log(governorateName.toString());
-    log(addr.toString());
-    log(area.toString());
     return 'غير محدد';
   }
 
-  /// تاريخ الإنشاء المحول
   DateTime? get parsedCreatedAt => DateTime.tryParse(createdAt ?? '');
 
-  /// صيغة تاريخ الإنشاء المنسقة
   String get formattedCreatedAt => parsedCreatedAt != null
       ? DateFormatter.date(parsedCreatedAt!)
       : (createdAt ?? 'غير متوفر');

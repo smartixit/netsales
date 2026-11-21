@@ -7,13 +7,13 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
 /// العقد التجريدي لمستودع العلاقات التجارية ونقاط البيع والشبكات
 abstract class CommercialRepository {
-  /// جلب الشبكات المصرح للمستخدم بالوصول إليها
+  /// استرجاع الشبكات المصرح للمستخدم بالوصول إليها
   Future<List<NetworkEntity>> getMyNetworks();
 
-  /// جلب نقاط البيع المصرح للمستخدم بالوصول إليها
+  /// استرجاع نقاط البيع المصرح للمستخدم بالوصول إليها
   Future<List<PosEntity>> getMyPos();
 
-  /// جلب قائمة نقاط البيع المرتبطة بشبكة محددة مع الفلترة والترقيم بالمؤشر
+  /// استرجاع قائمة نقاط البيع المرتبطة بشبكة محددة مع الفلترة والترقيم بالمؤشر
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
     required int networkId,
     bool? status,
@@ -22,7 +22,7 @@ abstract class CommercialRepository {
     int? perPage,
   });
 
-  /// جلب قائمة الشبكات المرتبطة بنقطة بيع محددة مع الفلترة والترقيم بالمؤشر
+  /// استرجاع قائمة الشبكات المرتبطة بنقطة بيع محددة مع الفلترة والترقيم بالمؤشر
   Future<PaginatedList<NetworkPosLinkEntity>> getPosNetworksList({
     required int posId,
     bool? status,
@@ -31,7 +31,7 @@ abstract class CommercialRepository {
     int? perPage,
   });
 
-  /// ربط يدوي مباشر بين شبكة ونقطة بيع
+  /// ربط مباشر بين شبكة ونقطة بيع
   Future<NetworkPosLinkEntity> createNetworkPosLink({
     required int networkId,
     required int posId,
@@ -43,7 +43,7 @@ abstract class CommercialRepository {
   /// فك الارتباط التجاري بين الشبكة ونقطة البيع
   Future<void> deleteNetworkPosLink(int networkPosId);
 
-  /// توليد دعوة وتحدي ربط مشفر عبر رمز QR من جانب الشبكة
+  /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
@@ -51,26 +51,26 @@ abstract class CommercialRepository {
     int durationMinutes = 15,
   });
 
-  /// فحص ومعاينة دعوة الربط المشفرة من جانب نقطة البيع
+  /// فحص ومعاينة دعوة الربط المشفرة
   Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
     int? posId,
     String? posUuid,
   });
 
-  /// تأكيد اعتماد الربط التجاري من جانب نقطة البيع عبر التحدي المشفر
+  /// تأكيد اعتماد الربط التجاري عبر التحدي المشفر
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
     int? posId,
     String? posUuid,
   });
 
-  /// إلغاء دعوة الربط المشفرة
+  /// إلغاء وإبطال دعوة الربط المشفرة
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
 
-  /// جلب التفاصيل الكاملة لشبكة محددة
+  /// استرجاع التفاصيل الكاملة لشبكة محددة
   Future<NetworkEntity> getNetworkDetails(int networkId);
 
-  /// جلب التفاصيل الكاملة لنقطة بيع محددة
+  /// استرجاع التفاصيل الكاملة لنقطة بيع محددة
   Future<PosEntity> getPosDetails(int posId);
 }

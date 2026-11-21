@@ -135,7 +135,7 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                               'أضف بياناً ومبلغاً لكل بند من بنود المصروف',
                           icon: Icons.list_alt_rounded,
                           trailing: CustomButton.secondary(
-                            text: 'إضافة بند +',
+                            text: 'إضافة بند',
                             icon: Icons.add_rounded,
                             size: AppButtonSize.small,
                             shape: AppButtonShape.pill,

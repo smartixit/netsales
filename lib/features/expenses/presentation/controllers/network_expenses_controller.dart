@@ -92,7 +92,7 @@ class NetworkExpensesController extends GetxController {
 
   Widget? get headerAction => canCreateExpense
       ? CustomButton.primary(
-          text: 'تسجيل مصروف +',
+          text: 'تسجيل مصروف',
           icon: Icons.add_rounded,
           shape: AppButtonShape.pill,
           size: AppButtonSize.small,

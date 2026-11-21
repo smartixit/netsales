@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
-import 'package:netsales/features/commercial/presentation/widgets/sheets/pos_qr_confirm_link_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
 
 void main() {
   group('Network–POS QR Linking & Challenge Tests', () {
@@ -70,9 +70,19 @@ void main() {
       expect(preview.isTargeted, isFalse);
     });
 
-    testWidgets('PosQrConfirmLinkSheet renders text field and button',
+    testWidgets('NetworkPosLinkConfirmSheet renders preview network details',
         (tester) async {
-      final controller = TextEditingController();
+      final preview = NetworkPosLinkPreviewModel.fromJson({
+        'challenge_uuid': 'test-challenge-uuid',
+        'is_targeted': false,
+        'network': {
+          'network_id': 10,
+          'owner_id': 1,
+          'network_name': 'شبكة النجوم',
+          'network_phone_number': '770000000',
+          'network_address': 'شارع الزبيري',
+        },
+      });
 
       await tester.pumpWidget(
         ScreenUtilInit(
@@ -80,10 +90,8 @@ void main() {
           builder: (context, _) => MaterialApp(
             theme: AppThemes.light,
             home: Scaffold(
-              body: PosQrConfirmLinkSheet(
-                codeController: controller,
-                preview: null,
-                onPreview: () {},
+              body: NetworkPosLinkConfirmSheet(
+                preview: preview,
                 onConfirm: () {},
               ),
             ),
@@ -92,7 +100,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('فحص كود الدعوة'), findsOneWidget);
+      expect(find.text('شبكة النجوم'), findsOneWidget);
+      expect(find.text('تأكيد وإتمام الارتباط'), findsOneWidget);
     });
   });
 }

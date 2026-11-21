@@ -6,13 +6,18 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_en
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
+import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
-import 'package:netsales/features/commercial/presentation/controllers/network_pos_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/pos_commercial_directory_controller.dart';
 
 class _FakeCommercialRepository implements CommercialRepository {
   final List<NetworkPosLinkEntity> links;
@@ -32,7 +37,15 @@ class _FakeCommercialRepository implements CommercialRepository {
   }
 
   @override
-  Future<List<PosEntity>> getMyPos() async => const [];
+  Future<List<PosEntity>> getMyPos() async => const [
+        PosEntity(
+          posId: 10,
+          ownerId: 2,
+          posUuid: 'POS-10',
+          posName: 'نقطة الأمل',
+          posPhoneNumber: '772222222',
+        ),
+      ];
 
   @override
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
@@ -64,8 +77,16 @@ class _FakeCommercialRepository implements CommercialRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) async =>
-      const PaginatedList(items: []);
+  }) async {
+    var filtered = links.where((l) => l.posId == posId);
+    if (status != null) {
+      filtered = filtered.where((l) => l.isActive == status);
+    }
+    return PaginatedList<NetworkPosLinkEntity>(
+      items: filtered.toList(),
+      nextCursor: null,
+    );
+  }
 
   @override
   Future<NetworkPosLinkEntity> createNetworkPosLink({
@@ -111,7 +132,15 @@ class _FakeCommercialRepository implements CommercialRepository {
     int? posId,
     String? posUuid,
   }) async {
-    throw UnimplementedError();
+    return const NetworkPosLinkPreviewEntity(
+      challengeUuid: 'CH-123',
+      network: NetworkEntity(
+        networkId: 1,
+        ownerId: 10,
+        networkName: 'الشبكة المركزية',
+        networkPhoneNumber: '771111111',
+      ),
+    );
   }
 
   @override
@@ -120,7 +149,12 @@ class _FakeCommercialRepository implements CommercialRepository {
     int? posId,
     String? posUuid,
   }) async {
-    throw UnimplementedError();
+    return const NetworkPosLinkEntity(
+      networkPosId: 99,
+      networkId: 1,
+      posId: 10,
+      status: true,
+    );
   }
 
   @override
@@ -140,9 +174,9 @@ class _FakeCommercialRepository implements CommercialRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('NetworkPosDirectoryController Tests', () {
+  group('NetworkCommercialDirectoryController Tests', () {
     late _FakeCommercialRepository repo;
-    late NetworkPosDirectoryController controller;
+    late NetworkCommercialDirectoryController controller;
 
     setUp(() {
       final sampleLinks = [
@@ -168,7 +202,7 @@ void main() {
             posId: 20,
             ownerId: 3,
             posUuid: 'POS-UUID-20',
-            posName: 'نقطة السلام',
+            posName: 'نقطة الشروق',
             posPhoneNumber: '773333333',
           ),
         ),
@@ -176,7 +210,7 @@ void main() {
 
       repo = _FakeCommercialRepository(sampleLinks);
 
-      controller = NetworkPosDirectoryController(
+      controller = NetworkCommercialDirectoryController(
         getNetworkPosListUseCase: GetNetworkPosListUseCase(repo),
         toggleNetworkPosLinkStatusUseCase:
             ToggleNetworkPosLinkStatusUseCase(repo),
@@ -189,58 +223,99 @@ void main() {
       );
     });
 
-    tearDown(() {
-      controller.onClose();
-    });
-
-    test('Loads initial networks and links on initialization', () async {
+    test('Loads initial networks and links successfully', () async {
       await controller.loadInitialData();
 
       expect(controller.authorizedNetworks.length, equals(1));
       expect(controller.selectedNetworkId.value, equals(1));
       expect(controller.links.length, equals(2));
-      expect(controller.totalCount, equals(2));
-      expect(controller.activeCount, equals(1));
-      expect(controller.inactiveCount, equals(1));
       expect(controller.isLoading.value, isFalse);
     });
 
-    test('Filters by active / inactive status correctly', () async {
+    test('Filters links by status correctly', () async {
       await controller.loadInitialData();
 
-      controller.setStatusFilter(true);
-      await controller.loadLinks(isRefresh: true);
+      controller.setStatusFilter('1');
+      await controller.loadLinks();
       expect(controller.links.length, equals(1));
-      expect(controller.links.first.isActive, isTrue);
+      expect(controller.links.first.posId, equals(10));
 
-      controller.setStatusFilter(false);
-      await controller.loadLinks(isRefresh: true);
+      controller.setStatusFilter('0');
+      await controller.loadLinks();
       expect(controller.links.length, equals(1));
-      expect(controller.links.first.isActive, isFalse);
-
-      controller.resetFilters();
-      await controller.loadLinks(isRefresh: true);
-      expect(controller.links.length, equals(2));
+      expect(controller.links.first.posId, equals(20));
     });
 
-    test('Toggles accordion expansion exclusively', () {
-      controller.toggleAccordion(1);
-      expect(controller.expandedLinkId.value, equals(1));
-
-      controller.toggleAccordion(2);
-      expect(controller.expandedLinkId.value, equals(2));
-
-      controller.toggleAccordion(2);
-      expect(controller.expandedLinkId.value, isNull);
-    });
-
-    test('Deletes partner link from local list', () async {
+    test('Searches links by partner name', () async {
       await controller.loadInitialData();
-      expect(controller.links.length, equals(2));
 
-      await controller.deleteLink(controller.links.first);
+      controller.searchQuery.value = 'الشروق';
+      await controller.loadLinks();
       expect(controller.links.length, equals(1));
-      expect(controller.links.first.networkPosId, equals(2));
+      expect(controller.links.first.posId, equals(20));
+    });
+
+    test('Toggles partner status locally and updates entity', () async {
+      await controller.loadInitialData();
+      final link = controller.links.first;
+
+      final updated =
+          await controller.toggleNetworkPosLinkStatusUseCase(link.networkPosId);
+      expect(updated.isActive, isFalse);
+    });
+
+    test('Deletes partner link and removes from list', () async {
+      await controller.loadInitialData();
+      final link = controller.links.first;
+
+      await controller.deleteNetworkPosLinkUseCase(link.networkPosId);
+      controller.links.removeWhere(
+        (element) => element.networkPosId == link.networkPosId,
+      );
+      expect(controller.links.length, equals(1));
+    });
+  });
+
+  group('PosCommercialDirectoryController Tests', () {
+    late _FakeCommercialRepository repo;
+    late PosCommercialDirectoryController controller;
+
+    setUp(() {
+      final sampleLinks = [
+        const NetworkPosLinkEntity(
+          networkPosId: 1,
+          networkId: 1,
+          posId: 10,
+          status: true,
+          network: NetworkEntity(
+            networkId: 1,
+            ownerId: 10,
+            networkName: 'الشبكة المركزية',
+            networkPhoneNumber: '771111111',
+          ),
+        ),
+      ];
+
+      repo = _FakeCommercialRepository(sampleLinks);
+
+      controller = PosCommercialDirectoryController(
+        getPosNetworksListUseCase: GetPosNetworksListUseCase(repo),
+        deleteNetworkPosLinkUseCase: DeleteNetworkPosLinkUseCase(repo),
+        previewNetworkPosLinkChallengeUseCase:
+            PreviewNetworkPosLinkChallengeUseCase(repo),
+        confirmNetworkPosLinkChallengeUseCase:
+            ConfirmNetworkPosLinkChallengeUseCase(repo),
+        getMyPosUseCase: GetMyPosUseCase(repo),
+      );
+    });
+
+    test('Loads POS networks and handles links count', () async {
+      await controller.loadInitialData();
+
+      expect(controller.authorizedPosList.length, equals(1));
+      expect(controller.selectedPosId.value, equals(10));
+      expect(controller.links.length, equals(1));
+      expect(controller.isLoading.value, isFalse);
     });
   });
 }

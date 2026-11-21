@@ -1,6 +1,6 @@
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
-/// نموذج بيانات نقطة البيع لمطابقة عقد الخادم (POS Model)
+/// نموذج بيانات نقطة البيع التجارية (POS Model)
 class PosModel extends PosEntity {
   const PosModel({
     required super.posId,
@@ -23,21 +23,27 @@ class PosModel extends PosEntity {
   });
 
   factory PosModel.fromJson(Map<String, dynamic> json) {
-    String? resolvedOwnerName;
-    if (json['pos_holder_name'] != null) {
-      resolvedOwnerName = json['pos_holder_name']?.toString();
-    } else if (json['owner'] is Map) {
-      resolvedOwnerName = json['owner']['user_full_name']?.toString();
-    }
-
     String? govName;
-    if (json['governorate'] is Map) {
+    if (json['governorate'] is Map<String, dynamic>) {
       govName = json['governorate']['governorate_name']?.toString();
+    } else if (json['governorate_name'] != null) {
+      govName = json['governorate_name']?.toString();
     }
 
     String? dirName;
-    if (json['directorate'] is Map) {
+    if (json['directorate'] is Map<String, dynamic>) {
       dirName = json['directorate']['directorate_name']?.toString();
+    } else if (json['directorate_name'] != null) {
+      dirName = json['directorate_name']?.toString();
+    }
+
+    String? ownerFullName;
+    if (json['owner'] is Map<String, dynamic>) {
+      ownerFullName = json['owner']['user_full_name']?.toString();
+    } else if (json['pos_holder_name'] != null) {
+      ownerFullName = json['pos_holder_name']?.toString();
+    } else if (json['owner_name'] != null) {
+      ownerFullName = json['owner_name']?.toString();
     }
 
     return PosModel(
@@ -54,7 +60,7 @@ class PosModel extends PosEntity {
       directorateName: dirName,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
-      ownerName: resolvedOwnerName,
+      ownerName: ownerFullName,
       posProfileLogoUrl: json['pos_profile_logo']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
@@ -72,9 +78,11 @@ class PosModel extends PosEntity {
       'pos_address': posAddress,
       'governorate_id': governorateId,
       'directorate_id': directorateId,
+      'governorate_name': governorateName,
+      'directorate_name': directorateName,
       'status': status,
       'status_label': statusLabel,
-      'pos_holder_name': ownerName,
+      'owner_name': ownerName,
       'pos_profile_logo': posProfileLogoUrl,
       'created_at': createdAt,
       'updated_at': updatedAt,

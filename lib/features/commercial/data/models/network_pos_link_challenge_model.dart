@@ -2,7 +2,7 @@ import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 
-/// نموذج بيانات تحدي ودعوة ربط نقطة البيع بالشبكة عبر QR
+/// نموذج بيانات دعوة وتحدي ربط نقطة البيع بالشبكة عبر QR
 class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
   const NetworkPosLinkChallengeModel({
     required super.challengeId,
@@ -21,6 +21,16 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
   });
 
   factory NetworkPosLinkChallengeModel.fromJson(Map<String, dynamic> json) {
+    NetworkModel? netModel;
+    if (json['network'] is Map<String, dynamic>) {
+      netModel = NetworkModel.fromJson(json['network'] as Map<String, dynamic>);
+    }
+
+    PosModel? pModel;
+    if (json['pos'] is Map<String, dynamic>) {
+      pModel = PosModel.fromJson(json['pos'] as Map<String, dynamic>);
+    }
+
     return NetworkPosLinkChallengeModel(
       challengeId: (json['challenge_id'] as num?)?.toInt() ?? 0,
       challengeUuid: json['challenge_uuid']?.toString() ?? '',
@@ -33,12 +43,8 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
       consumedAt: json['consumed_at']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
-      network: json['network'] is Map<String, dynamic>
-          ? NetworkModel.fromJson(json['network'] as Map<String, dynamic>)
-          : null,
-      pos: json['pos'] is Map<String, dynamic>
-          ? PosModel.fromJson(json['pos'] as Map<String, dynamic>)
-          : null,
+      network: netModel,
+      pos: pModel,
     );
   }
 
@@ -55,6 +61,10 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
       'consumed_at': consumedAt,
       'created_at': createdAt,
       'updated_at': updatedAt,
+      if (network != null && network is NetworkModel)
+        'network': (network! as NetworkModel).toJson(),
+      if (pos != null && pos is PosModel)
+        'pos': (pos! as PosModel).toJson(),
     };
   }
 }

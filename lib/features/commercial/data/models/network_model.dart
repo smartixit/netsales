@@ -1,6 +1,6 @@
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 
-/// نموذج بيانات الشبكة لمطابقة عقد الخادم (Network Model)
+/// نموذج بيانات مزود الشبكة التجاري (Network Model)
 class NetworkModel extends NetworkEntity {
   const NetworkModel({
     required super.networkId,
@@ -23,22 +23,28 @@ class NetworkModel extends NetworkEntity {
   });
 
   factory NetworkModel.fromJson(Map<String, dynamic> json) {
-    // دعم استخراج الاسم من كائن المالك إذا وجد
-    String? resolvedOwnerName;
-    if (json['network_holder_name'] != null) {
-      resolvedOwnerName = json['network_holder_name']?.toString();
-    } else if (json['owner'] is Map) {
-      resolvedOwnerName = json['owner']['user_full_name']?.toString();
-    }
-
+    // استخراج أسماء المحافظة والمديرية إن وُجدت العلاقات محملة
     String? govName;
-    if (json['governorate'] is Map) {
+    if (json['governorate'] is Map<String, dynamic>) {
       govName = json['governorate']['governorate_name']?.toString();
+    } else if (json['governorate_name'] != null) {
+      govName = json['governorate_name']?.toString();
     }
 
     String? dirName;
-    if (json['directorate'] is Map) {
+    if (json['directorate'] is Map<String, dynamic>) {
       dirName = json['directorate']['directorate_name']?.toString();
+    } else if (json['directorate_name'] != null) {
+      dirName = json['directorate_name']?.toString();
+    }
+
+    String? ownerFullName;
+    if (json['owner'] is Map<String, dynamic>) {
+      ownerFullName = json['owner']['user_full_name']?.toString();
+    } else if (json['network_holder_name'] != null) {
+      ownerFullName = json['network_holder_name']?.toString();
+    } else if (json['owner_name'] != null) {
+      ownerFullName = json['owner_name']?.toString();
     }
 
     return NetworkModel(
@@ -55,7 +61,7 @@ class NetworkModel extends NetworkEntity {
       directorateName: dirName,
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
-      ownerName: resolvedOwnerName,
+      ownerName: ownerFullName,
       networkProfileLogoUrl: json['network_profile_logo']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
@@ -73,9 +79,11 @@ class NetworkModel extends NetworkEntity {
       'network_address': networkAddress,
       'governorate_id': governorateId,
       'directorate_id': directorateId,
+      'governorate_name': governorateName,
+      'directorate_name': directorateName,
       'status': status,
       'status_label': statusLabel,
-      'network_holder_name': ownerName,
+      'owner_name': ownerName,
       'network_profile_logo': networkProfileLogoUrl,
       'created_at': createdAt,
       'updated_at': updatedAt,

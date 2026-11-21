@@ -5,7 +5,7 @@ import 'package:netsales/features/commercial/data/models/network_pos_link_model.
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
-/// واجهة مصدر البيانات البعيد للعلاقات التجارية
+/// العقد التجريدي لمصدر البيانات البعيد للعلاقات التجارية
 abstract class CommercialRemoteDataSource {
   Future<List<NetworkModel>> getMyNetworks();
 
