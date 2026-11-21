@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_vector_painters.dart';
 
@@ -17,6 +18,8 @@ class WorkspaceWelcomeHero extends StatelessWidget {
   const WorkspaceWelcomeHero({
     super.key,
     required this.userName,
+    required this.userAvatarUrl,
+    required this.userInitials,
     required this.role,
     required this.artwork,
     this.dateText,
@@ -25,6 +28,8 @@ class WorkspaceWelcomeHero extends StatelessWidget {
   });
 
   final String userName;
+  final String? userAvatarUrl;
+  final String userInitials;
   final String role;
   final WorkspaceWelcomeArtwork artwork;
   final String? dateText;
@@ -87,6 +92,8 @@ class WorkspaceWelcomeHero extends StatelessWidget {
                     flex: 6,
                     child: _WelcomeDetails(
                       userName: userName,
+                      userAvatarUrl: userAvatarUrl,
+                      userInitials: userInitials,
                       role: role,
                       dateText: dateText,
                       actionLabel: actionLabel,
@@ -117,6 +124,8 @@ class WorkspaceWelcomeHero extends StatelessWidget {
 class _WelcomeDetails extends StatelessWidget {
   const _WelcomeDetails({
     required this.userName,
+    required this.userAvatarUrl,
+    required this.userInitials,
     required this.role,
     this.dateText,
     this.actionLabel,
@@ -124,6 +133,8 @@ class _WelcomeDetails extends StatelessWidget {
   });
 
   final String userName;
+  final String? userAvatarUrl;
+  final String userInitials;
   final String role;
   final String? dateText;
   final String? actionLabel;
@@ -136,26 +147,52 @@ class _WelcomeDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'مرحباً بعودتك',
-          maxLines: 1,
-          textAlign: TextAlign.end,
-          style: AppTypography.titleSmall.copyWith(
-            color: Colors.white.withValues(alpha: 0.94),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: 3.h),
-        Text(
-          userName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.end,
-          style: AppTypography.titleLarge.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CustomAvatarBadge(
+              imageUrl: userAvatarUrl,
+              initials: userInitials,
+              size: AvatarBadgeSize.md,
+              customDimension: 44,
+              hasPulse: false,
+              borderRadius: BorderRadius.circular(AppRadius.full),
+              gradientColors: const [
+                Color(0xFFFFE7AD),
+                Color(0xFFE7B45D),
+              ],
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'مرحباً بعودتك',
+                    maxLines: 1,
+                    textAlign: TextAlign.end,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.94),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    userName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: AppTypography.titleLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         SizedBox(height: 7.h),
         Row(
