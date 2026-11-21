@@ -63,6 +63,8 @@ class WorkspaceService extends GetxService {
       }
     }
 
+    if (currentUser != null) bindDefaultActiveMembership(currentUser);
+
     log(
       '🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}',
     );
@@ -213,9 +215,35 @@ class WorkspaceService extends GetxService {
 
     if (resolvedWorkspace != null) {
       await setActiveWorkspace(resolvedWorkspace);
+      bindDefaultActiveMembership(user);
     } else {
       await storage.remove(StorageKeys.activeWorkspaceKey);
     }
+  }
+
+  void bindDefaultActiveMembership(UserModel user) {
+    if (currentWorkspace.value == AppWorkspace.network) {
+      final memberships = user.workspaceMemberships
+          .where((item) => item.isNetwork && item.tenantId > 0)
+          .toList(growable: false);
+      final selectedId = savedActiveNetworkId;
+      final selected = memberships.firstWhereOrNull(
+            (item) => item.tenantId == selectedId,
+          ) ??
+          (memberships.isEmpty ? null : memberships.first);
+      bindActiveMembership(RoleScope.network, selected?.tenantId);
+      return;
+    }
+
+    final memberships = user.workspaceMemberships
+        .where((item) => item.isPos && item.tenantId > 0)
+        .toList(growable: false);
+    final selectedId = savedActivePosId;
+    final selected = memberships.firstWhereOrNull(
+          (item) => item.tenantId == selectedId,
+        ) ??
+        (memberships.isEmpty ? null : memberships.first);
+    bindActiveMembership(RoleScope.pos, selected?.tenantId);
   }
 
   /// Rebind UI permissions to the exact active tenant membership.
