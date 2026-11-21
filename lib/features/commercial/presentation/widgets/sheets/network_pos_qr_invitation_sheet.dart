@@ -347,7 +347,7 @@ class _NetworkPosQrInvitationSheetState
           ),
           SizedBox(height: AppSpacing.xs),
           Text(
-            'ينتهي في: ${_expiresAtLabel}',
+            'ينتهي في: $_expiresAtLabel',
             textAlign: TextAlign.center,
             style: AppTypography.labelSmall.copyWith(
               color: colors.onSurfaceVariant,
