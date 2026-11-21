@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
