@@ -5,7 +5,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
 class PosProcurementApprovalProgress extends StatelessWidget {
-  const PosProcurementApprovalProgress({required this.presentation});
+  const PosProcurementApprovalProgress({super.key, required this.presentation});
 
   final EnumPresentation presentation;
 
