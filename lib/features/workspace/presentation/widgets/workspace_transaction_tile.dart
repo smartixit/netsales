@@ -274,9 +274,8 @@ class WorkspaceTransactionTile extends StatelessWidget {
           SizedBox(height: 4.h),
           _buildSubtitle(colors, compact: true),
         ],
-        ...[
-          SizedBox(height: AppSpacing.xs),
-          Wrap(
+        SizedBox(height: AppSpacing.xs),
+        Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: AppSpacing.sm,
@@ -288,9 +287,8 @@ class WorkspaceTransactionTile extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: 240.r),
                   child: _buildAmount(colors, compact: true),
                 ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ],
     );
   }
