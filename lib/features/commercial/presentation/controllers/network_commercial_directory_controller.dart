@@ -101,7 +101,6 @@ class NetworkCommercialDirectoryController
   final RxBool isResolvingInvitationTarget = false.obs;
   final Rxn<PosEntity> resolvedInvitationTarget = Rxn<PosEntity>();
 
-  final GlobalKey invitationShareCardKey = GlobalKey();
   final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
   final Rx<DateTime> invitationClock = DateTime.now().obs;
