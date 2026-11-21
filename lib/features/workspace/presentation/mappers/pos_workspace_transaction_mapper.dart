@@ -65,7 +65,7 @@ class PosWorkspaceTransactionMapper {
       invoice.saleTypeLabel,
     );
     final subtitleParts = [
-      if (saleTypeLabel != null) saleTypeLabel,
+      ?saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
       ?voucherDetail,
     ];
@@ -98,7 +98,7 @@ class PosWorkspaceTransactionMapper {
       request.saleTypeLabel,
     );
     final subtitle = [
-      if (saleTypeLabel != null) saleTypeLabel,
+      ?saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
     ].join(' • ');
 
