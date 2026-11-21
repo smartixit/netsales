@@ -30,7 +30,7 @@ class ProfileScreen extends GetView<ProfileController> {
           return const CustomStateView.loading(
             presentation: CustomStatePresentation.skeletonOnly,
             skeleton: CustomStateSkeleton(
-              layout: CustomStateSkeletonLayout.dashboard,
+              layout: CustomStateSkeletonLayout.cards,
               itemCount: 3,
               cardHeight: 132,
               hasLeading: true,
