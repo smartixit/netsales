@@ -5,6 +5,7 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_ch
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 
 /// العقد التجريدي لمستودع العلاقات التجارية ونقاط البيع والشبكات
 abstract class CommercialRepository {
@@ -45,7 +46,7 @@ abstract class CommercialRepository {
   Future<void> deleteNetworkPosLink(int networkPosId);
 
   /// التحقق من نقطة بيع محددة بواسطة المعرف التجاري قبل إصدار الدعوة.
-  Future<PosEntity> resolveNetworkLinkablePos({
+  Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
   });
