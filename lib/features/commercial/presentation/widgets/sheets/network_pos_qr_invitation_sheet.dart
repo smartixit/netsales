@@ -263,8 +263,29 @@ class _NetworkPosQrInvitationSheetState
                       ),
                       SizedBox(height: 3.h),
                       Text(
-                        '${widget.networkName} • ${widget.posName}',
-                        maxLines: 2,
+                        'الشبكة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        widget.networkName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'نقطة البيع المستهدفة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        widget.posName,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
@@ -323,6 +344,15 @@ class _NetworkPosQrInvitationSheetState
                 ),
               ),
             ],
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            'ينتهي في: ${_expiresAtLabel}',
+            textAlign: TextAlign.center,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
