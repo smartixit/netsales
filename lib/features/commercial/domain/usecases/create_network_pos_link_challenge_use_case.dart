@@ -9,13 +9,11 @@ class CreateNetworkPosLinkChallengeUseCase {
 
   Future<NetworkPosLinkChallengeEntity> call({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) {
     return _repository.createNetworkPosLinkChallenge(
       networkId: networkId,
-      posId: posId,
       posUuid: posUuid,
       durationMinutes: durationMinutes,
     );
