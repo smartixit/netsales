@@ -30,7 +30,7 @@ class NetworkWorkspaceTransactionMapper {
             reference: reference,
             subtitle: subtitle,
             formattedAmount:
-                '${AmountFormatter.format(request.requestTotalAmount)}',
+                AmountFormatter.format(request.requestTotalAmount),
             statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
               request.status,
               serverLabel: request.statusLabel,
