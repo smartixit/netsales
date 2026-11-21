@@ -46,6 +46,44 @@ enum NotificationType {
 
   bool get isKnown => this != NotificationType.unknown;
 
+  /// التصنيف العام لنوع الإشعار (مطابق لتصنيفات الباكيند)
+  String get category {
+    switch (this) {
+      case NotificationType.saleInvoiceCreated:
+      case NotificationType.saleInvoiceCompleted:
+      case NotificationType.saleInvoiceCancelled:
+      case NotificationType.walletDeposit:
+      case NotificationType.walletWithdrawal:
+      case NotificationType.walletTransfer:
+        return 'FINANCIAL';
+
+      case NotificationType.voucherRequestCreated:
+      case NotificationType.voucherRequestApproved:
+      case NotificationType.voucherRequestRejected:
+      case NotificationType.voucherRequestCancelled:
+      case NotificationType.networkApproved:
+      case NotificationType.networkRejected:
+      case NotificationType.posApproved:
+      case NotificationType.posRejected:
+        return 'OPERATIONAL';
+
+      case NotificationType.supportTicketCreated:
+      case NotificationType.supportTicketReplied:
+      case NotificationType.supportTicketClosed:
+        return 'SUPPORT';
+
+      case NotificationType.securityLoginAlert:
+      case NotificationType.securityDeviceBlocked:
+      case NotificationType.securityPasswordChanged:
+        return 'SECURITY';
+
+      case NotificationType.systemAnnouncement:
+      case NotificationType.generalInfo:
+      case NotificationType.unknown:
+        return 'SYSTEM';
+    }
+  }
+
   String get defaultRoute {
     final isPos = WorkspaceService.instance.activeWorkspace == AppWorkspace.pos;
 

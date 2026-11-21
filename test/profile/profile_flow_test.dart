@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/enums/role_key.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/core/models/user_model.dart';
@@ -166,9 +169,9 @@ void main() {
         expect(profile.statusLabel, 'مفعّل');
         expect(profile.twoFactorEnabled, isFalse);
         expect(profile.memberships, hasLength(2));
-        expect(profile.memberships[0].scope, 'NETWORK');
+        expect(profile.memberships[0].scope, RoleScope.network);
         expect(profile.memberships[0].tenantId, 101);
-        expect(profile.memberships[1].scope, 'POS');
+        expect(profile.memberships[1].scope, RoleScope.pos);
         expect(profile.memberships[1].tenantId, 202);
       },
     );
@@ -178,13 +181,14 @@ void main() {
         userId: 5,
         fullName: 'حساب تجريبي',
         phoneNumber: '770000005',
-        status: 'ACTIVE',
+        status: UserStatus.active,
         twoFactorEnabled: true,
+        mustChangePassword: false,
         memberships: [
           ProfileMembershipEntity(
-            scope: 'NETWORK',
+            scope: RoleScope.network,
             tenantId: 3,
-            roleKey: 'NETWORK_OWNER',
+            roleKey: RoleKey.networkOwner,
             roleName: 'مالك الشبكة',
           ),
         ],

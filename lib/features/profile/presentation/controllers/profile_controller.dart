@@ -81,12 +81,15 @@ class ProfileController extends GetxController {
     );
   }
 
-  Future<void> openSecuritySettings() =>
-      Get.toNamed<void>(AppRoutes.securitySettings);
+  Future<void> openSecuritySettings() async {
+    await Get.toNamed<void>(AppRoutes.securitySettings);
+  }
 
-  Future<void> openActiveSessions() =>
-      Get.toNamed<void>(AppRoutes.activeSessions);
+  Future<void> openActiveSessions() async {
+    await Get.toNamed<void>(AppRoutes.activeSessions);
+  }
 
-  Future<void> openPasswordSettings() =>
-      Get.toNamed<void>(AppRoutes.securitySettings);
+  Future<void> openPasswordSettings() async {
+    await Get.toNamed<void>(AppRoutes.securitySettings);
+  }
 }

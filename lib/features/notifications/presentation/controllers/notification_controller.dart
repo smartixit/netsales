@@ -38,11 +38,35 @@ class NotificationController extends GetxController {
   /// null = الكل، false = غير المقروءة، true = المقروءة
   final selectedFilter = Rxn<bool>();
 
+  /// تصنيف الدومين: null = الكل، FINANCIAL، OPERATIONAL، SECURITY، SUPPORT، SYSTEM
+  final selectedCategory = RxnString();
+
   final searchController = TextEditingController();
   final searchQuery = ''.obs;
 
   bool get hasMore => nextCursor.value != null && nextCursor.value!.isNotEmpty;
-  bool get isEmpty => !isLoading.value && notifications.isEmpty;
+  bool get isEmpty => !isLoading.value && filteredNotifications.isEmpty;
+
+  // ── مؤشرات الـ VIP التنفيذية ──
+  int get totalCount => notifications.length;
+  int get financialCount => notifications
+      .where((n) => n.notificationType.category == 'FINANCIAL')
+      .length;
+  int get operationalCount => notifications
+      .where((n) => n.notificationType.category == 'OPERATIONAL')
+      .length;
+  int get securityCount => notifications
+      .where((n) => n.notificationType.category == 'SECURITY')
+      .length;
+
+  /// القائمة المفلترة حسب التصنيف المختار محلياً
+  List<NotificationItemEntity> get filteredNotifications {
+    final cat = selectedCategory.value;
+    if (cat == null) return notifications;
+    return notifications
+        .where((n) => n.notificationType.category == cat)
+        .toList();
+  }
 
   int _loadRevision = 0;
 
@@ -91,11 +115,21 @@ class NotificationController extends GetxController {
     loadNotifications(isRefresh: true);
   }
 
+  /// تغيير تصنيف الدومين (مالية، عمليات، أمان، إلخ)
+  void setCategory(String? category) {
+    if (selectedCategory.value == category) {
+      selectedCategory.value = null;
+    } else {
+      selectedCategory.value = category;
+    }
+  }
+
   /// إعادة تعيين الفلاتر والبحث
   void resetFilters() {
     searchController.clear();
     searchQuery.value = '';
     selectedFilter.value = null;
+    selectedCategory.value = null;
     loadNotifications(isRefresh: true);
   }
 

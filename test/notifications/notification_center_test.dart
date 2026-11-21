@@ -376,5 +376,55 @@ void main() {
       final expected = DateFormatter.timeAgo(recent.createdAt!);
       expect(recent.relativeTime, equals(expected));
     });
+
+    test(
+      'Scenario 14: VIP KPI counters compute categories accurately',
+      () async {
+        await controller.loadInitialData();
+
+        expect(controller.totalCount, equals(3));
+        // sample1 is voucherRequestCreated (OPERATIONAL)
+        // sample2 is saleInvoiceCompleted (FINANCIAL)
+        // sample3 is walletDeposit (FINANCIAL)
+        expect(controller.financialCount, equals(2));
+        expect(controller.operationalCount, equals(1));
+        expect(controller.securityCount, equals(0));
+      },
+    );
+
+    test('Scenario 15: Category filtering updates filteredNotifications and toggles cleanly', () async {
+      await controller.loadInitialData();
+
+      expect(controller.filteredNotifications.length, equals(3));
+
+      // Filter FINANCIAL
+      controller.setCategory('FINANCIAL');
+      expect(controller.selectedCategory.value, equals('FINANCIAL'));
+      expect(controller.filteredNotifications.length, equals(2));
+      expect(
+        controller.filteredNotifications.every(
+          (n) => n.notificationType.category == 'FINANCIAL',
+        ),
+        isTrue,
+      );
+
+      // Toggle off
+      controller.setCategory('FINANCIAL');
+      expect(controller.selectedCategory.value, isNull);
+      expect(controller.filteredNotifications.length, equals(3));
+
+      // Filter OPERATIONAL
+      controller.setCategory('OPERATIONAL');
+      expect(controller.filteredNotifications.length, equals(1));
+      expect(
+        controller.filteredNotifications.first.notificationId,
+        equals(101),
+      );
+
+      // Reset filters clears category
+      controller.resetFilters();
+      expect(controller.selectedCategory.value, isNull);
+      expect(controller.filteredNotifications.length, equals(3));
+    });
   });
 }

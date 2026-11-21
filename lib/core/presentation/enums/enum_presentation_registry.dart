@@ -16,6 +16,7 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/enums/billing_trial_entitlement_mode.dart';
 import 'package:netsales/core/enums/network_status.dart';
+import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/enums/package_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/enums/repayment_status.dart';
@@ -815,6 +816,176 @@ class EnumPresentationRegistry {
         isKnown: true,
       ),
       PackageStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 21. أنواع الإشعارات والتنبيهات الموجهة (NotificationType)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolveNotificationType(
+    NotificationType type, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (type) {
+      NotificationType.saleInvoiceCreated => 'فاتورة مبيعات جديدة',
+      NotificationType.saleInvoiceCompleted => 'اكتمال فاتورة المبيعات',
+      NotificationType.saleInvoiceCancelled => 'إلغاء فاتورة مبيعات',
+      NotificationType.voucherRequestCreated => 'طلب كروت إنترنت جديد',
+      NotificationType.voucherRequestApproved => 'تمت الموافقة على طلب الكروت',
+      NotificationType.voucherRequestRejected => 'تم رفض طلب الكروت',
+      NotificationType.voucherRequestCancelled => 'تم إلغاء طلب الكروت',
+      NotificationType.walletDeposit => 'إيداع في المحفظة',
+      NotificationType.walletWithdrawal => 'سحب من المحفظة',
+      NotificationType.walletTransfer => 'تحويل رصيد محفظة',
+      NotificationType.supportTicketCreated => 'تذكرة دعم فني جديدة',
+      NotificationType.supportTicketReplied => 'رد جديد على تذكرة الدعم',
+      NotificationType.supportTicketClosed => 'إغلاق تذكرة الدعم',
+      NotificationType.networkApproved => 'اعتماد مزود الشبكة',
+      NotificationType.networkRejected => 'رفض مزود الشبكة',
+      NotificationType.posApproved => 'اعتماد نقطة البيع',
+      NotificationType.posRejected => 'رفض نقطة البيع',
+      NotificationType.securityLoginAlert => 'تنبيه تسجيل دخول',
+      NotificationType.securityDeviceBlocked => 'حظر أو تعطيل جهاز',
+      NotificationType.securityPasswordChanged => 'تغيير كلمة المرور',
+      NotificationType.systemAnnouncement => 'إعلان إداري عام',
+      NotificationType.generalInfo => 'إشعار توجيهي عام',
+      NotificationType.unknown => 'تنبيه نظام',
+    });
+
+    return switch (type) {
+      NotificationType.saleInvoiceCreated => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.receipt_long_rounded,
+        isKnown: true,
+      ),
+      NotificationType.saleInvoiceCompleted => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+        isKnown: true,
+      ),
+      NotificationType.saleInvoiceCancelled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.cancel_rounded,
+        isKnown: true,
+      ),
+      NotificationType.voucherRequestCreated => EnumPresentation(
+        label: label,
+        tone: SemanticTone.primary,
+        icon: Icons.inventory_2_rounded,
+        isKnown: true,
+      ),
+      NotificationType.voucherRequestApproved => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.task_alt_rounded,
+        isKnown: true,
+      ),
+      NotificationType.voucherRequestRejected => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.highlight_off_rounded,
+        isKnown: true,
+      ),
+      NotificationType.voucherRequestCancelled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.remove_shopping_cart_rounded,
+        isKnown: true,
+      ),
+      NotificationType.walletDeposit => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.account_balance_wallet_rounded,
+        isKnown: true,
+      ),
+      NotificationType.walletWithdrawal => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.payments_rounded,
+        isKnown: true,
+      ),
+      NotificationType.walletTransfer => EnumPresentation(
+        label: label,
+        tone: SemanticTone.primary,
+        icon: Icons.currency_exchange_rounded,
+        isKnown: true,
+      ),
+      NotificationType.supportTicketCreated => EnumPresentation(
+        label: label,
+        tone: SemanticTone.info,
+        icon: Icons.support_agent_rounded,
+        isKnown: true,
+      ),
+      NotificationType.supportTicketReplied => EnumPresentation(
+        label: label,
+        tone: SemanticTone.info,
+        icon: Icons.forum_rounded,
+        isKnown: true,
+      ),
+      NotificationType.supportTicketClosed => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.mark_chat_read_rounded,
+        isKnown: true,
+      ),
+      NotificationType.networkApproved => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.hub_rounded,
+        isKnown: true,
+      ),
+      NotificationType.networkRejected => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.lan_rounded,
+        isKnown: true,
+      ),
+      NotificationType.posApproved => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.storefront_rounded,
+        isKnown: true,
+      ),
+      NotificationType.posRejected => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.domain_disabled_rounded,
+        isKnown: true,
+      ),
+      NotificationType.securityLoginAlert => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.devices_rounded,
+        isKnown: true,
+      ),
+      NotificationType.securityDeviceBlocked => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.gpp_bad_rounded,
+        isKnown: true,
+      ),
+      NotificationType.securityPasswordChanged => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.lock_reset_rounded,
+        isKnown: true,
+      ),
+      NotificationType.systemAnnouncement => EnumPresentation(
+        label: label,
+        tone: SemanticTone.info,
+        icon: Icons.campaign_rounded,
+        isKnown: true,
+      ),
+      NotificationType.generalInfo => EnumPresentation(
+        label: label,
+        tone: SemanticTone.primary,
+        icon: Icons.info_outline_rounded,
+        isKnown: true,
+      ),
+      NotificationType.unknown => EnumPresentation.unknown(fallbackLabel: label),
     };
   }
 
