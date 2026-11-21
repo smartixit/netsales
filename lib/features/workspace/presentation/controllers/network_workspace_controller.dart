@@ -242,6 +242,7 @@ class NetworkWorkspaceController extends GetxController {
 
     final revision = ++_revision;
     selectedNetworkId.value = networkId;
+    WorkspaceService.to.bindActiveMembership(RoleScope.network, networkId);
     overview.value = null;
     overviewError.value = null;
     isLoadingOverview.value = true;
