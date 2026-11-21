@@ -7,9 +7,15 @@ class CustomQrShareCard extends StatelessWidget {
   const CustomQrShareCard({
     super.key,
     required this.payload,
+    required this.networkName,
+    required this.posName,
+    required this.expiresAtLabel,
   });
 
   final String payload;
+  final String networkName;
+  final String posName;
+  final String expiresAtLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +117,26 @@ class CustomQrShareCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 38),
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F8F6),
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(color: const Color(0xFFE3ECE7), width: 2),
+                    ),
+                    child: Column(
+                      children: [
+                        _InvitationDetailRow(label: 'الشبكة', value: networkName, icon: Icons.hub_rounded),
+                        const Divider(height: 24, color: Color(0xFFDDE8E2)),
+                        _InvitationDetailRow(label: 'نقطة البيع', value: posName, icon: Icons.storefront_rounded),
+                        const Divider(height: 24, color: Color(0xFFDDE8E2)),
+                        _InvitationDetailRow(label: 'ينتهي في', value: expiresAtLabel, icon: Icons.schedule_rounded),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -178,6 +204,45 @@ class CustomQrShareCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _InvitationDetailRow extends StatelessWidget {
+  const _InvitationDetailRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFF236B55), size: 26),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(
+                color: Color(0xFF687A72), fontSize: 15,
+              )),
+              const SizedBox(height: 3),
+              Text(value, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF173F35), fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
