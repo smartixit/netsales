@@ -1,6 +1,6 @@
 import 'package:netsales/core/constants/api_constants.dart';
-import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
