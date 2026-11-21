@@ -24,8 +24,7 @@ class _FakeCommercialRepository implements CommercialRepository {
   @override
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) {
     confirmCalls++;
     final pending = confirmation;
@@ -103,6 +102,7 @@ void main() {
       final pendingConfirmation = controller.confirmNetworkLinkChallenge(
         challengeUuid: 'challenge-uuid',
         posId: 10,
+        posUuid: 'pos-10',
       );
 
       controller.activePos.value = _pos(20);
@@ -124,6 +124,7 @@ void main() {
         controller.confirmNetworkLinkChallenge(
           challengeUuid: 'challenge-uuid',
           posId: 10,
+          posUuid: 'pos-10',
         ),
         throwsA(isA<AppException>()),
       );
