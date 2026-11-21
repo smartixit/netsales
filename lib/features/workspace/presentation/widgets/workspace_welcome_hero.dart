@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_background_painters.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_illustration_painter.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_welcome_details.dart';
@@ -90,7 +89,7 @@ class WorkspaceWelcomeHero extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 6,
-                    child: _WelcomeDetails(
+                    child: WorkspaceWelcomeDetails(
                       userName: userName,
                       userAvatarUrl: userAvatarUrl,
                       userInitials: userInitials,
