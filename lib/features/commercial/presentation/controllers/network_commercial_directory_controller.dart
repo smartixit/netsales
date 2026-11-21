@@ -692,6 +692,9 @@ class NetworkCommercialDirectoryController
   }
 
   Future<void> openCreateQrInvitation() async {
+    if (_isInvitationTargetDialogOpen || isResolvingInvitationTarget.value) {
+      return;
+    }
     final netId = resolvedNetworkId;
     if (netId == null) {
       CustomSnackbar.show(title: 'تنبيه', message: 'يرجى اختيار الشبكة أولاً', type: SnackType.warning);
