@@ -94,5 +94,46 @@ void main() {
       expect(openedInvoices, [11]);
       expect(openedRequests, [41]);
     });
+
+    test('uses the centralized unknown invoice status fallback', () {
+      final invoice = InvoiceEntity(
+        invoiceId: 12,
+        networkId: 3,
+        posId: 7,
+        invoiceTotalAmount: 900,
+        paymentStatusRaw: 'FUTURE_STATUS',
+      );
+
+      final items = PosWorkspaceTransactionMapper.map(
+        invoices: [invoice],
+        requests: const [],
+        onOpenInvoice: (_) {},
+        onOpenRequest: (_) {},
+      );
+
+      expect(items, hasLength(1));
+      expect(items.single.statusPresentation.isKnown, isFalse);
+      expect(items.single.statusPresentation.label, 'حالة غير معروفة');
+    });
+
+    test('uses centralized sale type fallback when server label is absent', () {
+      final request = RequestEntity(
+        requestId: 42,
+        networkId: 3,
+        posId: 7,
+        requestTotalAmount: 300,
+        saleTypeRaw: 'CASH',
+        statusRaw: 'PENDING',
+      );
+
+      final items = PosWorkspaceTransactionMapper.map(
+        invoices: const [],
+        requests: [request],
+        onOpenInvoice: (_) {},
+        onOpenRequest: (_) {},
+      );
+
+      expect(items.single.subtitle, 'نقدي');
+    });
   });
 }
