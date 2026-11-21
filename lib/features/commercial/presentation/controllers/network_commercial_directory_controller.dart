@@ -17,7 +17,7 @@ import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -99,7 +99,7 @@ class NetworkCommercialDirectoryController
 
   final TextEditingController invitationBusinessCodeController = TextEditingController();
   final RxBool isResolvingInvitationTarget = false.obs;
-  final Rxn<PosEntity> resolvedInvitationTarget = Rxn<PosEntity>();
+  final Rxn<NetworkLinkablePosEntity> resolvedInvitationTarget = Rxn<NetworkLinkablePosEntity>();
 
   final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
