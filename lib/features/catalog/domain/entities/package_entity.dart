@@ -7,7 +7,7 @@ class PackageEntity {
   final int networkId;
   final String packageName;
   final String? packageColor;
-  final double packageBalance;
+  final int packageBalance;
   final int? packageUptime;
   final int? packageValidity;
   final int packageVoucherCount;
@@ -100,10 +100,11 @@ class PackageEntity {
           : packageDefaultCreditDiscount;
 
   String get balanceDisplay =>
-      PackageSpecFormatter.formatBalance(packageBalance);
+      PackageSpecFormatter.formatData(packageBalance);
 
-  String get uptimeDisplay => PackageSpecFormatter.formatUptime(packageUptime);
+  String get uptimeDisplay =>
+      PackageSpecFormatter.formatDuration(packageUptime);
 
   String get validityDisplay =>
-      PackageSpecFormatter.formatValidity(packageValidity);
+      PackageSpecFormatter.formatDuration(packageValidity);
 }

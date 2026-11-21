@@ -65,7 +65,7 @@ class PackageModel extends PackageEntity {
       networkId: (json['network_id'] as num?)?.toInt() ?? 0,
       packageName: json['package_name']?.toString() ?? '',
       packageColor: json['package_color']?.toString(),
-      packageBalance: (json['package_balance'] as num?)?.toDouble() ?? 0.0,
+      packageBalance: (json['package_balance'] as num?)?.toInt() ?? 0,
       packageUptime: (json['package_uptime'] as num?)?.toInt(),
       packageValidity: (json['package_validity'] as num?)?.toInt(),
       packageVoucherCount:

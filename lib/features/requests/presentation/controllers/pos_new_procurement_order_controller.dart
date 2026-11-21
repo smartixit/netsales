@@ -1236,7 +1236,7 @@ class PosNewProcurementOrderController extends GetxController {
             packageName:
                 item.voucherPackage?.packageName ?? 'باقة #${item.packageId}',
             packageColor: item.voucherPackage?.packageColor,
-            packageBalance: 0.0,
+            packageBalance: 0,
             packageVoucherCount:
                 item.voucherPackage?.packageVoucherCount ?? 100,
             packageVoucherPrice: item.voucherPrice,

@@ -151,12 +151,12 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                     AppSpacing.hSm,
                     Expanded(
                       flex: 2,
-                      child: CustomDropdown<DataUnit>(
+                      child: CustomDropdown<DataSizeUnit>(
                         label: 'الوحدة',
                         searchEnabled: false,
                         valueListenable: controller.selectedBalanceUnit,
-                        items: DataUnit.values.map((unit) {
-                          return DropdownItem<DataUnit>(
+                        items: DataSizeUnit.values.map((unit) {
+                          return DropdownItem<DataSizeUnit>(
                             value: unit,
                             child: Text(unit.label),
                           );
@@ -194,12 +194,12 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                     AppSpacing.hSm,
                     Expanded(
                       flex: 2,
-                      child: CustomDropdown<UptimeUnit>(
+                      child: CustomDropdown<TimeDurationUnit>(
                         label: 'الوحدة',
                         searchEnabled: false,
                         valueListenable: controller.selectedUptimeUnit,
-                        items: UptimeUnit.values.map((unit) {
-                          return DropdownItem<UptimeUnit>(
+                        items: TimeDurationUnit.values.map((unit) {
+                          return DropdownItem<TimeDurationUnit>(
                             value: unit,
                             child: Text(unit.label),
                           );
@@ -237,12 +237,12 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                     AppSpacing.hSm,
                     Expanded(
                       flex: 2,
-                      child: CustomDropdown<ValidityUnit>(
+                      child: CustomDropdown<TimeDurationUnit>(
                         label: 'الوحدة',
                         searchEnabled: false,
                         valueListenable: controller.selectedValidityUnit,
-                        items: ValidityUnit.values.map((unit) {
-                          return DropdownItem<ValidityUnit>(
+                        items: TimeDurationUnit.values.map((unit) {
+                          return DropdownItem<TimeDurationUnit>(
                             value: unit,
                             child: Text(unit.label),
                           );

@@ -214,19 +214,19 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
                             CustomInfoListTile(
                               leading: Icon(Icons.data_usage_rounded, color: colors.primary),
                               title: const Text('حجم الرصيد'),
-                              trailing: Text(PackageSpecFormatter.formatBalance(package.packageBalance)),
+                              trailing: Text(PackageSpecFormatter.formatData(package.packageBalance)),
                             ),
                           if (package.packageUptime != null && package.packageUptime! > 0)
                             CustomInfoListTile(
                               leading: Icon(Icons.timer_outlined, color: colors.primary),
                               title: const Text('وقت الاتصال المسموح'),
-                              trailing: Text(PackageSpecFormatter.formatUptime(package.packageUptime!)),
+                              trailing: Text(PackageSpecFormatter.formatDuration(package.packageUptime!)),
                             ),
                           if (package.packageValidity != null && package.packageValidity! > 0)
                             CustomInfoListTile(
                               leading: Icon(Icons.calendar_month_outlined, color: colors.primary),
                               title: const Text('فترة الصلاحية'),
-                              trailing: Text(PackageSpecFormatter.formatValidity(package.packageValidity!)),
+                              trailing: Text(PackageSpecFormatter.formatDuration(package.packageValidity!)),
                             ),
                           CustomInfoListTile(
                             leading: Icon(Icons.money_off_rounded, color: colors.success),

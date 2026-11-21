@@ -95,7 +95,7 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       packageId: _packages.length + 1,
       networkId: data['network_id'] as int? ?? 1,
       packageName: data['package_name'] as String? ?? 'New Package',
-      packageBalance: (data['package_balance'] as num?)?.toDouble() ?? 5.0,
+      packageBalance: (data['package_balance'] as num).toInt(),
       packageVoucherCount: data['package_voucher_count'] as int? ?? 100,
       packageVoucherPrice:
           (data['package_voucher_price'] as num?)?.toDouble() ?? 1000.0,
@@ -199,7 +199,7 @@ void main() {
         'network_id': 5,
         'package_name': 'باقة النجوم 10 جيجا',
         'package_color': '#10B981',
-        'package_balance': 10.0,
+        'package_balance': 10737418240,
         'package_uptime': 30,
         'package_validity': 30,
         'package_voucher_count': 500,
@@ -232,7 +232,7 @@ void main() {
       expect(model.networkId, 5);
       expect(model.packageName, 'باقة النجوم 10 جيجا');
       expect(model.packageColor, '#10B981');
-      expect(model.packageBalance, 10.0);
+      expect(model.packageBalance, 10737418240);
       expect(model.packageUptime, 30);
       expect(model.packageValidity, 30);
       expect(model.packageVoucherCount, 500);
@@ -252,7 +252,7 @@ void main() {
         'package_id': 101,
         'network_id': 5,
         'package_name': 'باقة النجوم',
-        'package_balance': 10.0,
+        'package_balance': 10737418240,
         'package_voucher_count': 100,
         'package_voucher_price': 1500.0,
         'package_default_cash_discount': 0.0,
@@ -261,6 +261,7 @@ void main() {
       });
 
       expect(model.procurementIsCustomDiscount, isFalse);
+      expect(model.packageBalance, 10737418240);
     });
 
     test(
@@ -271,7 +272,7 @@ void main() {
         networkId: 5,
         packageName: 'باقة النجوم 10 جيجا',
         packageColor: '#10B981',
-        packageBalance: 10.0,
+        packageBalance: 1024,
         packageUptime: 30,
         packageValidity: 30,
         packageVoucherCount: 500,
@@ -309,7 +310,7 @@ void main() {
       packageId: 1,
       networkId: 10,
       packageName: 'باقة الفجر 5 جيجا',
-      packageBalance: 5.0,
+      packageBalance: 1024,
       packageVoucherCount: 100,
       packageVoucherPrice: 1000.0,
       packageDefaultCashDiscount: 8.0,

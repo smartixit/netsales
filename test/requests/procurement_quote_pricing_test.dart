@@ -193,7 +193,7 @@ final testPackage = PackageEntity(
   packageId: 101,
   networkId: 10,
   packageName: 'باقة الفخامة',
-  packageBalance: 1000.0,
+  packageBalance: 1000,
   packageVoucherPrice: 100.0,
   packageVoucherCount: 100,
   packageDefaultCashDiscount: 10.0,

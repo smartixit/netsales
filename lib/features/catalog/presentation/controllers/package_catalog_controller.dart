@@ -91,9 +91,9 @@ class PackageCatalogController extends GetxController {
   final creditDiscountController = TextEditingController(text: '0.0');
 
   // محددات الوحدات الفنية
-  final selectedBalanceUnit = ValueNotifier<DataUnit>(DataUnit.mb);
-  final selectedUptimeUnit = ValueNotifier<UptimeUnit>(UptimeUnit.hours);
-  final selectedValidityUnit = ValueNotifier<ValidityUnit>(ValidityUnit.days);
+  final selectedBalanceUnit = ValueNotifier<DataSizeUnit>(DataSizeUnit.megabytes);
+  final selectedUptimeUnit = ValueNotifier<TimeDurationUnit>(TimeDurationUnit.hours);
+  final selectedValidityUnit = ValueNotifier<TimeDurationUnit>(TimeDurationUnit.days);
 
   final selectedColorHex = '0xFF0D7A5F'.obs;
   final packageActiveStatus = true.obs;
@@ -400,7 +400,7 @@ class PackageCatalogController extends GetxController {
   }
 
   // ── إدارة وحدات القياس الفنية ──
-  void setBalanceUnit(DataUnit newUnit) {
+  void setBalanceUnit(DataSizeUnit newUnit) {
     if (selectedBalanceUnit.value == newUnit) return;
     final currentVal = double.tryParse(balanceController.text.trim());
     if (currentVal != null && currentVal > 0) {
@@ -411,39 +411,39 @@ class PackageCatalogController extends GetxController {
       );
       balanceController.text = converted % 1 == 0
           ? converted.toInt().toString()
-          : converted.toStringAsFixed(2);
+          : converted.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
     }
     selectedBalanceUnit.value = newUnit;
   }
 
-  void setUptimeUnit(UptimeUnit newUnit) {
+  void setUptimeUnit(TimeDurationUnit newUnit) {
     if (selectedUptimeUnit.value == newUnit) return;
     final currentVal = double.tryParse(uptimeController.text.trim());
     if (currentVal != null && currentVal > 0) {
-      final converted = PackageSpecFormatter.convertUptime(
+      final converted = PackageSpecFormatter.convertDuration(
         currentVal,
         selectedUptimeUnit.value,
         newUnit,
       );
       uptimeController.text = converted % 1 == 0
           ? converted.toInt().toString()
-          : converted.toStringAsFixed(1);
+          : converted.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
     }
     selectedUptimeUnit.value = newUnit;
   }
 
-  void setValidityUnit(ValidityUnit newUnit) {
+  void setValidityUnit(TimeDurationUnit newUnit) {
     if (selectedValidityUnit.value == newUnit) return;
     final currentVal = double.tryParse(validityController.text.trim());
     if (currentVal != null && currentVal > 0) {
-      final converted = PackageSpecFormatter.convertValidity(
+      final converted = PackageSpecFormatter.convertDuration(
         currentVal,
         selectedValidityUnit.value,
         newUnit,
       );
       validityController.text = converted % 1 == 0
           ? converted.toInt().toString()
-          : converted.toStringAsFixed(1);
+          : converted.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
     }
     selectedValidityUnit.value = newUnit;
   }
@@ -468,13 +468,11 @@ class PackageCatalogController extends GetxController {
     cashDiscountController.text = '0.0';
     creditDiscountController.text = '0.0';
 
-    selectedBalanceUnit.value = DataUnit.mb;
-    selectedUptimeUnit.value = UptimeUnit.hours;
-    selectedValidityUnit.value = ValidityUnit.days;
+    selectedBalanceUnit.value = DataSizeUnit.megabytes;
+    selectedUptimeUnit.value = TimeDurationUnit.hours;
+    selectedValidityUnit.value = TimeDurationUnit.days;
     selectedColorHex.value = '0xFF0D7A5F';
     packageActiveStatus.value = true;
-
-    Get.toNamed<void>(AppRoutes.packageForm);
   }
 
   void initEditForm(PackageEntity pkg) {
@@ -484,47 +482,36 @@ class PackageCatalogController extends GetxController {
 
     nameController.text = pkg.packageName;
 
-    if (pkg.packageBalance >= 1024 && pkg.packageBalance % 1024 == 0) {
-      selectedBalanceUnit.value = DataUnit.gb;
-      balanceController.text = (pkg.packageBalance / 1024).toInt().toString();
+    // حل الوحدة الأنسب لرصيد البيانات بالبايت
+    if (pkg.packageBalance > 0) {
+      final bestDataUnit = DataSizeUnit.resolveBestUnit(pkg.packageBalance);
+      selectedBalanceUnit.value = bestDataUnit;
+      final val = PackageSpecFormatter.fromCanonicalBytes(pkg.packageBalance, bestDataUnit);
+      balanceController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(2);
     } else {
-      selectedBalanceUnit.value = DataUnit.mb;
-      balanceController.text = pkg.packageBalance > 0
-          ? (pkg.packageBalance % 1 == 0
-              ? pkg.packageBalance.toInt().toString()
-              : pkg.packageBalance.toString())
-          : '';
+      selectedBalanceUnit.value = DataSizeUnit.megabytes;
+      balanceController.clear();
     }
 
+    // حل الوحدة الأنسب لوقت الاتصال بالدقائق
     if (pkg.packageUptime != null && pkg.packageUptime! > 0) {
-      if (pkg.packageUptime! >= 1440 && pkg.packageUptime! % 1440 == 0) {
-        selectedUptimeUnit.value = UptimeUnit.days;
-        uptimeController.text = (pkg.packageUptime! / 1440).toInt().toString();
-      } else if (pkg.packageUptime! >= 60 && pkg.packageUptime! % 60 == 0) {
-        selectedUptimeUnit.value = UptimeUnit.hours;
-        uptimeController.text = (pkg.packageUptime! / 60).toInt().toString();
-      } else {
-        selectedUptimeUnit.value = UptimeUnit.minutes;
-        uptimeController.text = pkg.packageUptime.toString();
-      }
+      final bestUptimeUnit = TimeDurationUnit.resolveBestUnit(pkg.packageUptime!);
+      selectedUptimeUnit.value = bestUptimeUnit;
+      final val = PackageSpecFormatter.fromCanonicalMinutes(pkg.packageUptime!, bestUptimeUnit);
+      uptimeController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
     } else {
-      selectedUptimeUnit.value = UptimeUnit.hours;
+      selectedUptimeUnit.value = TimeDurationUnit.hours;
       uptimeController.clear();
     }
 
+    // حل الوحدة الأنسب لفترة الصلاحية بالدقائق
     if (pkg.packageValidity != null && pkg.packageValidity! > 0) {
-      if (pkg.packageValidity! >= 720 && pkg.packageValidity! % 720 == 0) {
-        selectedValidityUnit.value = ValidityUnit.months;
-        validityController.text = (pkg.packageValidity! / 720).toInt().toString();
-      } else if (pkg.packageValidity! >= 24 && pkg.packageValidity! % 24 == 0) {
-        selectedValidityUnit.value = ValidityUnit.days;
-        validityController.text = (pkg.packageValidity! / 24).toInt().toString();
-      } else {
-        selectedValidityUnit.value = ValidityUnit.hours;
-        validityController.text = pkg.packageValidity.toString();
-      }
+      final bestValidityUnit = TimeDurationUnit.resolveBestUnit(pkg.packageValidity!);
+      selectedValidityUnit.value = bestValidityUnit;
+      final val = PackageSpecFormatter.fromCanonicalMinutes(pkg.packageValidity!, bestValidityUnit);
+      validityController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
     } else {
-      selectedValidityUnit.value = ValidityUnit.days;
+      selectedValidityUnit.value = TimeDurationUnit.days;
       validityController.clear();
     }
 
@@ -535,8 +522,6 @@ class PackageCatalogController extends GetxController {
 
     selectedColorHex.value = pkg.packageColor ?? '0xFF0D7A5F';
     packageActiveStatus.value = pkg.status;
-
-    Get.toNamed<void>(AppRoutes.packageForm, arguments: pkg);
   }
 
   Future<bool> submitPackageForm() async {
@@ -571,18 +556,27 @@ class PackageCatalogController extends GetxController {
         double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
 
     final rawBalance = double.tryParse(balanceController.text.trim());
-    final canonicalBalanceMb = (rawBalance != null && rawBalance > 0)
-        ? rawBalance * selectedBalanceUnit.value.mbFactor
-        : 0.0;
+    final canonicalBalanceBytes = (rawBalance != null && rawBalance > 0)
+        ? PackageSpecFormatter.toCanonicalBytes(
+            rawBalance,
+            selectedBalanceUnit.value,
+          )
+        : 0;
 
     final rawUptime = double.tryParse(uptimeController.text.trim());
     final canonicalUptimeMinutes = (rawUptime != null && rawUptime > 0)
-        ? (rawUptime * selectedUptimeUnit.value.minuteFactor).toInt()
+        ? PackageSpecFormatter.toCanonicalMinutes(
+            rawUptime,
+            selectedUptimeUnit.value,
+          )
         : null;
 
     final rawValidity = double.tryParse(validityController.text.trim());
-    final canonicalValidityHours = (rawValidity != null && rawValidity > 0)
-        ? (rawValidity * selectedValidityUnit.value.hourFactor).toInt()
+    final canonicalValidityMinutes = (rawValidity != null && rawValidity > 0)
+        ? PackageSpecFormatter.toCanonicalMinutes(
+            rawValidity,
+            selectedValidityUnit.value,
+          )
         : null;
 
     isSaving.value = true;
@@ -596,9 +590,9 @@ class PackageCatalogController extends GetxController {
       final payload = <String, dynamic>{
         'package_name': nameController.text.trim(),
         'package_color': selectedColorHex.value,
-        'package_balance': canonicalBalanceMb,
+        'package_balance': canonicalBalanceBytes,
         'package_uptime': canonicalUptimeMinutes,
-        'package_validity': canonicalValidityHours,
+        'package_validity': canonicalValidityMinutes,
         'package_voucher_count':
             int.tryParse(voucherCountController.text.trim()) ?? 51,
         'package_voucher_price': price,

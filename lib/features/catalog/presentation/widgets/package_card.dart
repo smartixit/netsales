@@ -76,11 +76,11 @@ class PackageCard extends StatelessWidget {
     final specTags = <String>[
       '${package.packageVoucherCount} كرت',
       if (package.packageBalance > 0)
-        PackageSpecFormatter.formatBalance(package.packageBalance),
+        PackageSpecFormatter.formatData(package.packageBalance),
       if (package.packageUptime != null && package.packageUptime! > 0)
-        PackageSpecFormatter.formatUptime(package.packageUptime!),
+        PackageSpecFormatter.formatDuration(package.packageUptime!),
       if (package.packageValidity != null && package.packageValidity! > 0)
-        PackageSpecFormatter.formatValidity(package.packageValidity!),
+        PackageSpecFormatter.formatDuration(package.packageValidity!),
     ];
 
     return CustomExecutiveTransactionCard(
