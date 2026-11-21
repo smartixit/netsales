@@ -164,7 +164,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 controller.invitationStatusRefreshError.value!,
                 textAlign: TextAlign.center,
                 style: AppTypography.labelSmall.copyWith(
-                  color: colors.warning,
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ],
