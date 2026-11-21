@@ -34,6 +34,8 @@ void main() {
       expect(model.pos?.posName, 'نقطة البيع المركزية');
       expect(model.pos?.ownerId, 0);
       expect(model.pos?.posPhoneNumber, '');
+      expect(model.pos?.governorateName, isNull);
+      expect(model.pos?.directorateName, isNull);
 
       expect(model.expiresAt, '2026-11-22T18:30:00+03:00');
     });
