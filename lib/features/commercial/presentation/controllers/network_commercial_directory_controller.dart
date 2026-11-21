@@ -112,6 +112,7 @@ class NetworkCommercialDirectoryController
   NetworkPosLinkChallengeEntity? _activeInvitation;
   bool _isInvitationStatusRequestInFlight = false;
   bool _isInvitationTargetDialogOpen = false;
+  bool _isInvitationTargetConfirmed = false;
   final selectedNetworkId = RxnInt();
 
   String? _nextCursor;
@@ -504,6 +505,7 @@ class NetworkCommercialDirectoryController
   void cancelInvitationTargetDialog() {
     if (isResolvingInvitationTarget.value) return;
     _isInvitationTargetDialogOpen = false;
+    _isInvitationTargetConfirmed = false;
     resolvedInvitationTarget.value = null;
     Get.back<void>();
   }
@@ -514,6 +516,7 @@ class NetworkCommercialDirectoryController
       return;
     }
     _isInvitationTargetDialogOpen = false;
+    _isInvitationTargetConfirmed = true;
     Get.back<void>();
   }
 
@@ -695,6 +698,7 @@ class NetworkCommercialDirectoryController
       } finally {
         _isInvitationTargetDialogOpen = false;
       }
+      if (!_isInvitationTargetConfirmed) return;
       final target = resolvedInvitationTarget.value;
       if (target == null) return;
       final challenge = await createNetworkPosLinkChallengeUseCase(networkId: netId, posUuid: target.posUuid);
@@ -731,6 +735,7 @@ class NetworkCommercialDirectoryController
     } catch (error) {
       CustomSnackbar.show(title: 'فشل إنشاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
     } finally {
+      _isInvitationTargetConfirmed = false;
       resolvedInvitationTarget.value = null;
     }
   }
