@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_background_painters.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_backdrop_painter.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_ribbon_painter.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_hero_illustration_painter.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_welcome_details.dart';
 

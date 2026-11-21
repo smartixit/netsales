@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
@@ -42,7 +43,8 @@ class PosQuickActionsSection extends StatelessWidget {
         AppSpacing.vMd,
         LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxWidth < 360;
+            final compact =
+                constraints.maxWidth < AppBreakpoints.mobileSmallMax;
             final order = PosQuickActionCard(
               icon: Icons.add_shopping_cart_rounded,
               title: 'طلب توريد',
