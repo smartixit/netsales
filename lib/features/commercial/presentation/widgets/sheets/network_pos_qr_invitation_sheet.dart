@@ -279,17 +279,32 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           }),
           SizedBox(height: AppSpacing.sm),
           Obx(() {
-            if (isInvitationActive()) {
-              final revoking = isRevokingInvitation.value || isExportingInvitation.value;
-              return CustomButton.outline(
-                text: 'إلغاء الدعوة',
-                icon: Icons.block_rounded,
-                size: AppButtonSize.medium,
-                loading: revoking,
-                onPressed: revoking ? null : onRevoke,
+            final status = invitationStatus.value;
+            if (status == LinkingChallengeStatus.pending) {
+              final revoking =
+                  isRevokingInvitation.value || isExportingInvitation.value;
+              return Column(
+                children: [
+                  CustomButton.outline(
+                    text: 'إلغاء الدعوة',
+                    icon: Icons.block_rounded,
+                    size: AppButtonSize.medium,
+                    loading: revoking,
+                    onPressed: revoking ? null : onRevoke,
+                  ),
+                  if (!isInvitationActive()) ...[
+                    SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'انتهى الوقت المعروض محلياً؛ جارٍ انتظار تأكيد الحالة من الخادم.',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
               );
             }
-            final status = invitationStatus.value;
             final message = switch (status) {
               LinkingChallengeStatus.consumed =>
                 'تم استخدام الدعوة وإتمام الارتباط.',
