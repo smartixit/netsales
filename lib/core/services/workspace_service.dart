@@ -265,10 +265,14 @@ class WorkspaceService extends GetxService {
   }
 
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
-    if (currentWorkspace.value != workspace) {
-      PermissionService.to.clearWorkspaceContext();
-    }
+    final workspaceChanged = currentWorkspace.value != workspace;
     currentWorkspace.value = workspace;
+    if (workspaceChanged) {
+      bindActiveMembership(
+        workspace == AppWorkspace.network ? RoleScope.network : RoleScope.pos,
+        null,
+      );
+    }
     await StorageService.instance.setString(
       StorageKeys.activeWorkspaceKey,
       workspace.name,
