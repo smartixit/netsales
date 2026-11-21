@@ -321,7 +321,7 @@ class _NetworkPosQrInvitationSheetState
                   text: 'مشاركة البطاقة',
                   icon: Icons.share_rounded,
                   size: AppButtonSize.medium,
-                  isLoading: _isExporting,
+                  loading: _isExporting,
                   onPressed: _isActive && !_isExporting
                       ? _shareInvitation
                       : null,
@@ -366,9 +366,12 @@ class _NetworkPosQrInvitationSheetState
           SizedBox(height: AppSpacing.md),
           Offstage(
             offstage: true,
-            child: RepaintBoundary(
-              key: _shareCardKey,
-              child: CustomQrShareCard(payload: widget.challenge.payload),
+            child: UnconstrainedBox(
+              alignment: Alignment.topLeft,
+              child: RepaintBoundary(
+                key: _shareCardKey,
+                child: CustomQrShareCard(payload: widget.challenge.payload),
+              ),
             ),
           ),
         ],
