@@ -38,7 +38,7 @@ class WorkspaceHeroCanvas {
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(trunk, Radius.circular(6 * scale)),
-        _solid(const Color(0xFF063F43)),
+        solid(const Color(0xFF063F43)),
       );
   
       final foliage = Path()
@@ -195,7 +195,7 @@ class WorkspaceHeroCanvas {
         ..close();
       canvas.drawPath(
         distantHill,
-        _linear(
+        linear(
           const Rect.fromLTWH(0, 430, 1000, 270),
           const [Color(0xFF075D58), Color(0xFF03454A)],
         ),
@@ -211,7 +211,7 @@ class WorkspaceHeroCanvas {
         ..close();
       canvas.drawPath(
         foreground,
-        _linear(
+        linear(
           const Rect.fromLTWH(0, 540, 1000, 160),
           const [Color(0xFF0A7165), Color(0xFF03444A)],
         ),
