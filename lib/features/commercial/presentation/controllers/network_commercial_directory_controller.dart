@@ -737,7 +737,7 @@ class NetworkCommercialDirectoryController
       } finally {
         await CustomAnimationOverlay.hide();
       }
-      final networkName = challenge.network?.networkName.trim() ?? '';
+      final networkName = challenge.networkName?.trim() ?? '';
       final posName = challenge.pos?.posName.trim() ?? '';
       if (challenge.networkId != netId ||
           challenge.posId != target.posId ||
