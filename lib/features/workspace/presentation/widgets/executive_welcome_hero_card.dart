@@ -14,6 +14,8 @@ class ExecutiveWelcomeHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return WorkspaceWelcomeHero(
       userName: controller.userName,
+      userAvatarUrl: controller.userProfileLogo,
+      userInitials: controller.userInitials,
       role: controller.userRole,
       dateText: controller.todayFormatted,
       artwork: WorkspaceWelcomeArtwork.network,
