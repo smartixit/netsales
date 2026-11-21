@@ -272,7 +272,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           }),
           SizedBox(height: AppSpacing.sm),
           Obx(() {
-            if (controller.isInvitationActive) {
+            if (isInvitationActive()) {
               return CustomButton.outline(
                 text: 'إلغاء الدعوة',
                 icon: Icons.block_rounded,
@@ -281,7 +281,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
               );
             }
             return Text(
-              controller.invitationStatus.value.name == 'consumed'
+              invitationStatus.value.name == 'consumed'
                   ? 'تم استخدام الدعوة وإتمام الارتباط.'
                   : 'هذه الدعوة لم تعد صالحة للمشاركة أو الحفظ.',
               textAlign: TextAlign.center,
@@ -302,7 +302,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     payload: challenge.payload,
                     networkName: networkName,
                     posName: posName,
-                    expiresAtLabel: controller.invitationExpiresAtLabel,
+                    expiresAtLabel: invitationExpiresAtLabel(),
                   ),
                 ),
               ),
