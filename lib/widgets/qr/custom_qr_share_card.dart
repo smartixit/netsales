@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/widgets/images/custom_brand_logo.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
 
@@ -39,8 +37,8 @@ class CustomQrShareCard extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    height: 250,
-                    padding: const EdgeInsets.symmetric(horizontal: 56),
+                    height: 190,
+                    padding: const EdgeInsets.symmetric(horizontal: 48),
                     decoration: const BoxDecoration(
                       color: Color(0xFF103F35),
                       borderRadius: BorderRadius.vertical(
@@ -60,7 +58,7 @@ class CustomQrShareCard extends StatelessWidget {
                                 'NetSales',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 42,
+                                  fontSize: 36,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -69,7 +67,7 @@ class CustomQrShareCard extends StatelessWidget {
                                 'NETWORK SALES MANAGEMENT',
                                 style: TextStyle(
                                   color: Color(0xFFD6E9E1),
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   letterSpacing: 2,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -80,31 +78,31 @@ class CustomQrShareCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 32),
                   const Text(
                     'دعوة ربط تجارية',
                     style: TextStyle(
                       color: Color(0xFF173F35),
-                      fontSize: 46,
+                      fontSize: 42,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
                   const Text(
                     'امسح الرمز من داخل تطبيق NetSales لإتمام عملية الربط',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF62746D),
-                      fontSize: 24,
+                      fontSize: 20,
                       height: 1.5,
                     ),
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.all(34),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(34),
+                      borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: const Color(0xFFE3ECE7),
                         width: 2,
@@ -112,7 +110,7 @@ class CustomQrShareCard extends StatelessWidget {
                     ),
                     child: CustomQrCode(
                       data: payload,
-                      size: 540,
+                      size: 440,
                       decoration: QrCodeService.brandDecoration,
                     ),
                   ),
@@ -129,9 +127,9 @@ class CustomQrShareCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 34),
+                  const SizedBox(height: 24),
                   Container(
-                    height: 150,
+                    height: 120,
                     width: double.infinity,
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
@@ -147,7 +145,7 @@ class CustomQrShareCard extends StatelessWidget {
                           'NetSales',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 32,
+                            fontSize: 28,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -156,7 +154,7 @@ class CustomQrShareCard extends StatelessWidget {
                           'إدارة أعمال الشبكات ونقاط البيع بذكاء',
                           style: TextStyle(
                             color: Color(0xFFD6E9E1),
-                            fontSize: 18,
+                            fontSize: 16,
                           ),
                         ),
                       ],
