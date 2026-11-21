@@ -74,10 +74,7 @@ class CustomRefreshablePage extends StatelessWidget {
     final overlaysWorkspaceBars =
         embedded && AppBreakpoints.usesBottomBar(context);
     final topPadding = overlaysWorkspaceBars
-        ? mediaQuery.padding.top +
-              AppSpacing.appBarHeight +
-              AppSpacing.sm +
-              AppSpacing.md
+        ? mediaQuery.padding.top + AppSpacing.lg
         : AppSpacing.md;
     final bottomPadding = overlaysWorkspaceBars
         ? 115.h + mediaQuery.padding.bottom
