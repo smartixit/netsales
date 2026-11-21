@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
@@ -13,9 +14,6 @@ class NetworkWorkspaceTransactionMapper {
   }) {
     return requests
         .map((request) {
-          final reference = request.requestUuid.isEmpty
-              ? ''
-              : request.requestUuid.split('-').first;
           final parsedDate = DateFormatter.tryParse(request.requestDate);
           final dateLabel = parsedDate == null
               ? ''
