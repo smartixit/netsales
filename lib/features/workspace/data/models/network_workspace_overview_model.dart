@@ -103,6 +103,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     final requestUuid = raw['request_uuid'];
     final posId = raw['pos_id'];
     final posName = raw['pos_name'];
+    final saleTypeLabel = raw['sale_type_label'];
     final requestDate = raw['request_date'];
     final requestTotalAmount = raw['request_total_amount'];
     final status = raw['status'];
@@ -114,6 +115,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
         requestUuid.trim().isEmpty ||
         posName is! String ||
         posName.trim().isEmpty ||
+        (saleTypeLabel != null && saleTypeLabel is! String) ||
         requestDate is! String ||
         requestDate.isEmpty ||
         requestTotalAmount is! String ||
@@ -136,6 +138,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       requestUuid: requestUuid,
       posId: _requiredInt(posId, 'pos_id'),
       posName: posName,
+      saleTypeLabel: saleTypeLabel as String?,
       requestDate: requestDate,
       requestTotalAmount: requestTotalAmount,
       statusRaw: status,
