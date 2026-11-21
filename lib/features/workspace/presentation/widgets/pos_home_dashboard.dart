@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/flows/pos_network_linking_flow.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_linked_network_selector.dart';
-import 'package:netsales/features/workspace/presentation/widgets/pos_quick_action_card.dart';
+import 'package:netsales/features/workspace/presentation/widgets/pos_quick_actions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
@@ -23,7 +20,6 @@ class PosHomeDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return CustomRefreshablePage(
       embedded: true,
       onRefresh: controller.loadWorkspace,
@@ -73,42 +69,11 @@ class PosHomeDashboard extends StatelessWidget {
               PosActiveSupplyOrderTracker(controller: controller),
               AppSpacing.vLg,
             ],
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Icon(Icons.bolt_rounded, color: colors.primary, size: 20.r),
-                  AppSpacing.hSm,
-                  Text(
-                    'العمليات السريعة',
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            PosQuickActionsSection(
+              onCreateOrder: controller.openNewProcurementOrder,
+              onOpenInvoices: controller.openPurchaseInvoices,
             ),
-            AppSpacing.vMd,
-            Row(
-              children: [
-                Expanded(
-                  child: PosQuickActionCard(
-                    icon: Icons.add_shopping_cart_rounded,
-                    title: 'طلب توريد',
-                    onTap: controller.openNewProcurementOrder,
-                  ),
-                ),
-                AppSpacing.hMd,
-                Expanded(
-                  child: PosQuickActionCard(
-                    icon: Icons.receipt_long_rounded,
-                    title: 'فواتيري',
-                    onTap: controller.openPurchaseInvoices,
-                  ),
-                ),
-              ],
-            ),
+            AppSpacing.vLg,
             AppSpacing.vLg,
             if (controller.selectedNetworkLink.value != null)
               PosRecentTransactionsSection(controller: controller),
