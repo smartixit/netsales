@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -23,7 +23,7 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
 
   final TextEditingController codeController;
   final RxBool isResolving;
-  final Rxn<PosEntity> resolvedTarget;
+  final Rxn<NetworkLinkablePosEntity> resolvedTarget;
   final ValueChanged<String> onChanged;
   final VoidCallback onResolve;
   final VoidCallback onConfirm;
