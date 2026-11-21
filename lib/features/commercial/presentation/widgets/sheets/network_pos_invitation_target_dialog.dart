@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -13,15 +14,19 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
     super.key,
     required this.codeController,
     required this.isResolving,
+    required this.resolvedTarget,
     required this.onChanged,
     required this.onResolve,
+    required this.onConfirm,
     required this.onCancel,
   });
 
   final TextEditingController codeController;
   final RxBool isResolving;
+  final Rxn<PosEntity> resolvedTarget;
   final ValueChanged<String> onChanged;
   final VoidCallback onResolve;
+  final VoidCallback onConfirm;
   final VoidCallback onCancel;
 
   @override
@@ -58,6 +63,54 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
               onFieldSubmitted: (_) => onResolve(),
             ),
           ),
+          Obx(() {
+            final target = resolvedTarget.value;
+            if (target == null) return const SizedBox.shrink();
+            return Container(
+              margin: EdgeInsets.only(top: AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colors.primary.withValues(alpha: .3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.verified_rounded, color: colors.primary, size: 28),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'تم التحقق من نقطة البيع',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.xs),
+                        Text(
+                          target.posName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.titleSmall.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          target.posUuid,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
           SizedBox(height: AppSpacing.sm),
           Text(
             'لا يتم عرض دليل عام لنقاط البيع. لن تظهر التفاصيل إلا بعد مطابقة المعرف والتحقق من أهلية الربط.',
@@ -80,11 +133,17 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: CustomButton.primary(
-                    text: 'التحقق والمتابعة',
-                    icon: Icons.verified_user_rounded,
+                    text: resolvedTarget.value == null
+                        ? 'التحقق من المعرف'
+                        : 'تأكيد نقطة البيع',
+                    icon: resolvedTarget.value == null
+                        ? Icons.search_rounded
+                        : Icons.verified_user_rounded,
                     loading: resolving,
                     enabled: !resolving,
-                    onPressed: resolving ? null : onResolve,
+                    onPressed: resolving
+                        ? null
+                        : (resolvedTarget.value == null ? onResolve : onConfirm),
                   ),
                 ),
               ],
