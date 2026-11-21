@@ -74,7 +74,7 @@ class AppSpacing {
   static double get bottomSheetPadding => 24.w;
 
   /// App bar height
-  static double get appBarHeight => 100.h;
+  static double get appBarHeight => 80.h;
 
   /// Bottom nav height
   static double get bottomNavHeight => 80.h;

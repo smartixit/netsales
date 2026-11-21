@@ -69,11 +69,12 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     final effectiveLogo = entityLogo ?? userProfileLogo;
     final defaultInitial = workspace == AppWorkspace.network ? 'ش' : 'ن';
-    final effectiveInitials = (entityInitials != null && entityInitials!.trim().isNotEmpty)
+    final effectiveInitials =
+        (entityInitials != null && entityInitials!.trim().isNotEmpty)
         ? entityInitials!
         : (userInitials != null && userInitials!.trim().isNotEmpty)
-            ? userInitials!
-            : defaultInitial;
+        ? userInitials!
+        : defaultInitial;
 
     return SafeArea(
       bottom: false,
