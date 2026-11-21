@@ -1,9 +1,12 @@
 import 'package:netsales/core/constants/api_constants.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
@@ -134,7 +137,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل إنشاء ارتباط نقطة البيع بالشبكة.');
+      throw AppException('فشل إنشاء ارتباط نقطة البيع بالشبكة.');
     }
     return result;
   }
@@ -151,7 +154,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل تبديل حالة الارتباط التجاري.');
+      throw AppException('فشل تبديل حالة الارتباط التجاري.');
     }
     return result;
   }
@@ -161,6 +164,30 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     await ApiService.instance.delete<dynamic>(
       ApiConstants.networkPosItem(networkPosId),
     );
+  }
+
+  @override
+  Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) async {
+    final response = await ApiService.instance.post<NetworkLinkablePosModel>(
+      ApiConstants.networkPosChallengesResolveTarget,
+      data: {
+        'network_id': networkId,
+        'pos_uuid': posBusinessCode.trim().toUpperCase(),
+      },
+      fromJson: (data) => NetworkLinkablePosModel.fromJson(data as Map<String, dynamic>),
+    );
+
+    final result = response.data;
+    if (result == null ||
+        result.posId <= 0 ||
+        result.posUuid.trim().isEmpty ||
+        result.posName.trim().isEmpty) {
+      throw AppException('تعذر التحقق من نقطة البيع المستهدفة.');
+    }
+    return result;
   }
 
   @override
@@ -189,7 +216,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل توليد رمز دعوة الارتباط التجاري.');
+      throw AppException('فشل توليد رمز دعوة الارتباط التجاري.');
     }
     return result;
   }
@@ -216,7 +243,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل فحص بيانات دعوة الارتباط التجاري.');
+      throw AppException('فشل فحص بيانات دعوة الارتباط التجاري.');
     }
     return result;
   }
@@ -243,7 +270,25 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل تأكيد الارتباط التجاري عبر الرمز المشفر.');
+      throw AppException('فشل تأكيد الارتباط التجاري عبر الرمز المشفر.');
+    }
+    return result;
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeStatusModel>
+  getNetworkPosLinkChallengeStatus(String challengeUuid) async {
+    final response =
+        await ApiService.instance.get<NetworkPosLinkChallengeStatusModel>(
+      ApiConstants.networkPosChallengeStatus(challengeUuid),
+      fromJson: (data) => NetworkPosLinkChallengeStatusModel.fromJson(
+        data as Map<String, dynamic>,
+      ),
+    );
+
+    final result = response.data;
+    if (result == null) {
+      throw AppException('تعذر استرجاع حالة دعوة الربط.');
     }
     return result;
   }
@@ -264,7 +309,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('لم يتم العثور على بيانات الشبكة المحددة.');
+      throw AppException('لم يتم العثور على بيانات الشبكة المحددة.');
     }
     return result;
   }
@@ -278,7 +323,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('لم يتم العثور على بيانات نقطة البيع المحددة.');
+      throw AppException('لم يتم العثور على بيانات نقطة البيع المحددة.');
     }
     return result;
   }

@@ -1,52 +1,165 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_invitation_share_card.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
 
-/// ورقة سفلية لعرض رمز دعوة الارتباط التجاري المعتمد (QR Code) لمشغل الشبكة
-///
-/// تلتزم بأعلى معايير الأمان والتصميم المؤسسي:
-/// - تشفير كامل: تعرض رمز الـ QR عبر [CustomQrCode] دون تسريب أي بيانات تشفير حساسة في نصوص الواجهة.
-/// - تمثيل حالة الدعوة عبر المحرك المركزي الموحد [EnumPresentationRegistry].
-/// - إرشادات أمان واضحة للطرفين.
+/// عرض دعوة الربط؛ دورة الحياة والتحديث والتصدير مملوكة لمتحكم GetX.
 class NetworkPosQrInvitationSheet extends StatelessWidget {
-  const NetworkPosQrInvitationSheet({
+  NetworkPosQrInvitationSheet({
     super.key,
-    required this.challenge,
+    required this.invitationStatus,
+    required this.invitationStatusRefreshError,
+    required this.isExportingInvitation,
+    required this.isRevokingInvitation,
+    required this.isInvitationActive,
+    required this.invitationRemainingLabel,
+    required this.invitationExpiresAtLabel,
+    required this.onShare,
+    required this.onSave,
     required this.onRevoke,
+    required this.challenge,
+    required this.networkName,
+    required this.posName,
   });
 
-  final NetworkPosLinkChallengeEntity challenge;
+  final Rx<LinkingChallengeStatus> invitationStatus;
+  final RxnString invitationStatusRefreshError;
+  final RxBool isExportingInvitation;
+  final RxBool isRevokingInvitation;
+  final bool Function() isInvitationActive;
+  final String Function() invitationRemainingLabel;
+  final String Function() invitationExpiresAtLabel;
+  final Future<void> Function(Future<Uint8List> Function()) onShare;
+  final Future<void> Function(Future<Uint8List> Function()) onSave;
   final VoidCallback onRevoke;
+  final NetworkPosLinkChallengeEntity challenge;
+  final String networkName;
+  final String posName;
+  final GlobalKey _shareCardKey = GlobalKey();
+
+  Future<Uint8List> _captureShareCard(BuildContext context) async {
+    await precacheImage(
+      const AssetImage('assets/images/brand_icon.png'),
+      context,
+    );
+    await WidgetsBinding.instance.endOfFrame;
+    final renderObject =
+        _shareCardKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) {
+      throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
+    }
+
+    final image = await renderObject.toImage(pixelRatio: 1);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw const AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
+      }
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      if (bytes.isEmpty) {
+        throw const AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
+      }
+      return bytes;
+    } finally {
+      image.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final statusPres = EnumPresentationRegistry.resolveLinkingChallengeStatus(
-      challenge.typedStatus,
-      serverLabel: challenge.statusLabel,
-    );
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Column(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. رمز QR داخل إطار حماية وتصميم معتمد
+          Container(
+            padding: EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(color: colors.outlineVariant),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.hub_rounded, color: colors.primary, size: 26.r),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'الجهة المرتبطة بالدعوة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: 3.h),
+                      Text(
+                        'الشبكة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        networkName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'نقطة البيع المستهدفة',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        posName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.verified_rounded, color: colors.primary),
+              ],
+            ),
+          ),
+          SizedBox(height: AppSpacing.md),
           Center(
             child: Container(
               padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(22.r),
                 border: Border.all(
                   color: colors.primary.withValues(alpha: .2),
                   width: 1.5,
@@ -54,79 +167,187 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: .06),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+                    blurRadius: 18,
+                    offset: const Offset(0, 7),
                   ),
                 ],
               ),
-              child: CustomQrCode(data: challenge.payload, size: 200.r),
+              child: CustomQrCode(
+                data: challenge.payload,
+                size: 224.r,
+                errorCorrectLevel: QrCodeService.highErrorCorrectionLevel,
+                decoration: QrCodeService.brandDecoration,
+                semanticsLabel: 'رمز دعوة ربط تجارية',
+              ),
             ),
           ),
           SizedBox(height: AppSpacing.md),
-
-          // 2. حالة الدعوة والصلاحية الأمنية
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          Obx(() {
+            final status = invitationStatus.value;
+            final presentation =
+                EnumPresentationRegistry.resolveLinkingChallengeStatus(status);
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CustomStatusBadge(
-                  label: statusPres.label,
-                  tone: statusPres.tone,
-                  icon: statusPres.icon,
+                  label: presentation.label,
+                  tone: presentation.tone,
+                  icon: presentation.icon,
                 ),
-                if (challenge.expiresAt != null) ...[
-                  SizedBox(width: AppSpacing.xs),
-                  Text(
-                    'صالح لمدة 15 دقيقة',
+                SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    invitationRemainingLabel(),
                     style: AppTypography.labelSmall.copyWith(
                       color: colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
+                ),
               ],
+            );
+          }),
+          SizedBox(height: AppSpacing.xs),
+          Obx(
+            () => Text(
+              'ينتهي في: ${invitationExpiresAtLabel()}',
+              textAlign: TextAlign.center,
+              style: AppTypography.labelSmall.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          Obx(() {
+            final error = invitationStatusRefreshError.value;
+            if (error == null) return const SizedBox.shrink();
+            return Padding(
+              padding: EdgeInsets.only(top: AppSpacing.xs),
+              child: Text(
+                error,
+                textAlign: TextAlign.center,
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            );
+          }),
           SizedBox(height: AppSpacing.sm),
-
-          // 3. إرشادات الأمان والاستخدام
           Text(
-            'وجّه التاجر لمسح رمز الـ QR عبر كاميرا التطبيق في نقطة البيع لإتمام وتأكيد الارتباط التجاري فورياً.',
+            'اطلب من نقطة البيع فتح ماسح QR داخل تطبيق NetSales ومسح الرمز لإتمام الربط.',
             textAlign: TextAlign.center,
             style: AppTypography.bodySmall.copyWith(
               color: colors.onSurfaceVariant,
-              height: 1.4,
+              height: 1.45,
             ),
           ),
-          SizedBox(height: AppSpacing.lg),
-
-          // 4. أزرار التحكم
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton.outline(
-                  text: 'إلغاء الدعوة',
-                  icon: Icons.block_rounded,
-                  size: AppButtonSize.medium,
-                  onPressed: () {
-                    Get.back<void>();
-                    onRevoke();
-                  },
+          SizedBox(height: AppSpacing.md),
+          Obx(() {
+            final isActive = isInvitationActive();
+            final isExporting = isExportingInvitation.value;
+            final isRevoking = isRevokingInvitation.value;
+            return Row(
+              children: [
+                Expanded(
+                  child: CustomButton.primary(
+                    text: 'مشاركة البطاقة',
+                    icon: Icons.share_rounded,
+                    size: AppButtonSize.medium,
+                    loading: isExporting,
+                    onPressed: isActive && !isExporting && !isRevoking
+                        ? () => onShare(
+                            () => _captureShareCard(context),
+                          )
+                        : null,
+                  ),
                 ),
-              ),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: CustomButton.primary(
-                  text: 'إغلاق',
-                  size: AppButtonSize.medium,
-                  onPressed: () => Get.back<void>(),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: CustomButton.outline(
+                    text: 'حفظ الصورة',
+                    icon: Icons.download_rounded,
+                    size: AppButtonSize.medium,
+                    loading: isExporting,
+                    onPressed: isActive && !isExporting && !isRevoking
+                        ? () => onSave(
+                            () => _captureShareCard(context),
+                          )
+                        : null,
+                  ),
                 ),
+              ],
+            );
+          }),
+          SizedBox(height: AppSpacing.sm),
+          Obx(() {
+            final status = invitationStatus.value;
+            if (status == LinkingChallengeStatus.pending) {
+              final revoking =
+                  isRevokingInvitation.value || isExportingInvitation.value;
+              return Column(
+                children: [
+                  CustomButton.outline(
+                    text: 'إلغاء الدعوة',
+                    icon: Icons.block_rounded,
+                    size: AppButtonSize.medium,
+                    loading: revoking,
+                    onPressed: revoking ? null : onRevoke,
+                  ),
+                  if (!isInvitationActive()) ...[
+                    SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'انتهى الوقت المعروض محلياً؛ جارٍ انتظار تأكيد الحالة من الخادم.',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }
+            final message = switch (status) {
+              LinkingChallengeStatus.consumed =>
+                'تم استخدام الدعوة وإتمام الارتباط.',
+              LinkingChallengeStatus.expired =>
+                'انتهت صلاحية الدعوة وفق تأكيد الخادم.',
+              LinkingChallengeStatus.revoked =>
+                'ألغى مالك الشبكة هذه الدعوة.',
+              LinkingChallengeStatus.pending =>
+                'انتهى الوقت المعروض محلياً؛ جارٍ انتظار تأكيد الحالة من الخادم.',
+              LinkingChallengeStatus.unknown =>
+                'تعذر التحقق من حالة الدعوة؛ لا يمكن مشاركتها.',
+            };
+            return Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
               ),
-            ],
-          ),
+            );
+          }),
           SizedBox(height: AppSpacing.md),
         ],
-      ),
+          ),
+        ),
+        Positioned(
+          left: -2000,
+          top: 0,
+          child: UnconstrainedBox(
+            alignment: Alignment.topLeft,
+            child: Obx(
+              () => RepaintBoundary(
+                key: _shareCardKey,
+                child: CommercialInvitationShareCard(
+                  payload: challenge.payload,
+                  networkName: networkName,
+                  posName: posName,
+                  expiresAtLabel: invitationExpiresAtLabel(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

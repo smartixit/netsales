@@ -1,7 +1,7 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:share_plus/share_plus.dart' show ShareResultStatus;
 
@@ -121,14 +121,39 @@ class QrCodeService {
   /// إنشاء كائن QR قابل للعرض أو التصدير.
   ///
   /// لا يتم إنشاء QrImage داخل build مباشرة.
-  static QrImage createQrImage({required String data}) {
+  static const int highErrorCorrectionLevel = QrErrorCorrectLevel.H;
+
+  static const PrettyQrDecoration brandDecoration = PrettyQrDecoration(
+    background: Color(0xFFFFFFFF),
+    quietZone: PrettyQrQuietZone.standard,
+    image: PrettyQrDecorationImage(
+      image: AssetImage('assets/images/brand_icon.png'),
+      position: PrettyQrDecorationImagePosition.embedded,
+      scale: 0.18,
+      padding: EdgeInsets.all(5),
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+    ),
+  );
+
+  static ImageConfiguration brandImageConfiguration({double? devicePixelRatio}) =>
+      ImageConfiguration(
+        bundle: rootBundle,
+        devicePixelRatio: devicePixelRatio ?? 1,
+        textDirection: TextDirection.ltr,
+      );
+
+  static QrImage createQrImage({required String data, int errorCorrectLevel = 1}) {
     final cleanData = data.trim();
 
     if (cleanData.isEmpty) {
       throw ArgumentError('بيانات QR لا يمكن أن تكون فارغة.');
     }
 
-    final qrCode = QrCode.fromData(data: cleanData, errorCorrectLevel: 1);
+    final qrCode = QrCode.fromData(
+      data: cleanData,
+      errorCorrectLevel: errorCorrectLevel,
+    );
 
     return QrImage(qrCode);
   }
@@ -145,12 +170,15 @@ class QrCodeService {
   }) async {
     try {
       final qrImage = createQrImage(data: data);
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
 
       return await generateImageFromQrImage(
         qrImage: qrImage,
         decoration: decoration,
         size: size,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
     } catch (e) {
       return QrCodeGenerationResult.failure('تعذر إنشاء صورة QR.', error: e);
@@ -168,6 +196,9 @@ class QrCodeService {
   }) async {
     try {
       final exportSize = size ?? _config.defaultExportSize;
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
 
       if (exportSize <= 0) {
         return QrCodeGenerationResult.failure('أبعاد صورة QR غير صحيحة.');
@@ -177,7 +208,7 @@ class QrCodeService {
         size: exportSize,
         format: ui.ImageByteFormat.png,
         decoration: decoration,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
 
       if (byteData == null) {
@@ -278,7 +309,16 @@ class QrCodeService {
         sharePositionOrigin: sharePositionOrigin,
       );
 
-      return QrCodeShareResult.success(result.status);
+      if (result.status == ShareResultStatus.success) {
+        return QrCodeShareResult.success(result.status);
+      }
+
+      return QrCodeShareResult.failure(
+        result.status == ShareResultStatus.dismissed
+            ? 'أُغلقت نافذة المشاركة دون اختيار وجهة.'
+            : 'خدمة المشاركة غير متاحة على هذا الجهاز.',
+        status: result.status,
+      );
     } catch (e) {
       return QrCodeShareResult.failure('تعذرت مشاركة صورة QR.', error: e);
     }

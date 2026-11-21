@@ -1,7 +1,9 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -93,6 +95,17 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) {
+    return _remoteDataSource.resolveNetworkLinkablePos(
+      networkId: networkId,
+      posBusinessCode: posBusinessCode,
+    );
+  }
+
+  @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
@@ -131,6 +144,12 @@ class CommercialRepositoryImpl implements CommercialRepository {
       posId: posId,
       posUuid: posUuid,
     );
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeStatusEntity>
+  getNetworkPosLinkChallengeStatus(String challengeUuid) {
+    return _remoteDataSource.getNetworkPosLinkChallengeStatus(challengeUuid);
   }
 
   @override

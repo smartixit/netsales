@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
@@ -12,9 +15,11 @@ import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_commercial_directory_controller.dart';
@@ -34,6 +39,18 @@ class _FakeCommercialRepository implements CommercialRepository {
         networkPhoneNumber: '771111111',
       ),
     ];
+  }
+
+  @override
+  Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) async {
+    return const NetworkLinkablePosEntity(
+      posId: 30,
+      posUuid: 'POS-2611-00030-A1B2',
+      posName: 'نقطة الاختبار',
+    );
   }
 
   @override
@@ -123,6 +140,18 @@ class _FakeCommercialRepository implements CommercialRepository {
       challengeUuid: 'CH-123',
       payload: 'PAYLOAD-123',
       networkId: 1,
+      posId: 30,
+      networkName: 'الشبكة المركزية',
+    );
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeStatusEntity> getNetworkPosLinkChallengeStatus(
+    String challengeUuid,
+  ) async {
+    return NetworkPosLinkChallengeStatusEntity(
+      status: LinkingChallengeStatus.pending,
+      expiresAt: DateTime.now().add(const Duration(minutes: 15)),
     );
   }
 
@@ -220,6 +249,10 @@ void main() {
         revokeNetworkPosLinkChallengeUseCase:
             RevokeNetworkPosLinkChallengeUseCase(repo),
         getMyNetworksUseCase: GetMyNetworksUseCase(repo),
+        getNetworkPosLinkChallengeStatusUseCase:
+            GetNetworkPosLinkChallengeStatusUseCase(repo),
+        resolveNetworkLinkablePosUseCase:
+            ResolveNetworkLinkablePosUseCase(repo),
       );
     });
 

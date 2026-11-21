@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/qr_code_service.dart';
 
 /// ============================================================================
@@ -22,6 +23,9 @@ class CustomQrCode extends StatefulWidget {
 
   /// أبعاد QR
   final double size;
+
+  /// مستوى تصحيح الأخطاء؛ يرفع في رموز الدعوات التي تتضمن شعاراً مضمناً.
+  final int errorCorrectLevel;
 
   /// إعدادات التصميم الكاملة للمكتبة
   final PrettyQrDecoration decoration;
@@ -48,6 +52,7 @@ class CustomQrCode extends StatefulWidget {
     super.key,
     required this.data,
     this.size = 200,
+    this.errorCorrectLevel = 1,
     this.decoration = const PrettyQrDecoration(),
     this.errorBuilder,
     this.semanticsLabel,
@@ -76,7 +81,8 @@ class _CustomQrCodeState extends State<CustomQrCode> {
   void didUpdateWidget(covariant CustomQrCode oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.data != widget.data) {
+    if (oldWidget.data != widget.data ||
+        oldWidget.errorCorrectLevel != widget.errorCorrectLevel) {
       _generateQr();
     }
   }
@@ -84,7 +90,10 @@ class _CustomQrCodeState extends State<CustomQrCode> {
   /// إنشاء QR Image عند الحاجة فقط
   void _generateQr() {
     try {
-      _qrImage = QrCodeService.createQrImage(data: widget.data);
+      _qrImage = QrCodeService.createQrImage(
+        data: widget.data,
+        errorCorrectLevel: widget.errorCorrectLevel,
+      );
 
       _error = null;
     } catch (e) {
@@ -125,7 +134,7 @@ class _CustomQrCodeState extends State<CustomQrCode> {
   /// واجهة الخطأ
   Widget _buildError(BuildContext context) {
     if (widget.errorBuilder != null) {
-      return widget.errorBuilder!(context, _error ?? Exception('Invalid QR'));
+      return widget.errorBuilder!(context, _error ?? AppException('Invalid QR'));
     }
 
     return SizedBox.square(

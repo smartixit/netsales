@@ -1,5 +1,4 @@
-import 'package:netsales/features/commercial/data/models/network_model.dart';
-import 'package:netsales/features/commercial/data/models/pos_model.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 
 /// نموذج بيانات دعوة وتحدي ربط نقطة البيع بالشبكة عبر QR
@@ -9,26 +8,28 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
     required super.challengeUuid,
     required super.payload,
     required super.networkId,
-    super.posId,
+    required super.posId,
     super.status,
     super.statusLabel,
     super.expiresAt,
     super.consumedAt,
     super.createdAt,
     super.updatedAt,
-    super.network,
+    super.networkName,
     super.pos,
   });
 
   factory NetworkPosLinkChallengeModel.fromJson(Map<String, dynamic> json) {
-    NetworkModel? netModel;
-    if (json['network'] is Map<String, dynamic>) {
-      netModel = NetworkModel.fromJson(json['network'] as Map<String, dynamic>);
-    }
+    final networkData = json['network'];
+    final networkName = networkData is Map<String, dynamic>
+        ? networkData['network_name']?.toString()
+        : null;
 
-    PosModel? pModel;
+    NetworkLinkablePosModel? pModel;
     if (json['pos'] is Map<String, dynamic>) {
-      pModel = PosModel.fromJson(json['pos'] as Map<String, dynamic>);
+      pModel = NetworkLinkablePosModel.fromJson(
+        json['pos'] as Map<String, dynamic>,
+      );
     }
 
     return NetworkPosLinkChallengeModel(
@@ -36,14 +37,14 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
       challengeUuid: json['challenge_uuid']?.toString() ?? '',
       payload: json['payload']?.toString() ?? '',
       networkId: (json['network_id'] as num?)?.toInt() ?? 0,
-      posId: (json['pos_id'] as num?)?.toInt(),
+      posId: (json['pos_id'] as num).toInt(),
       status: json['status']?.toString(),
       statusLabel: json['status_label']?.toString(),
       expiresAt: json['expires_at']?.toString(),
       consumedAt: json['consumed_at']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
-      network: netModel,
+      networkName: networkName,
       pos: pModel,
     );
   }
@@ -61,9 +62,14 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
       'consumed_at': consumedAt,
       'created_at': createdAt,
       'updated_at': updatedAt,
-      if (network != null && network is NetworkModel)
-        'network': (network! as NetworkModel).toJson(),
-      if (pos != null && pos is PosModel) 'pos': (pos! as PosModel).toJson(),
+      if (networkName != null)
+        'network': {'network_id': networkId, 'network_name': networkName},
+      if (pos != null)
+        'pos': {
+          'pos_id': pos!.posId,
+          'pos_uuid': pos!.posUuid,
+          'pos_name': pos!.posName,
+        },
     };
   }
 }

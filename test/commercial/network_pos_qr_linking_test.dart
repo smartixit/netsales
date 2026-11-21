@@ -23,15 +23,12 @@ void main() {
         'consumed_at': null,
         'network': {
           'network_id': 15,
-          'owner_id': 1,
           'network_name': 'شبكة الأمل للاختبار',
-          'network_phone_number': '771100000',
         },
         'pos': {
           'pos_id': 25,
-          'owner_id': 2,
+          'pos_uuid': 'POS-2611-00025-A1B2',
           'pos_name': 'نقطة السعادة',
-          'pos_phone_number': '772200000',
         },
         'created_at': '2026-11-04 16:00:00',
         'updated_at': '2026-11-04 16:00:00',
@@ -46,7 +43,7 @@ void main() {
       expect(model.payload, 'NTS_LINK_V1_TEST_TOKEN');
       expect(model.status, 'PENDING');
       expect(model.isPending, isTrue);
-      expect(model.network?.networkName, 'شبكة الأمل للاختبار');
+      expect(model.networkName, 'شبكة الأمل للاختبار');
       expect(model.pos?.posName, 'نقطة السعادة');
     });
 

@@ -1,6 +1,8 @@
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
@@ -36,6 +38,11 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> deleteNetworkPosLink(int networkPosId);
 
+  Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  });
+
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
@@ -54,6 +61,10 @@ abstract class CommercialRemoteDataSource {
     int? posId,
     String? posUuid,
   });
+
+  Future<NetworkPosLinkChallengeStatusModel> getNetworkPosLinkChallengeStatus(
+    String challengeUuid,
+  );
 
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
 

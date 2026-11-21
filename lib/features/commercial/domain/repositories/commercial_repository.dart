@@ -1,6 +1,8 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -43,6 +45,12 @@ abstract class CommercialRepository {
   /// فك الارتباط التجاري بين الشبكة ونقطة البيع
   Future<void> deleteNetworkPosLink(int networkPosId);
 
+  /// التحقق من نقطة بيع محددة بواسطة المعرف التجاري قبل إصدار الدعوة.
+  Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  });
+
   /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
@@ -64,6 +72,11 @@ abstract class CommercialRepository {
     int? posId,
     String? posUuid,
   });
+
+  /// استرجاع الحالة الآمنة الحالية لدعوة الربط.
+  Future<NetworkPosLinkChallengeStatusEntity> getNetworkPosLinkChallengeStatus(
+    String challengeUuid,
+  );
 
   /// إلغاء وإبطال دعوة الربط المشفرة
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
