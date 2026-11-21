@@ -43,19 +43,27 @@ class MockResilientRequestRepo implements RequestRepository {
     int? perPage,
   }) async {
     if (cursor != null && failNextPage) {
-      throw const AppException('تعذر تحميل الصفحة التالية؛ يرجى التحقق من الاتصال');
+      throw const AppException(
+        'تعذر تحميل الصفحة التالية؛ يرجى التحقق من الاتصال',
+      );
     }
 
     final filtered = items.where((r) {
       if (networkId != null && r.networkId != networkId) return false;
       if (posId != null && r.posId != posId) return false;
-      if (status != null && status.isNotEmpty && r.statusRaw != status) return false;
+      if (status != null && status.isNotEmpty && r.statusRaw != status) {
+        return false;
+      }
       return true;
     }).toList();
 
     return PaginatedList<RequestEntity>(
-      items: cursor == null ? filtered.take(1).toList() : filtered.skip(1).toList(),
-      nextCursor: cursor == null && filtered.length > 1 ? 'cursor_page_2' : null,
+      items: cursor == null
+          ? filtered.take(1).toList()
+          : filtered.skip(1).toList(),
+      nextCursor: cursor == null && filtered.length > 1
+          ? 'cursor_page_2'
+          : null,
     );
   }
 
@@ -74,7 +82,12 @@ class MockResilientRequestRepo implements RequestRepository {
   Future<RequestEntity> cancelRequest(int requestId) async => items.first;
 
   @override
-  Future<RequestApprovalResultEntity> approveRequest(int requestId, {String? requestNote, List<RequestModificationLineEntity>? items}) async => RequestApprovalResultEntity(
+  Future<RequestApprovalResultEntity> approveRequest(
+        int requestId, {
+    String? requestNote,
+    List<RequestModificationLineEntity>? items,
+    double? paidAmount,
+  }) async => RequestApprovalResultEntity(
     request: this.items.first,
     invoice: InvoiceEntity(
       invoiceId: 1,
@@ -86,10 +99,14 @@ class MockResilientRequestRepo implements RequestRepository {
   );
 
   @override
-  Future<RequestEntity> rejectRequest(int requestId, String reason) async => items.first;
+  Future<RequestEntity> rejectRequest(int requestId, String reason) async =>
+      items.first;
 
   @override
-  Future<RequestModificationPreviewEntity> previewRequestModification(int requestId, List<RequestModificationLineEntity> items) async => throw UnimplementedError();
+  Future<RequestModificationPreviewEntity> previewRequestModification(
+    int requestId,
+    List<RequestModificationLineEntity> items,
+  ) async => throw UnimplementedError();
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -151,7 +168,9 @@ void main() {
         getRequestsUseCase: GetRequestsUseCase(mockRepo),
         approveRequestUseCase: ApproveRequestUseCase(mockRepo),
         rejectRequestUseCase: RejectRequestUseCase(mockRepo),
-        previewRequestModificationUseCase: PreviewRequestModificationUseCase(mockRepo),
+        previewRequestModificationUseCase: PreviewRequestModificationUseCase(
+          mockRepo,
+        ),
         getPackagesUseCase: GetPackagesUseCase(dummyPkgRepo),
         getRequestDetailsUseCase: GetRequestDetailsUseCase(mockRepo),
       );
@@ -176,15 +195,22 @@ void main() {
 
     test('AppException sanitizer filters internal technical errors into user-friendly messages', () {
       // 1. Technical Dart errors are caught and sanitized
-      final nullPointer = AppException.sanitizeMessage('Null check operator used on a null value');
+      final nullPointer = AppException.sanitizeMessage(
+        'Null check operator used on a null value',
+      );
       expect(nullPointer, equals('حدث خطأ غير متوقع'));
 
       final noElement = AppException.sanitizeMessage('Bad state: No element');
       expect(noElement, equals('حدث خطأ غير متوقع'));
 
       // 2. Legitimate user-facing messages are kept intact
-      final networkError = AppException.sanitizeMessage('تعذر الاتصال بالخادم، يرجى التحقق من الشبكة');
-      expect(networkError, equals('تعذر الاتصال بالخادم، يرجى التحقق من الشبكة'));
+      final networkError = AppException.sanitizeMessage(
+        'تعذر الاتصال بالخادم، يرجى التحقق من الشبكة',
+      );
+      expect(
+        networkError,
+        equals('تعذر الاتصال بالخادم، يرجى التحقق من الشبكة'),
+      );
 
       // 3. AppException instance clean message extraction
       const appEx = AppException('تعذر تنفيذ العملية');
@@ -214,7 +240,10 @@ void main() {
       // Granting create permission updates state reactively
       permissionService.updateAccess(
         roleKey: 'POS_STAFF',
-        permissions: [AppPermissions.requestsView, AppPermissions.requestsCreate],
+        permissions: [
+          AppPermissions.requestsView,
+          AppPermissions.requestsCreate,
+        ],
       );
       expect(posController.canCreateOrder, isTrue);
       expect(posController.canCancelOrder, isFalse);

@@ -97,7 +97,8 @@ class FormValidators {
   static FormFieldValidator<String> addressValidator({
     String? fieldName,
     int minWordsCount = 1,
-    int maxWordsCount = 255,
+    int maxWordsCount = 10,
+    int maxLength = 150,
     bool isRequired = false,
   }) {
     return _transform(
@@ -108,6 +109,12 @@ class FormValidators {
           minWordsCount,
           errorText:
               'العنوان يجب ان يكون مكون من $minWordsCount كلمة على الاقل',
+          checkNullOrEmpty: false,
+        ),
+        FormBuilderValidators.maxLength(
+          maxLength,
+          errorText:
+              'العنوان يجب ان لا يزيد عن $maxLength حرف',
           checkNullOrEmpty: false,
         ),
         FormBuilderValidators.maxWordsCount(
@@ -175,7 +182,7 @@ class FormValidators {
   static FormFieldValidator<String> descriptionValidator({
     String? fieldName,
     int minLength = 3,
-    int maxLength = 255,
+    int maxLength = 150,
     bool isRequired = true,
   }) {
     return _transform(
@@ -344,7 +351,7 @@ class FormValidators {
     String? fieldName,
     String? startsWith,
     int? minLength = 1,
-    int? maxLength = 255,
+    int? maxLength = 150,
     int? minWordsCount = 1,
     int? maxWordsCount,
     bool isRequired = true,

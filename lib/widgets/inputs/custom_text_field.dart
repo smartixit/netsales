@@ -3,6 +3,7 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 
 class CustomTextField extends StatefulWidget {
@@ -295,7 +296,9 @@ class _CustomTextFieldState extends State<CustomTextField>
             }
           },
 
-          validator: _effectiveValidator,
+          validator:
+              _effectiveValidator ??
+              FormValidators.customTextValidator(isRequired: false),
 
           inputFormatters: effectiveInputFormatters,
 
