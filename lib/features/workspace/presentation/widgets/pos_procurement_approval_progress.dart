@@ -4,8 +4,8 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-class _ProcurementApprovalProgress extends StatelessWidget {
-  const _ProcurementApprovalProgress({required this.presentation});
+class PosProcurementApprovalProgress extends StatelessWidget {
+  const PosProcurementApprovalProgress({required this.presentation});
 
   final EnumPresentation presentation;
 
@@ -18,7 +18,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: _ProgressStep(
+          child: _ApprovalProgressStep(
             label: 'تم الإرسال',
             icon: Icons.check_rounded,
             color: colors.success,
@@ -34,7 +34,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: _ProgressStep(
+          child: _ApprovalProgressStep(
             label: presentation.label,
             icon: presentation.icon ?? Icons.help_outline_rounded,
             color: statusColor,
@@ -46,8 +46,8 @@ class _ProcurementApprovalProgress extends StatelessWidget {
   }
 }
 
-class _ProgressStep extends StatelessWidget {
-  const _ProgressStep({
+class _ApprovalProgressStep extends StatelessWidget {
+  const _ApprovalProgressStep({
     required this.label,
     required this.icon,
     required this.color,
