@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/qr_code_service.dart';
 
 /// ============================================================================
@@ -133,7 +134,7 @@ class _CustomQrCodeState extends State<CustomQrCode> {
   /// واجهة الخطأ
   Widget _buildError(BuildContext context) {
     if (widget.errorBuilder != null) {
-      return widget.errorBuilder!(context, _error ?? Exception('Invalid QR'));
+      return widget.errorBuilder!(context, _error ?? AppException('Invalid QR'));
     }
 
     return SizedBox.square(
