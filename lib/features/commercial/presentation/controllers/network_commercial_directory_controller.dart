@@ -114,6 +114,7 @@ class NetworkCommercialDirectoryController
   Timer? _invitationClockTimer;
   NetworkPosLinkChallengeEntity? _activeInvitation;
   bool _isInvitationStatusRequestInFlight = false;
+  bool _isInvitationTargetDialogOpen = false;
   final selectedNetworkId = RxnInt();
 
   String? _nextCursor;
@@ -503,6 +504,7 @@ class NetworkCommercialDirectoryController
 
   void cancelInvitationTargetDialog() {
     if (isResolvingInvitationTarget.value) return;
+    _isInvitationTargetDialogOpen = false;
     resolvedInvitationTarget.value = null;
     Get.back<void>();
   }
@@ -522,10 +524,12 @@ class NetworkCommercialDirectoryController
     isResolvingInvitationTarget.value = true;
     try {
       final target = await resolveNetworkLinkablePosUseCase(networkId: networkId, posBusinessCode: code);
+      if (!_isInvitationTargetDialogOpen) return;
       if (target.posId <= 0 || target.posUuid.trim().isEmpty) {
         throw const AppException('لم يُرجع الخادم هوية صالحة لنقطة البيع المستهدفة.');
       }
       resolvedInvitationTarget.value = target;
+      _isInvitationTargetDialogOpen = false;
       Get.back<void>();
     } catch (error) {
       CustomSnackbar.show(title: 'لم يتم العثور على جهة مؤهلة', message: AppException.sanitizeMessage(error), type: SnackType.error);
@@ -672,13 +676,18 @@ class NetworkCommercialDirectoryController
     invitationBusinessCodeController.clear();
     resolvedInvitationTarget.value = null;
     try {
-      await CustomDialog.show(
-        type: DialogType.custom,
-        title: 'تحديد نقطة البيع المستهدفة',
-        content: NetworkPosInvitationTargetDialog(controller: this),
-        canPop: false,
-        maxWidth: 480,
-      );
+      _isInvitationTargetDialogOpen = true;
+      try {
+        await CustomDialog.show(
+          type: DialogType.custom,
+          title: 'تحديد نقطة البيع المستهدفة',
+          content: NetworkPosInvitationTargetDialog(controller: this),
+          canPop: true,
+          maxWidth: 480,
+        );
+      } finally {
+        _isInvitationTargetDialogOpen = false;
+      }
       final target = resolvedInvitationTarget.value;
       if (target == null) return;
       final challenge = await createNetworkPosLinkChallengeUseCase(networkId: netId, posUuid: target.posUuid);
