@@ -174,12 +174,15 @@ class QrCodeService {
   }) async {
     try {
       final qrImage = createQrImage(data: data);
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
 
       return await generateImageFromQrImage(
         qrImage: qrImage,
         decoration: decoration,
         size: size,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
     } catch (e) {
       return QrCodeGenerationResult.failure('تعذر إنشاء صورة QR.', error: e);
