@@ -500,7 +500,7 @@ class NetworkCommercialDirectoryController
           networkName.isEmpty ||
           posName.isEmpty ||
           challenge.expiresAt == null) {
-        throw StateError('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
+        throw const AppException('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
       }
 
       await CustomBottomSheet.show<void>(
