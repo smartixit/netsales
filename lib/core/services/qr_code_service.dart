@@ -170,12 +170,15 @@ class QrCodeService {
   }) async {
     try {
       final qrImage = createQrImage(data: data);
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
 
       return await generateImageFromQrImage(
         qrImage: qrImage,
         decoration: decoration,
         size: size,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
     } catch (e) {
       return QrCodeGenerationResult.failure('تعذر إنشاء صورة QR.', error: e);
@@ -193,6 +196,10 @@ class QrCodeService {
   }) async {
     try {
       final exportSize = size ?? _config.defaultExportSize;
+      final effectiveConfiguration = configuration == ImageConfiguration.empty
+          ? brandImageConfiguration()
+          : configuration;
+
       if (exportSize <= 0) {
         return QrCodeGenerationResult.failure('أبعاد صورة QR غير صحيحة.');
       }
@@ -201,7 +208,7 @@ class QrCodeService {
         size: exportSize,
         format: ui.ImageByteFormat.png,
         decoration: decoration,
-        configuration: configuration,
+        configuration: effectiveConfiguration,
       );
 
       if (byteData == null) {
