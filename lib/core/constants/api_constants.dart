@@ -144,6 +144,8 @@ abstract final class ApiConstants {
       '/network-pos/challenges/confirm';
   static String networkPosChallengeRevoke(String uuid) =>
       '/network-pos/challenges/$uuid';
+  static String networkPosChallengeStatus(String uuid) =>
+      '/network-pos/challenges/$uuid';
 
   // ==========================================================================
   // 9. باقات كروت الإنترنت (Voucher Packages)

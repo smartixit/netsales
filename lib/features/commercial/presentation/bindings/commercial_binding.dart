@@ -14,6 +14,7 @@ import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
@@ -85,6 +86,12 @@ class CommercialBinding extends Bindings {
       ),
       fenix: true,
     );
+    registerLazyIfAbsent<GetNetworkPosLinkChallengeStatusUseCase>(
+      () => GetNetworkPosLinkChallengeStatusUseCase(
+        Get.find<CommercialRepository>(),
+      ),
+      fenix: true,
+    );
     registerLazyIfAbsent<RevokeNetworkPosLinkChallengeUseCase>(
       () => RevokeNetworkPosLinkChallengeUseCase(
         Get.find<CommercialRepository>(),
@@ -112,6 +119,8 @@ class CommercialBinding extends Bindings {
         revokeNetworkPosLinkChallengeUseCase:
             Get.find<RevokeNetworkPosLinkChallengeUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
+        getNetworkPosLinkChallengeStatusUseCase:
+            Get.find<GetNetworkPosLinkChallengeStatusUseCase>(),
       ),
       fenix: true,
     );

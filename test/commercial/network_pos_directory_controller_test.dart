@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
@@ -12,6 +14,7 @@ import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
@@ -123,6 +126,22 @@ class _FakeCommercialRepository implements CommercialRepository {
       challengeUuid: 'CH-123',
       payload: 'PAYLOAD-123',
       networkId: 1,
+      network: const NetworkEntity(
+        networkId: 1,
+        ownerId: 10,
+        networkName: 'الشبكة المركزية',
+        networkPhoneNumber: '771111111',
+      ),
+    );
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeStatusEntity> getNetworkPosLinkChallengeStatus(
+    String challengeUuid,
+  ) async {
+    return NetworkPosLinkChallengeStatusEntity(
+      status: LinkingChallengeStatus.pending,
+      expiresAt: DateTime.now().add(const Duration(minutes: 15)),
     );
   }
 
@@ -220,6 +239,8 @@ void main() {
         revokeNetworkPosLinkChallengeUseCase:
             RevokeNetworkPosLinkChallengeUseCase(repo),
         getMyNetworksUseCase: GetMyNetworksUseCase(repo),
+        getNetworkPosLinkChallengeStatusUseCase:
+            GetNetworkPosLinkChallengeStatusUseCase(repo),
       );
     });
 

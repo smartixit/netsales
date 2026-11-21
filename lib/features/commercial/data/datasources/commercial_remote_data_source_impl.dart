@@ -4,6 +4,7 @@ import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
@@ -244,6 +245,24 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     final result = response.data;
     if (result == null) {
       throw Exception('فشل تأكيد الارتباط التجاري عبر الرمز المشفر.');
+    }
+    return result;
+  }
+
+  @override
+  Future<NetworkPosLinkChallengeStatusModel>
+  getNetworkPosLinkChallengeStatus(String challengeUuid) async {
+    final response =
+        await ApiService.instance.get<NetworkPosLinkChallengeStatusModel>(
+      ApiConstants.networkPosChallengeStatus(challengeUuid),
+      fromJson: (data) => NetworkPosLinkChallengeStatusModel.fromJson(
+        data as Map<String, dynamic>,
+      ),
+    );
+
+    final result = response.data;
+    if (result == null) {
+      throw Exception('تعذر استرجاع حالة دعوة الربط.');
     }
     return result;
   }

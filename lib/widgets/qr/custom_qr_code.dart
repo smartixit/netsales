@@ -48,7 +48,7 @@ class CustomQrCode extends StatefulWidget {
     super.key,
     required this.data,
     this.size = 200,
-    this.decoration = const PrettyQrDecoration(),
+    this.decoration = QrCodeService.brandDecoration,
     this.errorBuilder,
     this.semanticsLabel,
     this.containerColor,
