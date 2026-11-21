@@ -58,7 +58,11 @@ class CommercialDetailRow extends StatelessWidget {
             ),
             if (onTap != null) ...[
               SizedBox(width: 4.w),
-              Icon(Icons.open_in_new_rounded, size: 13.r, color: colors.primary),
+              Icon(
+                Icons.open_in_new_rounded,
+                size: 13.r,
+                color: colors.primary,
+              ),
             ],
           ],
         ),

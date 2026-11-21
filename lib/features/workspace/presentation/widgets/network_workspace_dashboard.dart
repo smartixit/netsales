@@ -24,8 +24,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
       onRefresh: controller.loadWorkspace,
       maxContentWidth: 920,
       child: Obx(() {
-        if (controller.isLoadingNetworks.value &&
-            controller.networks.isEmpty) {
+        if (controller.isLoadingNetworks.value && controller.networks.isEmpty) {
           return const CustomStateView.loading(
             presentation: CustomStatePresentation.skeletonOnly,
             skeleton: CustomStateSkeleton(
@@ -129,8 +128,16 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               title: 'إدارة النشاط التجاري',
               subtitle: 'الفواتير والكتالوج والمصروفات التشغيلية.',
               items: [
-                WorkspaceFunctionAccessItem(title: 'فواتير المبيعات', icon: Icons.receipt_long_outlined, onTap: controller.openWholesaleInvoices),
-                WorkspaceFunctionAccessItem(title: 'المصروفات', icon: Icons.payments_outlined, onTap: controller.openOperatingExpenses),
+                WorkspaceFunctionAccessItem(
+                  title: 'فواتير المبيعات',
+                  icon: Icons.receipt_long_outlined,
+                  onTap: controller.openWholesaleInvoices,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'المصروفات',
+                  icon: Icons.payments_outlined,
+                  onTap: controller.openOperatingExpenses,
+                ),
               ],
             ),
             AppSpacing.vLg,
@@ -138,10 +145,26 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               title: 'الإدارة والمتابعة',
               subtitle: 'الفريق واشتراك المنصة وتقارير الأداء.',
               items: [
-                WorkspaceFunctionAccessItem(title: 'فريق العمل', icon: Icons.groups_outlined, onTap: controller.openTeamManagement),
-                WorkspaceFunctionAccessItem(title: 'اشتراك المنصة', icon: Icons.workspace_premium_outlined, onTap: controller.openPlatformBilling),
-                WorkspaceFunctionAccessItem(title: 'تقارير الاشتراكات', icon: Icons.query_stats_outlined, onTap: controller.openBillingReports),
-                WorkspaceFunctionAccessItem(title: 'التقارير التشغيلية', icon: Icons.analytics_outlined, onTap: controller.openOperationalReports),
+                WorkspaceFunctionAccessItem(
+                  title: 'فريق العمل',
+                  icon: Icons.groups_outlined,
+                  onTap: controller.openTeamManagement,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'اشتراك المنصة',
+                  icon: Icons.workspace_premium_outlined,
+                  onTap: controller.openPlatformBilling,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'تقارير الاشتراكات',
+                  icon: Icons.query_stats_outlined,
+                  onTap: controller.openBillingReports,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'التقارير التشغيلية',
+                  icon: Icons.analytics_outlined,
+                  onTap: controller.openOperationalReports,
+                ),
               ],
             ),
           ],

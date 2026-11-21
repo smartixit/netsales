@@ -182,7 +182,7 @@ class ExpenseDetailsController extends GetxController {
       isSharing.value = false;
     }
   }
-  
+
   /// تصدير وحفظ سند المصروف كملف PDF في ذاكرة الجهاز
   Future<void> saveCurrentExpense() async {
     final exp = expense.value;

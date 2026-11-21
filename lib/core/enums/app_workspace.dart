@@ -1,8 +1,5 @@
 /// Operational workspaces available in the NetSales mobile application.
-enum AppWorkspace {
-  network,
-  pos,
-}
+enum AppWorkspace { network, pos }
 
 extension AppWorkspaceExtension on AppWorkspace {
   bool get isNetwork => this == AppWorkspace.network;

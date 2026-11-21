@@ -37,9 +37,7 @@ abstract interface class MembershipRemoteDataSource {
   });
 
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
-  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(
-    int posId,
-  );
+  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(int posId);
 
   Future<ApiResponse<List<MembershipRoleModel>>> getPosAssignableRoles(
     int posId,

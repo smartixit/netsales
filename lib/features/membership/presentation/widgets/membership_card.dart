@@ -46,7 +46,10 @@ class MembershipCard extends StatelessWidget {
     );
 
     final actorLabel = member.isOwner ? 'المالك المعتمد لمساحة العمل' : null;
-    final displayName = TextFormatter.twoNames(member.displayFullName, fallback: member.displayFullName);
+    final displayName = TextFormatter.twoNames(
+      member.displayFullName,
+      fallback: member.displayFullName,
+    );
 
     return CustomExecutiveTransactionCard(
       reference: member.displayReference,
@@ -76,7 +79,8 @@ class MembershipCard extends StatelessWidget {
           textColor: status.tone.color(context),
         ),
       ],
-      actions: actions ??
+      actions:
+          actions ??
           MembershipCardActions(
             member: member,
             onDetails: onDetails,

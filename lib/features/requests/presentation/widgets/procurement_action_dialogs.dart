@@ -44,9 +44,12 @@ class ProcurementActionDialogs {
                 CustomTextField(
                   controller: paidAmountController,
                   label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
-                  hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
+                  hint:
+                      'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
                   isRequired: false,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   prefixIcon: const Icon(Icons.payments_outlined),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -65,7 +68,9 @@ class ProcurementActionDialogs {
                 label: 'ملاحظات الاعتماد (اختياري)',
                 hint: 'أضف أي ملاحظات للوكيل بخصوص الفاتورة...',
                 maxLines: 2,
-                validator: FormValidators.descriptionValidator(isRequired: false),
+                validator: FormValidators.descriptionValidator(
+                  isRequired: false,
+                ),
               ),
             ],
           ),
@@ -168,8 +173,7 @@ class ProcurementActionDialogs {
     final confirmed = await CustomDialog.show(
       type: DialogType.warning,
       title: 'تحديث في تعرفة الأسعار',
-      message:
-          'قام مزود الشبكة بتحديث أسعار بعض الباقات المختارة أثناء إعدادك للطلب. يرجى مراجعة الفروقات قبل المتابعة:',
+      message: 'قام مزود الشبكة بتحديث أسعار بعض الباقات المختارة أثناء إعدادك للطلب. يرجى مراجعة الفروقات قبل المتابعة:',
       confirmLabel: 'الموافقة والمتابعة',
       cancelLabel: 'مراجعة السلة',
       onConfirm: () => Get.back(result: true),
@@ -194,10 +198,7 @@ class ProcurementActionDialogs {
                   height: AppSpacing.md,
                   color: colors.outlineVariant.withValues(alpha: 0.4),
                 ),
-              _PriceChangeItem(
-                change: priceChanges[i],
-                currency: currency,
-              ),
+              _PriceChangeItem(change: priceChanges[i], currency: currency),
             ],
             AppSpacing.vMd,
             Container(
@@ -239,10 +240,7 @@ class ProcurementActionDialogs {
 }
 
 class _PriceChangeItem extends StatelessWidget {
-  const _PriceChangeItem({
-    required this.change,
-    required this.currency,
-  });
+  const _PriceChangeItem({required this.change, required this.currency});
 
   final PackagePriceChangeEntity change;
   final String currency;

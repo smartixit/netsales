@@ -111,10 +111,7 @@ class AppCryptoService {
   /// ==========================================================================
   /// 2. مزامنة المفاتيح العامة السيادية للخادم (Public Keys Synchronization)
   /// ==========================================================================
-  Future<bool> syncServerPublicKeys({
-    required Dio dio,
-    bool force = false,
-  }) {
+  Future<bool> syncServerPublicKeys({required Dio dio, bool force = false}) {
     if (!force && hasServerBoxKey) return Future<bool>.value(true);
 
     final inFlight = _publicKeysSyncFuture;
@@ -165,9 +162,7 @@ class AppCryptoService {
       final payload = responseData['data'];
       final keys = payload is Map ? payload['keys'] : null;
       if (keys is! List) {
-        log(
-          '❌ [Crypto] Public-key response does not contain data.keys.',
-        );
+        log('❌ [Crypto] Public-key response does not contain data.keys.');
         return false;
       }
 
@@ -178,8 +173,7 @@ class AppCryptoService {
         final kid = keyItem['kid']?.toString() ?? '';
         final crv = keyItem['crv']?.toString() ?? '';
         final hex = keyItem['public_key']?.toString() ?? '';
-        final isValidPublicKey =
-            RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(hex);
+        final isValidPublicKey = RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(hex);
 
         if (!isValidPublicKey) continue;
 
@@ -214,9 +208,7 @@ class AppCryptoService {
 
       return hasServerBoxKey;
     } catch (e, stack) {
-      log(
-        '❌ [Crypto] Failed to synchronize server public keys: $e\n$stack',
-      );
+      log('❌ [Crypto] Failed to synchronize server public keys: $e\n$stack');
       return hasServerBoxKey;
     }
   }

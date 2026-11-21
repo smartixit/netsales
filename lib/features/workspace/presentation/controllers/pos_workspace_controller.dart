@@ -49,15 +49,19 @@ class PosWorkspaceController extends GetxController {
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
   final GetPosInvoicesUseCase getPosInvoicesUseCase;
   final GetRequestsUseCase getRequestsUseCase;
-  final PreviewNetworkPosLinkChallengeUseCase previewNetworkPosLinkChallengeUseCase;
-  final ConfirmNetworkPosLinkChallengeUseCase confirmNetworkPosLinkChallengeUseCase;
+  final PreviewNetworkPosLinkChallengeUseCase
+  previewNetworkPosLinkChallengeUseCase;
+  final ConfirmNetworkPosLinkChallengeUseCase
+  confirmNetworkPosLinkChallengeUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxInt selectedMobileNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
   final Rxn<PosEntity> activePos = Rxn<PosEntity>();
-  final RxList<NetworkPosLinkEntity> networkLinks = <NetworkPosLinkEntity>[].obs;
-  final Rxn<NetworkPosLinkEntity> selectedNetworkLink = Rxn<NetworkPosLinkEntity>();
+  final RxList<NetworkPosLinkEntity> networkLinks =
+      <NetworkPosLinkEntity>[].obs;
+  final Rxn<NetworkPosLinkEntity> selectedNetworkLink =
+      Rxn<NetworkPosLinkEntity>();
 
   final RxList<InvoiceEntity> recentInvoices = <InvoiceEntity>[].obs;
   final RxList<RequestEntity> recentRequests = <RequestEntity>[].obs;
@@ -88,7 +92,8 @@ class PosWorkspaceController extends GetxController {
   String get todayFormatted => DateFormatter.fullDate(DateTime.now());
   String get activePosName => activePos.value?.posName ?? '';
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
-  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials =>
+      TextFormatter.avatarInitials(userName, maxChars: 2);
 
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
@@ -137,10 +142,8 @@ class PosWorkspaceController extends GetxController {
           AppRoutes.purchaseInvoiceDetails,
           arguments: invoice,
         ),
-        onOpenRequest: (request) => Get.toNamed<void>(
-          AppRoutes.procurementOrders,
-          arguments: request,
-        ),
+        onOpenRequest: (request) =>
+            Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request),
       );
 
   @override
@@ -184,11 +187,15 @@ class PosWorkspaceController extends GetxController {
       if (generation != _posGeneration || isClosed) return;
 
       availablePos.assignAll(positions);
-      final ids = positions.map((position) => position.posId).toList(growable: false);
+      final ids = positions
+          .map((position) => position.posId)
+          .toList(growable: false);
       final selectedId = WorkspaceService.to.resolveWorkspaceActivePosId(ids);
       final selected = selectedId == null
           ? null
-          : positions.firstWhereOrNull((position) => position.posId == selectedId);
+          : positions.firstWhereOrNull(
+              (position) => position.posId == selectedId,
+            );
 
       activePos.value = selected;
 
@@ -268,7 +275,9 @@ class PosWorkspaceController extends GetxController {
 
       // A POS may have distinct relationship records for the same network.
       // The relationship ID, not the network ID, identifies a selectable link.
-      final knownLinkIds = networkLinks.map((link) => link.networkPosId).toSet();
+      final knownLinkIds = networkLinks
+          .map((link) => link.networkPosId)
+          .toSet();
       for (final link in result.items) {
         if (knownLinkIds.add(link.networkPosId)) networkLinks.add(link);
       }
@@ -286,9 +295,7 @@ class PosWorkspaceController extends GetxController {
       }
 
       if (selectedNetworkLink.value == null && initial != null) {
-        await selectNetwork(
-          initial,
-        );
+        await selectNetwork(initial);
       }
     } catch (error) {
       if (generation != _networkGeneration || isClosed) return;
@@ -519,10 +526,7 @@ class PosWorkspaceController extends GetxController {
     } else {
       networkLinks[existingIndex] = newLink;
     }
-    await selectNetwork(
-      newLink,
-      forceRefresh: true,
-    );
+    await selectNetwork(newLink, forceRefresh: true);
     return true;
   }
 

@@ -22,7 +22,8 @@ class SplashRepositoryImpl implements SplashRepository {
         SessionValidationResult.valid => AppRoutes.dashboard,
         SessionValidationResult.unauthorized => AppRoutes.login,
         SessionValidationResult.forbidden => AppRoutes.unauthorized,
-        SessionValidationResult.unavailable => throw const BootVerificationUnavailableException(),
+        SessionValidationResult.unavailable =>
+          throw const BootVerificationUnavailableException(),
       };
     }
 

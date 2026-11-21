@@ -47,23 +47,24 @@ class CommercialPartnerCard extends StatelessWidget {
     // تمثيل حالة الكيان الشريك (نقطة البيع أو الشبكة)
     final partnerTypePres = isNetworkView
         ? (link.pos != null
-            ? EnumPresentationRegistry.resolvePosStatus(
-                link.pos!.typedStatus,
-                serverLabel: link.pos!.statusLabel,
-              )
-            : null)
+              ? EnumPresentationRegistry.resolvePosStatus(
+                  link.pos!.typedStatus,
+                  serverLabel: link.pos!.statusLabel,
+                )
+              : null)
         : (link.network != null
-            ? EnumPresentationRegistry.resolveNetworkStatus(
-                link.network!.typedStatus,
-                serverLabel: link.network!.statusLabel,
-              )
-            : null);
+              ? EnumPresentationRegistry.resolveNetworkStatus(
+                  link.network!.typedStatus,
+                  serverLabel: link.network!.statusLabel,
+                )
+              : null);
 
     final reference = isNetworkView
         ? link.displayPosReference
         : link.displayNetworkReference;
-    final partyName =
-        isNetworkView ? link.displayPosName : link.displayNetworkName;
+    final partyName = isNetworkView
+        ? link.displayPosName
+        : link.displayNetworkName;
     final partyPhone = isNetworkView ? link.posPhone : link.networkPhone;
     final partyLogo = isNetworkView
         ? link.pos?.posProfileLogoUrl
@@ -85,14 +86,8 @@ class CommercialPartnerCard extends StatelessWidget {
       secondaryReference: 'ارتباط #${link.networkPosId}',
       items: const [],
       metrics: [
-        ExecutiveCardMetricData(
-          label: 'الموقع الجغرافي',
-          value: location,
-        ),
-        ExecutiveCardMetricData(
-          label: 'المسؤول المباشر',
-          value: owner,
-        ),
+        ExecutiveCardMetricData(label: 'الموقع الجغرافي', value: location),
+        ExecutiveCardMetricData(label: 'المسؤول المباشر', value: owner),
         ExecutiveCardMetricData(
           label: 'حالة الارتباط',
           value: statusPres.label,
@@ -100,7 +95,8 @@ class CommercialPartnerCard extends StatelessWidget {
           textColor: link.isActive ? colors.primary : colors.onSurfaceVariant,
         ),
       ],
-      actions: actions ??
+      actions:
+          actions ??
           CommercialPartnerCardActions(
             link: link,
             isNetworkView: isNetworkView,

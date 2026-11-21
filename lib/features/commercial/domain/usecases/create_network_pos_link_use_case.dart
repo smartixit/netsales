@@ -11,9 +11,6 @@ class CreateNetworkPosLinkUseCase {
     required int networkId,
     required int posId,
   }) {
-    return _repository.createNetworkPosLink(
-      networkId: networkId,
-      posId: posId,
-    );
+    return _repository.createNetworkPosLink(networkId: networkId, posId: posId);
   }
 }

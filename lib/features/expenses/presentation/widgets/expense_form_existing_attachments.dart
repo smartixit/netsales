@@ -44,7 +44,8 @@ class ExpenseFormExistingAttachments
               final att = attachments[index];
               return _ExistingAttachmentItem(
                 attachment: att,
-                onDelete: () => controller.removeExistingAttachment(att.attachmentId),
+                onDelete: () =>
+                    controller.removeExistingAttachment(att.attachmentId),
               );
             },
           ),
@@ -86,9 +87,7 @@ class _ExistingAttachmentItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.6),
-        ),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.6)),
       ),
       child: Row(
         children: [

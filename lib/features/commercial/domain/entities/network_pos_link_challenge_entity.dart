@@ -45,18 +45,18 @@ class NetworkPosLinkChallengeEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        challengeId,
-        challengeUuid,
-        payload,
-        networkId,
-        posId,
-        status,
-        statusLabel,
-        expiresAt,
-        consumedAt,
-        createdAt,
-        updatedAt,
-        network,
-        pos,
-      ];
+    challengeId,
+    challengeUuid,
+    payload,
+    networkId,
+    posId,
+    status,
+    statusLabel,
+    expiresAt,
+    consumedAt,
+    createdAt,
+    updatedAt,
+    network,
+    pos,
+  ];
 }

@@ -113,8 +113,7 @@ class FormValidators {
         ),
         FormBuilderValidators.maxLength(
           maxLength,
-          errorText:
-              'العنوان يجب ان لا يزيد عن $maxLength حرف',
+          errorText: 'العنوان يجب ان لا يزيد عن $maxLength حرف',
           checkNullOrEmpty: false,
         ),
         FormBuilderValidators.maxWordsCount(

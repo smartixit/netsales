@@ -44,9 +44,7 @@ class WorkspaceWelcomeHero extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: Container(
         constraints: BoxConstraints(minHeight: 174.h),
-        decoration: BoxDecoration(
-          gradient: colors.executiveHeroGradient,
-        ),
+        decoration: BoxDecoration(gradient: colors.executiveHeroGradient),
         child: Stack(
           children: [
             const Positioned.fill(
@@ -120,4 +118,3 @@ class WorkspaceWelcomeHero extends StatelessWidget {
     );
   }
 }
-

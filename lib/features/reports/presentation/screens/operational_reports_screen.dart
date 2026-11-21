@@ -46,77 +46,75 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
     });
 
     final content = Padding(
-        padding: EdgeInsets.all(AppSpacing.cardPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'التقارير التشغيلية',
-              style: AppTypography.titleLarge.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: AppTypography.bold,
-              ),
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'التقارير التشغيلية',
+            style: AppTypography.titleLarge.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: AppTypography.bold,
             ),
-            AppSpacing.vXs,
-            Text(
-              'بيانات موثقة من الخادم، مع تصفية وتصدير حسب صلاحيات مساحة العمل.',
-              style: AppTypography.bodySmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          ),
+          AppSpacing.vXs,
+          Text(
+            'بيانات موثقة من الخادم، مع تصفية وتصدير حسب صلاحيات مساحة العمل.',
+            style: AppTypography.bodySmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            AppSpacing.vMd,
-            Expanded(
-              child: Obx(() {
-                final types = controller.availableTypes;
-                if (types.isEmpty) {
-                  return const CustomEmptyState.boxed(
-                    title: 'لا توجد تقارير متاحة',
-                    subtitle: 'لا توجد لديك صلاحية لعرض أي من التقارير التشغيلية في مساحة العمل الحالية.',
-                    icon: Icons.lock_outline_rounded,
-                  );
-                }
-
-                if (!controller.hasNetworkScope) {
-                  return const CustomEmptyState.boxed(
-                    title: 'حدد مساحة العمل أولاً',
-                    subtitle: 'اختر شبكة أو نقطة بيع مصرحاً بها حتى يمكن تحميل تقاريرها.',
-                    icon: Icons.business_outlined,
-                  );
-                }
-
-                final entry = controller.selectedReportEntry;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    OperationalReportTypeSelector(
-                      controller: controller,
-                      types: types,
-                    ),
-                    AppSpacing.vMd,
-                    if (entry != null)
-                      Expanded(
-                        flex: 3,
-                        child: OperationalReportStudioWorkspace(
-                          controller: controller,
-                          entry: entry,
-                        ),
-                      ),
-                    OperationalReportActionsBar(controller: controller),
-                    OperationalReportSummaryAndCharts(controller: controller),
-                    AppSpacing.vSm,
-                    Expanded(
-                      flex: 2,
-                      child: OperationalReportRecordsList(
-                        controller: controller,
-                      ),
-                    ),
-                  ],
+          ),
+          AppSpacing.vMd,
+          Expanded(
+            child: Obx(() {
+              final types = controller.availableTypes;
+              if (types.isEmpty) {
+                return const CustomEmptyState.boxed(
+                  title: 'لا توجد تقارير متاحة',
+                  subtitle: 'لا توجد لديك صلاحية لعرض أي من التقارير التشغيلية في مساحة العمل الحالية.',
+                  icon: Icons.lock_outline_rounded,
                 );
-              }),
-            ),
-          ],
-        ),
-      );
+              }
+
+              if (!controller.hasNetworkScope) {
+                return const CustomEmptyState.boxed(
+                  title: 'حدد مساحة العمل أولاً',
+                  subtitle: 'اختر شبكة أو نقطة بيع مصرحاً بها حتى يمكن تحميل تقاريرها.',
+                  icon: Icons.business_outlined,
+                );
+              }
+
+              final entry = controller.selectedReportEntry;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  OperationalReportTypeSelector(
+                    controller: controller,
+                    types: types,
+                  ),
+                  AppSpacing.vMd,
+                  if (entry != null)
+                    Expanded(
+                      flex: 3,
+                      child: OperationalReportStudioWorkspace(
+                        controller: controller,
+                        entry: entry,
+                      ),
+                    ),
+                  OperationalReportActionsBar(controller: controller),
+                  OperationalReportSummaryAndCharts(controller: controller),
+                  AppSpacing.vSm,
+                  Expanded(
+                    flex: 2,
+                    child: OperationalReportRecordsList(controller: controller),
+                  ),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
 
     if (embedded) {
       return content;

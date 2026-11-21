@@ -72,18 +72,12 @@ class AddMemberSheet extends StatelessWidget {
             hint: 'اختر حالة الحساب عند الإضافة',
             valueListenable: statusNotifier,
             items: const [
-              DropdownItem(
-                value: 'ACTIVE',
-                child: Text('نشط ومفعل فورياً'),
-              ),
+              DropdownItem(value: 'ACTIVE', child: Text('نشط ومفعل فورياً')),
               DropdownItem(
                 value: 'INVITED',
                 child: Text('بانتظار التأكيد (مدعو)'),
               ),
-              DropdownItem(
-                value: 'SUSPENDED',
-                child: Text('موقوف مؤقتاً'),
-              ),
+              DropdownItem(value: 'SUSPENDED', child: Text('موقوف مؤقتاً')),
             ],
             onChanged: (val) {
               if (val != null) statusNotifier.value = val;

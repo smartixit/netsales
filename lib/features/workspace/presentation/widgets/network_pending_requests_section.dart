@@ -48,7 +48,9 @@ class NetworkPendingRequestsSection extends StatelessWidget {
                 ),
               ),
               CustomButton.text(
-                text: totalPendingCount == null ? 'عرض الكل' : 'عرض الكل ($totalPendingCount)',
+                text: totalPendingCount == null
+                    ? 'عرض الكل'
+                    : 'عرض الكل ($totalPendingCount)',
                 suffix: Icons.chevron_right_rounded,
                 onPressed: onViewAll,
               ),

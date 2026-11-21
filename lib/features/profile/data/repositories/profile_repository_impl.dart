@@ -27,20 +27,22 @@ class ProfileRepositoryImpl implements ProfileRepository {
       statusLabel: statusPresentation.label,
       lastLoginAt: user.lastLoginAt,
       twoFactorEnabled: user.user2faEnabled,
-      memberships: user.workspaceMemberships.map((membership) {
-        final roleLabel = membership.roleName.trim().isNotEmpty
-            ? membership.roleName
-            : EnumPresentationRegistry.resolveRoleKey(
-                membership.typedRoleKey,
-              ).label;
+      memberships: user.workspaceMemberships
+          .map((membership) {
+            final roleLabel = membership.roleName.trim().isNotEmpty
+                ? membership.roleName
+                : EnumPresentationRegistry.resolveRoleKey(
+                    membership.typedRoleKey,
+                  ).label;
 
-        return ProfileMembershipEntity(
-          scope: membership.scope.wireValue,
-          tenantId: membership.tenantId,
-          roleKey: membership.roleKey,
-          roleName: roleLabel,
-        );
-      }).toList(growable: false),
+            return ProfileMembershipEntity(
+              scope: membership.scope.wireValue,
+              tenantId: membership.tenantId,
+              roleKey: membership.roleKey,
+              roleName: roleLabel,
+            );
+          })
+          .toList(growable: false),
     );
   }
 }

@@ -33,12 +33,12 @@ class PosQuickActionCard extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: colors.primary.withValues(
-            alpha: Theme.of(context).brightness == Brightness.dark ? 0.16 : 0.12,
+            alpha: Theme.of(context).brightness == Brightness.dark
+                ? 0.16
+                : 0.12,
           ),
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: colors.primary.withValues(alpha: 0.08),
-          ),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.08)),
         ),
         child: Row(
           children: [

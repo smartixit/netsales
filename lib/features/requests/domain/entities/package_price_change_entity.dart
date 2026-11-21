@@ -36,7 +36,8 @@ class PackagePriceChangeEntity {
   final int newLineTotalMinor;
 
   /// هل تغير السعر الأساسي للوحدة؟
-  bool get hasBasePriceChanged => oldBaseUnitPriceMinor != newBaseUnitPriceMinor;
+  bool get hasBasePriceChanged =>
+      oldBaseUnitPriceMinor != newBaseUnitPriceMinor;
 
   /// هل تغيرت نسبة الخصم المعتمدة؟
   bool get hasDiscountChanged =>

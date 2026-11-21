@@ -98,7 +98,9 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                 ),
               ),
               AppSpacing.vMd,
-              PosProcurementApprovalProgress(presentation: order.statusPresentation),
+              PosProcurementApprovalProgress(
+                presentation: order.statusPresentation,
+              ),
             ],
           ),
         ),
@@ -106,4 +108,3 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
     });
   }
 }
-

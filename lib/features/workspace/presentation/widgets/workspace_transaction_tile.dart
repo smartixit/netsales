@@ -68,7 +68,8 @@ class WorkspaceTransactionTile extends StatelessWidget {
       imageUrl: item.imageUrl,
       icon: item.icon,
       onTap: item.onTap,
-      trailingAction: customTrailingAction ??
+      trailingAction:
+          customTrailingAction ??
           (item.onAction == null
               ? null
               : WorkspaceTransactionAction(
@@ -146,4 +147,3 @@ class WorkspaceTransactionTile extends StatelessWidget {
     );
   }
 }
-

@@ -63,8 +63,7 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
       'updated_at': updatedAt,
       if (network != null && network is NetworkModel)
         'network': (network! as NetworkModel).toJson(),
-      if (pos != null && pos is PosModel)
-        'pos': (pos! as PosModel).toJson(),
+      if (pos != null && pos is PosModel) 'pos': (pos! as PosModel).toJson(),
     };
   }
 }

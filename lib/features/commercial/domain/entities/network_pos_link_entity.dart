@@ -37,8 +37,7 @@ class NetworkPosLinkEntity extends Equatable {
 
   String get posLocation => pos?.displayLocation ?? 'غير محدد';
 
-  String get displayNetworkName =>
-      network?.displayName ?? 'شبكة #$networkId';
+  String get displayNetworkName => network?.displayName ?? 'شبكة #$networkId';
 
   String get displayNetworkReference =>
       network?.displayReference ?? '#$networkId';
@@ -79,13 +78,13 @@ class NetworkPosLinkEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        networkPosId,
-        networkId,
-        posId,
-        status,
-        createdAt,
-        updatedAt,
-        network,
-        pos,
-      ];
+    networkPosId,
+    networkId,
+    posId,
+    status,
+    createdAt,
+    updatedAt,
+    network,
+    pos,
+  ];
 }

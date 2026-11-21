@@ -18,7 +18,9 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
   factory NetworkPosLinkModel.fromJson(Map<String, dynamic> json) {
     NetworkModel? networkModel;
     if (json['network'] is Map<String, dynamic>) {
-      networkModel = NetworkModel.fromJson(json['network'] as Map<String, dynamic>);
+      networkModel = NetworkModel.fromJson(
+        json['network'] as Map<String, dynamic>,
+      );
     }
 
     PosModel? posModel;
@@ -34,7 +36,10 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
     } else if (rawStatus is num) {
       parsedStatus = rawStatus == 1;
     } else if (rawStatus is String) {
-      parsedStatus = rawStatus == '1' || rawStatus.toUpperCase() == 'ACTIVE' || rawStatus.toUpperCase() == 'TRUE';
+      parsedStatus =
+          rawStatus == '1' ||
+          rawStatus.toUpperCase() == 'ACTIVE' ||
+          rawStatus.toUpperCase() == 'TRUE';
     } else {
       parsedStatus = true;
     }
@@ -61,8 +66,7 @@ class NetworkPosLinkModel extends NetworkPosLinkEntity {
       'updated_at': updatedAt,
       if (network != null && network is NetworkModel)
         'network': (network! as NetworkModel).toJson(),
-      if (pos != null && pos is PosModel)
-        'pos': (pos! as PosModel).toJson(),
+      if (pos != null && pos is PosModel) 'pos': (pos! as PosModel).toJson(),
     };
   }
 }

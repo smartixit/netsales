@@ -33,7 +33,8 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
 
     return Obx(() {
       // 1. حالة التحميل الهيكلي
-      if (controller.isLoading.value && controller.selectedPackage.value == null) {
+      if (controller.isLoading.value &&
+          controller.selectedPackage.value == null) {
         return CustomAppScaffold(
           appBarTitle: 'تفاصيل باقة الكروت',
           body: Padding(
@@ -60,7 +61,8 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
             child: CustomEmptyState(
               icon: Icons.wifi_tethering_off_rounded,
               title: 'لم يتم العثور على الباقة',
-              subtitle: 'قد تكون هذه الباقة حُذفت أو لم يعد بالإمكان الوصول إليها.',
+              subtitle:
+                  'قد تكون هذه الباقة حُذفت أو لم يعد بالإمكان الوصول إليها.',
               actionLabel: 'العودة للكتالوج',
               onAction: () => Get.back<void>(),
             ),
@@ -157,20 +159,23 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
                     metrics: [
                       CustomMetricCardData(
                         label: 'السعر الأساسي',
-                        value: '${AmountFormatter.formatValue(package.packageVoucherPrice)} ر.ي',
+                        value:
+                            '${AmountFormatter.formatValue(package.packageVoucherPrice)} ر.ي',
                         icon: Icons.payments_outlined,
                         accentColor: colors.primary,
                         isPrimary: true,
                       ),
                       CustomMetricCardData(
                         label: 'السعر الفعلي نقداً',
-                        value: '${AmountFormatter.formatValue(package.effectiveCashPrice)} ر.ي',
+                        value:
+                            '${AmountFormatter.formatValue(package.effectiveCashPrice)} ر.ي',
                         icon: Icons.price_change_outlined,
                         accentColor: colors.success,
                       ),
                       CustomMetricCardData(
                         label: 'السعر الفعلي آجلاً',
-                        value: '${AmountFormatter.formatValue(package.effectiveCreditPrice)} ر.ي',
+                        value:
+                            '${AmountFormatter.formatValue(package.effectiveCreditPrice)} ر.ي',
                         icon: Icons.credit_card_outlined,
                         accentColor: colors.secondary,
                       ),
@@ -206,37 +211,75 @@ class PackageDetailsScreen extends GetView<PackageCatalogController> {
                           ),
                           AppSpacing.vMd,
                           CustomInfoListTile(
-                            leading: Icon(Icons.wifi_tethering_rounded, color: colors.primary),
+                            leading: Icon(
+                              Icons.wifi_tethering_rounded,
+                              color: colors.primary,
+                            ),
                             title: const Text('عدد الكروت في الباقة'),
-                            trailing: Text('${package.packageVoucherCount} كرت'),
+                            trailing: Text(
+                              '${package.packageVoucherCount} كرت',
+                            ),
                           ),
                           if (package.packageBalance > 0)
                             CustomInfoListTile(
-                              leading: Icon(Icons.data_usage_rounded, color: colors.primary),
+                              leading: Icon(
+                                Icons.data_usage_rounded,
+                                color: colors.primary,
+                              ),
                               title: const Text('حجم الرصيد'),
-                              trailing: Text(PackageSpecFormatter.formatData(package.packageBalance)),
+                              trailing: Text(
+                                PackageSpecFormatter.formatData(
+                                  package.packageBalance,
+                                ),
+                              ),
                             ),
-                          if (package.packageUptime != null && package.packageUptime! > 0)
+                          if (package.packageUptime != null &&
+                              package.packageUptime! > 0)
                             CustomInfoListTile(
-                              leading: Icon(Icons.timer_outlined, color: colors.primary),
+                              leading: Icon(
+                                Icons.timer_outlined,
+                                color: colors.primary,
+                              ),
                               title: const Text('وقت الاتصال المسموح'),
-                              trailing: Text(PackageSpecFormatter.formatDuration(package.packageUptime!)),
+                              trailing: Text(
+                                PackageSpecFormatter.formatDuration(
+                                  package.packageUptime!,
+                                ),
+                              ),
                             ),
-                          if (package.packageValidity != null && package.packageValidity! > 0)
+                          if (package.packageValidity != null &&
+                              package.packageValidity! > 0)
                             CustomInfoListTile(
-                              leading: Icon(Icons.calendar_month_outlined, color: colors.primary),
+                              leading: Icon(
+                                Icons.calendar_month_outlined,
+                                color: colors.primary,
+                              ),
                               title: const Text('فترة الصلاحية'),
-                              trailing: Text(PackageSpecFormatter.formatDuration(package.packageValidity!)),
+                              trailing: Text(
+                                PackageSpecFormatter.formatDuration(
+                                  package.packageValidity!,
+                                ),
+                              ),
                             ),
                           CustomInfoListTile(
-                            leading: Icon(Icons.money_off_rounded, color: colors.success),
+                            leading: Icon(
+                              Icons.money_off_rounded,
+                              color: colors.success,
+                            ),
                             title: const Text('نسبة الخصم النقدي'),
-                            trailing: Text('${package.packageDefaultCashDiscount.toStringAsFixed(0)}%'),
+                            trailing: Text(
+                              '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%',
+                            ),
                           ),
                           CustomInfoListTile(
-                            leading: Icon(Icons.credit_card_rounded, color: colors.secondary),
+                            leading: Icon(
+                              Icons.credit_card_rounded,
+                              color: colors.secondary,
+                            ),
                             title: const Text('نسبة الخصم الآجل'),
-                            trailing: Text('${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%'),
+                            trailing: Text(
+                              '${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%',
+                            ),
                           ),
                         ],
                       ),

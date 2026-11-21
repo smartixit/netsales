@@ -263,9 +263,7 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   bool get canSubmitOrder =>
-      hasCartItems &&
-      !isRefreshingCartPricing.value &&
-      !isSubmitting.value;
+      hasCartItems && !isRefreshingCartPricing.value && !isSubmitting.value;
 
   void _setSelectedNetworkId(int? value) {
     selectedNetworkId.value = value;
@@ -609,13 +607,15 @@ class PosNewProcurementOrderController extends GetxController {
     cartPricingRefreshError.value = null;
 
     // تسجيل الأسعار السابقة للباقات لمقارنة أي تغير سعري يطرأ بعد التحديث
-    final oldLinePrices = <int, ({int baseMinor, int discountBp, int lineTotalMinor})>{};
+    final oldLinePrices =
+        <int, ({int baseMinor, int discountBp, int lineTotalMinor})>{};
     for (final line in cartLines) {
       final oldBase = line.package.procurementBaseUnitPriceMinor ?? 0;
       final oldDiscount = selectedSaleType.value == SaleType.cash
           ? (line.package.procurementCashDiscountBasisPoints ?? 0)
           : (line.package.procurementCreditDiscountBasisPoints ?? 0);
-      final oldTotal = estimatedLineTotalMinor(line.package, line.voucherCount) ?? 0;
+      final oldTotal =
+          estimatedLineTotalMinor(line.package, line.voucherCount) ?? 0;
       oldLinePrices[line.package.packageId] = (
         baseMinor: oldBase,
         discountBp: oldDiscount,
@@ -699,11 +699,13 @@ class PosNewProcurementOrderController extends GetxController {
           final newDiscount = selectedSaleType.value == SaleType.cash
               ? (newPkg.procurementCashDiscountBasisPoints ?? 0)
               : (newPkg.procurementCreditDiscountBasisPoints ?? 0);
-          final newTotal = procurementEstimateCalculator.calculateLineTotalMinor(
-            newPkg,
-            line.voucherCount,
-            selectedSaleType.value,
-          ) ?? 0;
+          final newTotal =
+              procurementEstimateCalculator.calculateLineTotalMinor(
+                newPkg,
+                line.voucherCount,
+                selectedSaleType.value,
+              ) ??
+              0;
 
           if (old.baseMinor != newBase || old.discountBp != newDiscount) {
             priceChanges.add(
@@ -1434,7 +1436,8 @@ class PosNewProcurementOrderController extends GetxController {
             !hasCurrentProcurementSnapshots) {
           CustomSnackbar.show(
             title: 'تعذر تحديث التعرفة',
-            message: cartPricingRefreshError.value ??
+            message:
+                cartPricingRefreshError.value ??
                 'تعذر الحصول على تعرفة موقعة وحديثة من الخادم قبل الإرسال.',
             type: SnackType.error,
           );
@@ -1448,12 +1451,12 @@ class PosNewProcurementOrderController extends GetxController {
           }
           final accepted =
               await ProcurementActionDialogs.showPriceChangeNoticeDialog(
-            context: Get.context!,
-            priceChanges: priceChanges,
-            oldTotal: preRefreshTotal,
-            newTotal: checkoutNetAmount,
-            currency: checkoutCurrency,
-          );
+                context: Get.context!,
+                priceChanges: priceChanges,
+                oldTotal: preRefreshTotal,
+                newTotal: checkoutNetAmount,
+                currency: checkoutCurrency,
+              );
           if (!accepted) {
             return;
           }

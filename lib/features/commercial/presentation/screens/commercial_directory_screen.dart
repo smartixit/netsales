@@ -92,7 +92,8 @@ class CommercialDirectoryScreen
           final isLoading = controller.isLoading.value;
           final error = controller.errorMessage.value;
           final isEmpty = controller.links.isEmpty;
-          final hasFilter = controller.statusFilter.value != null ||
+          final hasFilter =
+              controller.statusFilter.value != null ||
               controller.searchQuery.value.trim().isNotEmpty;
 
           if (isLoading && isEmpty) {
@@ -126,18 +127,18 @@ class CommercialDirectoryScreen
                 icon: hasFilter
                     ? Icons.search_off_rounded
                     : (controller.isNetworkView
-                        ? Icons.storefront_outlined
-                        : Icons.hub_outlined),
+                          ? Icons.storefront_outlined
+                          : Icons.hub_outlined),
                 title: hasFilter
                     ? 'لا يوجد شركاء مطابقين للبحث'
                     : (controller.isNetworkView
-                        ? 'لا توجد نقاط بيع مرتبطة حالياً'
-                        : 'لا توجد شبكات تزويد مرتبطة حالياً'),
+                          ? 'لا توجد نقاط بيع مرتبطة حالياً'
+                          : 'لا توجد شبكات تزويد مرتبطة حالياً'),
                 subtitle: hasFilter
                     ? 'جرّب تغيير كلمات البحث أو تصفية الحالات.'
                     : (controller.isNetworkView
-                        ? 'قم بمشاركة رمز دعوة الانضمام (QR) لربط أول نقطة بيع بشبكتك.'
-                        : 'قم بمسح رمز QR لدعوة المزود لإتمام الارتباط التجاري.'),
+                          ? 'قم بمشاركة رمز دعوة الانضمام (QR) لربط أول نقطة بيع بشبكتك.'
+                          : 'قم بمسح رمز QR لدعوة المزود لإتمام الارتباط التجاري.'),
                 actionLabel: hasFilter ? 'مسح عوامل التصفية' : null,
                 onAction: hasFilter ? controller.resetFilters : null,
               ),
@@ -146,32 +147,27 @@ class CommercialDirectoryScreen
 
           final linkCount = controller.links.length;
           return SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index.isOdd) return AppSpacing.vSm;
-                final linkIndex = index ~/ 2;
-                final link = controller.links[linkIndex];
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index.isOdd) return AppSpacing.vSm;
+              final linkIndex = index ~/ 2;
+              final link = controller.links[linkIndex];
 
-                return Obx(() {
-                  final isExpanded =
-                      controller.expandedLinkId.value == link.networkPosId;
+              return Obx(() {
+                final isExpanded =
+                    controller.expandedLinkId.value == link.networkPosId;
 
-                  return CommercialPartnerCard(
-                    key: ValueKey<String>(
-                      'commercial-link-${link.networkPosId}',
-                    ),
-                    link: link,
-                    isNetworkView: controller.isNetworkView,
-                    isExpanded: isExpanded,
-                    onToggleExpand: () =>
-                        controller.toggleAccordion(link.networkPosId),
-                    onDetails: () => controller.openPartnerDetails(link),
-                    actions: controller.buildCardActions(context, link),
-                  );
-                });
-              },
-              childCount: linkCount == 0 ? 0 : (linkCount * 2) - 1,
-            ),
+                return CommercialPartnerCard(
+                  key: ValueKey<String>('commercial-link-${link.networkPosId}'),
+                  link: link,
+                  isNetworkView: controller.isNetworkView,
+                  isExpanded: isExpanded,
+                  onToggleExpand: () =>
+                      controller.toggleAccordion(link.networkPosId),
+                  onDetails: () => controller.openPartnerDetails(link),
+                  actions: controller.buildCardActions(context, link),
+                );
+              });
+            }, childCount: linkCount == 0 ? 0 : (linkCount * 2) - 1),
           );
         }),
 
@@ -192,10 +188,7 @@ class CommercialDirectoryScreen
     if (embedded) return content;
 
     return Obx(
-      () => CustomAppScaffold(
-        appBarTitle: controller.pageTitle,
-        body: content,
-      ),
+      () => CustomAppScaffold(appBarTitle: controller.pageTitle, body: content),
     );
   }
 }

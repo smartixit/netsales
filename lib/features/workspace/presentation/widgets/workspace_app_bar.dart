@@ -49,7 +49,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(AppSpacing.appBarHeight + AppSpacing.sm);
+  Size get preferredSize =>
+      Size.fromHeight(AppSpacing.appBarHeight + AppSpacing.sm);
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +188,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                                               .copyWith(
                                                 color: colors.onSurface,
                                                 fontWeight: FontWeight.w800,
-                                                                                              ),
+                                              ),
                                         ),
                                       ),
                                       AppSpacing.hXxs,
@@ -210,10 +211,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const NotificationBadgeButton(),
                   AppSpacing.hSm,
                   CustomInteractiveBounce(
-                    onTap: () => _showExecutiveProfile(
-                      context,
-                      effectivePresentation,
-                    ),
+                    onTap: () =>
+                        _showExecutiveProfile(context, effectivePresentation),
                     child: Container(
                       width: 42.r,
                       height: 42.r,

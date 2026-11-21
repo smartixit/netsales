@@ -184,15 +184,12 @@ class PosMembershipsController extends BaseMembershipsController {
   int _listRevision = 0;
 
   int get totalMembersCount => _allMembers.length;
-  int get activeMembersCount =>
-      _allMembers.where((m) => m.isActive).length;
+  int get activeMembersCount => _allMembers.where((m) => m.isActive).length;
   int get suspendedMembersCount =>
       _allMembers.where((m) => m.isSuspended).length;
-  int get invitedMembersCount =>
-      _allMembers.where((m) => m.isInvited).length;
+  int get invitedMembersCount => _allMembers.where((m) => m.isInvited).length;
 
-  bool get canManageMembers =>
-      PermissionService.to.can(AppPermissions.posEdit);
+  bool get canManageMembers => PermissionService.to.can(AppPermissions.posEdit);
 
   int? get resolvedPosId => WorkspaceService.to.resolveActivePosId([]);
 
@@ -219,10 +216,7 @@ class PosMembershipsController extends BaseMembershipsController {
 
   @override
   Future<void> refreshMembers() async {
-    await Future.wait([
-      loadMembers(),
-      loadAssignableRoles(),
-    ]);
+    await Future.wait([loadMembers(), loadAssignableRoles()]);
   }
 
   Future<void> loadInitialData() async {
@@ -274,17 +268,20 @@ class PosMembershipsController extends BaseMembershipsController {
     final query = searchQuery.value.trim().toLowerCase();
     final filter = statusFilter.value;
 
-    final filtered = _allMembers.where((member) {
-      final matchesStatus =
-          filter == null || member.status.wireValue == filter;
-      final matchesQuery = query.isEmpty ||
-          member.displayFullName.toLowerCase().contains(query) ||
-          member.displayPhoneNumber.contains(query) ||
-          member.displayReference.toLowerCase().contains(query) ||
-          member.displayRoleName.toLowerCase().contains(query);
+    final filtered = _allMembers
+        .where((member) {
+          final matchesStatus =
+              filter == null || member.status.wireValue == filter;
+          final matchesQuery =
+              query.isEmpty ||
+              member.displayFullName.toLowerCase().contains(query) ||
+              member.displayPhoneNumber.contains(query) ||
+              member.displayReference.toLowerCase().contains(query) ||
+              member.displayRoleName.toLowerCase().contains(query);
 
-      return matchesStatus && matchesQuery;
-    }).toList(growable: false);
+          return matchesStatus && matchesQuery;
+        })
+        .toList(growable: false);
 
     members.assignAll(filtered);
   }
@@ -436,7 +433,8 @@ class PosMembershipsController extends BaseMembershipsController {
             Get.back<void>();
             CustomSnackbar.show(
               title: 'تم تحديث الدور',
-              message: 'تم تحديث دور وصلاحيات العضو ${member.displayFullName} بنجاح.',
+              message:
+                  'تم تحديث دور وصلاحيات العضو ${member.displayFullName} بنجاح.',
               type: SnackType.success,
             );
             await loadMembers();
@@ -506,7 +504,8 @@ class PosMembershipsController extends BaseMembershipsController {
           );
           CustomSnackbar.show(
             title: 'تم إنهاء العضوية',
-            message: 'تمت إزالة ${member.displayFullName} من طاقم نقطة البيع بنجاح.',
+            message:
+                'تمت إزالة ${member.displayFullName} من طاقم نقطة البيع بنجاح.',
             type: SnackType.success,
           );
           await loadMembers();

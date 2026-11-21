@@ -147,8 +147,9 @@ class PosInvoicesController extends BaseInvoicesController {
       );
 
       final existingIds = invoices.map((e) => e.invoiceId).toSet();
-      final newItems =
-          result.items.where((e) => !existingIds.contains(e.invoiceId)).toList();
+      final newItems = result.items
+          .where((e) => !existingIds.contains(e.invoiceId))
+          .toList();
 
       invoices.addAll(newItems);
       _nextCursor = result.nextCursor;
@@ -304,7 +305,10 @@ class PosInvoicesController extends BaseInvoicesController {
     );
 
     return [
-      const CustomSearchFilterOption<String?>(value: null, label: 'كافة الحالات'),
+      const CustomSearchFilterOption<String?>(
+        value: null,
+        label: 'كافة الحالات',
+      ),
       CustomSearchFilterOption<String?>(
         value: InvoicePaymentStatus.paid.wireValue,
         label: paidPres.label,

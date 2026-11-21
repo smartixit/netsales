@@ -120,7 +120,10 @@ class MemberDetailsSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .3)),
+              Divider(
+                height: 1,
+                color: colors.outlineVariant.withValues(alpha: .3),
+              ),
               CustomInfoListTile(
                 leading: Icon(
                   Icons.phone_outlined,
@@ -143,7 +146,10 @@ class MemberDetailsSheet extends StatelessWidget {
               ),
               if (member.user?.email != null &&
                   member.user!.email!.isNotEmpty) ...[
-                Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .3)),
+                Divider(
+                  height: 1,
+                  color: colors.outlineVariant.withValues(alpha: .3),
+                ),
                 CustomInfoListTile(
                   leading: Icon(
                     Icons.email_outlined,
@@ -165,7 +171,10 @@ class MemberDetailsSheet extends StatelessWidget {
                   ),
                 ),
               ],
-              Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .3)),
+              Divider(
+                height: 1,
+                color: colors.outlineVariant.withValues(alpha: .3),
+              ),
               CustomInfoListTile(
                 leading: Icon(
                   Icons.calendar_today_outlined,
@@ -190,10 +199,7 @@ class MemberDetailsSheet extends StatelessWidget {
           ),
         ),
         AppSpacing.vLg,
-        CustomButton.primary(
-          text: 'إغلاق',
-          onPressed: onClose,
-        ),
+        CustomButton.primary(text: 'إغلاق', onPressed: onClose),
       ],
     );
   }

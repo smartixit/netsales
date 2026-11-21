@@ -105,13 +105,10 @@ class MembershipBinding extends Bindings {
     registerLazyIfAbsent<PosMembershipsController>(
       () => PosMembershipsController(
         getPosMembersUseCase: Get.find<GetPosMembersUseCase>(),
-        getPosAssignableRolesUseCase:
-            Get.find<GetPosAssignableRolesUseCase>(),
+        getPosAssignableRolesUseCase: Get.find<GetPosAssignableRolesUseCase>(),
         addPosMemberUseCase: Get.find<AddPosMemberUseCase>(),
-        updatePosMemberRoleUseCase:
-            Get.find<UpdatePosMemberRoleUseCase>(),
-        updatePosMemberStatusUseCase:
-            Get.find<UpdatePosMemberStatusUseCase>(),
+        updatePosMemberRoleUseCase: Get.find<UpdatePosMemberRoleUseCase>(),
+        updatePosMemberStatusUseCase: Get.find<UpdatePosMemberStatusUseCase>(),
         removePosMemberUseCase: Get.find<RemovePosMemberUseCase>(),
       ),
       fenix: true,

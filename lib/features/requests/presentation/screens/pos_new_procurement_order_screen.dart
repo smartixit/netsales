@@ -60,8 +60,7 @@ class PosNewProcurementOrderScreen
                       : 'انتهت صلاحية التعرفة',
                   subtitle: controller.isRefreshingCartPricing.value
                       ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
-                      : controller.cartPricingRefreshError.value ??
-                            'سيتم تحديث التعرفة تلقائياً عند الإرسال، أو يمكنك التحديث الآن.',
+                      : controller.cartPricingRefreshError.value ?? 'سيتم تحديث التعرفة تلقائياً عند الإرسال، أو يمكنك التحديث الآن.',
                   actionLabel: controller.isRefreshingCartPricing.value
                       ? 'جارٍ التحديث...'
                       : 'تحديث الآن',

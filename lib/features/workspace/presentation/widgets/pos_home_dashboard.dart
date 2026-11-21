@@ -26,7 +26,8 @@ class PosHomeDashboard extends StatelessWidget {
       onRefresh: controller.loadWorkspace,
       maxContentWidth: 920,
       child: Obx(() {
-        if (controller.isLoadingPos.value && controller.activePos.value == null) {
+        if (controller.isLoadingPos.value &&
+            controller.activePos.value == null) {
           return const CustomStateView.loading(
             presentation: CustomStatePresentation.skeletonOnly,
             skeleton: CustomStateSkeleton(
@@ -79,9 +80,21 @@ class PosHomeDashboard extends StatelessWidget {
               title: 'إدارة نقطة البيع',
               subtitle: 'الفريق والشبكات المرتبطة وتقارير الأداء.',
               items: [
-                WorkspaceFunctionAccessItem(title: 'فريق العمل', icon: Icons.groups_outlined, onTap: controller.openTeamManagement),
-                WorkspaceFunctionAccessItem(title: 'التقارير التشغيلية', icon: Icons.analytics_outlined, onTap: controller.openOperationalReports),
-                WorkspaceFunctionAccessItem(title: 'الشبكات المرتبطة', icon: Icons.hub_outlined, onTap: controller.openLinkedNetworks),
+                WorkspaceFunctionAccessItem(
+                  title: 'فريق العمل',
+                  icon: Icons.groups_outlined,
+                  onTap: controller.openTeamManagement,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'التقارير التشغيلية',
+                  icon: Icons.analytics_outlined,
+                  onTap: controller.openOperationalReports,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'الشبكات المرتبطة',
+                  icon: Icons.hub_outlined,
+                  onTap: controller.openLinkedNetworks,
+                ),
               ],
             ),
             AppSpacing.vLg,

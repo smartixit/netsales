@@ -9,7 +9,9 @@ class NewExpenseItemInputModel extends NewExpenseItemInputEntity {
     required super.itemAmount,
   });
 
-  factory NewExpenseItemInputModel.fromEntity(NewExpenseItemInputEntity entity) {
+  factory NewExpenseItemInputModel.fromEntity(
+    NewExpenseItemInputEntity entity,
+  ) {
     return NewExpenseItemInputModel(
       itemStatement: entity.itemStatement,
       itemAmount: entity.itemAmount,

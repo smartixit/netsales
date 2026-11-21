@@ -43,10 +43,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               customDimension: 44,
               hasPulse: false,
               borderRadius: BorderRadius.circular(AppRadius.full),
-              gradientColors: const [
-                Color(0xFFFFE7AD),
-                Color(0xFFE7B45D),
-              ],
+              gradientColors: const [Color(0xFFFFE7AD), Color(0xFFE7B45D)],
             ),
             SizedBox(width: 8.w),
             Expanded(

@@ -27,23 +27,24 @@ class CommercialPartnerCardActions extends StatelessWidget {
   final bool isNetworkView;
 
   Future<void> _showMoreActions() async {
-    final partnerName =
-        isNetworkView ? link.displayPosName : link.displayNetworkName;
+    final partnerName = isNetworkView
+        ? link.displayPosName
+        : link.displayNetworkName;
 
     final actions = <CustomBottomSheetActionItem>[
       CustomBottomSheetActionItem(
         title: isNetworkView
             ? 'عرض ملف نقطة البيع المعتمد'
             : 'عرض ملف مزود الشبكة المعتمد',
-        icon: isNetworkView
-            ? Icons.storefront_outlined
-            : Icons.hub_outlined,
+        icon: isNetworkView ? Icons.storefront_outlined : Icons.hub_outlined,
         onTap: onViewDetails,
       ),
       if (isNetworkView) ...[
         if (onToggleStatus != null)
           CustomBottomSheetActionItem(
-            title: link.isActive ? 'تجميد الارتباط التجاري' : 'تنشيط الارتباط التجاري',
+            title: link.isActive
+                ? 'تجميد الارتباط التجاري'
+                : 'تنشيط الارتباط التجاري',
             icon: link.isActive
                 ? Icons.pause_circle_outline_rounded
                 : Icons.play_circle_outline_rounded,
@@ -69,9 +70,7 @@ class CommercialPartnerCardActions extends StatelessWidget {
 
     await CustomBottomSheet.showActions<void>(
       title: 'إجراءات الشريك: $partnerName',
-      leadingIcon: isNetworkView
-          ? Icons.storefront_rounded
-          : Icons.hub_rounded,
+      leadingIcon: isNetworkView ? Icons.storefront_rounded : Icons.hub_rounded,
       items: actions,
     );
   }

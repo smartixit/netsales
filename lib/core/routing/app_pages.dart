@@ -190,7 +190,6 @@ abstract final class AppPages {
       ],
     ),
 
-
     // ========================================================================
     // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)
     // ========================================================================
@@ -389,9 +388,7 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
-          anyPermissions: [
-            AppPermissions.expensesView,
-          ],
+          anyPermissions: [AppPermissions.expensesView],
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
@@ -404,9 +401,7 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
-          anyPermissions: [
-            AppPermissions.expensesView,
-          ],
+          anyPermissions: [AppPermissions.expensesView],
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
@@ -419,9 +414,7 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
-          anyPermissions: [
-            AppPermissions.expensesCreate,
-          ],
+          anyPermissions: [AppPermissions.expensesCreate],
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],

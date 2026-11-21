@@ -3,10 +3,7 @@ import 'package:netsales/features/workspace/presentation/controllers/network_wor
 import 'package:netsales/features/workspace/presentation/widgets/workspace_welcome_hero.dart';
 
 class ExecutiveWelcomeHeroCard extends StatelessWidget {
-  const ExecutiveWelcomeHeroCard({
-    super.key,
-    required this.controller,
-  });
+  const ExecutiveWelcomeHeroCard({super.key, required this.controller});
 
   final NetworkWorkspaceController controller;
 

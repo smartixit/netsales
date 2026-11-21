@@ -25,7 +25,9 @@ class ExecutiveMetricsGrid extends StatelessWidget {
     // The compact reference exposes exactly these three operational KPIs.
     // Sales stays in the trend panel; expenses are not duplicated here.
     final summaryMetrics = items
-        .where((item) => const {'pos', 'requests', 'packages'}.contains(item.id))
+        .where(
+          (item) => const {'pos', 'requests', 'packages'}.contains(item.id),
+        )
         .toList(growable: false);
     if (summaryMetrics.isEmpty) return const SizedBox.shrink();
 

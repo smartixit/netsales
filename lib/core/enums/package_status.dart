@@ -15,8 +15,12 @@ enum PackageStatus {
       return raw ? PackageStatus.active : PackageStatus.inactive;
     }
     final str = raw.toString().trim().toUpperCase();
-    if (str == 'ACTIVE' || str == '1' || str == 'TRUE') return PackageStatus.active;
-    if (str == 'INACTIVE' || str == '0' || str == 'FALSE') return PackageStatus.inactive;
+    if (str == 'ACTIVE' || str == '1' || str == 'TRUE') {
+      return PackageStatus.active;
+    }
+    if (str == 'INACTIVE' || str == '0' || str == 'FALSE') {
+      return PackageStatus.inactive;
+    }
     return PackageStatus.unknown;
   }
 

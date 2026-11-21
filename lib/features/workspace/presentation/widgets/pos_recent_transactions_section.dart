@@ -20,7 +20,8 @@ class PosRecentTransactionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final items = controller.recentTransactionItems;
-      final error = controller.recentInvoicesError.value ??
+      final error =
+          controller.recentInvoicesError.value ??
           controller.recentRequestsError.value;
 
       if (controller.isLoadingRecentData.value && items.isEmpty) {
@@ -86,9 +87,7 @@ class PosRecentTransactionsSection extends StatelessWidget {
               AppSpacing.vSm,
               Text(
                 'تعذر تحديث بعض البيانات: $error',
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: colors.error),
               ),
             ],
           ],

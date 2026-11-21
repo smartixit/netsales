@@ -18,7 +18,9 @@ class MembershipActionDialogs {
 
     await CustomDialog.show(
       type: willSuspend ? DialogType.warning : DialogType.confirmation,
-      title: willSuspend ? 'إيقاف عضوية $memberName' : 'إعادة تفعيل عضوية $memberName',
+      title: willSuspend
+          ? 'إيقاف عضوية $memberName'
+          : 'إعادة تفعيل عضوية $memberName',
       message: willSuspend
           ? 'سيتم إيقاف صلاحيات هذا العضو مؤقتاً ومنعه من الوصول إلى مساحة العمل.'
           : 'سيتم إعادة تفعيل صلاحيات العضو والسماح له بالوصول إلى مساحة العمل مجدداً.',

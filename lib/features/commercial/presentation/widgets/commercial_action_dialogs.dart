@@ -28,7 +28,9 @@ class CommercialActionDialogs {
   }) async {
     await CustomDialog.show(
       type: willDeactivate ? DialogType.warning : DialogType.confirmation,
-      title: willDeactivate ? 'تجميد الارتباط التجاري' : 'تنشيط الارتباط التجاري',
+      title: willDeactivate
+          ? 'تجميد الارتباط التجاري'
+          : 'تنشيط الارتباط التجاري',
       message: willDeactivate
           ? 'سيتم تجميد التعامل التجاري مؤقتاً مع "$partnerName". لن تتمكن نقطة البيع من رفع طلبات جديدة حتى إعادة التفعيل.'
           : 'سيتم إعادة تنشيط التعامل التجاري بالكامل مع "$partnerName".',
@@ -45,8 +47,7 @@ class CommercialActionDialogs {
     await CustomDialog.show(
       type: DialogType.warning,
       title: 'إلغاء رمز الدعوة',
-      message:
-          'هل أنت متأكد من إلغاء رمز الدعوة الحالي؟ لن تتمكن أي نقطة بيع من استخدامه بعد الإلغاء.',
+      message: 'هل أنت متأكد من إلغاء رمز الدعوة الحالي؟ لن تتمكن أي نقطة بيع من استخدامه بعد الإلغاء.',
       confirmLabel: 'تأكيد الإلغاء',
       cancelLabel: 'تراجع',
       onConfirm: onConfirm,

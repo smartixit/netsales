@@ -57,13 +57,7 @@ class PosQuickActionsSection extends StatelessWidget {
             );
 
             if (compact) {
-              return Column(
-                children: [
-                  order,
-                  AppSpacing.vSm,
-                  invoices,
-                ],
-              );
+              return Column(children: [order, AppSpacing.vSm, invoices]);
             }
 
             return Row(

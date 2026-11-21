@@ -139,7 +139,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                         controller: controller.balanceController,
                         label: 'حجم الرصيد',
                         hint: 'مثال: 5120',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixIcon: const Icon(Icons.data_usage_rounded),
                         isRequired: false,
                         validator: FormValidators.doubleValidator(
@@ -182,7 +184,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                         controller: controller.uptimeController,
                         label: 'وقت الاستخدام النشط',
                         hint: 'مثال: 24',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixIcon: const Icon(Icons.timer_outlined),
                         isRequired: false,
                         validator: FormValidators.doubleValidator(
@@ -225,7 +229,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                         controller: controller.validityController,
                         label: 'فترة الصلاحية الكلية',
                         hint: 'مثال: 7',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixIcon: const Icon(Icons.calendar_today_outlined),
                         isRequired: false,
                         validator: FormValidators.doubleValidator(
@@ -289,7 +295,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                   controller: controller.priceController,
                   label: 'السعر الأساسي للكرت (Base Price)',
                   hint: 'مثال: 1000',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   prefixIcon: const Icon(Icons.attach_money_rounded),
                   isRequired: true,
                   validator: FormValidators.amountValidator(
@@ -308,7 +316,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                         controller: controller.cashDiscountController,
                         label: 'الخصم النقدي الافتراضي %',
                         hint: 'مثال: 10.0',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixIcon: const Icon(Icons.price_change_outlined),
                         isRequired: false,
                         validator: FormValidators.percentageValidator(
@@ -325,7 +335,9 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                         controller: controller.creditDiscountController,
                         label: 'الخصم الآجل الافتراضي %',
                         hint: 'مثال: 5.0',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixIcon: const Icon(Icons.credit_card_outlined),
                         isRequired: false,
                         validator: FormValidators.percentageValidator(
@@ -362,7 +374,8 @@ class PackageFormScreen extends GetView<PackageCatalogController> {
                   activeIcon: Icons.check_circle_rounded,
                   inactiveIcon: Icons.pause_circle_outline_rounded,
                   activeColor: colors.primary,
-                  onChanged: (val) => controller.packageActiveStatus.value = val,
+                  onChanged: (val) =>
+                      controller.packageActiveStatus.value = val,
                 ),
 
                 AppSpacing.vXl,

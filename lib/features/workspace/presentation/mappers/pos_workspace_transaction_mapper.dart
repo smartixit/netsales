@@ -17,7 +17,8 @@ class PosWorkspaceTransactionMapper {
     required void Function(InvoiceEntity invoice) onOpenInvoice,
     required void Function(RequestEntity request) onOpenRequest,
   }) {
-    final entries = <({DateTime? date, WorkspaceTransactionItemViewModel item})>[];
+    final entries =
+        <({DateTime? date, WorkspaceTransactionItemViewModel item})>[];
 
     for (final invoice in invoices) {
       entries.add((
@@ -106,8 +107,7 @@ class PosWorkspaceTransactionMapper {
       title: 'طلب توريد',
       reference: _shortReference(request.requestUuid, 'طلب توريد'),
       subtitle: subtitle,
-      formattedAmount:
-          AmountFormatter.formatValue(request.requestTotalAmount),
+      formattedAmount: AmountFormatter.formatValue(request.requestTotalAmount),
       statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
         request.status,
         serverLabel: request.statusLabel,
@@ -116,7 +116,6 @@ class PosWorkspaceTransactionMapper {
       onTap: () => onOpenRequest(request),
     );
   }
-
 
   static String? _resolveSaleTypeLabel(SaleType type, String? serverLabel) {
     final normalizedServerLabel = serverLabel?.trim();

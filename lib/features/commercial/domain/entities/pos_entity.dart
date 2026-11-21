@@ -52,14 +52,13 @@ class PosEntity extends Equatable {
   String get displayName =>
       posName.trim().isNotEmpty ? posName.trim() : 'نقطة بيع #$posId';
 
-  String get displayPhone => posPhoneNumber.trim().isNotEmpty
-      ? posPhoneNumber.trim()
-      : 'غير متوفر';
+  String get displayPhone =>
+      posPhoneNumber.trim().isNotEmpty ? posPhoneNumber.trim() : 'غير متوفر';
 
   String get displayOwnerName =>
       ownerName != null && ownerName!.trim().isNotEmpty
-          ? ownerName!.trim()
-          : 'غير محدد';
+      ? ownerName!.trim()
+      : 'غير محدد';
 
   String get displayLocation {
     final segments = <String>[
@@ -89,22 +88,22 @@ class PosEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        posId,
-        ownerId,
-        posUuid,
-        posName,
-        posPhoneNumber,
-        posEmail,
-        posAddress,
-        governorateId,
-        directorateId,
-        governorateName,
-        directorateName,
-        status,
-        statusLabel,
-        ownerName,
-        posProfileLogoUrl,
-        createdAt,
-        updatedAt,
-      ];
+    posId,
+    ownerId,
+    posUuid,
+    posName,
+    posPhoneNumber,
+    posEmail,
+    posAddress,
+    governorateId,
+    directorateId,
+    governorateName,
+    directorateName,
+    status,
+    statusLabel,
+    ownerName,
+    posProfileLogoUrl,
+    createdAt,
+    updatedAt,
+  ];
 }

@@ -46,11 +46,7 @@ class ProfileSecuritySection extends StatelessWidget {
           AppSpacing.vSm,
           Row(
             children: [
-              Icon(
-                Icons.shield_outlined,
-                color: securityColor,
-                size: 22.r,
-              ),
+              Icon(Icons.shield_outlined, color: securityColor, size: 22.r),
               AppSpacing.hSm,
               Expanded(
                 child: Text(

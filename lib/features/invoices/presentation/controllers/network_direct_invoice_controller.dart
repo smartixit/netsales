@@ -95,8 +95,9 @@ class NetworkDirectInvoiceController extends GetxController {
       if (entry.value > 0) {
         final pkg = packages.firstWhereOrNull((p) => p.packageId == entry.key);
         if (pkg != null) {
-          final unitDiscount =
-              isCash ? pkg.resolvedCashDiscount : pkg.resolvedCreditDiscount;
+          final unitDiscount = isCash
+              ? pkg.resolvedCashDiscount
+              : pkg.resolvedCreditDiscount;
           discount += unitDiscount * entry.value;
         }
       }
@@ -127,10 +128,13 @@ class NetworkDirectInvoiceController extends GetxController {
   }
 
   bool get canSubmitInvoice {
-    if (selectedPosId.value == null || cartPackagesCount <= 0 || isSubmitting.value) {
+    if (selectedPosId.value == null ||
+        cartPackagesCount <= 0 ||
+        isSubmitting.value) {
       return false;
     }
-    if (selectedSaleType == SaleType.credit && paidAmount.value > checkoutNetAmount) {
+    if (selectedSaleType == SaleType.credit &&
+        paidAmount.value > checkoutNetAmount) {
       return false;
     }
     return true;

@@ -88,14 +88,14 @@ class InvoiceEntity {
   /// معرف العرض السيادي للفاتورة
   String get displayReference =>
       invoiceUuid != null && invoiceUuid!.trim().isNotEmpty
-          ? invoiceUuid!.trim()
-          : '#$invoiceId';
+      ? invoiceUuid!.trim()
+      : '#$invoiceId';
 
   /// اسم الشبكة الموردة للعرض
   String get displayNetworkName =>
       networkName != null && networkName!.trim().isNotEmpty
-          ? networkName!.trim()
-          : 'الشبكة #$networkId';
+      ? networkName!.trim()
+      : 'الشبكة #$networkId';
 
   /// اسم نقطة البيع للعرض
   String get displayPosName => posName != null && posName!.trim().isNotEmpty
@@ -133,6 +133,6 @@ class InvoiceEntity {
   /// صيغة نصية لعدد الأوراق
   String get formattedTotalSheets =>
       totalSheets.truncateToDouble() == totalSheets
-          ? totalSheets.toInt().toString()
-          : totalSheets.toStringAsFixed(1);
+      ? totalSheets.toInt().toString()
+      : totalSheets.toStringAsFixed(1);
 }

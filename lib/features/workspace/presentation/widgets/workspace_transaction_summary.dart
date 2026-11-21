@@ -39,7 +39,8 @@ class WorkspaceTransactionSummary extends StatelessWidget {
       children: [
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: compact ? 190.r : 150.r),
-          child: trailingAction ??
+          child:
+              trailingAction ??
               CustomStatusBadge.fromPresentation(
                 statusPresentation,
                 isCompact: true,

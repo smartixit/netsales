@@ -194,7 +194,8 @@ class NetworkExpenseFormController extends GetxController {
         inputItems.add(
           NewExpenseItemInputEntity(
             itemStatement: statementControllers[i].text.trim(),
-            itemAmount: double.tryParse(amountControllers[i].text.trim()) ?? 0.0,
+            itemAmount:
+                double.tryParse(amountControllers[i].text.trim()) ?? 0.0,
           ),
         );
       }
@@ -226,7 +227,8 @@ class NetworkExpenseFormController extends GetxController {
         }
 
         await CustomAnimationOverlay.showSuccess(
-          message: 'تم تحديث المصروف (${updatedExpense.displayReference}) بنجاح',
+          message:
+              'تم تحديث المصروف (${updatedExpense.displayReference}) بنجاح',
         );
 
         Get.back(result: true);

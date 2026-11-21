@@ -45,9 +45,7 @@ class WorkspaceTransactionIdentity extends StatelessWidget {
             if (reference != null && reference!.trim().isNotEmpty) ...[
               SizedBox(width: AppSpacing.xs),
               ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: compact ? 82.r : 108.r,
-                ),
+                constraints: BoxConstraints(maxWidth: compact ? 82.r : 108.r),
                 child: Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
@@ -64,9 +62,7 @@ class WorkspaceTransactionIdentity extends StatelessWidget {
                     style: AppTypography.labelSmall.copyWith(
                       color: colors.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
-                      fontFeatures: const [
-                        FontFeature.tabularFigures(),
-                      ],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),

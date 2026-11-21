@@ -7,12 +7,25 @@ import 'package:netsales/features/profile/data/repositories/profile_repository_i
 import 'package:netsales/features/profile/domain/repositories/profile_repository.dart';
 import 'package:netsales/features/profile/domain/usecases/get_profile_use_case.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
+
 class ProfileBinding extends Bindings {
   @override
   void dependencies() {
-    registerLazyIfAbsent<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(const AuthRemoteDataSourceImpl()), fenix: true);
-    registerLazyIfAbsent<ProfileRepository>(() => ProfileRepositoryImpl(Get.find<ProfileRemoteDataSource>()), fenix: true);
-    registerLazyIfAbsent<GetProfileUseCase>(() => GetProfileUseCase(Get.find<ProfileRepository>()), fenix: true);
-    registerLazyIfAbsent<ProfileController>(() => ProfileController(getProfileUseCase: Get.find<GetProfileUseCase>()), fenix: true);
+    registerLazyIfAbsent<ProfileRemoteDataSource>(
+      () => ProfileRemoteDataSourceImpl(const AuthRemoteDataSourceImpl()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<ProfileRepository>(
+      () => ProfileRepositoryImpl(Get.find<ProfileRemoteDataSource>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetProfileUseCase>(
+      () => GetProfileUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<ProfileController>(
+      () => ProfileController(getProfileUseCase: Get.find<GetProfileUseCase>()),
+      fenix: true,
+    );
   }
 }

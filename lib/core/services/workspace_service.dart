@@ -89,7 +89,9 @@ class WorkspaceService extends GetxService {
     String? preferredWorkspace,
   }) {
     if (user == null) {
-      throw StateError('Cannot resolve a workspace without an authenticated user.');
+      throw StateError(
+        'Cannot resolve a workspace without an authenticated user.',
+      );
     }
 
     final hasNetworkRole = _hasNetworkScope(user);
@@ -102,8 +104,7 @@ class WorkspaceService extends GetxService {
     }
 
     if (hasNetworkRole && hasPosRole) {
-      final preferred =
-          preferredWorkspace ?? _readSavedWorkspacePreference();
+      final preferred = preferredWorkspace ?? _readSavedWorkspacePreference();
 
       if (preferred == AppWorkspace.network.name) return AppWorkspace.network;
       if (preferred == AppWorkspace.pos.name) return AppWorkspace.pos;
@@ -169,7 +170,9 @@ class WorkspaceService extends GetxService {
       '${StorageKeys.activePosTenantPrefix}_${user.userId}',
     );
     if (savedPosId != null &&
-        !activePosMemberships.any((membership) => membership.tenantId == savedPosId)) {
+        !activePosMemberships.any(
+          (membership) => membership.tenantId == savedPosId,
+        )) {
       await storage.remove(
         '${StorageKeys.activePosTenantPrefix}_${user.userId}',
       );
@@ -188,7 +191,9 @@ class WorkspaceService extends GetxService {
       '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
     );
     if (savedNetworkId != null &&
-        !activeNetworkMemberships.any((membership) => membership.tenantId == savedNetworkId)) {
+        !activeNetworkMemberships.any(
+          (membership) => membership.tenantId == savedNetworkId,
+        )) {
       await storage.remove(
         '${StorageKeys.activeNetworkTenantPrefix}_${user.userId}',
       );

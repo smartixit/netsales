@@ -48,7 +48,11 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.trending_up_rounded, color: colors.primary, size: 19.r),
+              Icon(
+                Icons.trending_up_rounded,
+                color: colors.primary,
+                size: 19.r,
+              ),
               AppSpacing.hSm,
               Expanded(
                 child: Text(
@@ -158,10 +162,9 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: (isGrowthPositive
-                                  ? colors.success
-                                  : colors.error)
-                              .withValues(alpha: 0.12),
+                          color:
+                              (isGrowthPositive ? colors.success : colors.error)
+                                  .withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Row(

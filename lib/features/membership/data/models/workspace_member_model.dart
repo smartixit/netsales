@@ -23,9 +23,8 @@ class WorkspaceMemberModel extends WorkspaceMemberEntity {
     Map<String, dynamic> json, {
     int defaultTenantId = 0,
   }) {
-    final tenantId = json['network_id'] as int? ??
-        json['pos_id'] as int? ??
-        defaultTenantId;
+    final tenantId =
+        json['network_id'] as int? ?? json['pos_id'] as int? ?? defaultTenantId;
 
     return WorkspaceMemberModel(
       id: json['id'] as int? ?? 0,

@@ -77,9 +77,8 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
 
     final response = await ApiService.instance.get<Map<String, dynamic>>(
       ApiConstants.me,
-      fromJson: (json) => json is Map
-          ? Map<String, dynamic>.from(json)
-          : <String, dynamic>{},
+      fromJson: (json) =>
+          json is Map ? Map<String, dynamic>.from(json) : <String, dynamic>{},
     );
 
     if (response.statusCode == 401) {
@@ -90,7 +89,9 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
       SessionService.to.markSessionAccessBlocked();
       return SessionValidationResult.forbidden;
     }
-    if (!response.success || response.statusCode != 200 || response.data == null) {
+    if (!response.success ||
+        response.statusCode != 200 ||
+        response.data == null) {
       return SessionValidationResult.unavailable;
     }
 
@@ -108,7 +109,9 @@ class SplashLocalDataSourceImpl implements SplashLocalDataSource {
         'is_super_admin': profileData['is_super_admin'],
         'role_key': profileData['role_key'],
       });
-      final permissions = rawPermissions.map((value) => value.toString()).toList();
+      final permissions = rawPermissions
+          .map((value) => value.toString())
+          .toList();
 
       await SessionService.to.syncSessionProfile(
         user: updatedUser,

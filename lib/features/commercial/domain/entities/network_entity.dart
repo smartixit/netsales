@@ -58,8 +58,8 @@ class NetworkEntity extends Equatable {
 
   String get displayOwnerName =>
       ownerName != null && ownerName!.trim().isNotEmpty
-          ? ownerName!.trim()
-          : 'غير محدد';
+      ? ownerName!.trim()
+      : 'غير محدد';
 
   String get displayLocation {
     final segments = <String>[
@@ -89,22 +89,22 @@ class NetworkEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        networkId,
-        ownerId,
-        networkUuid,
-        networkName,
-        networkPhoneNumber,
-        networkEmail,
-        networkAddress,
-        governorateId,
-        directorateId,
-        governorateName,
-        directorateName,
-        status,
-        statusLabel,
-        ownerName,
-        networkProfileLogoUrl,
-        createdAt,
-        updatedAt,
-      ];
+    networkId,
+    ownerId,
+    networkUuid,
+    networkName,
+    networkPhoneNumber,
+    networkEmail,
+    networkAddress,
+    governorateId,
+    directorateId,
+    governorateName,
+    directorateName,
+    status,
+    statusLabel,
+    ownerName,
+    networkProfileLogoUrl,
+    createdAt,
+    updatedAt,
+  ];
 }

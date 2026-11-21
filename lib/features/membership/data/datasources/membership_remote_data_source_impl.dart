@@ -43,9 +43,8 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
         if (data is List) {
           return data
               .map(
-                (item) => MembershipRoleModel.fromJson(
-                  item as Map<String, dynamic>,
-                ),
+                (item) =>
+                    MembershipRoleModel.fromJson(item as Map<String, dynamic>),
               )
               .toList();
         }
@@ -116,9 +115,7 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
 
   @override
-  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(
-    int posId,
-  ) {
+  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(int posId) {
     return ApiService.instance.get<List<WorkspaceMemberModel>>(
       ApiConstants.posMembers(posId),
       fromJson: (data) {
@@ -147,9 +144,8 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
         if (data is List) {
           return data
               .map(
-                (item) => MembershipRoleModel.fromJson(
-                  item as Map<String, dynamic>,
-                ),
+                (item) =>
+                    MembershipRoleModel.fromJson(item as Map<String, dynamic>),
               )
               .toList();
         }

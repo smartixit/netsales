@@ -1,6 +1,9 @@
 /// Resolves a device identity directly from the platform's authoritative API.
 class DeviceIdentityUnavailableException implements Exception {
-  const DeviceIdentityUnavailableException({required this.platform, this.cause});
+  const DeviceIdentityUnavailableException({
+    required this.platform,
+    this.cause,
+  });
   final String platform;
   final Object? cause;
 
@@ -26,7 +29,10 @@ class DeviceIdentityResolver {
     try {
       value = await readPlatformIdentifier();
     } catch (error) {
-      throw DeviceIdentityUnavailableException(platform: platform, cause: error);
+      throw DeviceIdentityUnavailableException(
+        platform: platform,
+        cause: error,
+      );
     }
 
     final identity = value?.trim() ?? '';
@@ -34,7 +40,9 @@ class DeviceIdentityResolver {
       throw DeviceIdentityUnavailableException(platform: platform);
     }
     if (identity.length > 64) {
-      throw StateError('The $platform device identifier exceeds the supported 64 characters.');
+      throw StateError(
+        'The $platform device identifier exceeds the supported 64 characters.',
+      );
     }
     return identity;
   }

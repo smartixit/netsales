@@ -24,7 +24,8 @@ class NetworkWorkspaceDashboardMapper {
     final packages = overview.packages;
     final expenses = overview.expenses;
 
-    final points = sales?.trend
+    final points =
+        sales?.trend
             .map(
               (point) => ChartDataPoint(
                 x: _formatChartDate(point.date),
@@ -81,11 +82,7 @@ class NetworkWorkspaceDashboardMapper {
       NetworkWorkspaceDashboardViewModel(
         showSalesSection: false,
         pendingRequestsCount: null,
-        salesTrendSummary: (
-          totalSales: '',
-          invoiceCount: 0,
-          growthRate: 0,
-        ),
+        salesTrendSummary: (totalSales: '', invoiceCount: 0, growthRate: 0),
         salesChartDefinition: ChartDefinition(
           family: ChartFamily.cartesian,
           type: ChartType.splineArea,

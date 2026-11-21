@@ -2,6 +2,7 @@
 abstract final class StorageKeys {
   StorageKeys._();
   static const String session = 'session_id';
+
   /// Browser-installation identity for Web only. Native identity is read from
   /// the platform on each initialization and is never persisted separately.
   static const String webDeviceUuid = 'web_device_uuid';
@@ -21,5 +22,6 @@ abstract final class StorageKeys {
   static const String activeNetworkTenantPrefix = 'active_network_tenant';
   static const String activePosNetworkPrefix = 'active_pos_network';
   static const String lastServerCatchupRun = 'last_server_catchup_run_ms';
-  static const String serverCatchupFailuresCount = 'server_catchup_failures_count';
+  static const String serverCatchupFailuresCount =
+      'server_catchup_failures_count';
 }

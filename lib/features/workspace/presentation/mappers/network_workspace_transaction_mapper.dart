@@ -27,9 +27,9 @@ class NetworkWorkspaceTransactionMapper {
           void openRequest() => onOpenRequest(request.requestId);
           final statusPresentation =
               EnumPresentationRegistry.resolveRequestStatus(
-            request.status,
-            serverLabel: request.statusLabel,
-          );
+                request.status,
+                serverLabel: request.statusLabel,
+              );
 
           return WorkspaceTransactionItemViewModel(
             title: 'طلب توريد',

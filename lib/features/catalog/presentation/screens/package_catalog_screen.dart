@@ -43,8 +43,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
             children: [
               CustomPageHeroCard(
                 title: 'كتالوج باقات الكروت',
-                subtitle:
-                    'إدارة وتسعير باقات كروت الإنترنت وتحديد نسب الخصم النقدي والآجل.',
+                subtitle: 'إدارة وتسعير باقات كروت الإنترنت وتحديد نسب الخصم النقدي والآجل.',
                 icon: Icons.inventory_2_rounded,
                 action: controller.canCreatePackage
                     ? CustomButton.primary(
@@ -52,7 +51,8 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                         icon: Icons.add_rounded,
                         shape: AppButtonShape.pill,
                         size: AppButtonSize.small,
-                        onPressed: () => Get.toNamed<void>(AppRoutes.packageForm),
+                        onPressed: () =>
+                            Get.toNamed<void>(AppRoutes.packageForm),
                       )
                     : null,
               ),
@@ -183,9 +183,6 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
 
     if (embedded) return content;
 
-    return CustomAppScaffold(
-      appBarTitle: 'كتالوج باقات الكروت',
-      body: content,
-    );
+    return CustomAppScaffold(appBarTitle: 'كتالوج باقات الكروت', body: content);
   }
 }

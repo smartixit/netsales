@@ -166,7 +166,9 @@ class DeviceService extends GetxService {
     final stored = storage.getString(StorageKeys.webDeviceUuid)?.trim();
     if (stored != null && stored.isNotEmpty) {
       if (stored.length > 64) {
-        throw StateError('Persisted Web device identifier exceeds 64 characters.');
+        throw StateError(
+          'Persisted Web device identifier exceeds 64 characters.',
+        );
       }
       return stored;
     }

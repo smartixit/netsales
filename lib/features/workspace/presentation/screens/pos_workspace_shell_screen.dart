@@ -19,15 +19,58 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
   @override
   Widget build(BuildContext context) => Obx(() {
     final items = [
-      WorkspaceNavItem(label: 'الرئيسية', icon: Icons.storefront_outlined, activeIcon: Icons.storefront_rounded, content: PosHomeDashboard(controller: controller)),
-      const WorkspaceNavItem(label: 'الطلبات', icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long_rounded, content: ProcurementOrdersScreen(embedded: true)),
-      const WorkspaceNavItem(label: 'فواتيري', icon: Icons.receipt_outlined, activeIcon: Icons.receipt_rounded, content: InvoicesScreen(embedded: true, isNetwork: false)),
-      const WorkspaceNavItem(label: 'الملف الشخصي', icon: Icons.account_circle_outlined, activeIcon: Icons.account_circle_rounded, content: ProfileScreen(embedded: true)),
-      const WorkspaceNavItem(label: 'فريق العمل', icon: Icons.groups_outlined, activeIcon: Icons.groups_rounded, content: MembershipsScreen(embedded: true, isNetwork: false)),
-      WorkspaceNavItem(label: 'التقارير التشغيلية', icon: Icons.analytics_outlined, activeIcon: Icons.analytics_rounded, content: OperationalReportsScreen(networkId: controller.selectedNetworkLink.value?.networkId, posId: controller.activePos.value?.posId, isNetworkWorkspace: false, organizationName: controller.activePos.value?.posName, logoUrl: controller.activePos.value?.posProfileLogoUrl, embedded: true)),
-      const WorkspaceNavItem(label: 'الشبكات المرتبطة', icon: Icons.hub_outlined, activeIcon: Icons.hub_rounded, content: CommercialDirectoryScreen(embedded: true, isNetwork: false)),
+      WorkspaceNavItem(
+        label: 'الرئيسية',
+        icon: Icons.storefront_outlined,
+        activeIcon: Icons.storefront_rounded,
+        content: PosHomeDashboard(controller: controller),
+      ),
+      const WorkspaceNavItem(
+        label: 'الطلبات',
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        content: ProcurementOrdersScreen(embedded: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'فواتيري',
+        icon: Icons.receipt_outlined,
+        activeIcon: Icons.receipt_rounded,
+        content: InvoicesScreen(embedded: true, isNetwork: false),
+      ),
+      const WorkspaceNavItem(
+        label: 'الملف الشخصي',
+        icon: Icons.account_circle_outlined,
+        activeIcon: Icons.account_circle_rounded,
+        content: ProfileScreen(embedded: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'فريق العمل',
+        icon: Icons.groups_outlined,
+        activeIcon: Icons.groups_rounded,
+        content: MembershipsScreen(embedded: true, isNetwork: false),
+      ),
+      WorkspaceNavItem(
+        label: 'التقارير التشغيلية',
+        icon: Icons.analytics_outlined,
+        activeIcon: Icons.analytics_rounded,
+        content: OperationalReportsScreen(
+          networkId: controller.selectedNetworkLink.value?.networkId,
+          posId: controller.activePos.value?.posId,
+          isNetworkWorkspace: false,
+          organizationName: controller.activePos.value?.posName,
+          logoUrl: controller.activePos.value?.posProfileLogoUrl,
+          embedded: true,
+        ),
+      ),
+      const WorkspaceNavItem(
+        label: 'الشبكات المرتبطة',
+        icon: Icons.hub_outlined,
+        activeIcon: Icons.hub_rounded,
+        content: CommercialDirectoryScreen(embedded: true, isNetwork: false),
+      ),
     ];
-    final loading = controller.isLoadingPos.value && controller.activePos.value == null;
+    final loading =
+        controller.isLoadingPos.value && controller.activePos.value == null;
     return AdaptiveWorkspaceScaffold(
       appBar: WorkspaceAppBar(
         title: controller.activePos.value?.posName ?? 'اختر نقطة البيع',

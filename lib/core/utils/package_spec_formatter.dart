@@ -67,7 +67,10 @@ enum TimeDurationUnit {
   double fromCanonicalMinutes(num minutes) => minutes / minuteFactor;
 
   /// تحديد الوحدة الأنسب والأكثر تعبيراً لقيمة دقائق معينة تلقائياً
-  static TimeDurationUnit resolveBestUnit(num minutes, {TimeDurationUnit defaultUnit = hours}) {
+  static TimeDurationUnit resolveBestUnit(
+    num minutes, {
+    TimeDurationUnit defaultUnit = hours,
+  }) {
     if (minutes <= 0) return defaultUnit;
     if (minutes >= years.minuteFactor && minutes % years.minuteFactor == 0) {
       return years;
@@ -120,7 +123,10 @@ class PackageSpecFormatter {
   }
 
   /// تنسيق ذكي شامل لحجم البيانات (يبدأ من البايت حتى التيرابايت)
-  static String formatData(dynamic rawBytes, {String fallback = 'بلا رصيد محدد'}) {
+  static String formatData(
+    dynamic rawBytes, {
+    String fallback = 'بلا رصيد محدد',
+  }) {
     if (rawBytes == null) return fallback;
     final bytes = (rawBytes is num)
         ? rawBytes.toDouble()
@@ -173,7 +179,10 @@ class PackageSpecFormatter {
   }
 
   /// تنسيق لغوي عربي فصيح ودقيق للمدد الزمنية بالدقائق
-  static String formatDuration(dynamic rawMinutes, {String fallback = 'مفتوح'}) {
+  static String formatDuration(
+    dynamic rawMinutes, {
+    String fallback = 'مفتوح',
+  }) {
     if (rawMinutes == null) return fallback;
     final totalMinutes = (rawMinutes is num)
         ? rawMinutes.toDouble()
@@ -184,29 +193,56 @@ class PackageSpecFormatter {
     // 1. السنوات
     if (totalMinutes >= TimeDurationUnit.years.minuteFactor &&
         totalMinutes % TimeDurationUnit.years.minuteFactor == 0) {
-      final years = (totalMinutes / TimeDurationUnit.years.minuteFactor).toInt();
-      return _arabicQuantity(years, single: 'سنة', dual: 'سنتان', plural: 'سنوات', rule: 'سنة');
+      final years = (totalMinutes / TimeDurationUnit.years.minuteFactor)
+          .toInt();
+      return _arabicQuantity(
+        years,
+        single: 'سنة',
+        dual: 'سنتان',
+        plural: 'سنوات',
+        rule: 'سنة',
+      );
     }
 
     // 2. الأشهر (30 يوماً = 43200 دقيقة)
     if (totalMinutes >= TimeDurationUnit.months.minuteFactor &&
         totalMinutes % TimeDurationUnit.months.minuteFactor == 0) {
-      final months = (totalMinutes / TimeDurationUnit.months.minuteFactor).toInt();
-      return _arabicQuantity(months, single: 'شهر', dual: 'شهران', plural: 'أشهر', rule: 'شهراً');
+      final months = (totalMinutes / TimeDurationUnit.months.minuteFactor)
+          .toInt();
+      return _arabicQuantity(
+        months,
+        single: 'شهر',
+        dual: 'شهران',
+        plural: 'أشهر',
+        rule: 'شهراً',
+      );
     }
 
     // 3. الأسابيع (7 أيام = 10080 دقيقة)
     if (totalMinutes >= TimeDurationUnit.weeks.minuteFactor &&
         totalMinutes % TimeDurationUnit.weeks.minuteFactor == 0) {
-      final weeks = (totalMinutes / TimeDurationUnit.weeks.minuteFactor).toInt();
-      return _arabicQuantity(weeks, single: 'أسبوع', dual: 'أسبوعان', plural: 'أسابيع', rule: 'أسبوعاً');
+      final weeks = (totalMinutes / TimeDurationUnit.weeks.minuteFactor)
+          .toInt();
+      return _arabicQuantity(
+        weeks,
+        single: 'أسبوع',
+        dual: 'أسبوعان',
+        plural: 'أسابيع',
+        rule: 'أسبوعاً',
+      );
     }
 
     // 4. الأيام (24 ساعة = 1440 دقيقة)
     if (totalMinutes >= TimeDurationUnit.days.minuteFactor &&
         totalMinutes % TimeDurationUnit.days.minuteFactor == 0) {
       final days = (totalMinutes / TimeDurationUnit.days.minuteFactor).toInt();
-      return _arabicQuantity(days, single: 'يوم', dual: 'يومان', plural: 'أيام', rule: 'يوماً');
+      return _arabicQuantity(
+        days,
+        single: 'يوم',
+        dual: 'يومان',
+        plural: 'أيام',
+        rule: 'يوماً',
+      );
     }
 
     // 5. الساعات (60 دقيقة)
@@ -214,14 +250,26 @@ class PackageSpecFormatter {
       final hours = totalMinutes / TimeDurationUnit.hours.minuteFactor;
       if (hours % 1 == 0) {
         final h = hours.toInt();
-        return _arabicQuantity(h, single: 'ساعة', dual: 'ساعتان', plural: 'ساعات', rule: 'ساعة');
+        return _arabicQuantity(
+          h,
+          single: 'ساعة',
+          dual: 'ساعتان',
+          plural: 'ساعات',
+          rule: 'ساعة',
+        );
       }
       return '${_formatNumber(hours)} ساعة';
     }
 
     // 6. الدقائق
     final m = totalMinutes.toInt();
-    return _arabicQuantity(m, single: 'دقيقة', dual: 'دقيقتان', plural: 'دقائق', rule: 'دقيقة');
+    return _arabicQuantity(
+      m,
+      single: 'دقيقة',
+      dual: 'دقيقتان',
+      plural: 'دقائق',
+      rule: 'دقيقة',
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────

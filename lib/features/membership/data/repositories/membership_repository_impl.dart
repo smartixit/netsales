@@ -21,7 +21,9 @@ class MembershipRepositoryImpl implements MembershipRepository {
   Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(
     int networkId,
   ) async {
-    final response = await _remoteDataSource.getNetworkAssignableRoles(networkId);
+    final response = await _remoteDataSource.getNetworkAssignableRoles(
+      networkId,
+    );
     return response.data ?? [];
   }
 

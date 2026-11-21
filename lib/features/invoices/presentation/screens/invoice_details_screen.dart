@@ -149,7 +149,8 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                     heroTitle: isNetworkPerspective
                         ? 'فاتورة مبيعات كروت معتمدة'
                         : 'فاتورة مشتريات كروت معتمدة',
-                    actorLabel: invoice.createdByName != null &&
+                    actorLabel:
+                        invoice.createdByName != null &&
                             invoice.createdByName!.trim().isNotEmpty
                         ? 'أُصدرت بواسطة: ${invoice.createdByName!.trim()}'
                         : null,
@@ -284,10 +285,8 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                                 null &&
                             invoice.items[i].voucherPackage!.packageBalance > 0)
                           CustomChip(
-                            label: invoice
-                                .items[i]
-                                .voucherPackage!
-                                .balanceDisplay,
+                            label:
+                                invoice.items[i].voucherPackage!.balanceDisplay,
                             icon: Icons.data_usage_rounded,
                             isCompact: true,
                           ),

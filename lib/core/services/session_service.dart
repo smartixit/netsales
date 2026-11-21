@@ -58,7 +58,9 @@ class SessionService extends GetxService {
         deviceUuid: DeviceService.instance.deviceUuid,
       );
       _isAuthenticated.value = true;
-      final cachedPermissions = storage.getStringList(StorageKeys.permissionsStorage);
+      final cachedPermissions = storage.getStringList(
+        StorageKeys.permissionsStorage,
+      );
       if (Get.isRegistered<PermissionService>()) {
         PermissionService.to.updateAccess(
           roleKey: cachedUser.primaryWorkspaceRoleKey ?? '',
@@ -246,7 +248,8 @@ class SessionService extends GetxService {
 
     final previousUserId = _user.value?.userId;
     if (previousUserId != null) {
-      final posContextKey = '${StorageKeys.activePosTenantPrefix}_$previousUserId';
+      final posContextKey =
+          '${StorageKeys.activePosTenantPrefix}_$previousUserId';
       final savedPosId = storage.getInt(posContextKey);
       if (savedPosId != null) {
         await storage.remove(

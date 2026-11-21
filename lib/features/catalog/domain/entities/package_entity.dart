@@ -70,37 +70,32 @@ class PackageEntity {
   bool get isActive => packageStatus.isActive;
 
   /// السعر الأساسي للباقة محولاً من العملة الصغرى عند توفره
-  double get resolvedBasePrice =>
-      procurementBaseUnitPriceMinor != null
-          ? procurementBaseUnitPriceMinor! / 100.0
-          : packageVoucherPrice;
+  double get resolvedBasePrice => procurementBaseUnitPriceMinor != null
+      ? procurementBaseUnitPriceMinor! / 100.0
+      : packageVoucherPrice;
 
   /// سعر الشراء النقدي الفعلي محولاً من العملة الصغرى
-  double get resolvedCashPrice =>
-      procurementCashUnitPriceMinor != null
-          ? procurementCashUnitPriceMinor! / 100.0
-          : effectiveCashPrice;
+  double get resolvedCashPrice => procurementCashUnitPriceMinor != null
+      ? procurementCashUnitPriceMinor! / 100.0
+      : effectiveCashPrice;
 
   /// سعر الشراء الآجل الفعلي محولاً من العملة الصغرى
-  double get resolvedCreditPrice =>
-      procurementCreditUnitPriceMinor != null
-          ? procurementCreditUnitPriceMinor! / 100.0
-          : effectiveCreditPrice;
+  double get resolvedCreditPrice => procurementCreditUnitPriceMinor != null
+      ? procurementCreditUnitPriceMinor! / 100.0
+      : effectiveCreditPrice;
 
   /// نسبة الخصم النقدي المحولة من نقاط الأساس
-  double get resolvedCashDiscount =>
-      procurementCashDiscountBasisPoints != null
-          ? procurementCashDiscountBasisPoints! / 100.0
-          : packageDefaultCashDiscount;
+  double get resolvedCashDiscount => procurementCashDiscountBasisPoints != null
+      ? procurementCashDiscountBasisPoints! / 100.0
+      : packageDefaultCashDiscount;
 
   /// نسبة الخصم الآجل المحولة من نقاط الأساس
   double get resolvedCreditDiscount =>
       procurementCreditDiscountBasisPoints != null
-          ? procurementCreditDiscountBasisPoints! / 100.0
-          : packageDefaultCreditDiscount;
+      ? procurementCreditDiscountBasisPoints! / 100.0
+      : packageDefaultCreditDiscount;
 
-  String get balanceDisplay =>
-      PackageSpecFormatter.formatData(packageBalance);
+  String get balanceDisplay => PackageSpecFormatter.formatData(packageBalance);
 
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);

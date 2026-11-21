@@ -464,7 +464,9 @@ class PushNotificationService extends GetxService {
     final rawType = data['notification_type'] ?? data['entity_type'];
     final entityId = data['entity_id']?.toString() ?? data['id']?.toString();
 
-    log('🎯 [PushNotificationService] Dispatching a verified notification deep link.');
+    log(
+      '🎯 [PushNotificationService] Dispatching a verified notification deep link.',
+    );
 
     // 1. التوجيه المباشر بالمسار الصريح إن وُجد
     if (route != null && route.isNotEmpty) {

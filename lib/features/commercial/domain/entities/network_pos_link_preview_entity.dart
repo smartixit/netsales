@@ -39,10 +39,10 @@ class NetworkPosLinkPreviewEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        challengeUuid,
-        network,
-        pos,
-        expiresAt,
-        isTargeted,
-      ];
+    challengeUuid,
+    network,
+    pos,
+    expiresAt,
+    isTargeted,
+  ];
 }

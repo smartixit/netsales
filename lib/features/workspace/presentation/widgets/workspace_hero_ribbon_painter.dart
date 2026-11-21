@@ -53,25 +53,14 @@ class WorkspaceHeroRibbonPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFFFE7AD),
-            Color(0xFFE7B45D),
-            Color(0xFFB97A2B),
-          ],
+          colors: [Color(0xFFFFE7AD), Color(0xFFE7B45D), Color(0xFFB97A2B)],
           stops: [0, 0.55, 1],
         ).createShader(Rect.fromLTWH(0, h * 0.67, w * 0.54, h * 0.34)),
     );
 
     final highlight = Path()
       ..moveTo(-w * 0.02, h * 0.688)
-      ..cubicTo(
-        w * 0.09,
-        h * 0.756,
-        w * 0.17,
-        h * 0.882,
-        w * 0.325,
-        h * 0.927,
-      );
+      ..cubicTo(w * 0.09, h * 0.756, w * 0.17, h * 0.882, w * 0.325, h * 0.927);
     canvas.drawPath(
       highlight,
       Paint()
@@ -83,6 +72,5 @@ class WorkspaceHeroRibbonPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant WorkspaceHeroRibbonPainter oldDelegate) =>
-      false;
+  bool shouldRepaint(covariant WorkspaceHeroRibbonPainter oldDelegate) => false;
 }

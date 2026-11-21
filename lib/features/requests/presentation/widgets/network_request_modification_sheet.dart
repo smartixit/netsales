@@ -739,7 +739,8 @@ class _NetworkRequestApprovalNotesSection
     return Obx(() {
       final isCredit =
           controller.editingRequest.value?.saleType == SaleType.credit;
-      final maxAmount = controller.currentPreview.value?.previewTotalAmount ??
+      final maxAmount =
+          controller.currentPreview.value?.previewTotalAmount ??
           controller.editingRequest.value?.requestTotalAmount;
 
       return Column(
@@ -751,8 +752,9 @@ class _NetworkRequestApprovalNotesSection
               label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
               hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
               isRequired: false,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               prefixIcon: const Icon(Icons.payments_outlined),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -769,8 +771,7 @@ class _NetworkRequestApprovalNotesSection
           CustomTextField(
             controller: controller.modificationNoteController,
             label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
-            hint:
-                'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
+            hint: 'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
             maxLines: 2,
             isRequired: false,
             validator: FormValidators.descriptionValidator(isRequired: false),

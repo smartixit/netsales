@@ -22,18 +22,77 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
   @override
   Widget build(BuildContext context) => Obx(() {
     final items = [
-      WorkspaceNavItem(label: 'الرئيسية', icon: Icons.dashboard_outlined, activeIcon: Icons.dashboard_rounded, content: NetworkWorkspaceDashboard(controller: controller)),
-      const WorkspaceNavItem(label: 'الطلبات', icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long_rounded, content: ProcurementOrdersScreen(embedded: true, isNetwork: true)),
-      const WorkspaceNavItem(label: 'نقاط البيع', icon: Icons.storefront_outlined, activeIcon: Icons.storefront_rounded, content: CommercialDirectoryScreen(embedded: true, isNetwork: true)),
-      const WorkspaceNavItem(label: 'الملف الشخصي', icon: Icons.account_circle_outlined, activeIcon: Icons.account_circle_rounded, content: ProfileScreen(embedded: true)),
-      const WorkspaceNavItem(label: 'فواتير المبيعات', icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long_rounded, content: InvoicesScreen(embedded: true, isNetwork: true)),
-      const WorkspaceNavItem(label: 'المصروفات التشغيلية', icon: Icons.payments_outlined, activeIcon: Icons.payments_rounded, content: ExpensesScreen(embedded: true)),
-      const WorkspaceNavItem(label: 'اشتراك المنصة', icon: Icons.workspace_premium_outlined, activeIcon: Icons.workspace_premium_rounded, content: BillingWorkspaceScreen()),
-      const WorkspaceNavItem(label: 'تقارير الاشتراكات', icon: Icons.query_stats_outlined, activeIcon: Icons.query_stats_rounded, content: BillingReportsScreen()),
-      const WorkspaceNavItem(label: 'فريق العمل', icon: Icons.groups_outlined, activeIcon: Icons.groups_rounded, content: MembershipsScreen(embedded: true, isNetwork: true)),
-      WorkspaceNavItem(label: 'التقارير التشغيلية', icon: Icons.analytics_outlined, activeIcon: Icons.analytics_rounded, content: OperationalReportsScreen(networkId: controller.selectedNetworkId.value, isNetworkWorkspace: true, organizationName: controller.selectedNetwork?.networkName, logoUrl: controller.selectedNetwork?.networkProfileLogoUrl, embedded: true)),
+      WorkspaceNavItem(
+        label: 'الرئيسية',
+        icon: Icons.dashboard_outlined,
+        activeIcon: Icons.dashboard_rounded,
+        content: NetworkWorkspaceDashboard(controller: controller),
+      ),
+      const WorkspaceNavItem(
+        label: 'الطلبات',
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        content: ProcurementOrdersScreen(embedded: true, isNetwork: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'نقاط البيع',
+        icon: Icons.storefront_outlined,
+        activeIcon: Icons.storefront_rounded,
+        content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'الملف الشخصي',
+        icon: Icons.account_circle_outlined,
+        activeIcon: Icons.account_circle_rounded,
+        content: ProfileScreen(embedded: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'فواتير المبيعات',
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        content: InvoicesScreen(embedded: true, isNetwork: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'المصروفات التشغيلية',
+        icon: Icons.payments_outlined,
+        activeIcon: Icons.payments_rounded,
+        content: ExpensesScreen(embedded: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'اشتراك المنصة',
+        icon: Icons.workspace_premium_outlined,
+        activeIcon: Icons.workspace_premium_rounded,
+        content: BillingWorkspaceScreen(),
+      ),
+      const WorkspaceNavItem(
+        label: 'تقارير الاشتراكات',
+        icon: Icons.query_stats_outlined,
+        activeIcon: Icons.query_stats_rounded,
+        content: BillingReportsScreen(),
+      ),
+      const WorkspaceNavItem(
+        label: 'فريق العمل',
+        icon: Icons.groups_outlined,
+        activeIcon: Icons.groups_rounded,
+        content: MembershipsScreen(embedded: true, isNetwork: true),
+      ),
+      WorkspaceNavItem(
+        label: 'التقارير التشغيلية',
+        icon: Icons.analytics_outlined,
+        activeIcon: Icons.analytics_rounded,
+        content: OperationalReportsScreen(
+          networkId: controller.selectedNetworkId.value,
+          isNetworkWorkspace: true,
+          organizationName: controller.selectedNetwork?.networkName,
+          logoUrl: controller.selectedNetwork?.networkProfileLogoUrl,
+          embedded: true,
+        ),
+      ),
     ];
-    final loading = (controller.isLoadingNetworks.value || controller.isLoadingOverview.value) && controller.selectedNetwork == null;
+    final loading =
+        (controller.isLoadingNetworks.value ||
+            controller.isLoadingOverview.value) &&
+        controller.selectedNetwork == null;
     return AdaptiveWorkspaceScaffold(
       appBar: WorkspaceAppBar(
         title: controller.selectedNetwork?.networkName ?? 'اختر شبكة العمل',

@@ -91,9 +91,15 @@ class PackageCatalogController extends GetxController {
   final creditDiscountController = TextEditingController(text: '0.0');
 
   // محددات الوحدات الفنية
-  final selectedBalanceUnit = ValueNotifier<DataSizeUnit>(DataSizeUnit.megabytes);
-  final selectedUptimeUnit = ValueNotifier<TimeDurationUnit>(TimeDurationUnit.hours);
-  final selectedValidityUnit = ValueNotifier<TimeDurationUnit>(TimeDurationUnit.days);
+  final selectedBalanceUnit = ValueNotifier<DataSizeUnit>(
+    DataSizeUnit.megabytes,
+  );
+  final selectedUptimeUnit = ValueNotifier<TimeDurationUnit>(
+    TimeDurationUnit.hours,
+  );
+  final selectedValidityUnit = ValueNotifier<TimeDurationUnit>(
+    TimeDurationUnit.days,
+  );
 
   final selectedColorHex = '0xFF0D7A5F'.obs;
   final packageActiveStatus = true.obs;
@@ -210,7 +216,9 @@ class PackageCatalogController extends GetxController {
   String? get currentFilterKey {
     final val = statusFilter.value;
     if (val == null) return null;
-    return val ? PackageStatus.active.wireValue : PackageStatus.inactive.wireValue;
+    return val
+        ? PackageStatus.active.wireValue
+        : PackageStatus.inactive.wireValue;
   }
 
   void onFilterKeySelected(String? key) {
@@ -232,7 +240,8 @@ class PackageCatalogController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    final targetNetworkId = networkId ??
+    final targetNetworkId =
+        networkId ??
         selectedNetworkId.value ??
         (authorizedNetworks.isNotEmpty
             ? WorkspaceService.to.resolveActiveNetworkId(
@@ -276,7 +285,8 @@ class PackageCatalogController extends GetxController {
     isLoadingMore.value = true;
     loadMoreError.value = null;
 
-    final targetNetworkId = selectedNetworkId.value ??
+    final targetNetworkId =
+        selectedNetworkId.value ??
         (authorizedNetworks.isNotEmpty
             ? WorkspaceService.to.resolveActiveNetworkId(
                 authorizedNetworks.map((n) => n.networkId).toList(),
@@ -291,14 +301,13 @@ class PackageCatalogController extends GetxController {
           cursor: nextCursor.value,
         );
       } else {
-        result = await getPackagesUseCase(
-          cursor: nextCursor.value,
-        );
+        result = await getPackagesUseCase(cursor: nextCursor.value);
       }
 
       final existingIds = packages.map((p) => p.packageId).toSet();
-      final newItems =
-          result.items.where((p) => !existingIds.contains(p.packageId)).toList();
+      final newItems = result.items
+          .where((p) => !existingIds.contains(p.packageId))
+          .toList();
 
       packages.addAll(newItems);
       nextCursor.value = result.nextCursor;
@@ -453,7 +462,8 @@ class PackageCatalogController extends GetxController {
     isEditing.value = false;
     editingPackageId.value = null;
 
-    formNetworkId.value = networkId ??
+    formNetworkId.value =
+        networkId ??
         selectedNetworkId.value ??
         (authorizedNetworks.length == 1
             ? authorizedNetworks.first.networkId
@@ -486,8 +496,13 @@ class PackageCatalogController extends GetxController {
     if (pkg.packageBalance > 0) {
       final bestDataUnit = DataSizeUnit.resolveBestUnit(pkg.packageBalance);
       selectedBalanceUnit.value = bestDataUnit;
-      final val = PackageSpecFormatter.fromCanonicalBytes(pkg.packageBalance, bestDataUnit);
-      balanceController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(2);
+      final val = PackageSpecFormatter.fromCanonicalBytes(
+        pkg.packageBalance,
+        bestDataUnit,
+      );
+      balanceController.text = val % 1 == 0
+          ? val.toInt().toString()
+          : val.toStringAsFixed(2);
     } else {
       selectedBalanceUnit.value = DataSizeUnit.megabytes;
       balanceController.clear();
@@ -495,10 +510,17 @@ class PackageCatalogController extends GetxController {
 
     // حل الوحدة الأنسب لوقت الاتصال بالدقائق
     if (pkg.packageUptime != null && pkg.packageUptime! > 0) {
-      final bestUptimeUnit = TimeDurationUnit.resolveBestUnit(pkg.packageUptime!);
+      final bestUptimeUnit = TimeDurationUnit.resolveBestUnit(
+        pkg.packageUptime!,
+      );
       selectedUptimeUnit.value = bestUptimeUnit;
-      final val = PackageSpecFormatter.fromCanonicalMinutes(pkg.packageUptime!, bestUptimeUnit);
-      uptimeController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
+      final val = PackageSpecFormatter.fromCanonicalMinutes(
+        pkg.packageUptime!,
+        bestUptimeUnit,
+      );
+      uptimeController.text = val % 1 == 0
+          ? val.toInt().toString()
+          : val.toStringAsFixed(1);
     } else {
       selectedUptimeUnit.value = TimeDurationUnit.hours;
       uptimeController.clear();
@@ -506,10 +528,17 @@ class PackageCatalogController extends GetxController {
 
     // حل الوحدة الأنسب لفترة الصلاحية بالدقائق
     if (pkg.packageValidity != null && pkg.packageValidity! > 0) {
-      final bestValidityUnit = TimeDurationUnit.resolveBestUnit(pkg.packageValidity!);
+      final bestValidityUnit = TimeDurationUnit.resolveBestUnit(
+        pkg.packageValidity!,
+      );
       selectedValidityUnit.value = bestValidityUnit;
-      final val = PackageSpecFormatter.fromCanonicalMinutes(pkg.packageValidity!, bestValidityUnit);
-      validityController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
+      final val = PackageSpecFormatter.fromCanonicalMinutes(
+        pkg.packageValidity!,
+        bestValidityUnit,
+      );
+      validityController.text = val % 1 == 0
+          ? val.toInt().toString()
+          : val.toStringAsFixed(1);
     } else {
       selectedValidityUnit.value = TimeDurationUnit.days;
       validityController.clear();
@@ -688,7 +717,9 @@ class PackageCatalogController extends GetxController {
     try {
       final updated = await togglePackageStatusUseCase(package.packageId);
 
-      final index = packages.indexWhere((p) => p.packageId == package.packageId);
+      final index = packages.indexWhere(
+        (p) => p.packageId == package.packageId,
+      );
       if (index != -1) {
         packages[index] = updated;
       }

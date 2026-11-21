@@ -127,10 +127,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }) async {
     final response = await ApiService.instance.post<NetworkPosLinkModel>(
       ApiConstants.networkPos,
-      data: {
-        'network_id': networkId,
-        'pos_id': posId,
-      },
+      data: {'network_id': networkId, 'pos_id': posId},
       fromJson: (data) =>
           NetworkPosLinkModel.fromJson(data as Map<String, dynamic>),
     );
@@ -144,7 +141,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
   @override
   Future<NetworkPosLinkModel> toggleNetworkPosLinkStatus(
-      int networkPosId) async {
+    int networkPosId,
+  ) async {
     final response = await ApiService.instance.post<NetworkPosLinkModel>(
       ApiConstants.networkPosToggleStatus(networkPosId),
       fromJson: (data) =>
@@ -180,13 +178,14 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       'duration_minutes': durationMinutes,
     };
 
-    final response =
-        await ApiService.instance.post<NetworkPosLinkChallengeModel>(
-      ApiConstants.networkPosChallenges,
-      data: payload,
-      fromJson: (data) =>
-          NetworkPosLinkChallengeModel.fromJson(data as Map<String, dynamic>),
-    );
+    final response = await ApiService.instance
+        .post<NetworkPosLinkChallengeModel>(
+          ApiConstants.networkPosChallenges,
+          data: payload,
+          fromJson: (data) => NetworkPosLinkChallengeModel.fromJson(
+            data as Map<String, dynamic>,
+          ),
+        );
 
     final result = response.data;
     if (result == null) {
@@ -208,8 +207,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
         'pos_uuid': posUuid.trim(),
     };
 
-    final response =
-        await ApiService.instance.post<NetworkPosLinkPreviewModel>(
+    final response = await ApiService.instance.post<NetworkPosLinkPreviewModel>(
       ApiConstants.networkPosChallengesPreview,
       data: body,
       fromJson: (data) =>

@@ -123,8 +123,7 @@ class NetworkDirectInvoiceScreen
                         // 1. ترويسة الصفحة القيادية (CustomPageHeroCard)
                         const CustomPageHeroCard(
                           title: 'مساحة إصدار الفاتورة المباشرة',
-                          subtitle:
-                              'حدد المنفذ التجاري وطريقة السداد، ثم اختر الباقات والكميات لإصدار الفاتورة فورياً.',
+                          subtitle: 'حدد المنفذ التجاري وطريقة السداد، ثم اختر الباقات والكميات لإصدار الفاتورة فورياً.',
                           icon: Icons.point_of_sale_rounded,
                         ),
                         AppSpacing.vMd,
@@ -149,10 +148,14 @@ class NetworkDirectInvoiceScreen
                             label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
                             hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
                             isRequired: false,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             prefixIcon: const Icon(Icons.payments_outlined),
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*\.?\d*'),
+                              ),
                             ],
                             validator: FormValidators.amountValidator(
                               fieldName: 'المبلغ المقبوض كاش',
@@ -167,8 +170,7 @@ class NetworkDirectInvoiceScreen
                         // 4. اختيار الباقات والكميات
                         const CustomSectionHeading(
                           title: 'باقات الكروت والكميات',
-                          subtitle:
-                              'حدد الباقات وكمية الكروت لكل صنف مع تطبيق تعرفة السعر',
+                          subtitle: 'حدد الباقات وكمية الكروت لكل صنف مع تطبيق تعرفة السعر',
                           icon: Icons.inventory_2_rounded,
                         ),
                         AppSpacing.vXs,

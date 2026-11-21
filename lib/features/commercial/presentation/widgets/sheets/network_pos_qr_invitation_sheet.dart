@@ -59,10 +59,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              child: CustomQrCode(
-                data: challenge.payload,
-                size: 200.r,
-              ),
+              child: CustomQrCode(data: challenge.payload, size: 200.r),
             ),
           ),
           SizedBox(height: AppSpacing.md),

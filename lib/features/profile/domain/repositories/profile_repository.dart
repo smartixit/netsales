@@ -1,2 +1,5 @@
 import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
-abstract interface class ProfileRepository { Future<ProfileEntity> getProfile(); }
+
+abstract interface class ProfileRepository {
+  Future<ProfileEntity> getProfile();
+}

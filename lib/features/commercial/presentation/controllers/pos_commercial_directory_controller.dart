@@ -44,9 +44,9 @@ class PosCommercialDirectoryController
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
   final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
   final PreviewNetworkPosLinkChallengeUseCase
-      previewNetworkPosLinkChallengeUseCase;
+  previewNetworkPosLinkChallengeUseCase;
   final ConfirmNetworkPosLinkChallengeUseCase
-      confirmNetworkPosLinkChallengeUseCase;
+  confirmNetworkPosLinkChallengeUseCase;
   final GetMyPosUseCase? getMyPosUseCase;
 
   @override
@@ -215,13 +215,13 @@ class PosCommercialDirectoryController
     try {
       final PaginatedList<NetworkPosLinkEntity> result =
           await getPosNetworksListUseCase(
-        posId: posId,
-        status: statusParam,
-        search: searchQuery.value.trim().isEmpty
-            ? null
-            : searchQuery.value.trim(),
-        perPage: 15,
-      );
+            posId: posId,
+            status: statusParam,
+            search: searchQuery.value.trim().isEmpty
+                ? null
+                : searchQuery.value.trim(),
+            perPage: 15,
+          );
 
       if (currentRevision != _listRevision) return;
 
@@ -255,14 +255,14 @@ class PosCommercialDirectoryController
     try {
       final PaginatedList<NetworkPosLinkEntity> result =
           await getPosNetworksListUseCase(
-        posId: posId,
-        status: statusParam,
-        search: searchQuery.value.trim().isEmpty
-            ? null
-            : searchQuery.value.trim(),
-        cursor: _nextCursor,
-        perPage: 15,
-      );
+            posId: posId,
+            status: statusParam,
+            search: searchQuery.value.trim().isEmpty
+                ? null
+                : searchQuery.value.trim(),
+            cursor: _nextCursor,
+            perPage: 15,
+          );
 
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
@@ -306,10 +306,7 @@ class PosCommercialDirectoryController
       title: 'ملف مزود الشبكة',
       subtitle: 'البيانات التجارية المعتمدة للشريك',
       leadingIcon: Icons.hub_rounded,
-      child: CommercialPartnerDetailsSheet(
-        link: link,
-        isNetworkView: false,
-      ),
+      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: false),
     );
   }
 
@@ -382,10 +379,7 @@ class PosCommercialDirectoryController
         searchEnabled: false,
         rxValue: selectedPosId,
         items: posList.map((pos) {
-          return DropdownItem<int>(
-            value: pos.posId,
-            child: Text(pos.posName),
-          );
+          return DropdownItem<int>(value: pos.posId, child: Text(pos.posName));
         }).toList(),
         onChanged: onPosFilterChanged,
       ),

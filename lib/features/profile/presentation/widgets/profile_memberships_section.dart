@@ -7,10 +7,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/profile/domain/entities/profile_membership_entity.dart';
 
 class ProfileMembershipsSection extends StatelessWidget {
-  const ProfileMembershipsSection({
-    super.key,
-    required this.memberships,
-  });
+  const ProfileMembershipsSection({super.key, required this.memberships});
 
   final List<ProfileMembershipEntity> memberships;
 

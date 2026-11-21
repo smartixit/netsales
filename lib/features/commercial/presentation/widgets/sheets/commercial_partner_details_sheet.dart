@@ -28,15 +28,15 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final partnerName =
-        isNetworkView ? link.displayPosName : link.displayNetworkName;
-    final partnerRef =
-        isNetworkView ? link.displayPosReference : link.displayNetworkReference;
+    final partnerName = isNetworkView
+        ? link.displayPosName
+        : link.displayNetworkName;
+    final partnerRef = isNetworkView
+        ? link.displayPosReference
+        : link.displayNetworkReference;
     final phone = isNetworkView ? link.posPhone : link.networkPhone;
-    final manager =
-        isNetworkView ? link.posOwnerName : link.networkOwnerName;
-    final location =
-        isNetworkView ? link.posLocation : link.networkLocation;
+    final manager = isNetworkView ? link.posOwnerName : link.networkOwnerName;
+    final location = isNetworkView ? link.posLocation : link.networkLocation;
 
     final statusPres = isNetworkView
         ? EnumPresentationRegistry.resolvePosStatus(

@@ -17,16 +17,19 @@ class MemberUserModel extends MemberUserEntity {
     return MemberUserModel(
       userId: json['user_id'] as int? ?? 0,
       userUuid: json['user_uuid'] as String? ?? '',
-      fullName: json['user_full_name'] as String? ??
+      fullName:
+          json['user_full_name'] as String? ??
           json['full_name'] as String? ??
           '',
-      phoneNumber: json['user_phone_number'] as String? ??
+      phoneNumber:
+          json['user_phone_number'] as String? ??
           json['phone_number'] as String? ??
           '',
       email: json['user_email'] as String? ?? json['email'] as String?,
       statusRaw: json['status'] as String?,
       statusLabel: json['status_label'] as String?,
-      profilePictureUrl: json['user_profile_picture'] as String? ??
+      profilePictureUrl:
+          json['user_profile_picture'] as String? ??
           json['user_profile_logo_url'] as String? ??
           json['profile_picture'] as String?,
     );

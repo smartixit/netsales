@@ -6,11 +6,7 @@ class RemovePosMemberUseCase {
 
   const RemovePosMemberUseCase(this._repository);
 
-  Future<void> call({
-    required int posId,
-    required int userId,
-    String? reason,
-  }) {
+  Future<void> call({required int posId, required int userId, String? reason}) {
     return _repository.removePosMember(
       posId: posId,
       userId: userId,

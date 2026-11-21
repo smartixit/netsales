@@ -126,7 +126,9 @@ class WorkspaceEntityPickerController extends GetxController {
     if (network == null) return;
 
     if (Get.isRegistered<NetworkWorkspaceController>()) {
-      await Get.find<NetworkWorkspaceController>().selectNetwork(network.networkId);
+      await Get.find<NetworkWorkspaceController>().selectNetwork(
+        network.networkId,
+      );
       Get.back<void>();
       return;
     }
@@ -134,7 +136,9 @@ class WorkspaceEntityPickerController extends GetxController {
     await WorkspaceService.to.saveActiveNetworkId(network.networkId);
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
       Get.back<void>();
-      await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.network);
+      await WorkspaceCoordinatorController.to.switchWorkspace(
+        AppWorkspace.network,
+      );
     }
   }
 

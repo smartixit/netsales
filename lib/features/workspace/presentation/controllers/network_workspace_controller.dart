@@ -87,7 +87,8 @@ class NetworkWorkspaceController extends GetxController {
   String get welcomeGreeting => GreetingFormatter.greeting();
   String get todayFormatted => DateFormatter.fullDate(DateTime.now());
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
-  String get userInitials => TextFormatter.avatarInitials(userName, maxChars: 2);
+  String get userInitials =>
+      TextFormatter.avatarInitials(userName, maxChars: 2);
 
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);
@@ -165,8 +166,12 @@ class NetworkWorkspaceController extends GetxController {
       if (revision != _revision || isClosed) return;
 
       networks.assignAll(result);
-      final ids = result.map((network) => network.networkId).toList(growable: false);
-      final selectedId = WorkspaceService.to.resolveWorkspaceActiveNetworkId(ids);
+      final ids = result
+          .map((network) => network.networkId)
+          .toList(growable: false);
+      final selectedId = WorkspaceService.to.resolveWorkspaceActiveNetworkId(
+        ids,
+      );
       selectedNetworkId.value = selectedId;
 
       if (selectedId == null) {

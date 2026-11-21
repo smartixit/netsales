@@ -34,9 +34,7 @@ class CommercialBinding extends Bindings {
       fenix: true,
     );
     registerLazyIfAbsent<CommercialRepository>(
-      () => CommercialRepositoryImpl(
-        Get.find<CommercialRemoteDataSource>(),
-      ),
+      () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
       fenix: true,
     );
 
@@ -134,7 +132,8 @@ class CommercialBinding extends Bindings {
     // تسجيل BaseCommercialDirectoryController وفق مساحة العمل أو المسار الحالي (Strategy Provider)
     registerLazyIfAbsent<BaseCommercialDirectoryController>(() {
       final currentRoute = Get.currentRoute;
-      final isPos = currentRoute == AppRoutes.linkedNetworksCatalog ||
+      final isPos =
+          currentRoute == AppRoutes.linkedNetworksCatalog ||
           (Get.isRegistered<WorkspaceService>() &&
               WorkspaceService.to.activeWorkspace == AppWorkspace.pos);
 

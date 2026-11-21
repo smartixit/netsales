@@ -44,8 +44,10 @@ class NetworkCommercialDirectoryController
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
   final ToggleNetworkPosLinkStatusUseCase toggleNetworkPosLinkStatusUseCase;
   final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
-  final CreateNetworkPosLinkChallengeUseCase createNetworkPosLinkChallengeUseCase;
-  final RevokeNetworkPosLinkChallengeUseCase revokeNetworkPosLinkChallengeUseCase;
+  final CreateNetworkPosLinkChallengeUseCase
+  createNetworkPosLinkChallengeUseCase;
+  final RevokeNetworkPosLinkChallengeUseCase
+  revokeNetworkPosLinkChallengeUseCase;
   final GetMyNetworksUseCase? getMyNetworksUseCase;
 
   @override
@@ -216,13 +218,13 @@ class NetworkCommercialDirectoryController
     try {
       final PaginatedList<NetworkPosLinkEntity> result =
           await getNetworkPosListUseCase(
-        networkId: netId,
-        status: statusParam,
-        search: searchQuery.value.trim().isEmpty
-            ? null
-            : searchQuery.value.trim(),
-        perPage: 15,
-      );
+            networkId: netId,
+            status: statusParam,
+            search: searchQuery.value.trim().isEmpty
+                ? null
+                : searchQuery.value.trim(),
+            perPage: 15,
+          );
 
       if (currentRevision != _listRevision) return;
 
@@ -256,14 +258,14 @@ class NetworkCommercialDirectoryController
     try {
       final PaginatedList<NetworkPosLinkEntity> result =
           await getNetworkPosListUseCase(
-        networkId: netId,
-        status: statusParam,
-        search: searchQuery.value.trim().isEmpty
-            ? null
-            : searchQuery.value.trim(),
-        cursor: _nextCursor,
-        perPage: 15,
-      );
+            networkId: netId,
+            status: statusParam,
+            search: searchQuery.value.trim().isEmpty
+                ? null
+                : searchQuery.value.trim(),
+            cursor: _nextCursor,
+            perPage: 15,
+          );
 
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
@@ -307,10 +309,7 @@ class NetworkCommercialDirectoryController
       title: 'ملف نقطة البيع',
       subtitle: 'البيانات التجارية المعتمدة للشريك',
       leadingIcon: Icons.storefront_rounded,
-      child: CommercialPartnerDetailsSheet(
-        link: link,
-        isNetworkView: true,
-      ),
+      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: true),
     );
   }
 
@@ -410,10 +409,12 @@ class NetworkCommercialDirectoryController
       willDeactivate: link.isActive,
       onConfirm: () async {
         try {
-          final updated =
-              await toggleNetworkPosLinkStatusUseCase(link.networkPosId);
-          final index = links
-              .indexWhere((item) => item.networkPosId == link.networkPosId);
+          final updated = await toggleNetworkPosLinkStatusUseCase(
+            link.networkPosId,
+          );
+          final index = links.indexWhere(
+            (item) => item.networkPosId == link.networkPosId,
+          );
           if (index != -1) {
             links[index] = updated;
           }

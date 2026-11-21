@@ -89,8 +89,9 @@ class PackageCard extends StatelessWidget {
       partyName: package.packageName,
       statusPresentation: statusPresentation,
       typePresentation: null,
-      secondaryReference:
-          package.networkName != null ? 'شبكة ${package.networkName}' : null,
+      secondaryReference: package.networkName != null
+          ? 'شبكة ${package.networkName}'
+          : null,
       items: items,
       itemsHeaderTitle: 'التعرفة والخصومات التعاقدية',
       visibleItemNames: specTags,
@@ -112,7 +113,8 @@ class PackageCard extends StatelessWidget {
           textColor: colors.secondary,
         ),
       ],
-      actions: actions ??
+      actions:
+          actions ??
           PackageCardActions(
             package: package,
             onDetails: onDetails,
