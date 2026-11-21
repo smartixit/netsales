@@ -39,7 +39,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
           const [Color(0xFF0B8490), Color(0xFF064E5E)],
         ),
       );
-      final lowRiseRoof = _polygon(const [
+      final lowRiseRoof = artwork.polygon(const [
         Offset(28, 395),
         Offset(116, 354),
         Offset(205, 392),
@@ -55,7 +55,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
               Rect.fromLTWH(x, y, 37, 33),
               const Radius.circular(4),
             ),
-            _linear(
+            artwork.linear(
               Rect.fromLTWH(x, y, 37, 33),
               const [Color(0xFF0A5267), Color(0xFF28B9C4)],
             ),
@@ -71,7 +71,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       }
   
       // Main tower: bright glazed front plane and a deep, shaded side plane.
-      final mainSide = _polygon(const [
+      final mainSide = artwork.polygon(const [
         Offset(498, 70),
         Offset(632, 139),
         Offset(632, 564),
@@ -80,12 +80,12 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       canvas.drawShadow(mainSide, const Color(0xFF001B2C), 24, true);
       canvas.drawPath(
         mainSide,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(498, 70, 134, 553),
           const [Color(0xFF168D9C), Color(0xFF06445D)],
         ),
       );
-      final mainFront = _polygon(const [
+      final mainFront = artwork.polygon(const [
         Offset(278, 191),
         Offset(498, 70),
         Offset(498, 623),
@@ -94,13 +94,13 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       canvas.drawShadow(mainFront, const Color(0xFF001D27), 20, true);
       canvas.drawPath(
         mainFront,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(278, 70, 220, 587),
           const [Color(0xFFF0FFFF), Color(0xFF77DCE6), Color(0xFF2E9EAE)],
         ),
       );
       canvas.drawPath(
-        _polygon(const [
+        artwork.polygon(const [
           Offset(264, 190),
           Offset(498, 54),
           Offset(646, 132),
@@ -108,7 +108,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
           Offset(498, 91),
           Offset(282, 214),
         ]),
-        _solid(const Color(0xFFB9F8F3)),
+        artwork.solid(const Color(0xFFB9F8F3)),
       );
       canvas.drawLine(
         const Offset(498, 74),
@@ -123,7 +123,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
         for (var col = 0; col < 2; col++) {
           final x = 300 + col * 86.0;
           final y = 244 + row * 91.0;
-          final window = _polygon([
+          final window = artwork.polygon([
             Offset(x, y + 19),
             Offset(x + 67, y - 17),
             Offset(x + 67, y + 43),
@@ -131,9 +131,9 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
           ]);
           canvas.drawPath(
             window,
-            _solid(const Color(0xFF083E58)),
+            artwork.solid(const Color(0xFF083E58)),
           );
-          final inner = _polygon([
+          final inner = artwork.polygon([
             Offset(x + 5, y + 23),
             Offset(x + 62, y - 8),
             Offset(x + 62, y + 38),
@@ -141,7 +141,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
           ]);
           canvas.drawPath(
             inner,
-            _linear(
+            artwork.linear(
               Rect.fromLTWH(x, y - 17, 67, 96),
               const [
                 Color(0xFF1FC0D2),
@@ -174,21 +174,21 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
         for (var col = 0; col < 2; col++) {
           final x = 525 + col * 51.0;
           final y = 177 + row * 92.0;
-          final pane = _polygon([
+          final pane = artwork.polygon([
             Offset(x, y),
             Offset(x + 37, y + 19),
             Offset(x + 37, y + 73),
             Offset(x, y + 56),
           ]);
-          canvas.drawPath(pane, _solid(const Color(0xFF052F4B)));
+          canvas.drawPath(pane, artwork.solid(const Color(0xFF052F4B)));
           canvas.drawPath(
-            _polygon([
+            artwork.polygon([
               Offset(x + 4, y + 5),
               Offset(x + 32, y + 20),
               Offset(x + 32, y + 65),
               Offset(x + 4, y + 52),
             ]),
-            _linear(
+            artwork.linear(
               Rect.fromLTWH(x, y, 37, 73),
               const [Color(0xFF1BAEC5), Color(0xFF07516D)],
             ),
@@ -197,7 +197,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       }
   
       // A second, shorter block sits to the right of the main tower.
-      final secondSide = _polygon(const [
+      final secondSide = artwork.polygon(const [
         Offset(735, 255),
         Offset(852, 310),
         Offset(852, 559),
@@ -205,12 +205,12 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       ]);
       canvas.drawPath(
         secondSide,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(735, 255, 117, 340),
           const [Color(0xFF126F83), Color(0xFF064353)],
         ),
       );
-      final secondFront = _polygon(const [
+      final secondFront = artwork.polygon(const [
         Offset(620, 300),
         Offset(735, 255),
         Offset(735, 595),
@@ -218,7 +218,7 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
       ]);
       canvas.drawPath(
         secondFront,
-        _linear(
+        artwork.linear(
           const Rect.fromLTWH(620, 255, 115, 370),
           const [Color(0xFF9DEAF0), Color(0xFF167E91)],
         ),
@@ -232,11 +232,11 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
               Rect.fromLTWH(x, y, 30, 42),
               const Radius.circular(2),
             ),
-            _solid(const Color(0xFF07516C)),
+            artwork.solid(const Color(0xFF07516C)),
           );
           canvas.drawRect(
             Rect.fromLTWH(x + 4, y + 4, 22, 34),
-            _linear(
+            artwork.linear(
               Rect.fromLTWH(x + 4, y + 4, 22, 34),
               const [Color(0xFF21C0CC), Color(0xFF0B607A)],
             ),
@@ -246,11 +246,11 @@ class WorkspaceNetworkIllustrationPainter extends CustomPainter {
   
       // Distant tree silhouettes and layered foreground planting.
       artwork.drawTree( const Offset(105, 435), 0.72, const Color(0xFF087A6B));
-      _drawTree(canvas, const Offset(840, 426), 0.84, const Color(0xFF075D59));
+      artwork.drawTree( const Offset(840, 426), 0.84, const Color(0xFF075D59));
       artwork.drawBush( const Offset(148, 590), 260, 125);
-      _drawBush(canvas, const Offset(365, 627), 270, 118);
-      _drawBush(canvas, const Offset(760, 606), 260, 132);
-      _drawBush(canvas, const Offset(955, 620), 180, 105);
+      artwork.drawBush( const Offset(365, 627), 270, 118);
+      artwork.drawBush( const Offset(760, 606), 260, 132);
+      artwork.drawBush( const Offset(955, 620), 180, 105);
   
       // Cool edge lights add the glossy, illustrated finish visible in the art.
       canvas.drawPath(
