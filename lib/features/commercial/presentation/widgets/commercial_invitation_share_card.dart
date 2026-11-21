@@ -149,6 +149,7 @@ class CommercialInvitationShareCard extends StatelessWidget {
                     child: CustomQrCode(
                       data: payload,
                       size: 380,
+                      errorCorrectLevel: QrCodeService.highErrorCorrectionLevel,
                       decoration: QrCodeService.brandDecoration,
                     ),
                   ),
