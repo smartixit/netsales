@@ -289,10 +289,21 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 onPressed: revoking ? null : onRevoke,
               );
             }
+            final status = invitationStatus.value;
+            final message = switch (status) {
+              LinkingChallengeStatus.consumed =>
+                'تم استخدام الدعوة وإتمام الارتباط.',
+              LinkingChallengeStatus.expired =>
+                'انتهت صلاحية الدعوة وفق تأكيد الخادم.',
+              LinkingChallengeStatus.revoked =>
+                'ألغى مالك الشبكة هذه الدعوة.',
+              LinkingChallengeStatus.pending =>
+                'انتهى الوقت المعروض محلياً؛ جارٍ انتظار تأكيد الحالة من الخادم.',
+              LinkingChallengeStatus.unknown =>
+                'تعذر التحقق من حالة الدعوة؛ لا يمكن مشاركتها.',
+            };
             return Text(
-              invitationStatus.value.name == 'consumed'
-                  ? 'تم استخدام الدعوة وإتمام الارتباط.'
-                  : 'هذه الدعوة لم تعد صالحة للمشاركة أو الحفظ.',
+              message,
               textAlign: TextAlign.center,
               style: AppTypography.bodySmall.copyWith(
                 color: colors.onSurfaceVariant,
