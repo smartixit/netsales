@@ -14,7 +14,8 @@ void main() {
       expect(model.status, LinkingChallengeStatus.pending);
       expect(model.statusLabel, 'بانتظار المسح');
       expect(model.expiresAt, isNotNull);
-      expect(model.expiresAt!.timeZoneOffset, const Duration(hours: 3));
+      expect(model.expiresAt!.isUtc, isTrue);
+      expect(model.expiresAt, DateTime.utc(2026, 11, 21, 15, 30));
     });
 
     test('parses terminal challenge states without secret fields', () {
