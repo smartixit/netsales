@@ -61,10 +61,10 @@ class PosNewProcurementOrderScreen
                   subtitle: controller.isRefreshingCartPricing.value
                       ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
                       : controller.cartPricingRefreshError.value ??
-                            'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
+                            'سيتم تحديث التعرفة تلقائياً عند الإرسال، أو يمكنك التحديث الآن.',
                   actionLabel: controller.isRefreshingCartPricing.value
                       ? 'جارٍ التحديث...'
-                      : 'تحديث التعرفة',
+                      : 'تحديث الآن',
                   presentation: CustomStatePresentation.compact,
                   onAction: controller.isRefreshingCartPricing.value
                       ? null

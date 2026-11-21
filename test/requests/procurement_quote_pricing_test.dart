@@ -589,6 +589,36 @@ void main() {
       expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
     });
 
+    test('Submitting order auto-refreshes expired pricing snapshots seamlessly when prices are unchanged', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+
+      final expiredPackage = _expiredTestPackage();
+      controller.procurementCart.add(
+        ProcurementCartLineEntity(
+          package: expiredPackage,
+          sheets: 1,
+          voucherCount: 100,
+        ),
+      );
+
+      packageRepo.refreshedPackages = [testPackage];
+
+      expect(controller.hasCurrentProcurementSnapshots, isFalse);
+      expect(controller.canSubmitOrder, isTrue);
+
+      await controller.submitOrder();
+
+      expect(mockRepo.lastCreatePayload, isNotNull);
+      expect(
+        mockRepo.lastCreatePayload!['items'][0]['pricing_snapshot_token'],
+        'signed_snapshot_token_for_package_101',
+      );
+      expect(controller.procurementCart, isEmpty);
+    });
+
     test(
       'retries reuse the same idempotency key for an unchanged submission',
       () async {

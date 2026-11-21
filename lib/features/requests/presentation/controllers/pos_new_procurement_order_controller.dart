@@ -19,14 +19,16 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_en
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
-import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/entities/package_price_change_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
-import 'package:netsales/features/requests/domain/services/procurement_estimate_calculator.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
+import 'package:netsales/features/requests/domain/entities/request_entity.dart';
+import 'package:netsales/features/requests/domain/services/procurement_estimate_calculator.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
+import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
@@ -70,6 +72,10 @@ class PosNewProcurementOrderController extends GetxController {
         type: SnackType.warning,
       );
       return;
+    }
+    // تحديث استباقي صامت في الخلفية إذا كانت التعرفة بحاجة للتحديث
+    if (needsPricingRefresh && !isRefreshingCartPricing.value) {
+      unawaited(refreshNetworkPackages());
     }
     currentOrderStep.value = 1;
     FocusManager.instance.primaryFocus?.unfocus();
@@ -258,7 +264,6 @@ class PosNewProcurementOrderController extends GetxController {
 
   bool get canSubmitOrder =>
       hasCartItems &&
-      hasCurrentProcurementSnapshots &&
       !isRefreshingCartPricing.value &&
       !isSubmitting.value;
 
@@ -577,20 +582,20 @@ class PosNewProcurementOrderController extends GetxController {
     await loadEffectivePackageDiscounts();
   }
 
-  Future<void> refreshNetworkPackages() async {
+  Future<List<PackagePriceChangeEntity>> refreshNetworkPackages() async {
     final networkId = selectedNetworkId.value;
-    if (networkId == null) return;
+    if (networkId == null) return const [];
 
     final cartLines = procurementCart.toList(growable: false);
     if (cartLines.isEmpty) {
       await _fetchNetworkPackages(networkId, reset: true);
-      return;
+      return const [];
     }
 
     final posId = selectedPosId.value;
     final useCase = getPackagesUseCase;
     if (posId == null || useCase == null || isRefreshingCartPricing.value) {
-      return;
+      return const [];
     }
 
     final revision = ++_cartPricingRefreshRevision;
@@ -602,6 +607,22 @@ class PosNewProcurementOrderController extends GetxController {
 
     isRefreshingCartPricing.value = true;
     cartPricingRefreshError.value = null;
+
+    // تسجيل الأسعار السابقة للباقات لمقارنة أي تغير سعري يطرأ بعد التحديث
+    final oldLinePrices = <int, ({int baseMinor, int discountBp, int lineTotalMinor})>{};
+    for (final line in cartLines) {
+      final oldBase = line.package.procurementBaseUnitPriceMinor ?? 0;
+      final oldDiscount = selectedSaleType.value == SaleType.cash
+          ? (line.package.procurementCashDiscountBasisPoints ?? 0)
+          : (line.package.procurementCreditDiscountBasisPoints ?? 0);
+      final oldTotal = estimatedLineTotalMinor(line.package, line.voucherCount) ?? 0;
+      oldLinePrices[line.package.packageId] = (
+        baseMinor: oldBase,
+        discountBp: oldDiscount,
+        lineTotalMinor: oldTotal,
+      );
+    }
+
     try {
       // The API caps an ID-filtered request at 50 packages. Keep large carts
       // bounded without downloading unrelated catalogue pages.
@@ -618,7 +639,7 @@ class PosNewProcurementOrderController extends GetxController {
         if (revision != _cartPricingRefreshRevision ||
             selectedNetworkId.value != networkId ||
             selectedPosId.value != posId) {
-          return;
+          return const [];
         }
 
         for (final package in result.items) {
@@ -638,7 +659,7 @@ class PosNewProcurementOrderController extends GetxController {
 
       // Do not apply a response to a cart that the user changed while it was
       // in flight. The next refresh will use the latest cart contents.
-      if (!_matchesCartSnapshot(cartLines)) return;
+      if (!_matchesCartSnapshot(cartLines)) return const [];
 
       final refreshedLines = cartLines
           .map((line) {
@@ -668,6 +689,38 @@ class PosNewProcurementOrderController extends GetxController {
         );
       }
 
+      // فحص واكتشاف أي تعديل طرأ على أسعار الباقات أو نسب الخصم
+      final priceChanges = <PackagePriceChangeEntity>[];
+      for (final line in cartLines) {
+        final newPkg = refreshedPackages[line.package.packageId]!;
+        final old = oldLinePrices[line.package.packageId];
+        if (old != null) {
+          final newBase = newPkg.procurementBaseUnitPriceMinor ?? 0;
+          final newDiscount = selectedSaleType.value == SaleType.cash
+              ? (newPkg.procurementCashDiscountBasisPoints ?? 0)
+              : (newPkg.procurementCreditDiscountBasisPoints ?? 0);
+          final newTotal = procurementEstimateCalculator.calculateLineTotalMinor(
+            newPkg,
+            line.voucherCount,
+            selectedSaleType.value,
+          ) ?? 0;
+
+          if (old.baseMinor != newBase || old.discountBp != newDiscount) {
+            priceChanges.add(
+              PackagePriceChangeEntity(
+                package: newPkg,
+                oldBaseUnitPriceMinor: old.baseMinor,
+                newBaseUnitPriceMinor: newBase,
+                oldDiscountBasisPoints: old.discountBp,
+                newDiscountBasisPoints: newDiscount,
+                oldLineTotalMinor: old.lineTotalMinor,
+                newLineTotalMinor: newTotal,
+              ),
+            );
+          }
+        }
+      }
+
       cartPricingRefreshError.value = null;
       procurementCart.assignAll(refreshedLines);
       final refreshedAvailablePackages = availablePackages
@@ -694,12 +747,14 @@ class PosNewProcurementOrderController extends GetxController {
       _refreshProcurementPresentation();
 
       unawaited(loadEffectivePackageDiscounts());
+      return priceChanges;
     } catch (error) {
-      if (revision != _cartPricingRefreshRevision) return;
+      if (revision != _cartPricingRefreshRevision) return const [];
       cartPricingRefreshError.value = AppException.sanitizeMessage(
         error,
         fallback: 'لم نتمكن من جلب التعرفة الحالية للباقات المختارة.',
       );
+      return const [];
     } finally {
       if (revision == _cartPricingRefreshRevision) {
         isRefreshingCartPricing.value = false;
@@ -1317,6 +1372,7 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'يرجى اختيار نقطة البيع النشطة لتنفيذ الطلب باسمها.',
           type: SnackType.warning,
         );
+        return;
       }
 
       final isAuthorizedPos = myPosList.any((p) => p.posId == posId);
@@ -1326,6 +1382,7 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'نقطة البيع المحددة لم تعد متاحة أو سارية في حسابك.',
           type: SnackType.error,
         );
+        return;
       }
 
       if (selectedNetworkId.value == null) {
@@ -1334,6 +1391,7 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'يرجى اختيار شبكة الإنترنت الموردة للكروت.',
           type: SnackType.warning,
         );
+        return;
       }
 
       final isLinkedNetwork = linkedNetworks.any(
@@ -1345,6 +1403,7 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'الشبكة المحددة غير مرتبطة بنقطة البيع الحالية.',
           type: SnackType.error,
         );
+        return;
       }
 
       if (procurementCart.isEmpty) {
@@ -1353,6 +1412,7 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'أضف باقة واحدة على الأقل إلى الطلب قبل إرساله.',
           type: SnackType.warning,
         );
+        return;
       }
 
       if (procurementCart.any(
@@ -1363,15 +1423,44 @@ class PosNewProcurementOrderController extends GetxController {
           message: 'تحتوي السلة على باقات لا تنتمي إلى الشبكة المحددة.',
           type: SnackType.error,
         );
+        return;
       }
 
+      // 1. التحديث التلقائي الصامت للتعرفة في حال انتهاء صلاحية الـ Snapshot
       if (!hasCurrentProcurementSnapshots) {
-        CustomSnackbar.show(
-          title: 'بيانات التعرفة غير مكتملة أو منتهية',
-          message:
-              'حدّث كتالوج الباقات للحصول على تعرفة موقعة وحديثة قبل الإرسال.',
-          type: SnackType.warning,
-        );
+        final preRefreshTotal = checkoutNetAmount;
+        final priceChanges = await refreshNetworkPackages();
+        if (cartPricingRefreshError.value != null ||
+            !hasCurrentProcurementSnapshots) {
+          CustomSnackbar.show(
+            title: 'تعذر تحديث التعرفة',
+            message: cartPricingRefreshError.value ??
+                'تعذر الحصول على تعرفة موقعة وحديثة من الخادم قبل الإرسال.',
+            type: SnackType.error,
+          );
+          return;
+        }
+
+        // إذا طرأ تغير فعلي على الأسعار، نتوقف ونعرض للمستخدم ديالوج المقارنة للاعتراض أو الموافقة المستنيرة
+        if (priceChanges.isNotEmpty && Get.context != null) {
+          if (CustomAnimationOverlay.isShowing) {
+            await CustomAnimationOverlay.hide();
+          }
+          final accepted =
+              await ProcurementActionDialogs.showPriceChangeNoticeDialog(
+            context: Get.context!,
+            priceChanges: priceChanges,
+            oldTotal: preRefreshTotal,
+            newTotal: checkoutNetAmount,
+            currency: checkoutCurrency,
+          );
+          if (!accepted) {
+            return;
+          }
+          await CustomAnimationOverlay.showLoading(
+            message: 'جاري تقديم طلب التوريد بالتعرفة المعتمدة...',
+          );
+        }
       }
 
       final payload = <String, dynamic>{
