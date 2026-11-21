@@ -249,14 +249,10 @@ class WorkspaceService extends GetxService {
     } catch (_) {}
   }
 
-  /// Workspace-only resolution: restore a valid saved tenant, or select the
-  /// sole authorized tenant. Multiple candidates require explicit user choice.
-  int? resolveWorkspaceActivePosId(List<int> availablePosIds) {
-    final savedId = savedActivePosId;
-    if (savedId != null && availablePosIds.contains(savedId)) return savedId;
-    if (availablePosIds.length == 1) return availablePosIds.single;
-    return null;
-  }
+  /// Restores a valid saved POS, otherwise selects the first authorized POS
+  /// in the order returned by the server. An empty list remains unselected.
+  int? resolveWorkspaceActivePosId(List<int> availablePosIds) =>
+      _resolveSavedOrFirstTenant(availablePosIds, savedActivePosId);
 
   String get activeNetworkStorageKey =>
       '${StorageKeys.activeNetworkTenantPrefix}_${SessionService.to.currentUser?.userId ?? 0}';
@@ -281,31 +277,27 @@ class WorkspaceService extends GetxService {
     } catch (_) {}
   }
 
-  /// Workspace-only resolution: restore a valid saved tenant, or select the
-  /// sole authorized tenant. Multiple candidates require explicit user choice.
-  int? resolveWorkspaceActiveNetworkId(List<int> availableNetworkIds) {
-    final savedId = savedActiveNetworkId;
-    if (savedId != null && availableNetworkIds.contains(savedId)) return savedId;
-    if (availableNetworkIds.length == 1) return availableNetworkIds.single;
-    return null;
-  }
+  /// Restores a valid saved Network, otherwise selects the first authorized
+  /// Network in the order returned by the server. An empty list stays null.
+  int? resolveWorkspaceActiveNetworkId(List<int> availableNetworkIds) =>
+      _resolveSavedOrFirstTenant(availableNetworkIds, savedActiveNetworkId);
 
-  /// Legacy resolver retained for other features; Workspace controllers must
-  /// use the strict resolvers above and must never select the first tenant.
-  int? resolveActivePosId(List<int> availablePosIds) {
-    if (availablePosIds.isEmpty) return null;
-    final savedId = savedActivePosId;
-    if (savedId != null && availablePosIds.contains(savedId)) return savedId;
-    return availablePosIds.first;
-  }
+  /// Shared tenant-selection policy: preserve a valid saved selection, and
+  /// otherwise fall back to the first authorized item supplied by the server.
+  int? resolveActivePosId(List<int> availablePosIds) =>
+      _resolveSavedOrFirstTenant(availablePosIds, savedActivePosId);
 
-  /// Legacy resolver retained for other features; Workspace controllers must
-  /// use the strict resolvers above and must never select the first tenant.
-  int? resolveActiveNetworkId(List<int> availableNetworkIds) {
-    if (availableNetworkIds.isEmpty) return null;
-    final savedId = savedActiveNetworkId;
-    if (savedId != null && availableNetworkIds.contains(savedId)) return savedId;
-    return availableNetworkIds.first;
+  int? resolveActiveNetworkId(List<int> availableNetworkIds) =>
+      _resolveSavedOrFirstTenant(availableNetworkIds, savedActiveNetworkId);
+
+  int? _resolveSavedOrFirstTenant(
+    List<int> availableTenantIds,
+    int? savedTenantId,
+  ) {
+    if (savedTenantId != null && availableTenantIds.contains(savedTenantId)) {
+      return savedTenantId;
+    }
+    return availableTenantIds.isEmpty ? null : availableTenantIds.first;
   }
 
   String get workspaceRoute {
