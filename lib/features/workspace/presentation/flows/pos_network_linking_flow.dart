@@ -14,8 +14,10 @@ class PosNetworkLinkingFlow {
   final PosWorkspaceController controller;
 
   Future<void> start() async {
-    final posId = controller.activePos.value?.posId;
-    if (posId == null || posId <= 0) {
+    final activePos = controller.activePos.value;
+    final posId = activePos?.posId;
+    final posUuid = activePos?.posUuid;
+    if (posId == null || posId <= 0 || posUuid == null || posUuid.isEmpty) {
       CustomSnackbar.show(
         title: 'تنبيه',
         message: 'يرجى اختيار وتفعيل نقطة البيع أولاً قبل مسح رمز الارتباط',
@@ -32,19 +34,20 @@ class PosNetworkLinkingFlow {
         onClose: () => Get.back<void>(),
         onScan: (result) async {
           Get.back<void>();
-          await _handleScannedPayload(result.rawValue, posId);
+          await _handleScannedPayload(result.rawValue, posId, posUuid);
         },
       ),
       fullscreenDialog: true,
     );
   }
 
-  Future<void> _handleScannedPayload(String payload, int posId) async {
+  Future<void> _handleScannedPayload(String payload, int posId, String posUuid) async {
     try {
       await HapticFeedback.lightImpact();
       final preview = await controller.previewNetworkLinkChallenge(
         payload: payload,
         posId: posId,
+        posUuid: posUuid,
       );
       final confirmed = await NetworkPosLinkConfirmSheet.show(
         preview: preview,
@@ -53,6 +56,7 @@ class PosNetworkLinkingFlow {
             final linked = await controller.confirmNetworkLinkChallenge(
               challengeUuid: preview.challengeUuid,
               posId: posId,
+              posUuid: posUuid,
             );
             if (linked) {
               await CustomAnimationOverlay.showSuccess(
