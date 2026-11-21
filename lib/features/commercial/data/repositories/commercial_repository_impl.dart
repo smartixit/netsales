@@ -1,12 +1,12 @@
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
-import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
 /// تطبيق مستودع العلاقات التجارية ونقاط البيع والشبكات
