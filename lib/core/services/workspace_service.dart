@@ -237,6 +237,9 @@ class WorkspaceService extends GetxService {
   }
 
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
+    if (currentWorkspace.value != workspace) {
+      PermissionService.to.clearWorkspaceContext();
+    }
     currentWorkspace.value = workspace;
     await StorageService.instance.setString(
       StorageKeys.activeWorkspaceKey,
