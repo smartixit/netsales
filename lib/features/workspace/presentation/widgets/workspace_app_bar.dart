@@ -29,6 +29,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final AppWorkspace workspace;
   final bool isLoading;
   final EnumPresentation? rolePresentation;
+  final String? entityLogo;
+  final String? entityInitials;
   final String? userProfileLogo;
   final String? userInitials;
   final VoidCallback? onProfileTap;
@@ -41,6 +43,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.workspace,
     this.isLoading = false,
     this.rolePresentation,
+    this.entityLogo,
+    this.entityInitials,
     this.userProfileLogo,
     this.userInitials,
     this.onProfileTap,
@@ -63,8 +67,13 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           workspace == AppWorkspace.network ? RoleScope.network : RoleScope.pos,
         );
 
-    final effectiveInitials =
-        userInitials ?? (workspace == AppWorkspace.network ? 'ش' : 'ن');
+    final effectiveLogo = entityLogo ?? userProfileLogo;
+    final defaultInitial = workspace == AppWorkspace.network ? 'ش' : 'ن';
+    final effectiveInitials = (entityInitials != null && entityInitials!.trim().isNotEmpty)
+        ? entityInitials!
+        : (userInitials != null && userInitials!.trim().isNotEmpty)
+            ? userInitials!
+            : defaultInitial;
 
     return SafeArea(
       bottom: false,
@@ -109,7 +118,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                     )
                   else
                     CustomAvatarBadge(
-                      imageUrl: userProfileLogo,
+                      imageUrl: effectiveLogo,
                       initials: effectiveInitials,
                       size: AvatarBadgeSize.sm,
                       customDimension: 46,

@@ -41,7 +41,7 @@ class DashboardMetricContent extends StatelessWidget {
             Expanded(
               child: Text(
                 metric.title,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.titleSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
@@ -117,7 +117,7 @@ class DashboardMetricContent extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             metric.description!,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: textTheme.bodySmall?.copyWith(color: tokens.mutedForeground),
           ),

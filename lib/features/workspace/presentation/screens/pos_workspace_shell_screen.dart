@@ -73,12 +73,14 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         controller.isLoadingPos.value && controller.activePos.value == null;
     return AdaptiveWorkspaceScaffold(
       appBar: WorkspaceAppBar(
-        title: controller.activePos.value?.posName ?? 'اختر نقطة البيع',
+        title: controller.activePosName.isNotEmpty
+            ? controller.activePosName
+            : 'اختر نقطة البيع',
         workspace: AppWorkspace.pos,
         isLoading: loading,
         rolePresentation: controller.rolePresentation,
-        userProfileLogo: controller.userProfileLogo,
-        userInitials: controller.userInitials,
+        entityLogo: controller.entityLogo,
+        entityInitials: controller.entityInitials,
         onProfileTap: controller.openProfile,
       ),
       items: items,

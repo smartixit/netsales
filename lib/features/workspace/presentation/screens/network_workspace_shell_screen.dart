@@ -95,12 +95,14 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         controller.selectedNetwork == null;
     return AdaptiveWorkspaceScaffold(
       appBar: WorkspaceAppBar(
-        title: controller.selectedNetwork?.networkName ?? 'اختر شبكة العمل',
+        title: controller.activeNetworkName.isNotEmpty
+            ? controller.activeNetworkName
+            : 'اختر شبكة العمل',
         workspace: AppWorkspace.network,
         isLoading: loading,
         rolePresentation: controller.rolePresentation,
-        userProfileLogo: controller.userProfileLogo,
-        userInitials: controller.userInitials,
+        entityLogo: controller.entityLogo,
+        entityInitials: controller.entityInitials,
         onProfileTap: controller.openProfile,
       ),
       items: items,

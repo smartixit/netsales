@@ -31,7 +31,9 @@ class NetSalesDashboardMetricsThemeAdapter {
       cardBorder: colors.outlineVariant,
       mutedForeground: colors.onSurfaceVariant,
       cardRadius: AppRadius.card / radiusScale,
-      cardPadding: AppSpacing.cardPadding / widthScale,
+      cardPadding: AppBreakpoints.isMobile(context)
+          ? 12.0
+          : AppSpacing.cardPadding / widthScale,
       iconRadius: AppRadius.md / radiusScale,
       gridSpacing: AppBreakpoints.gridGutter(context),
       cardShadows: AppElevation.level1(context),

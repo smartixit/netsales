@@ -89,6 +89,13 @@ class NetworkWorkspaceController extends GetxController {
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
   String get userInitials => TextFormatter.avatarInitials(userName);
 
+  /// الهوية المرئية للمنشأة/الشبكة المعروضة في شريط مساحة العمل
+  String? get entityLogo => selectedNetwork?.networkProfileLogoUrl;
+  String get entityInitials {
+    final name = activeNetworkName.trim();
+    return name.isNotEmpty ? TextFormatter.avatarInitials(name) : 'ش';
+  }
+
   NetworkWorkspaceDashboardViewModel get dashboardViewModel =>
       NetworkWorkspaceDashboardMapper.map(overview.value);
 

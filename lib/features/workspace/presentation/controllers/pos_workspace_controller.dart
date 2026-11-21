@@ -94,6 +94,13 @@ class PosWorkspaceController extends GetxController {
   String? get userProfileLogo => SessionService.to.currentUser?.userProfileLogo;
   String get userInitials => TextFormatter.avatarInitials(userName);
 
+  /// الهوية المرئية لنقطة البيع المعروضة في شريط مساحة العمل
+  String? get entityLogo => activePos.value?.posProfileLogoUrl;
+  String get entityInitials {
+    final name = activePosName.trim();
+    return name.isNotEmpty ? TextFormatter.avatarInitials(name) : 'ن';
+  }
+
   EnumPresentation get rolePresentation {
     final user = SessionService.to.currentUser;
     final activePosId = activePos.value?.posId;
