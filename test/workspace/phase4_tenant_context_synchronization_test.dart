@@ -66,22 +66,28 @@ void main() {
       );
     });
 
-    test('single tenant resolves automatically but multiple tenants require choice', () async {
+    test('network selection restores a valid saved tenant or falls back to first', () async {
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([]), isNull);
       expect(workspaceService.resolveWorkspaceActiveNetworkId([50]), 50);
-      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60, 70]), isNull);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60, 70]), 50);
+
       await workspaceService.saveActiveNetworkId(60);
       expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60, 70]), 60);
-      expect(workspaceService.resolveWorkspaceActiveNetworkId([80, 90]), isNull);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([80, 90]), 80);
+
       await workspaceService.clearActiveNetworkId();
       expect(workspaceService.savedActiveNetworkId, isNull);
     });
 
-    test('single POS resolves automatically but multiple POS require choice', () async {
+    test('POS selection restores a valid saved tenant or falls back to first', () async {
+      expect(workspaceService.resolveWorkspaceActivePosId([]), isNull);
       expect(workspaceService.resolveWorkspaceActivePosId([101]), 101);
-      expect(workspaceService.resolveWorkspaceActivePosId([101, 102, 103]), isNull);
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 102, 103]), 101);
+
       await workspaceService.saveActivePosId(102);
       expect(workspaceService.resolveWorkspaceActivePosId([101, 102, 103]), 102);
-      expect(workspaceService.resolveWorkspaceActivePosId([201, 202]), isNull);
+      expect(workspaceService.resolveWorkspaceActivePosId([201, 202]), 201);
+
       await workspaceService.clearActivePosId();
       expect(workspaceService.savedActivePosId, isNull);
     });
@@ -89,11 +95,11 @@ void main() {
     test('saved tenant is restored only when it remains authorized', () async {
       await workspaceService.saveActiveNetworkId(60);
       expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 60]), 60);
-      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 70]), isNull);
+      expect(workspaceService.resolveWorkspaceActiveNetworkId([50, 70]), 50);
 
       await workspaceService.saveActivePosId(102);
       expect(workspaceService.resolveWorkspaceActivePosId([101, 102]), 102);
-      expect(workspaceService.resolveWorkspaceActivePosId([101, 103]), isNull);
+      expect(workspaceService.resolveWorkspaceActivePosId([101, 103]), 101);
     });
 
     test('revoked membership context is purged during synchronization', () async {

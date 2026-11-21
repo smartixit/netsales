@@ -1057,7 +1057,9 @@ class NetworkProcurementReviewController
     final preview = currentPreview.value;
     if (preview == null || !preview.hasModifications) return;
 
-    final rawPaid = double.tryParse(modificationPaidAmountController.text.trim());
+    final rawPaid = double.tryParse(
+      modificationPaidAmountController.text.trim(),
+    );
     final paidAmount = (rawPaid != null && rawPaid > 0) ? rawPaid : null;
 
     await CustomBottomSheet.showConfirmation<void>(
