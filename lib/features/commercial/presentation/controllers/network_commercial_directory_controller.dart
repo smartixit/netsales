@@ -667,8 +667,7 @@ class NetworkCommercialDirectoryController
     try {
       _isInvitationTargetDialogOpen = true;
       try {
-        await CustomDialog.show(
-          type: DialogType.custom,
+        await CustomDialog.custom(
           title: 'تحديد نقطة البيع المستهدفة',
           content: NetworkPosInvitationTargetDialog(
             codeController: invitationBusinessCodeController,
@@ -679,7 +678,7 @@ class NetworkCommercialDirectoryController
           ),
           canPop: true,
           maxWidth: 480,
-        );
+        ).showDialog();
       } finally {
         _isInvitationTargetDialogOpen = false;
       }
