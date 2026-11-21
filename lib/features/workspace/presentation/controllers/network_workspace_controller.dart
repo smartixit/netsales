@@ -172,6 +172,7 @@ class NetworkWorkspaceController extends GetxController {
         ids,
       );
       selectedNetworkId.value = selectedId;
+      WorkspaceService.to.bindActiveMembership(RoleScope.network, selectedId);
 
       if (selectedId == null) {
         await WorkspaceService.to.clearActiveNetworkId();
@@ -184,6 +185,7 @@ class NetworkWorkspaceController extends GetxController {
       if (revision != _revision || isClosed) return;
       networks.clear();
       selectedNetworkId.value = null;
+      WorkspaceService.to.bindActiveMembership(RoleScope.network, null);
       overview.value = null;
       networksError.value = AppException.sanitizeMessage(
         error,
@@ -244,6 +246,7 @@ class NetworkWorkspaceController extends GetxController {
 
     final revision = ++_revision;
     selectedNetworkId.value = networkId;
+    WorkspaceService.to.bindActiveMembership(RoleScope.network, networkId);
     overview.value = null;
     overviewError.value = null;
     isLoadingOverview.value = true;

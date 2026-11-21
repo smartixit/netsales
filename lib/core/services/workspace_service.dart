@@ -8,6 +8,7 @@ import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
 /// The single runtime authority for the currently selected workspace.
@@ -61,6 +62,8 @@ class WorkspaceService extends GetxService {
         log('ℹ️ [WorkspaceService] No workspace selected: $error');
       }
     }
+
+    if (currentUser != null) bindDefaultActiveMembership(currentUser);
 
     log(
       '🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}',
@@ -217,13 +220,64 @@ class WorkspaceService extends GetxService {
 
     if (resolvedWorkspace != null) {
       await setActiveWorkspace(resolvedWorkspace);
+      bindDefaultActiveMembership(user);
     } else {
       await storage.remove(StorageKeys.activeWorkspaceKey);
     }
   }
 
+  void bindDefaultActiveMembership(UserModel user) {
+    if (currentWorkspace.value == AppWorkspace.network) {
+      final memberships = user.workspaceMemberships
+          .where((item) => item.isNetwork && item.tenantId > 0)
+          .toList(growable: false);
+      final selectedId = savedActiveNetworkId;
+      final selected = memberships.firstWhereOrNull(
+            (item) => item.tenantId == selectedId,
+          ) ??
+          (memberships.isEmpty ? null : memberships.first);
+      bindActiveMembership(RoleScope.network, selected?.tenantId);
+      return;
+    }
+
+    final memberships = user.workspaceMemberships
+        .where((item) => item.isPos && item.tenantId > 0)
+        .toList(growable: false);
+    final selectedId = savedActivePosId;
+    final selected = memberships.firstWhereOrNull(
+          (item) => item.tenantId == selectedId,
+        ) ??
+        (memberships.isEmpty ? null : memberships.first);
+    bindActiveMembership(RoleScope.pos, selected?.tenantId);
+  }
+
+  /// Rebind UI permissions to the exact active tenant membership.
+  /// Missing or inactive membership is represented by an empty permission set.
+  void bindActiveMembership(RoleScope scope, int? tenantId) {
+    final user = SessionService.to.currentUser;
+    final membership = tenantId == null || tenantId <= 0
+        ? null
+        : user?.workspaceMemberships.firstWhereOrNull(
+            (item) => item.scope == scope && item.tenantId == tenantId,
+          );
+
+    PermissionService.to.setWorkspaceContext(
+      scope: scope,
+      tenantId: membership?.tenantId ?? 0,
+      roleKey: membership?.roleKey ?? '',
+      permissions: membership?.permissions ?? const <String>[],
+    );
+  }
+
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
+    final workspaceChanged = currentWorkspace.value != workspace;
     currentWorkspace.value = workspace;
+    if (workspaceChanged) {
+      bindActiveMembership(
+        workspace == AppWorkspace.network ? RoleScope.network : RoleScope.pos,
+        null,
+      );
+    }
     await StorageService.instance.setString(
       StorageKeys.activeWorkspaceKey,
       workspace.name,
