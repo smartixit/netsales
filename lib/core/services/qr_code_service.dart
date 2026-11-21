@@ -124,12 +124,7 @@ class QrCodeService {
   /// لا يتم إنشاء QrImage داخل build مباشرة.
   static const PrettyQrDecoration brandDecoration = PrettyQrDecoration(
     background: Color(0xFFFFFFFF),
-    quietZone: PrettyQrQuietZone.standart,
-    shape: PrettyQrShape.custom(
-      PrettyQrSquaresSymbol(),
-      finderPattern: PrettyQrSmoothSymbol(),
-      alignmentPatterns: PrettyQrSquaresSymbol(),
-    ),
+    quietZone: PrettyQrQuietZone.standard,
     image: PrettyQrDecorationImage(
       image: AssetImage('assets/images/brand_icon.png'),
       position: PrettyQrDecorationImagePosition.embedded,
