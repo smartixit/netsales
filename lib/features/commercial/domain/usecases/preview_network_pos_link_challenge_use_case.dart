@@ -9,12 +9,10 @@ class PreviewNetworkPosLinkChallengeUseCase {
 
   Future<NetworkPosLinkPreviewEntity> call({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) {
     return _repository.previewNetworkPosLinkChallenge(
       payload: payload,
-      posId: posId,
       posUuid: posUuid,
     );
   }
