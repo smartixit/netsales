@@ -191,6 +191,7 @@ class PosWorkspaceController extends GetxController {
           : positions.firstWhereOrNull((position) => position.posId == selectedId);
 
       activePos.value = selected;
+      WorkspaceService.to.bindActiveMembership(RoleScope.pos, selected?.posId);
 
       if (selected == null) {
         await WorkspaceService.to.clearActivePosId();
@@ -201,6 +202,7 @@ class PosWorkspaceController extends GetxController {
       if (generation != _posGeneration || isClosed) return;
       availablePos.clear();
       activePos.value = null;
+      WorkspaceService.to.bindActiveMembership(RoleScope.pos, null);
       _clearNetworkContext();
       posError.value = AppException.sanitizeMessage(
         error,
@@ -218,6 +220,7 @@ class PosWorkspaceController extends GetxController {
     if (activePos.value?.posId == pos.posId) return;
 
     activePos.value = pos;
+    WorkspaceService.to.bindActiveMembership(RoleScope.pos, pos.posId);
     _clearNetworkContext();
     await WorkspaceService.to.saveActivePosId(pos.posId);
     await loadNetworks(pos.posId);
