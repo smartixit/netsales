@@ -660,7 +660,13 @@ class NetworkCommercialDirectoryController
         await CustomDialog.show(
           type: DialogType.custom,
           title: 'تحديد نقطة البيع المستهدفة',
-          content: NetworkPosInvitationTargetDialog(controller: this),
+          content: NetworkPosInvitationTargetDialog(
+            codeController: invitationBusinessCodeController,
+            isResolving: isResolvingInvitationTarget,
+            onChanged: onInvitationBusinessCodeChanged,
+            onResolve: resolveInvitationTarget,
+            onCancel: cancelInvitationTargetDialog,
+          ),
           canPop: true,
           maxWidth: 480,
         );
