@@ -206,9 +206,14 @@ class NetworkCommercialDirectoryController
       selectedNetworkId.value = WorkspaceService.to.resolveActiveNetworkId(
         networks.map((n) => n.networkId).toList(growable: false),
       );
-    } catch (_) {
+    } catch (error) {
       authorizedNetworks.clear();
       selectedNetworkId.value = null;
+      CustomSnackbar.show(
+        title: 'تعذر تحميل الشبكات',
+        message: AppException.sanitizeMessage(error),
+        type: SnackType.error,
+      );
     }
   }
 
