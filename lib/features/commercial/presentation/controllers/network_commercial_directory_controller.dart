@@ -658,16 +658,31 @@ class NetworkCommercialDirectoryController
       return;
     }
     isRevokingInvitation.value = true;
+    var didRevoke = false;
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إلغاء دعوة الربط...',
+      );
       await revokeNetworkPosLinkChallengeUseCase(challenge.challengeUuid);
       invitationStatus.value = LinkingChallengeStatus.revoked;
       _cancelInvitationTimers();
-      await CustomAnimationOverlay.showSuccess(message: 'تم إلغاء رمز الدعوة بنجاح');
-      Get.back<void>();
+      didRevoke = true;
     } catch (error) {
-      CustomSnackbar.show(title: 'تعذر إلغاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+      CustomSnackbar.show(
+        title: 'تعذر إلغاء الدعوة',
+        message: AppException.sanitizeMessage(error),
+        type: SnackType.error,
+      );
     } finally {
+      await CustomAnimationOverlay.hide();
       isRevokingInvitation.value = false;
+    }
+
+    if (didRevoke) {
+      await CustomAnimationOverlay.showSuccess(
+        message: 'تم إلغاء رمز الدعوة بنجاح',
+      );
+      Get.back<void>();
     }
   }
 
@@ -702,7 +717,18 @@ class NetworkCommercialDirectoryController
       if (!_isInvitationTargetConfirmed) return;
       final target = resolvedInvitationTarget.value;
       if (target == null) return;
-      final challenge = await createNetworkPosLinkChallengeUseCase(networkId: netId, posUuid: target.posUuid);
+      late final NetworkPosLinkChallengeEntity challenge;
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري إنشاء دعوة الربط...',
+      );
+      try {
+        challenge = await createNetworkPosLinkChallengeUseCase(
+          networkId: netId,
+          posUuid: target.posUuid,
+        );
+      } finally {
+        await CustomAnimationOverlay.hide();
+      }
       final networkName = challenge.network?.networkName.trim() ?? '';
       final posName = challenge.pos?.posName.trim() ?? '';
       if (challenge.networkId != netId || challenge.posId != target.posId || networkName.isEmpty || posName.isEmpty || challenge.expiresAt == null) {
