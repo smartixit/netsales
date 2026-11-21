@@ -566,7 +566,7 @@ class NetworkCommercialDirectoryController
     if (expiry == null) return 'تعذر تحديد وقت الانتهاء';
     final remaining = expiry.difference(invitationClock.value);
     if (remaining <= Duration.zero) return 'انتهت مدة الدعوة';
-    return 'متبقي ' + remaining.inMinutes.toString() + ' دقيقة و' + (remaining.inSeconds % 60).toString() + ' ثانية';
+    return 'متبقي ${remaining.inMinutes} دقيقة و${remaining.inSeconds % 60} ثانية';
   }
 
   void _cancelInvitationTimers() {
