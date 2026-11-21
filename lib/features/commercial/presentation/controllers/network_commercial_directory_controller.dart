@@ -182,6 +182,8 @@ class NetworkCommercialDirectoryController
     _listRevision++;
     searchController.dispose();
     invitationBusinessCodeController.dispose();
+    _isInvitationTargetDialogOpen = false;
+    resolvedInvitationTarget.value = null;
     stopInvitationMonitoring();
     super.onClose();
   }
