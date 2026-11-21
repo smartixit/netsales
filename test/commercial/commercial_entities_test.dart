@@ -102,6 +102,7 @@ void main() {
         challengeUuid: 'CHALLENGE-UUID-001',
         payload: 'NETSALES:LINK:001',
         networkId: 1,
+        posId: 2,
         status: 'PENDING',
       );
 
