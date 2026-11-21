@@ -74,7 +74,7 @@ class _NetworkPosQrInvitationSheetState
       const Duration(seconds: 1),
       (_) {
         if (mounted) setState(() {});
-        if (!_isActive) {
+        if (_status != LinkingChallengeStatus.pending) {
           _statusTimer?.cancel();
           _clockTimer?.cancel();
         }
@@ -98,7 +98,10 @@ class _NetworkPosQrInvitationSheetState
       setState(() {
         _status = latest.status;
         _expiresAt = latest.expiresAt ?? _expiresAt;
-        if (!_isActive) _statusTimer?.cancel();
+        if (_status != LinkingChallengeStatus.pending) {
+          _statusTimer?.cancel();
+          _clockTimer?.cancel();
+        }
       });
     } catch (_) {
       // Keep the last server-confirmed state; a transient network failure
