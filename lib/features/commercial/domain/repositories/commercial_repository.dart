@@ -44,6 +44,12 @@ abstract class CommercialRepository {
   /// فك الارتباط التجاري بين الشبكة ونقطة البيع
   Future<void> deleteNetworkPosLink(int networkPosId);
 
+  /// التحقق من نقطة بيع محددة بواسطة المعرف التجاري قبل إصدار الدعوة.
+  Future<PosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  });
+
   /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
