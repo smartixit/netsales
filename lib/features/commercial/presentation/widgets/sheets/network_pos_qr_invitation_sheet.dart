@@ -86,9 +86,12 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Column(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -297,25 +300,28 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
             );
           }),
           SizedBox(height: AppSpacing.md),
-          Obx(
-            () => Transform.translate(
-              offset: const Offset(-2000, 0),
-              child: UnconstrainedBox(
-                alignment: Alignment.topLeft,
-                child: RepaintBoundary(
-                  key: _shareCardKey,
-                  child: CommercialInvitationShareCard(
-                    payload: challenge.payload,
-                    networkName: networkName,
-                    posName: posName,
-                    expiresAtLabel: invitationExpiresAtLabel(),
-                  ),
+        ],
+          ),
+        ),
+        Positioned(
+          left: -2000,
+          top: 0,
+          child: UnconstrainedBox(
+            alignment: Alignment.topLeft,
+            child: Obx(
+              () => RepaintBoundary(
+                key: _shareCardKey,
+                child: CommercialInvitationShareCard(
+                  payload: challenge.payload,
+                  networkName: networkName,
+                  posName: posName,
+                  expiresAtLabel: invitationExpiresAtLabel(),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
