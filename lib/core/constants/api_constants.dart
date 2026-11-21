@@ -138,6 +138,8 @@ abstract final class ApiConstants {
   static const String networkPosBatchDelete = '/network-pos/batch-delete';
   static const String networkPosBatchStatus = '/network-pos/batch-status';
   static const String networkPosChallenges = '/network-pos/challenges';
+  static const String networkPosChallengesResolveTarget =
+      '/network-pos/challenges/resolve-target';
   static const String networkPosChallengesPreview =
       '/network-pos/challenges/preview';
   static const String networkPosChallengesConfirm =
