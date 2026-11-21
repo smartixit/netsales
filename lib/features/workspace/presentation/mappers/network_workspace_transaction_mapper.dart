@@ -20,6 +20,8 @@ class NetworkWorkspaceTransactionMapper {
               : DateFormatter.smart(parsedDate);
           final subtitle = [
             request.posName,
+            if (request.saleTypeLabel?.trim().isNotEmpty ?? false)
+              request.saleTypeLabel!.trim(),
             if (dateLabel.isNotEmpty) dateLabel,
           ].join(' • ');
           void openRequest() => onOpenRequest(request.requestId);
