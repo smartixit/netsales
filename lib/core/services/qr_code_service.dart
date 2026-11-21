@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:share_plus/share_plus.dart' show ShareResultStatus;
 
@@ -121,6 +122,31 @@ class QrCodeService {
   /// إنشاء كائن QR قابل للعرض أو التصدير.
   ///
   /// لا يتم إنشاء QrImage داخل build مباشرة.
+  static const PrettyQrDecoration brandDecoration = PrettyQrDecoration(
+    background: Color(0xFFFFFFFF),
+    quietZone: PrettyQrQuietZone.standart,
+    shape: PrettyQrShape.custom(
+      PrettyQrSquaresSymbol(),
+      finderPattern: PrettyQrSmoothSymbol(),
+      alignmentPatterns: PrettyQrSquaresSymbol(),
+    ),
+    image: PrettyQrDecorationImage(
+      image: AssetImage('assets/images/brand_icon.png'),
+      position: PrettyQrDecorationImagePosition.embedded,
+      scale: 0.18,
+      padding: EdgeInsets.all(5),
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+    ),
+  );
+
+  static ImageConfiguration brandImageConfiguration({double? devicePixelRatio}) =>
+      ImageConfiguration(
+        bundle: rootBundle,
+        devicePixelRatio: devicePixelRatio ?? 1,
+        textDirection: TextDirection.ltr,
+      );
+
   static QrImage createQrImage({required String data}) {
     final cleanData = data.trim();
 
@@ -128,7 +154,10 @@ class QrCodeService {
       throw ArgumentError('بيانات QR لا يمكن أن تكون فارغة.');
     }
 
-    final qrCode = QrCode.fromData(data: cleanData, errorCorrectLevel: 1);
+    final qrCode = QrCode.fromData(
+      data: cleanData,
+      errorCorrectLevel: QrErrorCorrectLevel.H,
+    );
 
     return QrImage(qrCode);
   }
