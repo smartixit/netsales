@@ -144,6 +144,7 @@ void main() {
           'user_phone_number': '771111111',
           'user_2fa_enabled': false,
           'status': 'ACTIVE',
+          'status_label': 'مفعّل',
           'workspace_roles': [
             {
               'scope': 'NETWORK',

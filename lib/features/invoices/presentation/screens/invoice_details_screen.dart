@@ -12,9 +12,9 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
 import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
 import 'package:netsales/widgets/document_details/custom_document_details_hero.dart';
-import 'package:netsales/widgets/document_details/custom_document_item_card.dart';
 import 'package:netsales/widgets/document_details/custom_document_metrics_strip.dart';
 import 'package:netsales/widgets/document_details/custom_document_parties_card.dart';
+import 'package:netsales/widgets/document_details/document_package_item_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
@@ -267,43 +267,32 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                   ),
                   AppSpacing.vSm,
 
-                  // 5. قائمة بطاقات الباقات المعتمدة (CustomDocumentItemCard)
+                  // 5. قائمة بطاقات الباقات المعتمدة الموحدة (DocumentPackageItemCard)
                   for (int i = 0; i < invoice.items.length; i++) ...[
                     if (i > 0) AppSpacing.vSm,
-                    CustomDocumentItemCard(
-                      index: i,
-                      title: invoice.items[i].packageName,
-                      subtitle:
-                          'سعة الورقة: ${invoice.items[i].sheetSize} كرت  •  ${invoice.items[i].formattedSheetsCount} ورقة',
-                      colorHex: invoice.items[i].packageColor,
-                      totalAmountFormatted: AmountFormatter.formatValue(
-                        invoice.items[i].itemTotalAmount,
+                    Obx(
+                      () => DocumentPackageItemCard(
+                        index: i,
+                        title: invoice.items[i].packageName,
+                        colorHex: invoice.items[i].packageColor,
+                        totalAmount: invoice.items[i].itemTotalAmount,
+                        voucherCount: invoice.items[i].voucherCount,
+                        formattedSheetsCount:
+                            invoice.items[i].formattedSheetsCount,
+                        sheetDescription: invoice.items[i].sheetDescription,
+                        voucherPrice: invoice.items[i].voucherPrice,
+                        hasDiscount: invoice.items[i].hasDiscount,
+                        itemDiscount: invoice.items[i].itemDiscount,
+                        balanceDisplay:
+                            invoice.items[i].voucherPackage?.balanceDisplay,
+                        validityDisplay:
+                            invoice.items[i].voucherPackage?.validityDisplay,
+                        uptimeDisplay:
+                            invoice.items[i].voucherPackage?.uptimeDisplay,
+                        quantityLabel: 'الكمية المفوترة',
+                        isExpanded: controller.isItemExpanded(i),
+                        onToggleExpand: () => controller.toggleItemExpansion(i),
                       ),
-                      totalAmountSubtitle: 'الصافي',
-                      specBadges: [
-                        if (invoice.items[i].voucherPackage?.packageBalance !=
-                                null &&
-                            invoice.items[i].voucherPackage!.packageBalance > 0)
-                          CustomChip(
-                            label:
-                                invoice.items[i].voucherPackage!.balanceDisplay,
-                            icon: Icons.data_usage_rounded,
-                            isCompact: true,
-                          ),
-                        CustomChip(
-                          label:
-                              '${invoice.items[i].voucherCount} كرت بسعر ${AmountFormatter.formatValue(invoice.items[i].voucherPrice)}',
-                          icon: Icons.tag_rounded,
-                          isCompact: true,
-                        ),
-                        if (invoice.items[i].hasDiscount)
-                          CustomChip(
-                            label:
-                                'خصم ${AmountFormatter.formatValue(invoice.items[i].itemDiscount)}',
-                            icon: Icons.discount_outlined,
-                            isCompact: true,
-                          ),
-                      ],
                     ),
                   ],
 

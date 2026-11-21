@@ -22,6 +22,19 @@ class InvoiceDetailsController extends GetxController {
   final RxBool isSharing = false.obs;
   final RxBool isExporting = false.obs;
 
+  /// فهرس البند المفتوح حالياً بنظام الأكورديون الحصري
+  final Rxn<int> expandedItemIndex = Rxn<int>();
+
+  void toggleItemExpansion(int index) {
+    if (expandedItemIndex.value == index) {
+      expandedItemIndex.value = null;
+    } else {
+      expandedItemIndex.value = index;
+    }
+  }
+
+  bool isItemExpanded(int index) => expandedItemIndex.value == index;
+
   @override
   void onInit() {
     super.onInit();
