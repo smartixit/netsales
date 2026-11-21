@@ -146,7 +146,14 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
                   NavigationDrawerDestination(
                     icon: Icon(item.icon),
                     selectedIcon: Icon(item.activeIcon),
-                    label: Text(item.label),
+                    label: SizedBox(
+                      width: AppBreakpoints.maxDrawerWidth - 112,
+                      child: Text(
+                        item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
               ],
             ),
