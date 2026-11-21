@@ -111,7 +111,7 @@ When a cart snapshot expires, refreshing the tariff must request the cart's pack
 The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, section **M4 POS–Network Linking Challenge API Contracts (Targeted QR Workflow)**.
 
 - A Network invitation always targets exactly one Network and one POS. Never expose or call a public POS directory/search endpoint.
-- Resolve a POS by its commercial business code using `POST /network-pos/challenges/resolve-target` with `network_id` and `pos_uuid`. The value called `pos_uuid` on the wire is the formatted business code (for example `POS-YYMM-00001-AB12`), not an RFC UUID.
+- Resolve a POS by its commercial business code using `POST /network-pos/challenges/resolve-target` with `network_id` and `pos_uuid`. The value called `pos_uuid` on the wire is the formatted business code (for example `POS-YYMM-00001-AB12`), not an RFC UUID. Keep the target dialog open after resolution, display the verified POS name and business code, and require explicit user confirmation before creating the challenge.
 - The minimal resolve response includes `pos_id`, `pos_uuid`, `pos_name`, and optional governorate/directorate names. The `pos_uuid` field is required by Flutter's subsequent create-challenge call; do not infer it from `pos_id`.
 - Create challenge with the same `network_id` and resolved `pos_uuid`. The API requires exactly one of `pos_id` or `pos_uuid`; never create an untargeted challenge.
 - The encrypted QR payload is the only challenge payload rendered in the QR. Do not expose internal IDs, nonce, or secret fields on the share card.
