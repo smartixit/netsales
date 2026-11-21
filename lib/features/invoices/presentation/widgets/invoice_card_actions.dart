@@ -28,7 +28,7 @@ class InvoiceCardActions extends StatelessWidget {
       children: [
         // زر التفاصيل الرئيسي
         Expanded(
-          child: CustomButton.secondary(
+          child: CustomButton.primary(
             text: 'تفاصيل الفاتورة',
             icon: Icons.receipt_long_rounded,
             size: AppButtonSize.small,
@@ -44,10 +44,7 @@ class InvoiceCardActions extends StatelessWidget {
             icon: Icons.print_outlined,
             size: AppButtonSize.small,
             shape: AppButtonShape.circle,
-            backgroundColor: colors.surfaceContainerHighest.withValues(
-              alpha: 0.5,
-            ),
-            foregroundColor: colors.onSurfaceVariant,
+            backgroundColor: colors.surfaceContainerHigh,
             tooltip: 'طباعة الفاتورة',
             onPressed: onPrint,
           ),

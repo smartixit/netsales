@@ -57,16 +57,16 @@ class ProcurementOrderCard extends StatelessWidget {
       serverLabel: request.saleTypeLabel,
     );
 
-    final actorLabel =
-        request.isApproved &&
-            request.reviewedByName != null &&
-            request.reviewedByName!.isNotEmpty
-        ? 'اعتمد بواسطة: ${request.reviewedByName}'
-        : (request.isRejected &&
-                  request.reviewedByName != null &&
-                  request.reviewedByName!.isNotEmpty
-              ? 'رُفض بواسطة: ${request.reviewedByName}'
-              : null);
+    // final actorLabel =
+    //     request.isApproved &&
+    //         request.reviewedByName != null &&
+    //         request.reviewedByName!.isNotEmpty
+    //     ? 'اعتمد بواسطة: ${request.reviewedByName}'
+    //     : (request.isRejected &&
+    //               request.reviewedByName != null &&
+    //               request.reviewedByName!.isNotEmpty
+    //           ? 'رُفض بواسطة: ${request.reviewedByName}'
+    //           : null);
 
     return CustomExecutiveTransactionCard(
       reference: request.displayReference,
@@ -75,9 +75,9 @@ class ProcurementOrderCard extends StatelessWidget {
           ? request.displayPosName
           : request.displayNetworkName,
       partyLogoUrl: isNetworkView ? request.posLogo : request.networkLogo,
-      partyPhone: isNetworkView ? request.posPhone : request.networkPhone,
+      // partyPhone: isNetworkView ? request.posPhone : request.networkPhone,
       isPartyVerified: false,
-      actorLabel: actorLabel,
+      // actorLabel: actorLabel,
       statusPresentation: status,
       typePresentation: saleType,
       secondaryReference: request.hasInvoice

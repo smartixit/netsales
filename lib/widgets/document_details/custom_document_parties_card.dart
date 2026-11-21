@@ -6,6 +6,7 @@ import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/document_details/models/document_party_data.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -225,39 +226,47 @@ class _DocumentPartyTile extends StatelessWidget {
           if (party.phoneNumber != null &&
               party.phoneNumber!.trim().isNotEmpty) ...[
             AppSpacing.hSm,
-            CustomInteractiveBounce(
-              onTap: () =>
+            CustomButton.icon(
+              icon: Icons.phone_outlined,
+              backgroundColor: colors.surfaceContainerHigh,
+              size: AppButtonSize.small,
+              shape: AppButtonShape.pill,
+              onPressed: () =>
                   UrlLauncherService.callPhone(party.phoneNumber!.trim()),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: colors.outlineVariant.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.phone_outlined,
-                      size: 13.r,
-                      color: colors.primary,
-                    ),
-                    // SizedBox(width: 4.w),
-                    // Text(
-                    //   party.phoneNumber!.trim(),
-                    //   style: AppTypography.caption.copyWith(
-                    //     color: colors.onSurface,
-                    //     fontWeight: FontWeight.w700,
-                    //     fontSize: 10.sp,
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
             ),
+            // CustomInteractiveBounce(
+            //   onTap: () =>
+
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+            //     decoration: BoxDecoration(
+            //       color: colors.surfaceContainerHigh,
+            //       borderRadius: BorderRadius.circular(8.r),
+            //       border: Border.all(
+            //         color: colors.outlineVariant.withValues(alpha: 0.4),
+            //       ),
+            //     ),
+            //     child: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Icon(
+            //           Icons.phone_outlined,
+            //           size: 13.r,
+            //           color: colors.primary,
+            //         ),
+            //         // SizedBox(width: 4.w),
+            //         // Text(
+            //         //   party.phoneNumber!.trim(),
+            //         //   style: AppTypography.caption.copyWith(
+            //         //     color: colors.onSurface,
+            //         //     fontWeight: FontWeight.w700,
+            //         //     fontSize: 10.sp,
+            //         //   ),
+            //         // ),
+            // ],
+            // ),
+            // ),
+            // ),
           ],
         ],
       ),

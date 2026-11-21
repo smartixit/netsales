@@ -337,8 +337,9 @@ class _ExecutiveCardHeader extends StatelessWidget {
                       initials: partyInitial,
                       size: AvatarBadgeSize.sm,
                       customDimension: 20.r,
+                      hasPulse: false,
                     ),
-                    AppSpacing.hXxs,
+                    AppSpacing.hXs,
                     Flexible(
                       child: Text(
                         partyName,

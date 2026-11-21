@@ -2,6 +2,7 @@
 abstract final class StorageKeys {
   StorageKeys._();
   static const String session = 'session_id';
+  static const String activeDeviceUuid = 'active_device_uuid';
 
   /// Browser-installation identity for Web only. Native identity is read from
   /// the platform on each initialization and is never persisted separately.

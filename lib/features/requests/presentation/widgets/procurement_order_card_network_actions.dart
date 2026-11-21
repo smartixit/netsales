@@ -32,12 +32,11 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
           if (onApprove != null)
             Expanded(
               flex: 4,
-              child: CustomButton(
+              child: CustomButton.primary(
                 text: 'اعتماد الطلب',
                 icon: Icons.check_circle_outline_rounded,
                 size: AppButtonSize.small,
-                backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
+                shape: AppButtonShape.pill,
                 onPressed: onApprove,
               ),
             ),
@@ -84,13 +83,12 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: CustomButton.outline(
+          child: CustomButton.primary(
             text: 'عرض تفاصيل الطلب',
             icon: Icons.chevron_right_rounded,
             iconPosition: AppButtonIconPosition.end,
             size: AppButtonSize.small,
-            foregroundColor: colors.primary,
-            borderColor: colors.primary.withValues(alpha: .6),
+            shape: AppButtonShape.pill,
             onPressed: onDetails,
           ),
         ),
@@ -98,10 +96,10 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
         CustomButton.icon(
           icon: Icons.more_horiz_rounded,
           tooltip: 'المزيد من الخيارات',
-          dimension: 38.r,
-          backgroundColor: colors.surfaceContainer,
+          size: AppButtonSize.small,
+          shape: AppButtonShape.circle,
+          backgroundColor: colors.surfaceContainerHigh,
           foregroundColor: colors.onSurfaceVariant,
-          borderColor: colors.outlineVariant.withValues(alpha: .6),
           onPressed: onMoreActions,
         ),
       ],

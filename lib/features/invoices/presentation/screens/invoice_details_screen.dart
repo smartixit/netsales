@@ -158,7 +158,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                     actorColor: colors.emeraldDark,
                     extraBadge: invoice.hasLinkedRequest
                         ? CustomChip(
-                            label: 'طلب #${invoice.requestId}',
+                            label: 'طلب #${invoice.requestUuid}',
                             icon: Icons.link_rounded,
                             isCompact: true,
                           )
@@ -217,7 +217,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                   // 3. بطاقة أطراف المعاملة المالية الرسمية (CustomDocumentPartiesCard)
                   CustomDocumentPartiesCard(
                     title: 'أطراف المعاملة المالية',
-                    badgeText: 'طريقة السداد: ${saleTypePres.label}',
+                    badgeText: saleTypePres.label,
                     firstParty: DocumentPartyData(
                       roleLabel: 'الجهة المورّدة (مزود الشبكة)',
                       name: invoice.displayNetworkName,

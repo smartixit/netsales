@@ -45,17 +45,21 @@ class SessionService extends GetxService {
     _isAccessBlocked.value = false;
     final storage = StorageService.instance;
     final sessionId = storage.sessionId;
+    final cachedDeviceUuid = storage.getString(StorageKeys.activeDeviceUuid);
     final cachedUser = storage.getModel<UserModel>(
       StorageKeys.userData,
       UserModel.fromJson,
     );
 
     if (sessionId != null && sessionId.isNotEmpty && cachedUser != null) {
+      final effectiveDeviceUuid = DeviceService.instance.deviceUuid.isNotEmpty
+          ? DeviceService.instance.deviceUuid
+          : cachedDeviceUuid ?? '';
       _user.value = cachedUser;
       _session.value = UserSessionModel(
         sessionId: sessionId,
         userId: cachedUser.userId,
-        deviceUuid: DeviceService.instance.deviceUuid,
+        deviceUuid: effectiveDeviceUuid,
       );
       _isAuthenticated.value = true;
       final cachedPermissions = storage.getStringList(
@@ -109,6 +113,7 @@ class SessionService extends GetxService {
 
     final storage = StorageService.instance;
     await storage.saveSession(session.sessionId);
+    await storage.setString(StorageKeys.activeDeviceUuid, sessionDeviceUuid);
     await storage.setInt(StorageKeys.userId, user.userId);
     await storage.setModel(StorageKeys.userData, user, (u) => u.toJson());
     await storage.setStringList(StorageKeys.permissionsStorage, permissions);
@@ -241,6 +246,7 @@ class SessionService extends GetxService {
     _isAuthenticated.value = false;
     final storage = StorageService.instance;
     await storage.clearSession();
+    await storage.remove(StorageKeys.activeDeviceUuid);
     await storage.remove(StorageKeys.userId);
     await storage.remove(StorageKeys.userData);
     await storage.remove(StorageKeys.permissionsStorage);

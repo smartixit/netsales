@@ -48,11 +48,11 @@ class InvoiceCard extends StatelessWidget {
       serverLabel: invoice.saleTypeLabel,
     );
 
-    final actorLabel =
-        invoice.createdByName != null &&
-            invoice.createdByName!.trim().isNotEmpty
-        ? 'أُصدرت بواسطة: ${invoice.createdByName}'
-        : null;
+    // final actorLabel =
+    //     invoice.createdByName != null &&
+    //         invoice.createdByName!.trim().isNotEmpty
+    //     ? 'أُصدرت بواسطة: ${invoice.createdByName}'
+    //     : null;
 
     return CustomExecutiveTransactionCard(
       reference: invoice.displayReference,
@@ -63,11 +63,11 @@ class InvoiceCard extends StatelessWidget {
       partyLogoUrl: isNetworkPerspective
           ? invoice.posLogo
           : invoice.networkLogo,
-      partyPhone: isNetworkPerspective
-          ? invoice.posPhoneNumber
-          : invoice.networkPhoneNumber,
+      // partyPhone: isNetworkPerspective
+      //     ? invoice.posPhoneNumber
+      //     : invoice.networkPhoneNumber,
       isPartyVerified: false,
-      actorLabel: actorLabel,
+      // actorLabel: actorLabel,
       statusPresentation: status,
       typePresentation: saleType,
       secondaryReference: invoice.hasLinkedRequest

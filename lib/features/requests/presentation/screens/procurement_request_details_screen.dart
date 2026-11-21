@@ -314,7 +314,7 @@ class ProcurementRequestDetailsScreen
                   // 6. بطاقة أطراف العملية التوريدية (الشبكة ونقطة البيع)
                   CustomDocumentPartiesCard(
                     title: 'أطراف العملية التوريدية',
-                    badgeText: 'طريقة السداد: ${saleTypePres.label}',
+                    badgeText: saleTypePres.label,
                     firstParty: DocumentPartyData(
                       roleLabel: 'الجهة المورّدة (مزود الشبكة)',
                       name:
