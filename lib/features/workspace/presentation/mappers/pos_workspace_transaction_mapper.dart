@@ -61,7 +61,9 @@ class PosWorkspaceTransactionMapper {
         ? '${invoice.totalVouchersCount} كرت'
         : null;
 
+    final saleTypeLabel = invoice.saleTypeLabel?.trim();
     final subtitleParts = [
+      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
       if (dateLabel.isNotEmpty) dateLabel,
       ?voucherDetail,
     ];
@@ -89,11 +91,16 @@ class PosWorkspaceTransactionMapper {
       request.requestDate ?? request.createdAt ?? '',
     );
     final dateLabel = parsedDate == null ? '' : DateFormatter.smart(parsedDate);
+    final saleTypeLabel = request.saleTypeLabel?.trim();
+    final subtitle = [
+      if (saleTypeLabel != null && saleTypeLabel.isNotEmpty) saleTypeLabel,
+      if (dateLabel.isNotEmpty) dateLabel,
+    ].join(' • ');
 
     return WorkspaceTransactionItemViewModel(
       title: 'طلب توريد',
       reference: _shortReference(request.requestUuid, 'طلب توريد'),
-      subtitle: dateLabel,
+      subtitle: subtitle,
       formattedAmount:
           AmountFormatter.formatValue(request.requestTotalAmount),
       statusPresentation: EnumPresentationRegistry.resolveRequestStatus(
