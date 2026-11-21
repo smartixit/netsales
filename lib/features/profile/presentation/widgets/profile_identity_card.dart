@@ -15,7 +15,7 @@ class ProfileIdentityCard extends StatelessWidget {
   String _initials(String name) {
     final parts = name.trim().split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).toList();
     if (parts.isEmpty) return '؟';
-    return parts.take(2).map((part) => part.characters.first).join();
+    return parts.take(2).map((part) => part.substring(0, 1)).join();
   }
 
   @override

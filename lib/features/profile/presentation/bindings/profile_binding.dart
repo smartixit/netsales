@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:netsales/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:netsales/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:netsales/features/profile/data/datasources/profile_remote_data_source_impl.dart';
 import 'package:netsales/features/profile/data/repositories/profile_repository_impl.dart';
@@ -12,6 +13,11 @@ import 'package:netsales/features/profile/presentation/controllers/profile_contr
 class ProfileBinding extends Bindings {
   @override
   void dependencies() {
+    registerLazyIfAbsent<AuthRemoteDataSource>(
+      () => const AuthRemoteDataSourceImpl(),
+      fenix: true,
+    );
+
     registerLazyIfAbsent<ProfileRemoteDataSource>(
       () => ProfileRemoteDataSourceImpl(Get.find<AuthRemoteDataSource>()),
       fenix: true,
