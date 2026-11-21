@@ -105,7 +105,7 @@ void main() {
                 'invoice_count': 1,
                 'total_amount': '100.00',
                 'growth_rate': 0,
-                'trend': [],
+                'trend': <dynamic>[],
               },
               'unrecognized_metric_group': {'value': 'ignored'},
             },
