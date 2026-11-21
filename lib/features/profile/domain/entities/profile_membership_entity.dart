@@ -1,4 +1,9 @@
-class ProfileMembershipEntity {
+import 'package:equatable/equatable.dart';
+import 'package:netsales/core/enums/role_key.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+
+/// One operational tenant membership belonging to the authenticated user.
+class ProfileMembershipEntity extends Equatable {
   const ProfileMembershipEntity({
     required this.scope,
     required this.tenantId,
@@ -6,14 +11,21 @@ class ProfileMembershipEntity {
     required this.roleName,
   });
 
-  final String scope;
+  final RoleScope scope;
   final int tenantId;
-  final String roleKey;
+  final RoleKey roleKey;
   final String roleName;
 
-  String get scopeLabel => switch (scope.toUpperCase()) {
-    'NETWORK' => 'عضوية شبكة',
-    'POS' => 'عضوية نقطة بيع',
-    _ => 'عضوية مساحة عمل',
-  };
+  bool get isNetwork => scope == RoleScope.network;
+
+  bool get isPos => scope == RoleScope.pos;
+
+  String get scopeLabel => switch (scope) {
+        RoleScope.network => 'مساحة شبكة',
+        RoleScope.pos => 'مساحة نقطة بيع',
+        _ => 'مساحة عمل',
+      };
+
+  @override
+  List<Object?> get props => [scope, tenantId, roleKey, roleName];
 }
