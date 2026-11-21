@@ -5,6 +5,7 @@ import 'package:netsales/features/commercial/data/models/network_pos_link_challe
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 
 /// العقد التجريدي لمصدر البيانات البعيد للعلاقات التجارية
 abstract class CommercialRemoteDataSource {
@@ -37,7 +38,7 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> deleteNetworkPosLink(int networkPosId);
 
-  Future<PosModel> resolveNetworkLinkablePos({
+  Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
   });
