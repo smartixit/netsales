@@ -6,6 +6,7 @@ import 'package:netsales/features/workspace/presentation/widgets/executive_metri
 import 'package:netsales/features/workspace/presentation/widgets/executive_sales_trend_chart.dart';
 import 'package:netsales/features/workspace/presentation/widgets/executive_welcome_hero_card.dart';
 import 'package:netsales/features/workspace/presentation/widgets/network_pending_requests_section.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_function_access_section.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -122,6 +123,26 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               items: pendingItems,
               totalPendingCount: dashboard.pendingRequestsCount,
               onViewAll: () => controller.onNavItemSelected(1),
+            ),
+            AppSpacing.vLg,
+            WorkspaceFunctionAccessSection(
+              title: 'إدارة النشاط التجاري',
+              subtitle: 'الفواتير والكتالوج والمصروفات التشغيلية.',
+              items: [
+                WorkspaceFunctionAccessItem(title: 'فواتير المبيعات', icon: Icons.receipt_long_outlined, onTap: controller.openWholesaleInvoices),
+                WorkspaceFunctionAccessItem(title: 'المصروفات', icon: Icons.payments_outlined, onTap: controller.openOperatingExpenses),
+              ],
+            ),
+            AppSpacing.vLg,
+            WorkspaceFunctionAccessSection(
+              title: 'الإدارة والمتابعة',
+              subtitle: 'الفريق واشتراك المنصة وتقارير الأداء.',
+              items: [
+                WorkspaceFunctionAccessItem(title: 'فريق العمل', icon: Icons.groups_outlined, onTap: controller.openTeamManagement),
+                WorkspaceFunctionAccessItem(title: 'اشتراك المنصة', icon: Icons.workspace_premium_outlined, onTap: controller.openPlatformBilling),
+                WorkspaceFunctionAccessItem(title: 'تقارير الاشتراكات', icon: Icons.query_stats_outlined, onTap: controller.openBillingReports),
+                WorkspaceFunctionAccessItem(title: 'التقارير التشغيلية', icon: Icons.analytics_outlined, onTap: controller.openOperationalReports),
+              ],
             ),
           ],
         );

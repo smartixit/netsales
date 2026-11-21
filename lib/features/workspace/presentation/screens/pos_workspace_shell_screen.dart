@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
+import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -15,78 +17,35 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
   const PosWorkspaceShell({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final navItems = [
-        WorkspaceNavItem(
-          label: 'الرئيسية',
-          icon: Icons.storefront_outlined,
-          activeIcon: Icons.storefront_rounded,
-          content: PosHomeDashboard(controller: controller),
-        ),
-        const WorkspaceNavItem(
-          label: 'الطلبات',
-          icon: Icons.receipt_long_outlined,
-          activeIcon: Icons.receipt_long_rounded,
-          content: ProcurementOrdersScreen(embedded: true),
-        ),
-        const WorkspaceNavItem(
-          label: 'فواتيري',
-          icon: Icons.receipt_outlined,
-          activeIcon: Icons.receipt_rounded,
-          content: InvoicesScreen(embedded: true),
-        ),
-        const WorkspaceNavItem(
-          label: 'فريق العمل',
-          icon: Icons.groups_outlined,
-          activeIcon: Icons.groups_rounded,
-          content: MembershipsScreen(embedded: true, isNetwork: false),
-        ),
-        WorkspaceNavItem(
-          label: 'التقارير',
-          icon: Icons.analytics_outlined,
-          activeIcon: Icons.analytics_rounded,
-          content: OperationalReportsScreen(
-            networkId: controller.selectedNetworkLink.value?.networkId,
-            posId: controller.activePos.value?.posId,
-            isNetworkWorkspace: false,
-            organizationName: controller.activePos.value?.posName,
-            logoUrl: controller.activePos.value?.posProfileLogoUrl,
-          ),
-        ),
-      ];
-
-      final mobileNavItems = [
-        navItems[0],
-        navItems[1],
-        navItems[2],
-        navItems[3],
-      ];
-      final mobileMoreItems = [navItems[4]];
-
-      final isAppBarLoading =
-          controller.isLoadingPos.value && controller.activePos.value == null;
-      final posTitle =
-          controller.activePos.value?.posName ?? 'اختر نقطة البيع';
-
-      return AdaptiveWorkspaceScaffold(
-        appBar: WorkspaceAppBar(
-          title: posTitle,
-          workspace: AppWorkspace.pos,
-          isLoading: isAppBarLoading,
-          rolePresentation: controller.rolePresentation,
-          userProfileLogo: controller.userProfileLogo,
-          userInitials: controller.userInitials,
-        ),
-        items: navItems,
-        mobileItems: mobileNavItems,
-        mobileMoreItems: mobileMoreItems,
-        currentIndex: controller.selectedNavIndex.value,
-        onIndexChanged: controller.onNavItemSelected,
-        centerActionIcon: Icons.add_rounded,
-        centerActionTooltip: 'طلب توريد جديد',
-        onCenterActionTap: controller.openNewProcurementOrder,
-      );
-    });
-  }
+  Widget build(BuildContext context) => Obx(() {
+    final items = [
+      WorkspaceNavItem(label: 'الرئيسية', icon: Icons.storefront_outlined, activeIcon: Icons.storefront_rounded, content: PosHomeDashboard(controller: controller)),
+      const WorkspaceNavItem(label: 'الطلبات', icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long_rounded, content: ProcurementOrdersScreen(embedded: true)),
+      const WorkspaceNavItem(label: 'فواتيري', icon: Icons.receipt_outlined, activeIcon: Icons.receipt_rounded, content: InvoicesScreen(embedded: true, isNetwork: false)),
+      const WorkspaceNavItem(label: 'الملف الشخصي', icon: Icons.account_circle_outlined, activeIcon: Icons.account_circle_rounded, content: ProfileScreen(embedded: true)),
+      const WorkspaceNavItem(label: 'فريق العمل', icon: Icons.groups_outlined, activeIcon: Icons.groups_rounded, content: MembershipsScreen(embedded: true, isNetwork: false)),
+      WorkspaceNavItem(label: 'التقارير التشغيلية', icon: Icons.analytics_outlined, activeIcon: Icons.analytics_rounded, content: OperationalReportsScreen(networkId: controller.selectedNetworkLink.value?.networkId, posId: controller.activePos.value?.posId, isNetworkWorkspace: false, organizationName: controller.activePos.value?.posName, logoUrl: controller.activePos.value?.posProfileLogoUrl, embedded: true)),
+      const WorkspaceNavItem(label: 'الشبكات المرتبطة', icon: Icons.hub_outlined, activeIcon: Icons.hub_rounded, content: CommercialDirectoryScreen(embedded: true, isNetwork: false)),
+    ];
+    final loading = controller.isLoadingPos.value && controller.activePos.value == null;
+    return AdaptiveWorkspaceScaffold(
+      appBar: WorkspaceAppBar(
+        title: controller.activePos.value?.posName ?? 'اختر نقطة البيع',
+        workspace: AppWorkspace.pos,
+        isLoading: loading,
+        rolePresentation: controller.rolePresentation,
+        userProfileLogo: controller.userProfileLogo,
+        userInitials: controller.userInitials,
+        onProfileTap: controller.openProfile,
+      ),
+      items: items,
+      mobileItems: items.take(4).toList(growable: false),
+      currentIndex: controller.selectedNavIndex.value,
+      mobileCurrentIndex: controller.selectedMobileNavIndex.value,
+      onIndexChanged: controller.onNavItemSelected,
+      centerActionIcon: Icons.add_rounded,
+      centerActionTooltip: 'طلب توريد جديد',
+      onCenterActionTap: controller.openNewProcurementOrder,
+    );
+  });
 }

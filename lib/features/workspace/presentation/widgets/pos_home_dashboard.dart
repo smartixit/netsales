@@ -6,6 +6,7 @@ import 'package:netsales/features/workspace/presentation/flows/pos_network_linki
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_linked_network_selector.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_actions_section.dart';
+import 'package:netsales/features/workspace/presentation/widgets/workspace_function_access_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_recent_transactions_section.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_welcome_header.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
@@ -72,6 +73,16 @@ class PosHomeDashboard extends StatelessWidget {
             PosQuickActionsSection(
               onCreateOrder: controller.openNewProcurementOrder,
               onOpenInvoices: controller.openPurchaseInvoices,
+            ),
+            AppSpacing.vLg,
+            WorkspaceFunctionAccessSection(
+              title: 'إدارة نقطة البيع',
+              subtitle: 'الفريق والشبكات المرتبطة وتقارير الأداء.',
+              items: [
+                WorkspaceFunctionAccessItem(title: 'فريق العمل', icon: Icons.groups_outlined, onTap: controller.openTeamManagement),
+                WorkspaceFunctionAccessItem(title: 'التقارير التشغيلية', icon: Icons.analytics_outlined, onTap: controller.openOperationalReports),
+                WorkspaceFunctionAccessItem(title: 'الشبكات المرتبطة', icon: Icons.hub_outlined, onTap: controller.openLinkedNetworks),
+              ],
             ),
             AppSpacing.vLg,
             if (controller.selectedNetworkLink.value != null)

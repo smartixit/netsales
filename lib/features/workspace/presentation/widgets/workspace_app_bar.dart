@@ -210,12 +210,10 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const NotificationBadgeButton(),
                   AppSpacing.hSm,
                   CustomInteractiveBounce(
-                    onTap:
-                        onProfileTap ??
-                        () => _showExecutiveProfile(
-                          context,
-                          effectivePresentation,
-                        ),
+                    onTap: () => _showExecutiveProfile(
+                      context,
+                      effectivePresentation,
+                    ),
                     child: Container(
                       width: 42.r,
                       height: 42.r,

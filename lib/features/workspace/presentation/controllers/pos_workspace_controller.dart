@@ -53,6 +53,7 @@ class PosWorkspaceController extends GetxController {
   final ConfirmNetworkPosLinkChallengeUseCase confirmNetworkPosLinkChallengeUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
+  final RxInt selectedMobileNavIndex = 0.obs;
   final RxList<PosEntity> availablePos = <PosEntity>[].obs;
   final Rxn<PosEntity> activePos = Rxn<PosEntity>();
   final RxList<NetworkPosLinkEntity> networkLinks = <NetworkPosLinkEntity>[].obs;
@@ -533,5 +534,14 @@ class PosWorkspaceController extends GetxController {
   void openProcurementOrder(RequestEntity request) =>
       Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
 
-  void onNavItemSelected(int index) => selectedNavIndex.value = index;
+  void onNavItemSelected(int index) {
+    if (index < 0) return;
+    selectedNavIndex.value = index;
+    if (index < 4) selectedMobileNavIndex.value = index;
+  }
+
+  void openProfile() => onNavItemSelected(3);
+  void openTeamManagement() => onNavItemSelected(4);
+  void openOperationalReports() => onNavItemSelected(5);
+  void openLinkedNetworks() => onNavItemSelected(6);
 }

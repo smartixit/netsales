@@ -10,7 +10,7 @@ import 'package:netsales/features/workspace/presentation/widgets/workspace_sheet
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// النافذة السفلية لعرض الملف الشخصي والتحكم القيادي بمساحات العمل (WorkspaceExecutiveProfileSheet)
+/// نافذة الإجراءات السريعة لمساحة العمل (WorkspaceExecutiveProfileSheet)
 /// مكوّن عرض نقي خاضع بالكامل للبيانات الممررة من الكنترولر دون أي منطق أعمال
 class WorkspaceExecutiveProfileSheet extends StatelessWidget {
   final String userName;
@@ -64,7 +64,7 @@ class WorkspaceExecutiveProfileSheet extends StatelessWidget {
     final isNetwork = currentWorkspace == AppWorkspace.network;
 
     await CustomBottomSheet.show<void>(
-      title: 'الملف الشخصي والتحكم القيادي',
+      title: 'إجراءات مساحة العمل',
       subtitle: isNetwork ? 'لوحة تحكم مزود الشبكة' : 'لوحة تحكم نقطة البيع',
       leadingIcon: Icons.account_circle_outlined,
       child: WorkspaceExecutiveProfileSheet(
