@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/form_validators.dart';
+import 'package:netsales/features/requests/domain/entities/package_price_change_entity.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -146,6 +152,171 @@ class ProcurementActionDialogs {
       onConfirm: () async {
         await onConfirm();
       },
+    );
+  }
+
+  /// نافذة حوار اعتراضية لإشعار المستخدم بتحديث أسعار الباقات ونيل موافقته الصريحة المستنيرة
+  static Future<bool> showPriceChangeNoticeDialog({
+    required BuildContext context,
+    required List<PackagePriceChangeEntity> priceChanges,
+    required double oldTotal,
+    required double newTotal,
+    required String currency,
+  }) async {
+    final colors = context.colors;
+
+    final confirmed = await CustomDialog.show(
+      type: DialogType.warning,
+      title: 'تحديث في تعرفة الأسعار',
+      message:
+          'قام مزود الشبكة بتحديث أسعار بعض الباقات المختارة أثناء إعدادك للطلب. يرجى مراجعة الفروقات قبل المتابعة:',
+      confirmLabel: 'الموافقة والمتابعة',
+      cancelLabel: 'مراجعة السلة',
+      onConfirm: () => Get.back(result: true),
+      onCancel: () => Get.back(result: false),
+      content: Container(
+        margin: EdgeInsets.only(top: AppSpacing.sm),
+        padding: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int i = 0; i < priceChanges.length; i++) ...[
+              if (i > 0)
+                Divider(
+                  height: AppSpacing.md,
+                  color: colors.outlineVariant.withValues(alpha: 0.4),
+                ),
+              _PriceChangeItem(
+                change: priceChanges[i],
+                currency: currency,
+              ),
+            ],
+            AppSpacing.vMd,
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'إجمالي الطلب بعد التحديث:',
+                    style: AppTypography.labelMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    '${AmountFormatter.formatValue(newTotal)} $currency',
+                    style: AppTypography.titleSmall.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return confirmed ?? false;
+  }
+}
+
+class _PriceChangeItem extends StatelessWidget {
+  const _PriceChangeItem({
+    required this.change,
+    required this.currency,
+  });
+
+  final PackagePriceChangeEntity change;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          change.package.packageName,
+          style: AppTypography.labelLarge.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colors.onSurface,
+          ),
+        ),
+        AppSpacing.vXs,
+        if (change.hasBasePriceChanged) ...[
+          Row(
+            children: [
+              Text(
+                'سعر الوحدة: ',
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                '${AmountFormatter.formatValue(change.oldBaseUnitPrice)} $currency',
+                style: AppTypography.bodySmall.copyWith(
+                  decoration: TextDecoration.lineThrough,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const Icon(Icons.arrow_left_rounded, size: 16),
+              Text(
+                '${AmountFormatter.formatValue(change.newBaseUnitPrice)} $currency',
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (change.hasDiscountChanged) ...[
+          Row(
+            children: [
+              Text(
+                'نسبة الخصم: ',
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                '${change.oldDiscountPercentage}%',
+                style: AppTypography.bodySmall.copyWith(
+                  decoration: TextDecoration.lineThrough,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const Icon(Icons.arrow_left_rounded, size: 16),
+              Text(
+                '${change.newDiscountPercentage}%',
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
