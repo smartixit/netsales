@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
@@ -97,7 +98,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                 ),
               ),
               AppSpacing.vMd,
-              const _ProcurementApprovalProgress(),
+              _ProcurementApprovalProgress(status: order.request.status),
             ],
           ),
         ),
@@ -107,7 +108,9 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
 }
 
 class _ProcurementApprovalProgress extends StatelessWidget {
-  const _ProcurementApprovalProgress();
+  const _ProcurementApprovalProgress({required this.status});
+
+  final RequestStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +118,26 @@ class _ProcurementApprovalProgress extends StatelessWidget {
     final inactive = colors.outlineVariant;
     final complete = colors.success;
     final active = colors.warning;
+    final rejected = colors.error;
+    final decisionLabel = switch (status) {
+      RequestStatus.approved => 'تم الاعتماد',
+      RequestStatus.rejected => 'تم الرفض',
+      RequestStatus.cancelled => 'تم الإلغاء',
+      RequestStatus.pending || RequestStatus.unknown => 'بانتظار الاعتماد',
+    };
+    final decisionColor = switch (status) {
+      RequestStatus.approved => complete,
+      RequestStatus.rejected || RequestStatus.cancelled => rejected,
+      RequestStatus.pending || RequestStatus.unknown => active,
+    };
+    final decisionIcon = switch (status) {
+      RequestStatus.approved => Icons.check_rounded,
+      RequestStatus.rejected || RequestStatus.cancelled => Icons.close_rounded,
+      RequestStatus.pending || RequestStatus.unknown => Icons.schedule_rounded,
+    };
+    final decisionIsFinal = status == RequestStatus.approved ||
+        status == RequestStatus.rejected ||
+        status == RequestStatus.cancelled;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,10 +160,10 @@ class _ProcurementApprovalProgress extends StatelessWidget {
         ),
         Expanded(
           child: _ProgressStep(
-            label: 'بانتظار الاعتماد',
-            icon: Icons.schedule_rounded,
-            color: active,
-            isCurrent: true,
+            label: decisionLabel,
+            icon: decisionIcon,
+            color: decisionColor,
+            isCurrent: decisionIsFinal || status == RequestStatus.pending,
           ),
         ),
         Padding(
@@ -155,7 +178,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
           child: _ProgressStep(
             label: 'تم الاعتماد',
             icon: Icons.verified_rounded,
-            color: inactive,
+            color: status == RequestStatus.approved ? complete : inactive,
             isCurrent: false,
           ),
         ),
