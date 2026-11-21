@@ -61,15 +61,13 @@ abstract class CommercialRepository {
   /// فحص ومعاينة دعوة الربط المشفرة
   Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   /// تأكيد اعتماد الربط التجاري عبر التحدي المشفر
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   /// استرجاع الحالة الآمنة الحالية لدعوة الربط.
