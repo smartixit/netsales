@@ -74,7 +74,6 @@ class PosHomeDashboard extends StatelessWidget {
               onOpenInvoices: controller.openPurchaseInvoices,
             ),
             AppSpacing.vLg,
-            AppSpacing.vLg,
             if (controller.selectedNetworkLink.value != null)
               PosRecentTransactionsSection(controller: controller),
           ],
