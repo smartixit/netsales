@@ -7,6 +7,7 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_ch
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
@@ -41,16 +42,14 @@ class _FakeCommercialRepository implements CommercialRepository {
   }
 
   @override
-  Future<PosEntity> resolveNetworkLinkablePos({
+  Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
   }) async {
-    return const PosEntity(
+    return const NetworkLinkablePosEntity(
       posId: 30,
-      ownerId: 4,
       posUuid: 'POS-2611-00030-A1B2',
       posName: 'نقطة الاختبار',
-      posPhoneNumber: '770000000',
     );
   }
 
