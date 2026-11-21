@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/custom_qr_share_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_invitation_share_card.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/qr/custom_qr_code.dart';
@@ -230,7 +230,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 alignment: Alignment.topLeft,
                 child: RepaintBoundary(
                   key: controller.invitationShareCardKey,
-                  child: CustomQrShareCard(
+                  child: CommercialInvitationShareCard(
                     payload: challenge.payload,
                     networkName: networkName,
                     posName: posName,
