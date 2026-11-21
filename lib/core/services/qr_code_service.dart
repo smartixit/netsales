@@ -310,7 +310,16 @@ class QrCodeService {
         sharePositionOrigin: sharePositionOrigin,
       );
 
-      return QrCodeShareResult.success(result.status);
+      if (result.status == ShareResultStatus.success) {
+        return QrCodeShareResult.success(result.status);
+      }
+
+      return QrCodeShareResult.failure(
+        result.status == ShareResultStatus.dismissed
+            ? 'أُغلقت نافذة المشاركة دون اختيار وجهة.'
+            : 'خدمة المشاركة غير متاحة على هذا الجهاز.',
+        status: result.status,
+      );
     } catch (e) {
       return QrCodeShareResult.failure('تعذرت مشاركة صورة QR.', error: e);
     }
