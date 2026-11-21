@@ -12,8 +12,8 @@ enum WorkspaceWelcomeArtwork { network, pos }
 
 /// Shared welcome banner used by both mobile workspaces.
 ///
-/// The AppBar remains responsible for the active entity and user avatar;
-/// this banner is intentionally dedicated to the personal welcome message.
+/// The avatar is sourced from the authenticated user's profile, never from
+/// the active network/POS entity logo displayed by the workspace selector.
 class WorkspaceWelcomeHero extends StatelessWidget {
   const WorkspaceWelcomeHero({
     super.key,
