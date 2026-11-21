@@ -25,6 +25,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
     required this.invitationStatus,
     required this.invitationStatusRefreshError,
     required this.isExportingInvitation,
+    required this.isRevokingInvitation,
     required this.isInvitationActive,
     required this.invitationRemainingLabel,
     required this.invitationExpiresAtLabel,
@@ -39,6 +40,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
   final Rx<LinkingChallengeStatus> invitationStatus;
   final RxnString invitationStatusRefreshError;
   final RxBool isExportingInvitation;
+  final RxBool isRevokingInvitation;
   final bool Function() isInvitationActive;
   final String Function() invitationRemainingLabel;
   final String Function() invitationExpiresAtLabel;
@@ -274,11 +276,13 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           SizedBox(height: AppSpacing.sm),
           Obx(() {
             if (isInvitationActive()) {
+              final revoking = isRevokingInvitation.value;
               return CustomButton.outline(
                 text: 'إلغاء الدعوة',
                 icon: Icons.block_rounded,
                 size: AppButtonSize.medium,
-                onPressed: onRevoke,
+                loading: revoking,
+                onPressed: revoking ? null : onRevoke,
               );
             }
             return Text(
