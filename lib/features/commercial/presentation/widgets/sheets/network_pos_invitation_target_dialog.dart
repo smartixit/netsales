@@ -34,19 +34,22 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.md),
-          CustomTextField(
-            controller: controller.invitationBusinessCodeController,
-            label: 'المعرف التجاري لنقطة البيع',
-            hint: 'POS-YYMM-00001-AB12',
-            prefixIcon: const Icon(Icons.storefront_rounded),
-            keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.done,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9-]')),
-              LengthLimitingTextInputFormatter(19),
-            ],
-            onChanged: controller.onInvitationBusinessCodeChanged,
-            onFieldSubmitted: (_) => controller.resolveInvitationTarget(),
+          Obx(
+            () => CustomTextField(
+              controller: controller.invitationBusinessCodeController,
+              label: 'المعرف التجاري لنقطة البيع',
+              hint: 'POS-YYMM-00001-AB12',
+              prefixIcon: const Icon(Icons.storefront_rounded),
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              enabled: !controller.isResolvingInvitationTarget.value,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9-]')),
+                LengthLimitingTextInputFormatter(19),
+              ],
+              onChanged: controller.onInvitationBusinessCodeChanged,
+              onFieldSubmitted: (_) => controller.resolveInvitationTarget(),
+            ),
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
