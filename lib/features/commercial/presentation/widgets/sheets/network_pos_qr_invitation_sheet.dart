@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -41,21 +42,21 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
     final renderObject =
         controller.invitationShareCardKey.currentContext?.findRenderObject();
     if (renderObject is! RenderRepaintBoundary) {
-      throw StateError('تعذر تجهيز بطاقة الدعوة للتصدير.');
+      throw AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
     }
 
     final image = await renderObject.toImage(pixelRatio: 1);
     try {
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       if (data == null) {
-        throw StateError('تعذر تحويل بطاقة الدعوة إلى صورة.');
+        throw AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
       }
       final bytes = data.buffer.asUint8List(
         data.offsetInBytes,
         data.lengthInBytes,
       );
       if (bytes.isEmpty) {
-        throw StateError('الصورة الناتجة لبطاقة الدعوة فارغة.');
+        throw AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
       }
       return bytes;
     } finally {
