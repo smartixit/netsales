@@ -14,9 +14,9 @@ import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/share_service.dart';
-import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
