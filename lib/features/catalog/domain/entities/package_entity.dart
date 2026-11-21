@@ -1,3 +1,4 @@
+import 'package:netsales/core/enums/package_status.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
 
 /// كيان باقة كروت الإنترنت (Enterprise Package Entity)
@@ -65,7 +66,8 @@ class PackageEntity {
     this.procurementIsCustomDiscount = false,
   });
 
-  bool get isActive => status;
+  PackageStatus get packageStatus => PackageStatus.fromWire(status);
+  bool get isActive => packageStatus.isActive;
 
   /// السعر الأساسي للباقة محولاً من العملة الصغرى عند توفره
   double get resolvedBasePrice =>

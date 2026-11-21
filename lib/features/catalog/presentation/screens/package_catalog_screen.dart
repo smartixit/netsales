@@ -1,150 +1,191 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_catalog_empty_state.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_catalog_grid.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_catalog_list.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_filter_bottom_sheet.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_search_filter_header.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
+import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
+import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
+import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
-/// شاشة كتالوج باقات الكروت — مسؤوليتها تركيب الصفحة فقط دون أي دوال بناء خاصة
+/// واجهة استعراض وإدارة كتالوج باقات الكروت للشبكة (PackageCatalogScreen)
+///
+/// تجسد المعمارية المؤسسية النظيفة (Enterprise Clean Architecture):
+/// - كلاس واحد في ملف واحد بمسؤولية واحدة واضحة (One Public Class Per File).
+/// - واجهة تصريحية بحتة (Pure Declarative UI) خالية تماماً من منطق الأعمال والشروط المتفرعة.
+/// - مطابقة تامة للمعمارية الموحدة المنفذة في شاشات الطلبات، الفواتير، والعضويات.
 class PackageCatalogScreen extends GetView<PackageCatalogController> {
-  const PackageCatalogScreen({super.key});
+  const PackageCatalogScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isTablet = AppBreakpoints.isTablet(context);
+    final content = CustomRefreshablePage.slivers(
+      embedded: embedded,
+      onRefresh: controller.refreshCatalog,
+      onLoadMore: controller.loadMorePackages,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
+      scrollKey: const PageStorageKey<String>('package-catalog-scroll'),
+      slivers: [
+        // 1. ترويسة الصفحة وبطاقات المؤشرات والبحث والتصفية
+        SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CustomPageHeroCard(
+                title: 'كتالوج باقات الكروت',
+                subtitle:
+                    'إدارة وتسعير باقات كروت الإنترنت وتحديد نسب الخصم النقدي والآجل.',
+                icon: Icons.inventory_2_rounded,
+                action: controller.canCreatePackage
+                    ? CustomButton.primary(
+                        text: 'إنشاء باقة كروت',
+                        icon: Icons.add_rounded,
+                        shape: AppButtonShape.pill,
+                        size: AppButtonSize.small,
+                        onPressed: () => Get.toNamed<void>(AppRoutes.packageForm),
+                      )
+                    : null,
+              ),
 
-    return CustomAppScaffold(
-      appBar: AppBar(
-        title: Text(
-          'كتالوج باقات الكروت',
-          style: AppTypography.titleMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          CustomButton.icon(
-            icon: Icons.tune_rounded,
-            tooltip: 'فلترة وترتيب الباقات',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.primary,
-            onPressed: () => PackageFilterBottomSheet.show(controller),
-          ),
-          CustomButton.icon(
-            icon: Icons.refresh_rounded,
-            tooltip: 'تحديث الكتالوج',
-            backgroundColor: Colors.transparent,
-            foregroundColor: colors.onSurfaceVariant,
-            onPressed: () => controller.refreshCatalog(),
-          ),
-          AppSpacing.hXs,
-        ],
-      ),
-      floatingActionButton: controller.canCreatePackage
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                controller.initCreateForm();
-                Get.toNamed<void>(AppRoutes.packageForm);
-              },
-              backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                'إنشاء باقة كروت',
-                style: AppTypography.labelLarge.copyWith(
-                  color: colors.onPrimary,
-                  fontWeight: FontWeight.bold,
+              Obx(
+                () => CustomStatusSummaryStrip(
+                  cards: controller.buildKpiCards(context),
+                  isLoading:
+                      controller.isLoading.value && controller.packages.isEmpty,
+                  selectedKey: controller.currentFilterKey,
+                  onSelectKey: controller.onFilterKeySelected,
                 ),
               ),
-            )
-          : null,
-      body: Column(
-        children: [
-          // 1. شريط البحث والفلترة القطاعية
-          const PackageSearchFilterHeader(),
 
-          // شريط موحد لعرض عدد السجلات ونتائج التصفية والبحث
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Obx(
-              () => CustomResultsCounterBar(
-                count: controller.filteredPackages.length,
-                totalCount: controller.packages.length,
-                recordLabel: 'باقة كروت',
-                isFiltered:
-                    controller.searchQuery.value.isNotEmpty ||
-                    controller.statusFilter.value != null,
-                isLoading:
-                    controller.isLoading.value && controller.packages.isEmpty,
-                onClear: controller.resetFilters,
+              Obx(
+                () => CustomSearchFilterBar<String?>(
+                  searchController: controller.searchController,
+                  searchQuery: controller.searchQuery.value,
+                  searchHint: 'بحث باسم الباقة، المعرف، أو الرصيد...',
+                  selectedFilter: controller.currentFilterKey,
+                  filterOptions: controller.buildFilterOptions(context),
+                  onFilterChanged: controller.onFilterKeySelected,
+                  onClearSearch: controller.searchController.clear,
+                ),
               ),
+
+              SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        ),
+
+        // 2. حالات القائمة (تحميل، خطأ، فراغ) أو عناصر باقات الكروت
+        Obx(() {
+          final isLoading = controller.isLoading.value;
+          final error = controller.errorMessage.value;
+          final isEmpty = controller.packages.isEmpty;
+          final hasFilter =
+              controller.statusFilter.value != null ||
+              controller.searchQuery.value.trim().isNotEmpty;
+
+          if (isLoading && isEmpty) {
+            return const SliverToBoxAdapter(
+              child: CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 4,
+                  cardHeight: 156,
+                  maxColumns: 1,
+                  hasLeading: true,
+                ),
+              ),
+            );
+          }
+
+          if (error != null && isEmpty) {
+            return SliverToBoxAdapter(
+              child: CustomErrorState(
+                title: 'تعذر جلب كتالوج الباقات',
+                subtitle: error,
+                onRetry: controller.refreshCatalog,
+              ),
+            );
+          }
+
+          if (isEmpty) {
+            return SliverToBoxAdapter(
+              child: CustomEmptyState(
+                icon: hasFilter
+                    ? Icons.search_off_rounded
+                    : Icons.wifi_tethering_off_rounded,
+                title: hasFilter
+                    ? 'لا توجد باقات مطابقة'
+                    : 'لا توجد باقات كروت مسجلة حالياً',
+                subtitle: hasFilter
+                    ? 'جرّب تغيير كلمات البحث أو تصفية الحالات.'
+                    : 'يمكنك البدء بإنشاء باقات كروت الإنترنت وتحديد أسعارها ونسب خصمها.',
+                actionLabel: hasFilter ? 'مسح عوامل التصفية' : null,
+                onAction: hasFilter ? controller.resetFilters : null,
+              ),
+            );
+          }
+
+          final packageCount = controller.packages.length;
+          return SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index.isOdd) return AppSpacing.vSm;
+              final packageIndex = index ~/ 2;
+              final package = controller.packages[packageIndex];
+
+              return Obx(() {
+                final isExpanded =
+                    controller.expandedPackageId.value == package.packageId;
+
+                return PackageCard(
+                  key: ValueKey<String>('voucher-package-${package.packageId}'),
+                  package: package,
+                  isExpanded: isExpanded,
+                  onToggleExpand: () =>
+                      controller.toggleAccordion(package.packageId),
+                  onDetails: () => controller.openPackageDetails(package),
+                  onEdit: controller.canEditPackage
+                      ? () => controller.initEditForm(package)
+                      : null,
+                  onToggleStatus: () => controller.promptToggleStatus(package),
+                  onDelete: controller.canDeletePackage
+                      ? () => controller.promptDeletePackage(package)
+                      : null,
+                );
+              });
+            }, childCount: packageCount == 0 ? 0 : packageCount * 2 - 1),
+          );
+        }),
+
+        // 3. ذيل التحميل الإضافي الموحد (CustomCursorLoadMore)
+        SliverToBoxAdapter(
+          child: Obx(
+            () => CustomCursorLoadMore(
+              hasMore: controller.hasMore,
+              isLoading: controller.isLoadingMore.value,
+              error: controller.loadMoreError.value,
+              onPressed: controller.loadMorePackages,
             ),
           ),
+        ),
+      ],
+    );
 
-          AppSpacing.vSm,
+    if (embedded) return content;
 
-          // 2. محتوى القائمة مع حالات التحميل والخطأ والفراغ
-          Expanded(
-            child: Obx(() {
-              // أ. حالة التحميل بالوميض (Shimmer Loading)
-              if (controller.isLoading.value) {
-                return Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  child: CustomStateView.loading(
-                    presentation: CustomStatePresentation.skeletonOnly,
-                    skeleton: CustomStateSkeleton(
-                      layout: CustomStateSkeletonLayout.list,
-                      itemCount: 4,
-                      cardHeight: 140.h,
-                    ),
-                  ),
-                );
-              }
-
-              // ب. حالة الخطأ مع خيار إعادة المحاولة
-              if (controller.errorMessage.value != null &&
-                  controller.packages.isEmpty) {
-                return Center(
-                  child: CustomErrorState(
-                    title: 'تعذر تحميل كتالوج الباقات',
-                    subtitle: controller.errorMessage.value,
-                    onRetry: () => controller.refreshCatalog(),
-                  ),
-                );
-              }
-
-              // ج. حالة القائمة الفارغة
-              if (controller.filteredPackages.isEmpty) {
-                return const Center(child: PackageCatalogEmptyState());
-              }
-
-              // د. القائمة أو الشبكة التكيفية مع سحب للتحديث
-              return RefreshIndicator.adaptive(
-                onRefresh: () => controller.refreshCatalog(),
-                child: isTablet
-                    ? const PackageCatalogGrid()
-                    : const PackageCatalogList(),
-              );
-            }),
-          ),
-        ],
-      ),
+    return CustomAppScaffold(
+      appBarTitle: 'كتالوج باقات الكروت',
+      body: content,
     );
   }
 }

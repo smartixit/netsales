@@ -1,255 +1,128 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/core/utils/package_spec_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
-import 'package:netsales/widgets/pickers/custom_color_picker.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_actions.dart';
+import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 
-/// بطاقة عرض باقة كروت الإنترنت في كتالوج الشبكة
+/// بطاقة باقة كروت الإنترنت بنظام الأكورديون القيادي (Package Card - Executive Edition)
+///
+/// تلتزم بالمعايير المؤسسية والنظام البصري الموحد:
+/// - استهلاك المكون القيادي الموحد [CustomExecutiveTransactionCard] بحواف 24.r وظلال مزدوجة.
+/// - تفويض حالة الباقة حصرياً للسجل المركزي [EnumPresentationRegistry].
+/// - تفويض تنسيق المبالغ المالية حصرياً لـ [AmountFormatter.formatValue].
+/// - أكورديون تفاعلي يعرض المواصفات الفنية المعتمدة للكرت.
+/// - شريط إجراءات ذكي يلتزم بصلاحيات المستخدم في مساحة عمل الشبكة.
 class PackageCard extends StatelessWidget {
-  final PackageEntity package;
-  final VoidCallback onTap;
-  final VoidCallback? onToggleStatus;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-
   const PackageCard({
     super.key,
     required this.package,
-    required this.onTap,
-    this.onToggleStatus,
+    required this.onDetails,
+    this.isExpanded = false,
+    this.onToggleExpand,
     this.onEdit,
+    this.onToggleStatus,
     this.onDelete,
+    this.actions,
   });
+
+  final PackageEntity package;
+  final VoidCallback onDetails;
+  final bool isExpanded;
+  final VoidCallback? onToggleExpand;
+  final VoidCallback? onEdit;
+  final VoidCallback? onToggleStatus;
+  final VoidCallback? onDelete;
+  final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final packageColor = CustomColorPicker.parseHex(package.packageColor);
 
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.only(bottom: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(
-            color: package.status
-                ? colors.outlineVariant.withValues(alpha: 0.5)
-                : colors.error.withValues(alpha: 0.2),
-            width: 1,
-          ),
-          boxShadow: AppElevation.level2(context),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // الشريط اللوني المميز للباقة
-                Container(
-                  width: AppSpacing.xs + 2,
-                  color: package.status ? packageColor : colors.outlineVariant,
-                ),
+    // استهلاك السجل المركزي الموحد للحالات عبر الـ Enum المعتمد
+    final statusPresentation = EnumPresentationRegistry.resolvePackageStatus(
+      package.packageStatus,
+    );
 
-                // المحتوى الأساسي
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.cardPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // الرأس: الاسم + الشارة الدلالية
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: AppSpacing.giant,
-                              height: AppSpacing.giant,
-                              decoration: BoxDecoration(
-                                color: packageColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.sm,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.wifi_tethering_rounded,
-                                color: packageColor,
-                                size: AppSpacing.xl,
-                              ),
-                            ),
-                            AppSpacing.hSm,
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    package.packageName,
-                                    style: AppTypography.titleMedium.copyWith(
-                                      color: colors.onSurface,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (package.packageBalance > 0) ...[
-                                    AppSpacing.vXxs,
-                                    Text(
-                                      'الرصيد: ${package.packageBalance} ميجابايت',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: colors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            CustomStatusBadge(
-                              label: package.status ? 'نشطة' : 'معطلة',
-                              tone: package.status
-                                  ? SemanticTone.success
-                                  : SemanticTone.danger,
-                              isCompact: true,
-                              showDot: true,
-                            ),
-                          ],
-                        ),
+    final dateLabel = package.createdAt != null
+        ? DateFormatter.fullDate(package.createdAt!)
+        : '';
 
-                        AppSpacing.vSm,
-                        Divider(
-                          height: 1,
-                          color: colors.outlineVariant.withValues(alpha: 0.3),
-                        ),
-                        AppSpacing.vSm,
-
-                        // تفاصيل التسعير والخصم المالي
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // السعر الأساسي للكرت
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'السعر الأساسي',
-                                  style: AppTypography.labelSmall.copyWith(
-                                    color: colors.onSurfaceVariant,
-                                  ),
-                                ),
-                                AppSpacing.vXxs,
-                                CustomInteractiveAmountText(
-                                  amount: package.packageVoucherPrice,
-                                  style: AppTypography.titleMedium.copyWith(
-                                    color: colors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // نسب الخصومات الافتراضية
-                            Row(
-                              children: [
-                                // الخصم النقدي
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.xs,
-                                    vertical: AppSpacing.xxs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colors.success.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.xs,
-                                    ),
-                                    border: Border.all(
-                                      color: colors.success.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.payments_outlined,
-                                        size: AppSpacing.md,
-                                        color: colors.success,
-                                      ),
-                                      AppSpacing.hXxs,
-                                      Text(
-                                        'نقدي: ${package.packageDefaultCashDiscount}%',
-                                        style: AppTypography.labelSmall
-                                            .copyWith(
-                                              color: colors.success,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                AppSpacing.hXs,
-
-                                // الخصم الآجل
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.xs,
-                                    vertical: AppSpacing.xxs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colors.secondary.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.xs,
-                                    ),
-                                    border: Border.all(
-                                      color: colors.secondary.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.credit_card_outlined,
-                                        size: AppSpacing.md,
-                                        color: colors.secondary,
-                                      ),
-                                      AppSpacing.hXxs,
-                                      Text(
-                                        'آجل: ${package.packageDefaultCreditDiscount}%',
-                                        style: AppTypography.labelSmall
-                                            .copyWith(
-                                              color: colors.secondary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    // بنود التعرفة والخصومات المدمجة داخل أكورديون البطاقة
+    final items = <ExecutiveCardItemData>[
+      ExecutiveCardItemData(
+        title: 'السعر الفعلي نقداً',
+        subtitle:
+            'بعد الخصم النقدي (${package.packageDefaultCashDiscount.toStringAsFixed(0)}%) - ${package.packageVoucherCount} كرت',
+        colorHex: package.packageColor,
+        totalAmount: package.effectiveCashPrice,
+        discountAmount: package.cashDiscountAmount,
+        badgeText: 'نقداً',
       ),
+      ExecutiveCardItemData(
+        title: 'السعر الفعلي آجلاً',
+        subtitle:
+            'بعد الخصم الآجل (${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%) - ${package.packageVoucherCount} كرت',
+        colorHex: package.packageColor,
+        totalAmount: package.effectiveCreditPrice,
+        discountAmount: package.creditDiscountAmount,
+        badgeText: 'آجلاً',
+      ),
+    ];
+
+    final specTags = <String>[
+      '${package.packageVoucherCount} كرت',
+      if (package.packageBalance > 0)
+        PackageSpecFormatter.formatBalance(package.packageBalance),
+      if (package.packageUptime != null && package.packageUptime! > 0)
+        PackageSpecFormatter.formatUptime(package.packageUptime!),
+      if (package.packageValidity != null && package.packageValidity! > 0)
+        PackageSpecFormatter.formatValidity(package.packageValidity!),
+    ];
+
+    return CustomExecutiveTransactionCard(
+      reference: 'باقة #${package.packageId}',
+      dateLabel: dateLabel,
+      partyName: package.packageName,
+      statusPresentation: statusPresentation,
+      typePresentation: null,
+      secondaryReference:
+          package.networkName != null ? 'شبكة ${package.networkName}' : null,
+      items: items,
+      itemsHeaderTitle: 'التعرفة والخصومات التعاقدية',
+      visibleItemNames: specTags,
+      metrics: [
+        ExecutiveCardMetricData(
+          label: 'السعر الأساسي',
+          value: AmountFormatter.formatValue(package.packageVoucherPrice),
+          isEmphasized: true,
+          textColor: colors.primary,
+        ),
+        ExecutiveCardMetricData(
+          label: 'الخصم النقدي',
+          value: '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%',
+          textColor: colors.success,
+        ),
+        ExecutiveCardMetricData(
+          label: 'الخصم الآجل',
+          value: '${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%',
+          textColor: colors.secondary,
+        ),
+      ],
+      actions: actions ??
+          PackageCardActions(
+            package: package,
+            onDetails: onDetails,
+            onEdit: onEdit,
+            onToggleStatus: onToggleStatus,
+            onDelete: onDelete,
+          ),
+      onTap: onDetails,
+      isExpanded: isExpanded,
+      onToggleExpand: onToggleExpand,
     );
   }
 }

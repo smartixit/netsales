@@ -106,7 +106,7 @@ class TextFormatter {
   /// - 'نقطة بيع النور' -> 'ن ب'
   static String avatarInitials(
     String? name, {
-    int maxChars = 2,
+    int maxChars = 1,
     bool spaceBetween = true,
     String fallback = 'نت',
   }) {

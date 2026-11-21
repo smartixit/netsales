@@ -16,6 +16,7 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/enums/billing_trial_entitlement_mode.dart';
 import 'package:netsales/core/enums/network_status.dart';
+import 'package:netsales/core/enums/package_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/enums/repayment_status.dart';
 import 'package:netsales/core/enums/receivable_aging_bucket.dart';
@@ -785,6 +786,36 @@ class EnumPresentationRegistry {
       icon: icon,
       isKnown: true,
     );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 20. حالة تفعيل باقة كروت الإنترنت (PackageStatus)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolvePackageStatus(
+    PackageStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      PackageStatus.active => 'نشطة ومفعلة',
+      PackageStatus.inactive => 'معطلة',
+      PackageStatus.unknown => 'حالة غير معروفة',
+    });
+
+    return switch (status) {
+      PackageStatus.active => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+        isKnown: true,
+      ),
+      PackageStatus.inactive => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.pause_circle_outline_rounded,
+        isKnown: true,
+      ),
+      PackageStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
+    };
   }
 
   // ──────────────────────────────────────────────────────────────────────────
