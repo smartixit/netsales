@@ -256,13 +256,13 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(
-                        '${invoice.totalVouchers} كرت (${invoice.formattedTotalSheets} ورقة)',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      // Text(
+                      //   '${invoice.totalVouchers} كرت (${invoice.formattedTotalSheets} ورقة)',
+                      //   style: AppTypography.bodySmall.copyWith(
+                      //     color: colors.onSurfaceVariant,
+                      //     fontWeight: FontWeight.w600,
+                      //   ),
+                      // ),
                     ],
                   ),
                   AppSpacing.vSm,

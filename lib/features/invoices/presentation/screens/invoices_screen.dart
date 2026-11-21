@@ -41,13 +41,11 @@ class InvoicesScreen extends GetView<BaseInvoicesController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Obx(
-                () => CustomPageHeroCard(
-                  title: controller.pageTitle,
-                  subtitle: controller.pageSubtitle,
-                  icon: controller.pageIcon,
-                  action: controller.headerAction,
-                ),
+              CustomPageHeroCard(
+                title: controller.pageTitle,
+                subtitle: controller.pageSubtitle,
+                icon: controller.pageIcon,
+                action: controller.headerAction,
               ),
 
               Obx(
@@ -72,11 +70,8 @@ class InvoicesScreen extends GetView<BaseInvoicesController> {
                 ),
               ),
 
-              Obx(
-                () =>
-                    controller.buildExtraFilters(context) ??
-                    const SizedBox.shrink(),
-              ),
+              controller.buildExtraFilters(context) ?? const SizedBox.shrink(),
+
               SizedBox(height: AppSpacing.sm),
             ],
           ),

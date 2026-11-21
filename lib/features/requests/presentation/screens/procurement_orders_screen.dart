@@ -45,13 +45,11 @@ class ProcurementOrdersScreen extends GetView<BaseProcurementOrdersController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Obx(
-                () => CustomPageHeroCard(
-                  title: controller.pageTitle,
-                  subtitle: controller.pageSubtitle,
-                  icon: controller.pageIcon,
-                  action: controller.headerAction,
-                ),
+              CustomPageHeroCard(
+                title: controller.pageTitle,
+                subtitle: controller.pageSubtitle,
+                icon: controller.pageIcon,
+                action: controller.headerAction,
               ),
 
               Obx(
@@ -76,11 +74,8 @@ class ProcurementOrdersScreen extends GetView<BaseProcurementOrdersController> {
                 ),
               ),
 
-              Obx(
-                () =>
-                    controller.buildExtraFilters(context) ??
-                    const SizedBox.shrink(),
-              ),
+              controller.buildExtraFilters(context) ?? const SizedBox.shrink(),
+
               SizedBox(height: AppSpacing.sm),
             ],
           ),

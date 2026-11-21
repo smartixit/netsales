@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 
@@ -15,14 +16,7 @@ class ProfileIdentityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final initials = profile.fullName.trim().isEmpty
-        ? '؟'
-        : profile.fullName
-              .trim()
-              .split(RegExp(r'\s+'))
-              .take(2)
-              .map((part) => part[0])
-              .join();
+    final initials = TextFormatter.avatarInitials(profile.fullName);
 
     return Container(
       padding: EdgeInsets.all(AppSpacing.lg),
