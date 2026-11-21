@@ -40,27 +40,42 @@ class WorkspaceService extends GetxService {
   AppWorkspace get activeWorkspace => currentWorkspace.value;
 
   Future<WorkspaceService> init() async {
-    final savedWorkspace = StorageService.instance.getString(
-      StorageKeys.activeWorkspaceKey,
-    );
+    final savedWorkspace = _readSavedWorkspacePreference();
     final currentUser = Get.isRegistered<SessionService>()
         ? SessionService.to.currentUser
         : null;
 
-    final resolved = currentUser == null
-        ? (savedWorkspace == AppWorkspace.pos.name
-              ? AppWorkspace.pos
-              : AppWorkspace.network)
-        : resolveWorkspaceForUser(
-            currentUser,
-            preferredWorkspace: savedWorkspace,
-          );
-    currentWorkspace.value = resolved;
+    if (currentUser == null) {
+      currentWorkspace.value = savedWorkspace == AppWorkspace.pos.name
+          ? AppWorkspace.pos
+          : AppWorkspace.network;
+    } else {
+      try {
+        currentWorkspace.value = resolveWorkspaceForUser(
+          currentUser,
+          preferredWorkspace: savedWorkspace,
+        );
+      } on StateError catch (error) {
+        // No supported or unambiguous workspace must not block application
+        // bootstrap. Protected workspace navigation still fails closed.
+        log('ℹ️ [WorkspaceService] No workspace selected: $error');
+      }
+    }
 
     log(
-      '🏢 [WorkspaceService] Initialized with workspace: ${resolved.name}',
+      '🏢 [WorkspaceService] Initialized with workspace: ${currentWorkspace.value.name}',
     );
     return this;
+  }
+
+  String? _readSavedWorkspacePreference() {
+    try {
+      return StorageService.instance.getString(StorageKeys.activeWorkspaceKey);
+    } catch (_) {
+      // Workspace-role resolution can run in isolated tests before storage
+      // initialization; the backend primary role remains authoritative.
+      return null;
+    }
   }
 
   /// Resolves a supported workspace from exact backend role keys and scopes.
@@ -87,8 +102,8 @@ class WorkspaceService extends GetxService {
     }
 
     if (hasNetworkRole && hasPosRole) {
-      final preferred = preferredWorkspace ??
-          StorageService.instance.getString(StorageKeys.activeWorkspaceKey);
+      final preferred =
+          preferredWorkspace ?? _readSavedWorkspacePreference();
 
       if (preferred == AppWorkspace.network.name) return AppWorkspace.network;
       if (preferred == AppWorkspace.pos.name) return AppWorkspace.pos;
@@ -146,11 +161,6 @@ class WorkspaceService extends GetxService {
     }
 
     final storage = StorageService.instance;
-    final savedWorkspace = storage.getString(StorageKeys.activeWorkspaceKey);
-    final resolved = resolveWorkspaceForUser(
-      user,
-      preferredWorkspace: savedWorkspace,
-    );
 
     final activePosMemberships = user.workspaceMemberships
         .where((membership) => membership.isPos && membership.tenantId > 0)
@@ -187,7 +197,24 @@ class WorkspaceService extends GetxService {
       );
     }
 
-    await setActiveWorkspace(resolved);
+    AppWorkspace? resolvedWorkspace;
+    try {
+      resolvedWorkspace = resolveWorkspaceForUser(
+        user,
+        preferredWorkspace: _readSavedWorkspacePreference(),
+      );
+    } on StateError catch (error) {
+      // Authentication and permission synchronization must not fail merely
+      // because this account has no supported or unambiguous mobile workspace.
+      // Do not invent a default; the workspace route guard remains fail-closed.
+      log('ℹ️ [WorkspaceService] Skipping workspace selection: $error');
+    }
+
+    if (resolvedWorkspace != null) {
+      await setActiveWorkspace(resolvedWorkspace);
+    } else {
+      await storage.remove(StorageKeys.activeWorkspaceKey);
+    }
   }
 
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
