@@ -16,6 +16,8 @@ class PosWelcomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return WorkspaceWelcomeHero(
       userName: controller.userName,
+      userAvatarUrl: controller.userProfileLogo,
+      userInitials: controller.userInitials,
       role: controller.userRole,
       artwork: WorkspaceWelcomeArtwork.pos,
       actionLabel: 'ربط شبكة',
