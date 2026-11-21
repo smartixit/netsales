@@ -3,7 +3,6 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
-import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
