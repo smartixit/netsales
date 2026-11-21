@@ -94,6 +94,17 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<PosEntity> resolveNetworkLinkablePos({
+    required int networkId,
+    required String posBusinessCode,
+  }) {
+    return _remoteDataSource.resolveNetworkLinkablePos(
+      networkId: networkId,
+      posBusinessCode: posBusinessCode,
+    );
+  }
+
+  @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
     int? posId,
