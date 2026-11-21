@@ -193,15 +193,12 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
-      'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty)
-        'pos_uuid': posUuid.trim(),
+      'pos_uuid': posUuid.trim(),
       'duration_minutes': durationMinutes,
     };
 
@@ -229,9 +226,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }) async {
     final body = <String, dynamic>{
       'payload': payload,
-      'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty)
-        'pos_uuid': posUuid.trim(),
+      'pos_uuid': posUuid.trim(),
     };
 
     final response = await ApiService.instance.post<NetworkPosLinkPreviewModel>(
