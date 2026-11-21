@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 /// Paints the luminous teal atmosphere and connected-node motif used by both
