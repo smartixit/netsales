@@ -26,6 +26,8 @@ class WorkspaceTransactionTile extends StatelessWidget {
     this.amountColor,
     this.onTap,
     this.trailingAction,
+    this.showAmount = true,
+    this.showChevron = false,
   });
 
   final String title;
@@ -39,11 +41,15 @@ class WorkspaceTransactionTile extends StatelessWidget {
   final Color? amountColor;
   final VoidCallback? onTap;
   final Widget? trailingAction;
+  final bool showAmount;
+  final bool showChevron;
 
   factory WorkspaceTransactionTile.fromItem(
     WorkspaceTransactionItemViewModel item, {
     Key? key,
     Widget? customTrailingAction,
+    bool showAmount = true,
+    bool showChevron = false,
   }) {
     return WorkspaceTransactionTile(
       key: key,
@@ -64,6 +70,8 @@ class WorkspaceTransactionTile extends StatelessWidget {
                   onTap: item.onAction!,
                 )
               : null),
+      showAmount: showAmount,
+      showChevron: showChevron,
     );
   }
 
@@ -176,26 +184,37 @@ class WorkspaceTransactionTile extends StatelessWidget {
                     ),
               ),
             ),
-            SizedBox(width: AppSpacing.xs),
-            Flexible(
-              flex: 3,
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
+            if (showAmount && formattedAmount.isNotEmpty) ...[
+              SizedBox(width: AppSpacing.xs),
+              Flexible(
+                flex: 3,
+                child: Align(
                   alignment: AlignmentDirectional.centerEnd,
-                  child: Text(
-                    formattedAmount,
-                    maxLines: 1,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: amountColor ?? colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Text(
+                      formattedAmount,
+                      maxLines: 1,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: amountColor ?? colors.onSurface,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
+            if (showChevron)
+              Padding(
+                padding: EdgeInsetsDirectional.only(start: AppSpacing.xs),
+                child: Icon(
+                  Icons.chevron_left_rounded,
+                  size: 19.r,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
           ],
         ),
       ),
