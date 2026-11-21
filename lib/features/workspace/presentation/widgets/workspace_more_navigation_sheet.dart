@@ -106,7 +106,7 @@ class WorkspaceMoreNavigationSheet extends StatelessWidget {
                                 color: colors.onSurface,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
-                                    : FontWeight.medium,
+                                    : FontWeight.w500,
                               ),
                             ),
                           ),
