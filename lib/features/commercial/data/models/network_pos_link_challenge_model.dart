@@ -15,7 +15,7 @@ class NetworkPosLinkChallengeModel extends NetworkPosLinkChallengeEntity {
     super.consumedAt,
     super.createdAt,
     super.updatedAt,
-    super.network,
+    super.networkName,
     super.pos,
   });
 
