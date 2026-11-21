@@ -27,7 +27,14 @@ void main() {
           );
 
           expect(tester.takeException(), isNull);
-          expect(find.byType(CustomPaint), findsOneWidget);
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is CustomPaint &&
+                  widget.painter is WorkspaceHeroIllustrationPainter,
+            ),
+            findsOneWidget,
+          );
         },
       );
     }
