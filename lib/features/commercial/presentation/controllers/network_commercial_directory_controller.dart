@@ -10,18 +10,21 @@ import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_action_dialogs.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_qr_invitation_sheet.dart';
+import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_invitation_target_dialog.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -41,6 +44,7 @@ class NetworkCommercialDirectoryController
     required this.revokeNetworkPosLinkChallengeUseCase,
     this.getMyNetworksUseCase,
     required this.getNetworkPosLinkChallengeStatusUseCase,
+    required this.resolveNetworkLinkablePosUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -53,6 +57,7 @@ class NetworkCommercialDirectoryController
   final GetMyNetworksUseCase? getMyNetworksUseCase;
   final GetNetworkPosLinkChallengeStatusUseCase
   getNetworkPosLinkChallengeStatusUseCase;
+  final ResolveNetworkLinkablePosUseCase resolveNetworkLinkablePosUseCase;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -473,20 +478,39 @@ class NetworkCommercialDirectoryController
     }
 
     try {
+      final target = await Get.dialog<PosEntity>(
+        NetworkPosInvitationTargetDialog(
+          onResolve: (businessCode) => resolveNetworkLinkablePosUseCase(
+            networkId: netId,
+            posBusinessCode: businessCode,
+          ),
+        ),
+        barrierDismissible: false,
+      );
+      if (target == null) return;
+
       final challenge = await createNetworkPosLinkChallengeUseCase(
         networkId: netId,
+        posUuid: target.posUuid,
       );
       final networkName = challenge.network?.networkName.trim() ?? '';
-      if (challenge.networkId != netId || networkName.isEmpty) {
-        throw StateError('تعذر ربط الدعوة بالشبكة المحددة بشكل موثوق.');
+      final posName = challenge.pos?.posName.trim() ?? '';
+      if (challenge.networkId != netId ||
+          challenge.posId != target.posId ||
+          networkName.isEmpty ||
+          posName.isEmpty ||
+          challenge.expiresAt == null) {
+        throw StateError('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
       }
+
       await CustomBottomSheet.show<void>(
-        title: 'دعوة نقطة بيع عبر رمز QR',
-        subtitle: 'امسح الرمز المباشر لإتمام الارتباط التجاري',
+        title: 'دعوة ربط نقطة بيع',
+        subtitle: 'دعوة موجهة حصرياً إلى نقطة البيع المحددة',
         leadingIcon: Icons.qr_code_rounded,
         child: NetworkPosQrInvitationSheet(
           challenge: challenge,
           networkName: networkName,
+          posName: posName,
           getStatus: () =>
               getNetworkPosLinkChallengeStatusUseCase(challenge.challengeUuid),
           onRevoke: () => revokeChallenge(challenge.challengeUuid),
