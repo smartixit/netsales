@@ -519,6 +519,10 @@ class NetworkCommercialDirectoryController
 
   Future<void> resolveInvitationTarget() async {
     final code = invitationBusinessCodeController.text.trim().toUpperCase();
+    final existingTarget = resolvedInvitationTarget.value;
+    if (existingTarget != null && existingTarget.posUuid.toUpperCase() == code) {
+      return;
+    }
     if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}$').hasMatch(code)) {
       CustomSnackbar.show(title: 'تحقق من المعرف', message: 'أدخل المعرف التجاري لنقطة البيع بالصيغة الموجودة في ملفها.', type: SnackType.warning);
       return;
