@@ -1,5 +1,6 @@
 import 'package:netsales/core/constants/api_constants.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
@@ -135,7 +136,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل إنشاء ارتباط نقطة البيع بالشبكة.');
+      throw AppException('فشل إنشاء ارتباط نقطة البيع بالشبكة.');
     }
     return result;
   }
@@ -152,7 +153,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل تبديل حالة الارتباط التجاري.');
+      throw AppException('فشل تبديل حالة الارتباط التجاري.');
     }
     return result;
   }
@@ -180,7 +181,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null || result.posId <= 0) {
-      throw Exception('تعذر التحقق من نقطة البيع المستهدفة.');
+      throw AppException('تعذر التحقق من نقطة البيع المستهدفة.');
     }
     return result;
   }
@@ -211,7 +212,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل توليد رمز دعوة الارتباط التجاري.');
+      throw AppException('فشل توليد رمز دعوة الارتباط التجاري.');
     }
     return result;
   }
@@ -238,7 +239,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل فحص بيانات دعوة الارتباط التجاري.');
+      throw AppException('فشل فحص بيانات دعوة الارتباط التجاري.');
     }
     return result;
   }
@@ -265,7 +266,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('فشل تأكيد الارتباط التجاري عبر الرمز المشفر.');
+      throw AppException('فشل تأكيد الارتباط التجاري عبر الرمز المشفر.');
     }
     return result;
   }
@@ -283,7 +284,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('تعذر استرجاع حالة دعوة الربط.');
+      throw AppException('تعذر استرجاع حالة دعوة الربط.');
     }
     return result;
   }
@@ -304,7 +305,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('لم يتم العثور على بيانات الشبكة المحددة.');
+      throw AppException('لم يتم العثور على بيانات الشبكة المحددة.');
     }
     return result;
   }
@@ -318,7 +319,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     final result = response.data;
     if (result == null) {
-      throw Exception('لم يتم العثور على بيانات نقطة البيع المحددة.');
+      throw AppException('لم يتم العثور على بيانات نقطة البيع المحددة.');
     }
     return result;
   }
