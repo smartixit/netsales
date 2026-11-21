@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -10,12 +11,6 @@ class ProfileIdentityCard extends StatelessWidget {
   const ProfileIdentityCard({super.key, required this.profile});
 
   final ProfileEntity profile;
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).toList();
-    if (parts.isEmpty) return '؟';
-    return parts.take(2).map((part) => part.substring(0, 1)).join();
-  }
 
   @override
   Widget build(BuildContext context) {
