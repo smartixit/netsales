@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_transaction_identity.dart';
@@ -84,7 +85,7 @@ class WorkspaceTransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 420;
+        final compact = constraints.maxWidth < AppBreakpoints.mobileSmallMax;
         final identity = WorkspaceTransactionIdentity(
           title: title,
           reference: reference,
