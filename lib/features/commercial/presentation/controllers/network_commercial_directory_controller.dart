@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
@@ -606,28 +603,11 @@ class NetworkCommercialDirectoryController
     }
   }
 
-  Future<Uint8List> captureInvitationCard(BuildContext context) async {
-    await precacheImage(const AssetImage('assets/images/brand_icon.png'), context);
-    await WidgetsBinding.instance.endOfFrame;
-    final renderObject = invitationShareCardKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderRepaintBoundary) throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
-    final image = await renderObject.toImage(pixelRatio: 1);
-    try {
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (data == null) throw const AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
-      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-      if (bytes.isEmpty) throw const AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
-      return bytes;
-    } finally {
-      image.dispose();
-    }
-  }
-
-  Future<void> shareInvitation(BuildContext context) async {
+  Future<void> shareInvitation(Future<Uint8List> Function() captureCard) async {
     if (!isInvitationActive || isExportingInvitation.value) return;
     isExportingInvitation.value = true;
     try {
-      final bytes = await captureInvitationCard(context);
+      final bytes = await captureCard();
       final result = await ShareService.instance.shareBytes(bytes: bytes, fileName: 'NetSales_Invitation.png', mimeType: 'image/png', subject: 'دعوة ربط عبر NetSales', text: 'امسح رمز الدعوة من داخل تطبيق NetSales.');
       if (result.status == ShareResultStatus.success) {
         CustomSnackbar.show(title: 'تمت المشاركة', message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.', type: SnackType.success);
@@ -639,7 +619,7 @@ class NetworkCommercialDirectoryController
     }
   }
 
-  Future<void> saveInvitation(BuildContext context) async {
+  Future<void> saveInvitation(Future<Uint8List> Function() captureCard) async {
     if (!isInvitationActive || isExportingInvitation.value) return;
     isExportingInvitation.value = true;
     try {
