@@ -80,7 +80,8 @@ class _CustomQrCodeState extends State<CustomQrCode> {
   void didUpdateWidget(covariant CustomQrCode oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.data != widget.data) {
+    if (oldWidget.data != widget.data ||
+        oldWidget.errorCorrectLevel != widget.errorCorrectLevel) {
       _generateQr();
     }
   }
