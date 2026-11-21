@@ -7,12 +7,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
-import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_invitation_share_card.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -22,13 +22,29 @@ import 'package:netsales/widgets/qr/custom_qr_code.dart';
 class NetworkPosQrInvitationSheet extends StatelessWidget {
   NetworkPosQrInvitationSheet({
     super.key,
-    required this.controller,
+    required this.invitationStatus,
+    required this.invitationStatusRefreshError,
+    required this.isExportingInvitation,
+    required this.isInvitationActive,
+    required this.invitationRemainingLabel,
+    required this.invitationExpiresAtLabel,
+    required this.onShare,
+    required this.onSave,
+    required this.onRevoke,
     required this.challenge,
     required this.networkName,
     required this.posName,
   });
 
-  final NetworkCommercialDirectoryController controller;
+  final Rx<LinkingChallengeStatus> invitationStatus;
+  final RxnString invitationStatusRefreshError;
+  final RxBool isExportingInvitation;
+  final bool Function() isInvitationActive;
+  final String Function() invitationRemainingLabel;
+  final String Function() invitationExpiresAtLabel;
+  final Future<void> Function(Future<Uint8List> Function()) onShare;
+  final Future<void> Function(Future<Uint8List> Function()) onSave;
+  final VoidCallback onRevoke;
   final NetworkPosLinkChallengeEntity challenge;
   final String networkName;
   final String posName;
@@ -161,7 +177,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.md),
           Obx(() {
-            final status = controller.invitationStatus.value;
+            final status = invitationStatus.value;
             final presentation =
                 EnumPresentationRegistry.resolveLinkingChallengeStatus(status);
             return Row(
@@ -175,7 +191,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
-                    controller.invitationRemainingLabel,
+                    invitationRemainingLabel(),
                     style: AppTypography.labelSmall.copyWith(
                       color: colors.onSurfaceVariant,
                     ),
@@ -187,7 +203,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           SizedBox(height: AppSpacing.xs),
           Obx(
             () => Text(
-              'ينتهي في: ${controller.invitationExpiresAtLabel}',
+              'ينتهي في: ${invitationExpiresAtLabel()}',
               textAlign: TextAlign.center,
               style: AppTypography.labelSmall.copyWith(
                 color: colors.onSurfaceVariant,
@@ -196,7 +212,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
             ),
           ),
           Obx(() {
-            final error = controller.invitationStatusRefreshError.value;
+            final error = invitationStatusRefreshError.value;
             if (error == null) return const SizedBox.shrink();
             return Padding(
               padding: EdgeInsets.only(top: AppSpacing.xs),
@@ -220,8 +236,8 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.md),
           Obx(() {
-            final isActive = controller.isInvitationActive;
-            final isExporting = controller.isExportingInvitation.value;
+            final isActive = isInvitationActive();
+            final isExporting = isExportingInvitation.value;
             return Row(
               children: [
                 Expanded(
@@ -231,7 +247,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     size: AppButtonSize.medium,
                     loading: isExporting,
                     onPressed: isActive && !isExporting
-                        ? () => controller.shareInvitation(
+                        ? () => onShare(
                             () => _captureShareCard(context),
                           )
                         : null,
@@ -245,7 +261,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     size: AppButtonSize.medium,
                     loading: isExporting,
                     onPressed: isActive && !isExporting
-                        ? () => controller.saveInvitation(
+                        ? () => onSave(
                             () => _captureShareCard(context),
                           )
                         : null,
@@ -261,7 +277,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                 text: 'إلغاء الدعوة',
                 icon: Icons.block_rounded,
                 size: AppButtonSize.medium,
-                onPressed: controller.revokeActiveInvitation,
+                onPressed: onRevoke,
               );
             }
             return Text(
@@ -281,7 +297,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
               child: UnconstrainedBox(
                 alignment: Alignment.topLeft,
                 child: RepaintBoundary(
-                  key: controller.invitationShareCardKey,
+                  key: _shareCardKey,
                   child: CommercialInvitationShareCard(
                     payload: challenge.payload,
                     networkName: networkName,
