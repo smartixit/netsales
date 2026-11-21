@@ -623,7 +623,7 @@ class NetworkCommercialDirectoryController
     if (!isInvitationActive || isExportingInvitation.value) return;
     isExportingInvitation.value = true;
     try {
-      final bytes = await captureInvitationCard(context);
+      final bytes = await captureCard();
       final result = await FileExportService.instance.saveFile(bytes: bytes, fileName: 'NetSales_Invitation', extension: 'png', folderName: 'NetSales', autoOpen: false, showFeedback: false);
       CustomSnackbar.show(title: result.isSuccess ? 'تم حفظ الدعوة' : 'تعذر حفظ الدعوة', message: result.isSuccess ? 'تم حفظ بطاقة الدعوة في مجلد تنزيلات NetSales.' : (result.errorMessage ?? 'لم نتمكن من حفظ صورة الدعوة.'), type: result.isSuccess ? SnackType.success : SnackType.error);
     } catch (error) {
