@@ -8,6 +8,7 @@ import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 class WorkspaceWelcomeDetails extends StatelessWidget {
   const WorkspaceWelcomeDetails({
+    super.key,
     required this.userName,
     required this.userAvatarUrl,
     required this.userInitials,
