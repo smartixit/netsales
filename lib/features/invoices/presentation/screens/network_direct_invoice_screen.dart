@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -13,6 +15,7 @@ import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
 import 'package:netsales/widgets/forms/custom_section_heading.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// مساحة إنشاء وإصدار فاتورة بيع مباشرة لنقطة بيع (NetworkDirectInvoiceScreen)
 ///
@@ -32,6 +35,9 @@ class NetworkDirectInvoiceScreen
       final gross = controller.checkoutGrossAmount;
       final discount = controller.checkoutDiscountAmount;
       final net = controller.checkoutNetAmount;
+      final isCredit = controller.selectedSaleType == SaleType.credit;
+      final paid = controller.checkoutPaidAmount;
+      final remaining = controller.checkoutRemainingCreditAmount;
       final count = controller.checkoutTotalVouchers;
 
       return CustomAppScaffold(
@@ -60,8 +66,19 @@ class NetworkDirectInvoiceScreen
             CheckoutMetricData(
               label: 'الصافي التقديري',
               value: AmountFormatter.formatValue(net),
-              isNet: true,
+              isNet: !isCredit,
             ),
+            if (isCredit) ...[
+              CheckoutMetricData(
+                label: 'المقبوض كاش',
+                value: AmountFormatter.formatValue(paid),
+              ),
+              CheckoutMetricData(
+                label: 'المتبقي الآجل',
+                value: AmountFormatter.formatValue(remaining),
+                isNet: true,
+              ),
+            ],
           ],
           itemCount: controller.cartPackagesCount,
           itemCountLabel: 'باقة مختارة',
@@ -124,6 +141,29 @@ class NetworkDirectInvoiceScreen
                         ),
                         AppSpacing.vXs,
                         const DirectInvoiceSaleTypeSelector(),
+                        if (isCredit) ...[
+                          AppSpacing.vSm,
+                          CustomTextField(
+                            controller: controller.paidAmountController,
+                            label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
+                            hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
+                            isRequired: false,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            prefixIcon: const Icon(Icons.payments_outlined),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            ],
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) return null;
+                              final amt = double.tryParse(val.trim());
+                              if (amt == null || amt < 0) return 'يرجى إدخال مبلغ صحيح';
+                              if (amt > controller.checkoutNetAmount) {
+                                return 'لا يمكن أن تتجاوز الدفعة صافي الفاتورة';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                         AppSpacing.vLg,
 
                         // 4. اختيار الباقات والكميات
