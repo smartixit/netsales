@@ -1,15 +1,24 @@
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
+import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
@@ -28,10 +37,12 @@ import 'package:netsales/features/commercial/presentation/widgets/sheets/network
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
+import 'package:share_plus/share_plus.dart' show ShareResultStatus;
 
 /// متحكم دليل نقاط البيع والشركاء لمساحة عمل شبكة التوزيع (Network Commercial Directory)
 class NetworkCommercialDirectoryController
@@ -87,6 +98,22 @@ class NetworkCommercialDirectoryController
   final RxnInt expandedLinkId = RxnInt();
 
   final authorizedNetworks = <NetworkEntity>[].obs;
+
+  final TextEditingController invitationBusinessCodeController = TextEditingController();
+  final RxString invitationBusinessCode = ''.obs;
+  final RxBool isResolvingInvitationTarget = false.obs;
+  final Rxn<PosEntity> resolvedInvitationTarget = Rxn<PosEntity>();
+
+  final GlobalKey invitationShareCardKey = GlobalKey();
+  final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
+  final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
+  final Rx<DateTime> invitationClock = DateTime.now().obs;
+  final RxBool isExportingInvitation = false.obs;
+  final RxnString invitationStatusRefreshError = RxnString();
+  Timer? _invitationStatusTimer;
+  Timer? _invitationClockTimer;
+  NetworkPosLinkChallengeEntity? _activeInvitation;
+  bool _isInvitationStatusRequestInFlight = false;
   final selectedNetworkId = RxnInt();
 
   String? _nextCursor;
@@ -157,6 +184,8 @@ class NetworkCommercialDirectoryController
   void onClose() {
     _listRevision++;
     searchController.dispose();
+    invitationBusinessCodeController.dispose();
+    stopInvitationMonitoring();
     super.onClose();
   }
 
