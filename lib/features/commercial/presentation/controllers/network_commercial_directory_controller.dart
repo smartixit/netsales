@@ -687,7 +687,20 @@ class NetworkCommercialDirectoryController
           title: 'دعوة ربط نقطة بيع',
           subtitle: 'دعوة موجهة حصرياً إلى نقطة البيع المحددة',
           leadingIcon: Icons.qr_code_rounded,
-          child: NetworkPosQrInvitationSheet(controller: this, challenge: challenge, networkName: networkName, posName: posName),
+          child: NetworkPosQrInvitationSheet(
+            invitationStatus: invitationStatus,
+            invitationStatusRefreshError: invitationStatusRefreshError,
+            isExportingInvitation: isExportingInvitation,
+            isInvitationActive: () => isInvitationActive,
+            invitationRemainingLabel: () => invitationRemainingLabel,
+            invitationExpiresAtLabel: () => invitationExpiresAtLabel,
+            onShare: shareInvitation,
+            onSave: saveInvitation,
+            onRevoke: revokeActiveInvitation,
+            challenge: challenge,
+            networkName: networkName,
+            posName: posName,
+          ),
         );
       } finally {
         stopInvitationMonitoring();
