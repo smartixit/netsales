@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_detail_row.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// ورقة سفلية لتأكيد واعتماد ربط نقطة البيع بالشبكة بعد مسح رمز الدعوة المشفر
+/// ورقة سفلية لتأكيد واعتماد ربط نقطة البيع بالشبكة بعد مسح رمز الدعوة المشفر بالكاميرا
 class NetworkPosLinkConfirmSheet extends StatelessWidget {
   const NetworkPosLinkConfirmSheet({
     super.key,
@@ -47,6 +49,10 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final statusPres = EnumPresentationRegistry.resolveNetworkStatus(
+      preview.network.typedStatus,
+      serverLabel: preview.network.statusLabel,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -58,7 +64,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
             padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: colors.primary.withValues(alpha: .06),
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
                 color: colors.primary.withValues(alpha: .25),
                 width: 1.0,
@@ -82,6 +88,12 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: colors.primary,
                       ),
+                    ),
+                    const Spacer(),
+                    CustomStatusBadge(
+                      label: statusPres.label,
+                      tone: statusPres.tone,
+                      icon: statusPres.icon,
                     ),
                   ],
                 ),
@@ -124,6 +136,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                 child: CustomButton.outline(
                   text: 'إلغاء',
                   size: AppButtonSize.medium,
+                  shape: AppButtonShape.pill,
                   onPressed: onCancel ?? () => Get.back<bool>(result: false),
                 ),
               ),
@@ -134,6 +147,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                   text: 'تأكيد وإتمام الارتباط',
                   icon: Icons.check_circle_outline_rounded,
                   size: AppButtonSize.medium,
+                  shape: AppButtonShape.pill,
                   onPressed: onConfirm,
                 ),
               ),

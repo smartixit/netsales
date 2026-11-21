@@ -42,7 +42,6 @@ class NetworkEntity extends Equatable {
   final String? createdAt;
   final String? updatedAt;
 
-  /// مرجع الشبكة الأصلي للعرض والنسخ (UUID المعتمد أو المعرف الرقمي)
   String get displayReference {
     if (networkUuid != null && networkUuid!.trim().isNotEmpty) {
       return networkUuid!.trim();
@@ -50,22 +49,18 @@ class NetworkEntity extends Equatable {
     return '#$networkId';
   }
 
-  /// الاسم المنسق للعرض
   String get displayName =>
       networkName.trim().isNotEmpty ? networkName.trim() : 'شبكة #$networkId';
 
-  /// هاتف التواصل المنسق
   String get displayPhone => networkPhoneNumber.trim().isNotEmpty
       ? networkPhoneNumber.trim()
       : 'غير متوفر';
 
-  /// اسم المسؤول أو المالك المنسق
   String get displayOwnerName =>
       ownerName != null && ownerName!.trim().isNotEmpty
           ? ownerName!.trim()
           : 'غير محدد';
 
-  /// العنوان والموقع الجغرافي المنسق
   String get displayLocation {
     final segments = <String>[
       if (governorateName != null && governorateName!.trim().isNotEmpty)
@@ -83,10 +78,8 @@ class NetworkEntity extends Equatable {
     return 'غير محدد';
   }
 
-  /// تاريخ الإنشاء المحول
   DateTime? get parsedCreatedAt => DateTime.tryParse(createdAt ?? '');
 
-  /// صيغة تاريخ الإنشاء المنسقة
   String get formattedCreatedAt => parsedCreatedAt != null
       ? DateFormatter.date(parsedCreatedAt!)
       : (createdAt ?? 'غير متوفر');

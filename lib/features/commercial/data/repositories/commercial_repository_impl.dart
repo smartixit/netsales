@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -8,21 +7,20 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_link_pr
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
-/// تطبيق مستودع العلاقات التجارية والشركاء
+/// تطبيق مستودع العلاقات التجارية ونقاط البيع والشبكات
 class CommercialRepositoryImpl implements CommercialRepository {
-  CommercialRepositoryImpl([CommercialRemoteDataSource? remoteDataSource])
-      : _remote = remoteDataSource ?? Get.find<CommercialRemoteDataSource>();
+  const CommercialRepositoryImpl(this._remoteDataSource);
 
-  final CommercialRemoteDataSource _remote;
+  final CommercialRemoteDataSource _remoteDataSource;
 
   @override
   Future<List<NetworkEntity>> getMyNetworks() {
-    return _remote.getMyNetworks();
+    return _remoteDataSource.getMyNetworks();
   }
 
   @override
   Future<List<PosEntity>> getMyPos() {
-    return _remote.getMyPos();
+    return _remoteDataSource.getMyPos();
   }
 
   @override
@@ -32,13 +30,20 @@ class CommercialRepositoryImpl implements CommercialRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) {
-    return _remote.getNetworkPosList(
+  }) async {
+    final paginatedModels = await _remoteDataSource.getNetworkPosList(
       networkId: networkId,
       status: status,
       search: search,
       cursor: cursor,
       perPage: perPage,
+    );
+
+    return PaginatedList<NetworkPosLinkEntity>(
+      items: paginatedModels.items,
+      nextCursor: paginatedModels.nextCursor,
+      prevCursor: paginatedModels.prevCursor,
+      perPage: paginatedModels.perPage,
     );
   }
 
@@ -49,13 +54,20 @@ class CommercialRepositoryImpl implements CommercialRepository {
     String? search,
     String? cursor,
     int? perPage,
-  }) {
-    return _remote.getPosNetworksList(
+  }) async {
+    final paginatedModels = await _remoteDataSource.getPosNetworksList(
       posId: posId,
       status: status,
       search: search,
       cursor: cursor,
       perPage: perPage,
+    );
+
+    return PaginatedList<NetworkPosLinkEntity>(
+      items: paginatedModels.items,
+      nextCursor: paginatedModels.nextCursor,
+      prevCursor: paginatedModels.prevCursor,
+      perPage: paginatedModels.perPage,
     );
   }
 
@@ -64,7 +76,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     required int networkId,
     required int posId,
   }) {
-    return _remote.createNetworkPosLink(
+    return _remoteDataSource.createNetworkPosLink(
       networkId: networkId,
       posId: posId,
     );
@@ -72,12 +84,12 @@ class CommercialRepositoryImpl implements CommercialRepository {
 
   @override
   Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(int networkPosId) {
-    return _remote.toggleNetworkPosLinkStatus(networkPosId);
+    return _remoteDataSource.toggleNetworkPosLinkStatus(networkPosId);
   }
 
   @override
   Future<void> deleteNetworkPosLink(int networkPosId) {
-    return _remote.deleteNetworkPosLink(networkPosId);
+    return _remoteDataSource.deleteNetworkPosLink(networkPosId);
   }
 
   @override
@@ -87,7 +99,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     String? posUuid,
     int durationMinutes = 15,
   }) {
-    return _remote.createNetworkPosLinkChallenge(
+    return _remoteDataSource.createNetworkPosLinkChallenge(
       networkId: networkId,
       posId: posId,
       posUuid: posUuid,
@@ -101,7 +113,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     int? posId,
     String? posUuid,
   }) {
-    return _remote.previewNetworkPosLinkChallenge(
+    return _remoteDataSource.previewNetworkPosLinkChallenge(
       payload: payload,
       posId: posId,
       posUuid: posUuid,
@@ -114,7 +126,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     int? posId,
     String? posUuid,
   }) {
-    return _remote.confirmNetworkPosLinkChallenge(
+    return _remoteDataSource.confirmNetworkPosLinkChallenge(
       challengeUuid: challengeUuid,
       posId: posId,
       posUuid: posUuid,
@@ -123,16 +135,16 @@ class CommercialRepositoryImpl implements CommercialRepository {
 
   @override
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid) {
-    return _remote.revokeNetworkPosLinkChallenge(challengeUuid);
+    return _remoteDataSource.revokeNetworkPosLinkChallenge(challengeUuid);
   }
 
   @override
   Future<NetworkEntity> getNetworkDetails(int networkId) {
-    return _remote.getNetworkDetails(networkId);
+    return _remoteDataSource.getNetworkDetails(networkId);
   }
 
   @override
   Future<PosEntity> getPosDetails(int posId) {
-    return _remote.getPosDetails(posId);
+    return _remoteDataSource.getPosDetails(posId);
   }
 }

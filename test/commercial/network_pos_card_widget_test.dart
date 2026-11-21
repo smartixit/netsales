@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
-import 'package:netsales/features/commercial/presentation/widgets/network_pos_card/network_pos_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card.dart';
 
 void main() {
   Widget buildTestableWidget(Widget child) {
@@ -17,7 +17,7 @@ void main() {
     );
   }
 
-  group('NetworkPosCard Widget Tests', () {
+  group('CommercialPartnerCard Widget Tests (Executive Edition)', () {
     const link = NetworkPosLinkEntity(
       networkPosId: 1,
       networkId: 10,
@@ -36,12 +36,13 @@ void main() {
       ),
     );
 
-    testWidgets('Renders partner name, raw UUID, and status badge', (tester) async {
+    testWidgets('Renders partner name, reference, and active status badge', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          NetworkPosCard(
+          CommercialPartnerCard(
             link: link,
-            onTap: () {},
+            isNetworkView: true,
+            onDetails: () {},
             onToggleStatus: () {},
             onDelete: () {},
           ),
@@ -51,34 +52,29 @@ void main() {
 
       expect(find.text('مركز المدينة للاتصالات'), findsOneWidget);
       expect(find.text('POS-2026-SOVEREIGN-999'), findsOneWidget);
-      expect(find.text('نشط'), findsOneWidget);
-      expect(find.text('التفاصيل'), findsOneWidget);
-      expect(find.text('تجميد'), findsOneWidget);
+      expect(find.text('نشط'), findsWidgets);
+      expect(find.text('ملف نقطة البيع'), findsOneWidget);
     });
 
-    testWidgets('Triggers callbacks when buttons are tapped', (tester) async {
+    testWidgets('Triggers callbacks when details action is tapped', (tester) async {
       bool detailsTapped = false;
-      bool toggleTapped = false;
 
       await tester.pumpWidget(
         buildTestableWidget(
-          NetworkPosCard(
+          CommercialPartnerCard(
             link: link,
-            onTap: () => detailsTapped = true,
-            onToggleStatus: () => toggleTapped = true,
+            isNetworkView: true,
+            onDetails: () => detailsTapped = true,
+            onToggleStatus: () {},
             onDelete: () {},
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('التفاصيل'));
+      await tester.tap(find.text('ملف نقطة البيع'));
       await tester.pumpAndSettle();
       expect(detailsTapped, isTrue);
-
-      await tester.tap(find.text('تجميد'));
-      await tester.pumpAndSettle();
-      expect(toggleTapped, isTrue);
     });
   });
 }

@@ -56,7 +56,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   @override
   Widget? get headerAction => canCreateOrder
       ? CustomButton.primary(
-          text: 'طلب توريد جديد +',
+          text: 'طلب توريد جديد',
           icon: Icons.add_shopping_cart_rounded,
           shape: AppButtonShape.pill,
           size: AppButtonSize.small,

@@ -4,7 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 
-/// سطر عرض معلومة موحد داخل أكورديون البطاقة التجارية
+/// سطر عرض معلومة موحد داخل تفاصيل البطاقة التجارية
 class CommercialDetailRow extends StatelessWidget {
   const CommercialDetailRow({
     super.key,

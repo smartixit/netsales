@@ -8,7 +8,7 @@ import 'package:netsales/features/commercial/data/models/network_pos_link_model.
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
-/// تطبيق مصدر البيانات البعيد للعلاقات التجارية عبر [ApiService] المعتمد
+/// تطبيق مصدر البيانات البعيد للعلاقات التجارية عبر [ApiService]
 class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   const CommercialRemoteDataSourceImpl();
 
@@ -61,8 +61,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       'per_page': perPage ?? 15,
     };
 
-    final response =
-        await ApiService.instance.get<List<NetworkPosLinkModel>>(
+    final response = await ApiService.instance.get<List<NetworkPosLinkModel>>(
       ApiConstants.networkPosList(networkId),
       queryParameters: queryParams,
       fromJson: (data) {
@@ -99,8 +98,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       'per_page': perPage ?? 15,
     };
 
-    final response =
-        await ApiService.instance.get<List<NetworkPosLinkModel>>(
+    final response = await ApiService.instance.get<List<NetworkPosLinkModel>>(
       ApiConstants.posNetworksList(posId),
       queryParameters: queryParams,
       fromJson: (data) {
@@ -147,7 +145,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<NetworkPosLinkModel> toggleNetworkPosLinkStatus(
       int networkPosId) async {
-    final response = await ApiService.instance.patch<NetworkPosLinkModel>(
+    final response = await ApiService.instance.post<NetworkPosLinkModel>(
       ApiConstants.networkPosToggleStatus(networkPosId),
       fromJson: (data) =>
           NetworkPosLinkModel.fromJson(data as Map<String, dynamic>),
@@ -177,7 +175,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     final payload = <String, dynamic>{
       'network_id': networkId,
       'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
+      if (posUuid != null && posUuid.trim().isNotEmpty)
+        'pos_uuid': posUuid.trim(),
       'duration_minutes': durationMinutes,
     };
 
@@ -205,15 +204,16 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     final body = <String, dynamic>{
       'payload': payload,
       'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
+      if (posUuid != null && posUuid.trim().isNotEmpty)
+        'pos_uuid': posUuid.trim(),
     };
 
     final response =
         await ApiService.instance.post<NetworkPosLinkPreviewModel>(
       ApiConstants.networkPosChallengesPreview,
       data: body,
-      fromJson: (data) => NetworkPosLinkPreviewModel.fromJson(
-          data as Map<String, dynamic>),
+      fromJson: (data) =>
+          NetworkPosLinkPreviewModel.fromJson(data as Map<String, dynamic>),
     );
 
     final result = response.data;
@@ -232,7 +232,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     final body = <String, dynamic>{
       'challenge_uuid': challengeUuid,
       'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty) 'pos_uuid': posUuid.trim(),
+      if (posUuid != null && posUuid.trim().isNotEmpty)
+        'pos_uuid': posUuid.trim(),
     };
 
     final response = await ApiService.instance.post<NetworkPosLinkModel>(

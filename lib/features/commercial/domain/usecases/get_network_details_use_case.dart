@@ -1,6 +1,7 @@
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
+/// حالة استخدام استرجاع تفاصيل شبكة محددة
 class GetNetworkDetailsUseCase {
   const GetNetworkDetailsUseCase(this._repository);
 

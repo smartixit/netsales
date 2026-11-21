@@ -27,42 +27,30 @@ class NetworkPosLinkEntity extends Equatable {
 
   bool get isActive => status;
 
-  /// اسم نقطة البيع المنسق للعرض
   String get displayPosName => pos?.displayName ?? 'نقطة بيع #$posId';
 
-  /// معرف نقطة البيع الأصلي للعرض والنسخ
   String get displayPosReference => pos?.displayReference ?? '#$posId';
 
-  /// هاتف نقطة البيع
   String get posPhone => pos?.displayPhone ?? 'غير متوفر';
 
-  /// مدير نقطة البيع
   String get posOwnerName => pos?.displayOwnerName ?? 'غير محدد';
 
-  /// موقع نقطة البيع
   String get posLocation => pos?.displayLocation ?? 'غير محدد';
 
-  /// اسم الشبكة المنسق للعرض
   String get displayNetworkName =>
       network?.displayName ?? 'شبكة #$networkId';
 
-  /// معرف الشبكة الأصلي للعرض والنسخ
   String get displayNetworkReference =>
       network?.displayReference ?? '#$networkId';
 
-  /// هاتف الشبكة
   String get networkPhone => network?.displayPhone ?? 'غير متوفر';
 
-  /// مدير الشبكة
   String get networkOwnerName => network?.displayOwnerName ?? 'غير محدد';
 
-  /// موقع الشبكة
   String get networkLocation => network?.displayLocation ?? 'غير محدد';
 
-  /// تاريخ الارتباط المحول
   DateTime? get parsedLinkedDate => DateTime.tryParse(createdAt ?? '');
 
-  /// صيغة تاريخ الارتباط المنسقة
   String get formattedLinkedDate => parsedLinkedDate != null
       ? DateFormatter.date(parsedLinkedDate!)
       : (createdAt ?? 'غير متوفر');

@@ -90,7 +90,7 @@ class NetworkInvoicesController extends BaseInvoicesController {
   @override
   Widget? get headerAction => canCreateDirectInvoice
       ? CustomButton.primary(
-          text: 'فاتورة مباشرة +',
+          text: 'فاتورة مباشرة',
           icon: Icons.add_rounded,
           shape: AppButtonShape.pill,
           size: AppButtonSize.small,
@@ -166,8 +166,9 @@ class NetworkInvoicesController extends BaseInvoicesController {
       );
 
       final existingIds = invoices.map((e) => e.invoiceId).toSet();
-      final newItems =
-          result.items.where((e) => !existingIds.contains(e.invoiceId)).toList();
+      final newItems = result.items
+          .where((e) => !existingIds.contains(e.invoiceId))
+          .toList();
 
       invoices.addAll(newItems);
       _nextCursor = result.nextCursor;
@@ -323,7 +324,10 @@ class NetworkInvoicesController extends BaseInvoicesController {
     );
 
     return [
-      const CustomSearchFilterOption<String?>(value: null, label: 'كافة الحالات'),
+      const CustomSearchFilterOption<String?>(
+        value: null,
+        label: 'كافة الحالات',
+      ),
       CustomSearchFilterOption<String?>(
         value: InvoicePaymentStatus.paid.wireValue,
         label: paidPres.label,

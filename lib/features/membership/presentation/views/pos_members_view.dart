@@ -35,11 +35,10 @@ class PosMembersView extends GetView<PosMembersController> {
             children: [
               CustomPageHeroCard(
                 title: 'فريق عمل نقطة البيع',
-                subtitle:
-                    'إدارة البائعين والمشغلين، تعيين الأدوار، والتحكم في صلاحيات الوصول للفرع.',
+                subtitle: 'إدارة البائعين والمشغلين، تعيين الأدوار، والتحكم في صلاحيات الوصول للفرع.',
                 icon: Icons.groups_rounded,
                 action: CustomButton.primary(
-                  text: 'إضافة عضو +',
+                  text: 'إضافة عضو',
                   icon: Icons.person_add_rounded,
                   shape: AppButtonShape.pill,
                   size: AppButtonSize.small,
@@ -131,7 +130,8 @@ class PosMembersView extends GetView<PosMembersController> {
           }
 
           if (members.isEmpty) {
-            final hasFilter = controller.searchQuery.value.isNotEmpty ||
+            final hasFilter =
+                controller.searchQuery.value.isNotEmpty ||
                 controller.statusFilter.value != null;
 
             return SliverToBoxAdapter(
@@ -151,41 +151,36 @@ class PosMembersView extends GetView<PosMembersController> {
                 onAction: hasFilter
                     ? controller.resetFilters
                     : (controller.canManageMembers
-                        ? controller.openAddMemberSheet
-                        : null),
+                          ? controller.openAddMemberSheet
+                          : null),
               ),
             );
           }
 
           final memberCount = members.length;
           return SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index.isOdd) return AppSpacing.vSm;
-                final memberIndex = index ~/ 2;
-                final member = members[memberIndex];
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index.isOdd) return AppSpacing.vSm;
+              final memberIndex = index ~/ 2;
+              final member = members[memberIndex];
 
-                return Obx(() {
-                  final isExpanded = controller.expandedMemberId.value ==
-                      member.userId;
+              return Obx(() {
+                final isExpanded =
+                    controller.expandedMemberId.value == member.userId;
 
-                  return MemberCard(
-                    key: ValueKey<String>('pos-member-${member.userId}'),
-                    member: member,
-                    isExpanded: isExpanded,
-                    onToggleExpansion: () =>
-                        controller.toggleAccordion(member.userId),
-                    onUpdateRole: () =>
-                        controller.openChangeRoleSheet(member),
-                    onToggleStatus: () =>
-                        controller.promptToggleMemberStatus(member),
-                    onDelete: () =>
-                        controller.promptRemoveMember(member),
-                  );
-                });
-              },
-              childCount: memberCount == 0 ? 0 : memberCount * 2 - 1,
-            ),
+                return MemberCard(
+                  key: ValueKey<String>('pos-member-${member.userId}'),
+                  member: member,
+                  isExpanded: isExpanded,
+                  onToggleExpansion: () =>
+                      controller.toggleAccordion(member.userId),
+                  onUpdateRole: () => controller.openChangeRoleSheet(member),
+                  onToggleStatus: () =>
+                      controller.promptToggleMemberStatus(member),
+                  onDelete: () => controller.promptRemoveMember(member),
+                );
+              });
+            }, childCount: memberCount == 0 ? 0 : memberCount * 2 - 1),
           );
         }),
       ],
