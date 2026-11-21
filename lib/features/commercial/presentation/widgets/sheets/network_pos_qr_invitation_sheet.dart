@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -27,6 +31,37 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
   final NetworkPosLinkChallengeEntity challenge;
   final String networkName;
   final String posName;
+
+  Future<Uint8List> _captureShareCard(BuildContext context) async {
+    await precacheImage(
+      const AssetImage('assets/images/brand_icon.png'),
+      context,
+    );
+    await WidgetsBinding.instance.endOfFrame;
+    final renderObject =
+        controller.invitationShareCardKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) {
+      throw StateError('تعذر تجهيز بطاقة الدعوة للتصدير.');
+    }
+
+    final image = await renderObject.toImage(pixelRatio: 1);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw StateError('تعذر تحويل بطاقة الدعوة إلى صورة.');
+      }
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      if (bytes.isEmpty) {
+        throw StateError('الصورة الناتجة لبطاقة الدعوة فارغة.');
+      }
+      return bytes;
+    } finally {
+      image.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +222,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     size: AppButtonSize.medium,
                     loading: isExporting,
                     onPressed: isActive && !isExporting
-                        ? () => controller.shareInvitation(context)
+                        ? () => controller.shareInvitation(() => _captureShareCard(context))
                         : null,
                   ),
                 ),
@@ -199,7 +234,7 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     size: AppButtonSize.medium,
                     loading: isExporting,
                     onPressed: isActive && !isExporting
-                        ? () => controller.saveInvitation(context)
+                        ? () => controller.saveInvitation(() => _captureShareCard(context))
                         : null,
                   ),
                 ),
