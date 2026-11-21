@@ -70,7 +70,6 @@ jobs:
           lib/core/services/infinityfree_challenge_solver.dart
           test/core/services/infinityfree_challenge_interceptor_test.dart
           test/core/services/infinityfree_challenge_solver_test.dart
-
           test/requests/procurement_quote_pricing_test.dart
           test/requests/procurement_requests_controller_test.dart
           lib/features/requests/presentation/controllers/network_procurement_review_controller.dart
@@ -85,7 +84,6 @@ jobs:
           lib/core/services/infinityfree_challenge_solver.dart
           test/core/services/infinityfree_challenge_interceptor_test.dart
           test/core/services/infinityfree_challenge_solver_test.dart
-
           test/requests/procurement_quote_pricing_test.dart
           test/requests/procurement_requests_controller_test.dart
           lib/features/requests/presentation/controllers/network_procurement_review_controller.dart
