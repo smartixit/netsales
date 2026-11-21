@@ -54,8 +54,7 @@ abstract class CommercialRepository {
   /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   });
 
