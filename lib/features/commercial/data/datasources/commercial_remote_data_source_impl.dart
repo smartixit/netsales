@@ -9,6 +9,7 @@ import 'package:netsales/features/commercial/data/models/network_pos_link_challe
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 
 /// تطبيق مصدر البيانات البعيد للعلاقات التجارية عبر [ApiService]
 class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
@@ -166,17 +167,17 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
-  Future<PosModel> resolveNetworkLinkablePos({
+  Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
   }) async {
-    final response = await ApiService.instance.post<PosModel>(
+    final response = await ApiService.instance.post<NetworkLinkablePosModel>(
       ApiConstants.networkPosChallengesResolveTarget,
       data: {
         'network_id': networkId,
         'pos_uuid': posBusinessCode.trim().toUpperCase(),
       },
-      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+      fromJson: (data) => NetworkLinkablePosModel.fromJson(data as Map<String, dynamic>),
     );
 
     final result = response.data;
