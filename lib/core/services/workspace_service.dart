@@ -8,6 +8,7 @@ import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/models/user_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 
 /// The single runtime authority for the currently selected workspace.
@@ -215,6 +216,24 @@ class WorkspaceService extends GetxService {
     } else {
       await storage.remove(StorageKeys.activeWorkspaceKey);
     }
+  }
+
+  /// Rebind UI permissions to the exact active tenant membership.
+  /// Missing or inactive membership is represented by an empty permission set.
+  void bindActiveMembership(RoleScope scope, int? tenantId) {
+    final user = SessionService.to.currentUser;
+    final membership = tenantId == null || tenantId <= 0
+        ? null
+        : user?.workspaceMemberships.firstWhereOrNull(
+            (item) => item.scope == scope && item.tenantId == tenantId,
+          );
+
+    PermissionService.to.setWorkspaceContext(
+      scope: scope,
+      tenantId: membership?.tenantId ?? 0,
+      roleKey: membership?.roleKey ?? '',
+      permissions: membership?.permissions ?? const <String>[],
+    );
   }
 
   Future<void> setActiveWorkspace(AppWorkspace workspace) async {
