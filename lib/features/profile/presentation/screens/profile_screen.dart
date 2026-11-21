@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_details_section.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_identity_card.dart';
