@@ -9,7 +9,7 @@ class NetworkPosLinkChallengeEntity extends Equatable {
     required this.challengeUuid,
     required this.payload,
     required this.networkId,
-    this.posId,
+    required this.posId,
     this.status,
     this.statusLabel,
     this.expiresAt,
@@ -24,7 +24,7 @@ class NetworkPosLinkChallengeEntity extends Equatable {
   final String challengeUuid;
   final String payload;
   final int networkId;
-  final int? posId;
+  final int posId;
   final String? status;
   final String? statusLabel;
   final String? expiresAt;
