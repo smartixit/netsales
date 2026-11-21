@@ -3,8 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/request_status.dart';
-import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
@@ -98,7 +97,7 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
                 ),
               ),
               AppSpacing.vMd,
-              _ProcurementApprovalProgress(status: order.request.status),
+              _ProcurementApprovalProgress(presentation: order.statusPresentation),
             ],
           ),
         ),
@@ -108,36 +107,14 @@ class PosActiveSupplyOrderTracker extends StatelessWidget {
 }
 
 class _ProcurementApprovalProgress extends StatelessWidget {
-  const _ProcurementApprovalProgress({required this.status});
+  const _ProcurementApprovalProgress({required this.presentation});
 
-  final RequestStatus status;
+  final EnumPresentation presentation;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final inactive = colors.outlineVariant;
-    final complete = colors.success;
-    final active = colors.warning;
-    final rejected = colors.error;
-    final decisionLabel = switch (status) {
-      RequestStatus.approved => 'تمت المراجعة',
-      RequestStatus.rejected => 'تم الرفض',
-      RequestStatus.cancelled => 'تم الإلغاء',
-      RequestStatus.pending || RequestStatus.unknown => 'بانتظار الاعتماد',
-    };
-    final decisionColor = switch (status) {
-      RequestStatus.approved => complete,
-      RequestStatus.rejected || RequestStatus.cancelled => rejected,
-      RequestStatus.pending || RequestStatus.unknown => active,
-    };
-    final decisionIcon = switch (status) {
-      RequestStatus.approved => Icons.check_rounded,
-      RequestStatus.rejected || RequestStatus.cancelled => Icons.close_rounded,
-      RequestStatus.pending || RequestStatus.unknown => Icons.schedule_rounded,
-    };
-    final decisionIsFinal = status == RequestStatus.approved ||
-        status == RequestStatus.rejected ||
-        status == RequestStatus.cancelled;
+    final statusColor = presentation.tone.resolveColor(colors);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +123,7 @@ class _ProcurementApprovalProgress extends StatelessWidget {
           child: _ProgressStep(
             label: 'تم الإرسال',
             icon: Icons.check_rounded,
-            color: complete,
+            color: colors.success,
             isCurrent: false,
           ),
         ),
@@ -155,31 +132,15 @@ class _ProcurementApprovalProgress extends StatelessWidget {
           child: Container(
             height: 2.h,
             width: 20.w,
-            color: active.withValues(alpha: 0.72),
+            color: statusColor.withValues(alpha: 0.72),
           ),
         ),
         Expanded(
           child: _ProgressStep(
-            label: decisionLabel,
-            icon: decisionIcon,
-            color: decisionColor,
-            isCurrent: decisionIsFinal || status == RequestStatus.pending,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 11.h),
-          child: Container(
-            height: 2.h,
-            width: 20.w,
-            color: (status == RequestStatus.approved ? complete : inactive).withValues(alpha: 0.8),
-          ),
-        ),
-        Expanded(
-          child: _ProgressStep(
-            label: 'تم الاعتماد',
-            icon: Icons.verified_rounded,
-            color: status == RequestStatus.approved ? complete : inactive,
-            isCurrent: false,
+            label: presentation.label,
+            icon: presentation.icon ?? Icons.help_outline_rounded,
+            color: statusColor,
+            isCurrent: true,
           ),
         ),
       ],
