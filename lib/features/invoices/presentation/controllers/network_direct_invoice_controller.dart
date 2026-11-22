@@ -47,8 +47,7 @@ class NetworkDirectInvoiceController extends GetxController {
   // نوع البيع (0 = نقدي، 1 = آجل)
   final selectedSaleTypeIndex = 0.obs;
 
-  SaleType get selectedSaleType =>
-      selectedSaleTypeIndex.value == 0 ? SaleType.cash : SaleType.credit;
+  SaleType get selectedSaleType => SaleType.cash;
 
   // الدفعة النقدية المقبوضة كاش في البيع الآجل
   final paidAmountController = TextEditingController();
@@ -160,9 +159,7 @@ class NetworkDirectInvoiceController extends GetxController {
     }
   }
 
-  void setSaleTypeIndex(int index) {
-    selectedSaleTypeIndex.value = index;
-  }
+  void setSaleTypeIndex(int index) {}
 
   void selectPos(int posId) {
     selectedPosId.value = posId;
