@@ -144,6 +144,7 @@ class FakeQuoteRequestRepository implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) async => throw UnimplementedError();
 
   @override
@@ -493,11 +494,11 @@ void main() {
           ),
         );
 
-        // The procurement workflow is cash-only; attempts to select credit are ignored.
-        controller.setSaleTypeIndex(1);
+        // Change from CASH to CREDIT
+        controller.selectedSaleType.value = SaleType.credit;
         await pumpEventQueue();
 
-        expect(controller.selectedSaleType.value, SaleType.cash);
+        expect(controller.selectedSaleType.value, SaleType.credit);
         expect(mockRepo.lastQuotePayload, isNull);
       },
     );
