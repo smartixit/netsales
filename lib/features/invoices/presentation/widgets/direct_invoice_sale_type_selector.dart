@@ -19,7 +19,7 @@ class DirectInvoiceSaleTypeSelector
 
     return Obx(
       () => CustomSegmentedBar(
-        selectedIndex: controller.selectedSaleTypeIndex.value,
+        selectedIndex: controller.selectedSaleTypeIndex,
         onSegmentChanged: controller.setSaleTypeIndex,
         items: [
           CustomSegmentItem(

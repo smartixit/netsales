@@ -116,7 +116,7 @@ class DirectInvoicePackageSelectionSection
                                         package.packageId,
                                       );
                                   final isCashSale =
-                                      controller.selectedSaleType ==
+                                      controller.selectedSaleType.value ==
                                       SaleType.cash;
 
                                   return DirectInvoicePackageOptionCard(

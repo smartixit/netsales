@@ -42,10 +42,12 @@ class InvoiceCardActions extends StatelessWidget {
           const SizedBox(width: 8),
           CustomButton.icon(
             icon: Icons.print_outlined,
-            size: AppButtonSize.small,
-            shape: AppButtonShape.circle,
-            backgroundColor: colors.surfaceContainerHigh,
             tooltip: 'طباعة الفاتورة',
+            size: AppButtonSize.small,
+            shape: AppButtonShape.pill,
+            backgroundColor: colors.surfaceContainer,
+            foregroundColor: colors.onSurfaceVariant,
+            borderColor: colors.outlineVariant.withValues(alpha: .6),
             onPressed: onPrint,
           ),
         ],
@@ -53,15 +55,15 @@ class InvoiceCardActions extends StatelessWidget {
         // زر المشاركة السريعة الموحد
         if (onShare != null) ...[
           const SizedBox(width: 6),
+
           CustomButton.icon(
             icon: Icons.share_outlined,
-            size: AppButtonSize.small,
-            shape: AppButtonShape.circle,
-            backgroundColor: colors.surfaceContainerHighest.withValues(
-              alpha: 0.5,
-            ),
-            foregroundColor: colors.onSurfaceVariant,
             tooltip: 'مشاركة الفاتورة',
+            size: AppButtonSize.small,
+            shape: AppButtonShape.pill,
+            backgroundColor: colors.surfaceContainer,
+            foregroundColor: colors.onSurfaceVariant,
+            borderColor: colors.outlineVariant.withValues(alpha: .6),
             onPressed: onShare,
           ),
         ],
