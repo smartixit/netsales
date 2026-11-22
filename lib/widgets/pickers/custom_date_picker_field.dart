@@ -35,10 +35,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
     this.rangeIncompleteMessage = 'يرجى تحديد تاريخ البداية والنهاية',
     this.outOfRangeMessage = 'التاريخ المحدد خارج النطاق المسموح',
     this.unselectableDateMessage = 'أحد التواريخ المحددة غير متاح',
-    // Forwarded through FormField's explicit super initializer with the rest
-    // of the form configuration.
-    // ignore: use_super_parameters
-    bool enabled = true,
+    super.enabled = true,
     this.readOnly = false,
     this.clearable = true,
     FormFieldValidator<List<DateTime?>>? validator,
@@ -60,7 +57,6 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
        assert(maxDisplayLines >= 1 && maxDisplayLines <= 3),
        super(
          initialValue: _normalizeDatePickerValue(value, pickerType),
-         enabled: enabled,
          autovalidateMode: autovalidateMode,
          validator: (candidate) => _validateDatePickerValue(
            candidate,
