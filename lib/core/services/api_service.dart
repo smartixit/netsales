@@ -116,7 +116,7 @@ class ApiService {
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode} ${e.message}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {

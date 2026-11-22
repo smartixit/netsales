@@ -59,7 +59,9 @@ import 'package:netsales/features/workspace/presentation/bindings/network_worksp
 import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_binding.dart';
 import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell_screen.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
+import 'package:netsales/features/wallet/presentation/bindings/network_wallet_statement_binding.dart';
 import 'package:netsales/features/wallet/presentation/bindings/pos_wallet_statement_binding.dart';
+import 'package:netsales/features/wallet/presentation/screens/network_wallet_statement_screen.dart';
 import 'package:netsales/features/wallet/presentation/screens/pos_wallet_statement_screen.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_binding.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_screen.dart';
@@ -432,6 +434,15 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.networkWalletStatement,
+      page: () => const NetworkWalletStatementScreen(),
+      binding: NetworkWalletStatementBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
 

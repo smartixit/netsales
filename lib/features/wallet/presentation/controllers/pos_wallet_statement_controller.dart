@@ -9,10 +9,12 @@ import 'package:netsales/features/wallet/domain/entities/pos_wallet_entity.dart'
 import 'package:netsales/features/wallet/domain/entities/pos_wallet_log_entity.dart';
 import 'package:netsales/features/wallet/domain/usecases/get_pos_wallet_by_network_and_pos_use_case.dart';
 import 'package:netsales/features/wallet/domain/usecases/get_pos_wallet_logs_use_case.dart';
+import 'package:netsales/features/wallet/presentation/controllers/wallet_filter_controller.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 
 /// متحكم كشف حساب ودفتر أستاذ محفظة نقطة البيع (POS Wallet Statement Controller)
-class PosWalletStatementController extends GetxController {
+class PosWalletStatementController extends GetxController
+    implements WalletFilterController {
   PosWalletStatementController({
     required this.getPosWalletByNetworkAndPosUseCase,
     required this.getPosWalletLogsUseCase,
@@ -33,11 +35,13 @@ class PosWalletStatementController extends GetxController {
   final RxnString errorMessage = RxnString();
 
   // الفلاتر
+  @override
   final Rxn<WalletOperationType> selectedOperationType =
       Rxn<WalletOperationType>();
   final RxString searchQuery = ''.obs;
   final RxnString fromDate = RxnString();
   final RxnString toDate = RxnString();
+  @override
   final TextEditingController searchController = TextEditingController();
 
   // الترقيم التدريجي بالمؤشر
@@ -160,6 +164,7 @@ class PosWalletStatementController extends GetxController {
   }
 
   /// تغيير فلتر نوع الحركة (الكل / إيداع / سحب)
+  @override
   void setOperationFilter(WalletOperationType? type) {
     if (selectedOperationType.value == type) return;
     selectedOperationType.value = type;
@@ -184,6 +189,7 @@ class PosWalletStatementController extends GetxController {
   }
 
   /// البحث المؤجل (Debounced Search)
+  @override
   void onSearchChanged(String query) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {

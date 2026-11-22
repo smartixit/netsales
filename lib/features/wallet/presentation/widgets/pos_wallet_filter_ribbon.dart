@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/features/wallet/presentation/controllers/pos_wallet_statement_controller.dart';
+import 'package:netsales/features/wallet/presentation/controllers/wallet_filter_controller.dart';
 import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_filter_chip.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
@@ -11,7 +11,7 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 class PosWalletFilterRibbon extends StatelessWidget {
   const PosWalletFilterRibbon({super.key, required this.controller});
 
-  final PosWalletStatementController controller;
+  final WalletFilterController controller;
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
@@ -13,11 +15,13 @@ import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 /// - ترويسة بهوية الشريك وشعاره الرسمي، الهاتف، وشارات الحالة والنوع المعتمدة عبر [EnumPresentationRegistry].
 /// - سكة قياسات ثلاثية محمية بـ FittedBox (الموقع الجغرافي، المسؤول، حالة الارتباط).
 /// - أزرار إجراءات ذكية تتكيف مع مساحة العمل (شبكة التوزيع أو نقطة البيع).
+/// - النقر المباشر على الكرت يوجه تلقائياً إلى دفتر أستاذ محفظة نقطة البيع في سياق مساحة عمل الشبكة.
 class CommercialPartnerCard extends StatelessWidget {
   const CommercialPartnerCard({
     super.key,
     required this.link,
     required this.onDetails,
+    this.onTap,
     this.isNetworkView = true,
     this.isExpanded = false,
     this.onToggleExpand,
@@ -28,6 +32,7 @@ class CommercialPartnerCard extends StatelessWidget {
 
   final NetworkPosLinkEntity link;
   final VoidCallback onDetails;
+  final VoidCallback? onTap;
   final bool isNetworkView;
   final bool isExpanded;
   final VoidCallback? onToggleExpand;
@@ -104,7 +109,18 @@ class CommercialPartnerCard extends StatelessWidget {
             onToggleStatus: onToggleStatus,
             onDelete: onDelete,
           ),
-      onTap: onDetails,
+      onTap: onTap ??
+          (isNetworkView
+              ? () {
+                  Get.toNamed(
+                    AppRoutes.posWalletStatement,
+                    arguments: {
+                      'network_id': link.networkId,
+                      'pos_id': link.posId,
+                    },
+                  );
+                }
+              : onDetails),
       isExpanded: isExpanded,
       onToggleExpand: onToggleExpand,
     );

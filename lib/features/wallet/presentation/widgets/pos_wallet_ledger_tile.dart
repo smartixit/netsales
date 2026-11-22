@@ -6,17 +6,17 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
-import 'package:netsales/features/wallet/domain/entities/pos_wallet_log_entity.dart';
+import 'package:netsales/features/wallet/domain/entities/wallet_log_entry.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// بطاقة قيد حركة دفتر أستاذ محفظة نقطة البيع (POS Wallet Ledger Tile)
+/// بطاقة قيد حركة دفتر أستاذ المحفظة المالية (Wallet Ledger Tile)
 ///
 /// تستخدم كائن العرض الدلالي الموحد [EnumPresentation] المستخرج عبر [EnumPresentationRegistry].
 class PosWalletLedgerTile extends StatelessWidget {
   const PosWalletLedgerTile({super.key, required this.log, this.onTap});
 
-  final PosWalletLogEntity log;
+  final WalletLogEntry log;
   final VoidCallback? onTap;
 
   @override
