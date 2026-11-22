@@ -360,11 +360,8 @@ class CustomBottomSheet extends StatelessWidget {
     final effectiveMaxHeight =
         mediaQuery.size.height * (maxHeightFactor ?? 0.88);
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: effectiveMaxHeight,
-        maxWidth: maxWidth ?? double.infinity,
-      ),
+    final sheet = Container(
+      constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.vertical(
@@ -524,6 +521,17 @@ class CustomBottomSheet extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+
+    if (maxWidth == null) return sheet;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth!),
+        child: sheet,
       ),
     );
   }
