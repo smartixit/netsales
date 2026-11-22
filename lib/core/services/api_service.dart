@@ -115,10 +115,12 @@ class ApiService {
       _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
-      final statusLabel =
-          e.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true
-          ? 'verification-unavailable'
-          : e.response?.statusCode;
+      final Object? statusLabel;
+      if (e.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true) {
+        statusLabel = 'verification-unavailable';
+      } else {
+        statusLabel = e.response?.statusCode;
+      }
       log(
         '⚠️ DioException on [$endpoint]: type=${e.type}, status=$statusLabel ${e.message}',
       );
@@ -750,9 +752,11 @@ class _SessionAuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] ==
-            true ||
-        err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true) {
+    final isVerificationProbe =
+        err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true;
+    final isChallengeFailure =
+        err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true;
+    if (isVerificationProbe || isChallengeFailure) {
       return handler.next(err);
     }
 
