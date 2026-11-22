@@ -543,8 +543,14 @@ class NetworkCommercialDirectoryController
 
 
   void onInvitationBusinessCodeChanged(String value) {
+    _invitationTargetsRevision++;
     invitationSearchQuery.value = value.trim();
     resolvedInvitationTarget.value = null;
+    invitationTargets.clear();
+    _invitationTargetsNextCursor = null;
+    invitationTargetsError.value = null;
+    isLoadingInvitationTargets.value = false;
+    isLoadingMoreInvitationTargets.value = false;
   }
 
   Future<void> loadInvitationTargets() async {
