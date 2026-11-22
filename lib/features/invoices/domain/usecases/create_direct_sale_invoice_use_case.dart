@@ -7,7 +7,7 @@ import 'package:netsales/features/invoices/domain/repositories/invoice_repositor
 ///
 /// تفرض الفحص المسبق والتحقق الدفاعي للبيانات قبل الاتصال بالمستودع:
 /// - اشتراط معرفات موجبة للشبكة ونقطة البيع.
-/// - اشتراط أن تكون الفاتورة نقدية فقط.
+/// - اشتراط نوع بيع صالح (نقدي أو آجل).
 /// - اشتراط قائمة بنود غير فارغة وبكميات كروت موجبة.
 /// - اشتراط مفتاح عزل تكرار (Idempotency Key) غير فارغ لحماية المعاملات المالية.
 class CreateDirectSaleInvoiceUseCase {
@@ -21,6 +21,7 @@ class CreateDirectSaleInvoiceUseCase {
     required SaleType saleType,
     required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   }) {
     if (networkId <= 0) {
       throw ArgumentError.value(networkId, 'networkId', 'معرف الشبكة غير صالح');
@@ -28,8 +29,8 @@ class CreateDirectSaleInvoiceUseCase {
     if (posId <= 0) {
       throw ArgumentError.value(posId, 'posId', 'معرف نقطة البيع غير صالح');
     }
-    if (saleType != SaleType.cash) {
-      throw ArgumentError.value(saleType, 'saleType', 'الفواتير المباشرة نقدية فقط');
+    if (saleType == SaleType.unknown) {
+      throw ArgumentError.value(saleType, 'saleType', 'نوع البيع غير معروف');
     }
     if (idempotencyKey.trim().isEmpty) {
       throw ArgumentError(
@@ -51,6 +52,7 @@ class CreateDirectSaleInvoiceUseCase {
       saleType: saleType,
       items: items,
       idempotencyKey: idempotencyKey,
+      paidAmount: paidAmount,
     );
   }
 }
