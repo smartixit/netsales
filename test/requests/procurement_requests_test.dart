@@ -404,7 +404,7 @@ void main() {
           'request_id': 101,
           'request_uuid': 'req-uuid-12345',
           'invoice_uuid': 'inv-uuid-901',
-          'sale_type': 'CREDIT',
+          'sale_type': 'CASH',
           'invoice_total_amount': 27000.0,
           'paid_amount': 27000.0,
           'remaining_amount': 0.0,
