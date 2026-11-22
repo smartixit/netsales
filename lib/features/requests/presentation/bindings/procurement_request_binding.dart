@@ -162,6 +162,10 @@ class ProcurementRequestBinding extends Bindings {
         previewRequestModificationUseCase:
             Get.find<PreviewRequestModificationUseCase>(),
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
+        getEffectivePackageDiscountsForPosUseCase:
+            Get.isRegistered<GetEffectivePackageDiscountsForPosUseCase>()
+                ? Get.find<GetEffectivePackageDiscountsForPosUseCase>()
+                : null,
         getRequestDetailsUseCase: Get.find<GetRequestDetailsUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
         getRequestStatusSummaryUseCase:

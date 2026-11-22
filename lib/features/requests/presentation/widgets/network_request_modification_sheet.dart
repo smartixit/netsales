@@ -485,6 +485,8 @@ class _NetworkRequestProposedItemsSection
               child: ProcurementPackageOptionCard(
                 package: pkg,
                 quantity: line.voucherCount,
+                customDiscount: controller.discountForPackage(line.packageId),
+                isDiscountLoading: controller.isLoadingPackageDiscounts.value,
                 estimatedLineTotal: authoritativeTotal,
                 onSetQuantity: (qty) =>
                     controller.setModificationQuantity(line.packageId, qty),

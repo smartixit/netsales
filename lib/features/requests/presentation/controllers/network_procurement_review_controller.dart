@@ -17,7 +17,9 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_status_summary_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_modification_preview_entity.dart';
@@ -52,9 +54,12 @@ class NetworkProcurementReviewController
   final GetPackagesUseCase getPackagesUseCase;
   final GetRequestDetailsUseCase getRequestDetailsUseCase;
   final GetRequestStatusSummaryUseCase? getRequestStatusSummaryUseCase;
+  final GetEffectivePackageDiscountsForPosUseCase?
+      getEffectivePackageDiscountsForPosUseCase;
   int _modificationRevision = 0;
   int _editorLoadRevision = 0;
   int _packageLoadRevision = 0;
+  int _packageDiscountRevision = 0;
 
   NetworkProcurementReviewController({
     required this.getRequestsUseCase,
@@ -65,6 +70,7 @@ class NetworkProcurementReviewController
     required this.getRequestDetailsUseCase,
     this.getMyNetworksUseCase,
     this.getRequestStatusSummaryUseCase,
+    this.getEffectivePackageDiscountsForPosUseCase,
   });
 
   @override
@@ -263,6 +269,12 @@ class NetworkProcurementReviewController
 
   final availablePackages = <PackageEntity>[].obs;
   final isLoadingPackages = false.obs;
+  final effectiveDiscountsByPackageId =
+      <int, EffectivePackageDiscountEntity>{}.obs;
+  final isLoadingPackageDiscounts = false.obs;
+
+  EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
+      effectiveDiscountsByPackageId[packageId];
   final isPreviewingModification = false.obs;
   final currentPreview = Rxn<RequestModificationPreviewEntity>();
   final lastApprovalResult = Rxn<RequestApprovalResultEntity>();
@@ -340,13 +352,101 @@ class NetworkProcurementReviewController
     final fromCatalog = availablePackages.firstWhereOrNull(
       (p) => p.packageId == packageId,
     );
-    if (fromCatalog != null) return fromCatalog;
-
     final fromRequest = editingRequest.value?.items.firstWhereOrNull(
       (i) => i.packageId == packageId,
     );
-    if (fromRequest?.voucherPackage != null) {
-      return fromRequest!.voucherPackage!;
+    final customDiscount = discountForPackage(packageId);
+    final hasCustom =
+        customDiscount?.isCustom == true || fromRequest?.isCustomDiscount == true;
+
+    if (fromCatalog != null) {
+      if (hasCustom && !fromCatalog.procurementIsCustomDiscount) {
+        return PackageEntity(
+          packageId: fromCatalog.packageId,
+          networkId: fromCatalog.networkId,
+          packageName: fromCatalog.packageName,
+          packageColor: fromCatalog.packageColor,
+          packageBalance: fromCatalog.packageBalance,
+          packageUptime: fromCatalog.packageUptime,
+          packageValidity: fromCatalog.packageValidity,
+          packageVoucherCount: fromCatalog.packageVoucherCount,
+          packageVoucherPrice: fromCatalog.packageVoucherPrice,
+          packageDefaultCashDiscount: fromCatalog.packageDefaultCashDiscount,
+          packageDefaultCreditDiscount:
+              fromCatalog.packageDefaultCreditDiscount,
+          cashDiscountAmount: fromCatalog.cashDiscountAmount,
+          creditDiscountAmount: fromCatalog.creditDiscountAmount,
+          effectiveCashPrice: fromCatalog.effectiveCashPrice,
+          effectiveCreditPrice: fromCatalog.effectiveCreditPrice,
+          status: fromCatalog.status,
+          createdBy: fromCatalog.createdBy,
+          createdAt: fromCatalog.createdAt,
+          updatedAt: fromCatalog.updatedAt,
+          networkName: fromCatalog.networkName,
+          procurementBaseUnitPriceMinor:
+              fromCatalog.procurementBaseUnitPriceMinor,
+          procurementCashUnitPriceMinor:
+              fromCatalog.procurementCashUnitPriceMinor,
+          procurementCreditUnitPriceMinor:
+              fromCatalog.procurementCreditUnitPriceMinor,
+          procurementCashDiscountBasisPoints:
+              fromCatalog.procurementCashDiscountBasisPoints,
+          procurementCreditDiscountBasisPoints:
+              fromCatalog.procurementCreditDiscountBasisPoints,
+          procurementPricingSnapshotToken:
+              fromCatalog.procurementPricingSnapshotToken,
+          procurementPricingSnapshotExpiresAt:
+              fromCatalog.procurementPricingSnapshotExpiresAt,
+          procurementIsCustomDiscount: true,
+        );
+      }
+      return fromCatalog;
+    }
+
+    final reqPackage = fromRequest?.voucherPackage;
+    if (reqPackage != null) {
+      if (hasCustom && !reqPackage.procurementIsCustomDiscount) {
+        return PackageEntity(
+          packageId: reqPackage.packageId,
+          networkId: reqPackage.networkId,
+          packageName: reqPackage.packageName,
+          packageColor: reqPackage.packageColor,
+          packageBalance: reqPackage.packageBalance,
+          packageUptime: reqPackage.packageUptime,
+          packageValidity: reqPackage.packageValidity,
+          packageVoucherCount: reqPackage.packageVoucherCount,
+          packageVoucherPrice: reqPackage.packageVoucherPrice,
+          packageDefaultCashDiscount:
+              reqPackage.packageDefaultCashDiscount,
+          packageDefaultCreditDiscount:
+              reqPackage.packageDefaultCreditDiscount,
+          cashDiscountAmount: reqPackage.cashDiscountAmount,
+          creditDiscountAmount: reqPackage.creditDiscountAmount,
+          effectiveCashPrice: reqPackage.effectiveCashPrice,
+          effectiveCreditPrice: reqPackage.effectiveCreditPrice,
+          status: reqPackage.status,
+          createdBy: reqPackage.createdBy,
+          createdAt: reqPackage.createdAt,
+          updatedAt: reqPackage.updatedAt,
+          networkName: reqPackage.networkName,
+          procurementBaseUnitPriceMinor:
+              reqPackage.procurementBaseUnitPriceMinor,
+          procurementCashUnitPriceMinor:
+              reqPackage.procurementCashUnitPriceMinor,
+          procurementCreditUnitPriceMinor:
+              reqPackage.procurementCreditUnitPriceMinor,
+          procurementCashDiscountBasisPoints:
+              reqPackage.procurementCashDiscountBasisPoints,
+          procurementCreditDiscountBasisPoints:
+              reqPackage.procurementCreditDiscountBasisPoints,
+          procurementPricingSnapshotToken:
+              reqPackage.procurementPricingSnapshotToken,
+          procurementPricingSnapshotExpiresAt:
+              reqPackage.procurementPricingSnapshotExpiresAt,
+          procurementIsCustomDiscount: true,
+        );
+      }
+      return reqPackage;
     }
 
     return PackageEntity(
@@ -368,6 +468,7 @@ class NetworkProcurementReviewController
       effectiveCashPrice: fromRequest?.voucherPrice ?? 0,
       effectiveCreditPrice: fromRequest?.voucherPrice ?? 0,
       status: true,
+      procurementIsCustomDiscount: hasCustom,
     );
   }
 
@@ -426,11 +527,18 @@ class NetworkProcurementReviewController
         ),
       );
       modificationNoteController.text = detailedRequest.requestNote ?? '';
-      await loadModificationPackages(
-        detailedRequest.networkId,
-        requestId: requestId,
-        editorRevision: loadRevision,
-      );
+      await Future.wait([
+        loadModificationPackages(
+          detailedRequest.networkId,
+          posId: detailedRequest.posId,
+          requestId: requestId,
+          editorRevision: loadRevision,
+        ),
+        loadEffectivePackageDiscounts(
+          detailedRequest.networkId,
+          detailedRequest.posId,
+        ),
+      ]);
     } catch (error) {
       if (loadRevision != _editorLoadRevision ||
           editingRequestId.value != requestId) {
@@ -451,8 +559,38 @@ class NetworkProcurementReviewController
     }
   }
 
+  Future<void> loadEffectivePackageDiscounts(int networkId, int posId) async {
+    final useCase = getEffectivePackageDiscountsForPosUseCase;
+    if (useCase == null) {
+      effectiveDiscountsByPackageId.clear();
+      return;
+    }
+
+    final revision = ++_packageDiscountRevision;
+    isLoadingPackageDiscounts.value = true;
+    try {
+      final discounts = await useCase(networkId: networkId, posId: posId);
+      if (revision != _packageDiscountRevision ||
+          editingRequest.value?.posId != posId) {
+        return;
+      }
+      effectiveDiscountsByPackageId.assignAll({
+        for (final discount in discounts)
+          if (discount.packageId != null) discount.packageId!: discount,
+      });
+    } catch (_) {
+      if (revision != _packageDiscountRevision) return;
+      effectiveDiscountsByPackageId.clear();
+    } finally {
+      if (revision == _packageDiscountRevision) {
+        isLoadingPackageDiscounts.value = false;
+      }
+    }
+  }
+
   Future<void> loadModificationPackages(
     int networkId, {
+    int? posId,
     required int requestId,
     required int editorRevision,
   }) async {
@@ -461,6 +599,7 @@ class NetworkProcurementReviewController
     try {
       final result = await getPackagesUseCase(
         networkId: networkId,
+        posId: posId,
         status: true,
         perPage: 100,
       );
@@ -637,12 +776,15 @@ class NetworkProcurementReviewController
     _modificationRevision++;
     _editorLoadRevision++;
     _packageLoadRevision++;
+    _packageDiscountRevision++;
     isLoadingPackages.value = false;
+    isLoadingPackageDiscounts.value = false;
     editingRequestId.value = null;
     editingRequest.value = null;
     currentPreview.value = null;
     modificationLines.clear();
     availablePackages.clear();
+    effectiveDiscountsByPackageId.clear();
     modificationNoteController.clear();
     modificationPaidAmountController.clear();
     for (final c in _modificationQuantityControllers.values) {

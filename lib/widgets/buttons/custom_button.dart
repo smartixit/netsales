@@ -635,12 +635,12 @@ class CustomButton extends StatelessWidget {
       case AppButtonVariant.icon:
         resolvedBgColor = backgroundColor ?? colors.surfaceContainerHighest;
         resolvedFgColor = foregroundColor ?? colors.primary;
-        if (borderColor != null) {
-          resolvedBorder = Border.all(
-            color: borderColor!,
-            width: borderWidth ?? 1.0.w,
-          );
-        }
+        // if (borderColor != null) {
+        resolvedBorder = Border.all(
+          color: borderColor ?? colors.outlineVariant.withValues(alpha: .6),
+          width: borderWidth ?? 1.0.w,
+        );
+        // }
         break;
 
       case AppButtonVariant.floating:
