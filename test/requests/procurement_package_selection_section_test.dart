@@ -203,7 +203,7 @@ void main() {
   });
 
   testWidgets(
-    'يحدث محدد النقدي والآجل نفسه عند النقر وعند تغيير الحالة من المتحكم',
+    'يعرض محدد التوريد خيار التسوية النقدية فقط',
     (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2;
@@ -231,17 +231,6 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-
-      Color labelColor(String label) {
-        final text = tester.widget<Text>(find.text(label));
-        return text.style!.color!;
-      }
-
-      final selectedColor = AppThemes.light.colorScheme.primary;
-      final inactiveColor = AppThemes.light.colorScheme.onSurfaceVariant;
-
-      expect(labelColor('نقدي'), selectedColor);
-      expect(labelColor('آجل'), inactiveColor);
 
       expect(controller.selectedSaleType.value, SaleType.cash);
       expect(find.text('نقدي'), findsOneWidget);
