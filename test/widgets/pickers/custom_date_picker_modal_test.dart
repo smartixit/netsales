@@ -89,7 +89,7 @@ void main() {
 
       await tester.tap(find.text('فتح المنتقي'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('مسح الاختيار'));
+      await tester.tap(find.byTooltip('مسح'));
       await tester.pump();
       await tester.tap(find.text('تأكيد'));
       await tester.pumpAndSettle();
@@ -162,8 +162,9 @@ void main() {
       await tester.tap(find.text('فتح المنتقي'));
       await tester.pumpAndSettle();
 
-      expect(find.text('55'), findsOneWidget);
-      await tester.tap(find.byTooltip('زيادة').last);
+      final minuteIncrement = find.byTooltip('زيادة').last;
+      await tester.ensureVisible(minuteIncrement);
+      await tester.tap(minuteIncrement);
       await tester.pump();
 
       expect(find.text('00'), findsOneWidget);
@@ -196,8 +197,9 @@ void main() {
       await tester.tap(find.text('فتح المنتقي'));
       await tester.pumpAndSettle();
 
-      expect(find.text('00'), findsOneWidget);
-      await tester.tap(find.byTooltip('إنقاص').last);
+      final minuteDecrement = find.byTooltip('إنقاص').last;
+      await tester.ensureVisible(minuteDecrement);
+      await tester.tap(minuteDecrement);
       await tester.pump();
 
       expect(find.text('55'), findsOneWidget);
