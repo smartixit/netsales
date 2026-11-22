@@ -24,7 +24,6 @@ import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/search_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
@@ -55,7 +54,6 @@ class NetworkCommercialDirectoryController
     required this.revokeNetworkPosLinkChallengeUseCase,
     this.getMyNetworksUseCase,
     required this.getNetworkPosLinkChallengeStatusUseCase,
-    required this.resolveNetworkLinkablePosUseCase,
     required this.searchNetworkLinkablePosUseCase,
   });
 
@@ -69,7 +67,6 @@ class NetworkCommercialDirectoryController
   final GetMyNetworksUseCase? getMyNetworksUseCase;
   final GetNetworkPosLinkChallengeStatusUseCase
   getNetworkPosLinkChallengeStatusUseCase;
-  final ResolveNetworkLinkablePosUseCase resolveNetworkLinkablePosUseCase;
   final SearchNetworkLinkablePosUseCase searchNetworkLinkablePosUseCase;
 
   @override
