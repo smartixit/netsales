@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
@@ -13,25 +12,16 @@ class ProcurementSaleTypeSelector
   @override
   Widget build(BuildContext context) {
     final cashPres = EnumPresentationRegistry.resolveSaleType(SaleType.cash);
-    final creditPres = EnumPresentationRegistry.resolveSaleType(
-      SaleType.credit,
-    );
 
-    return Obx(
-      () => CustomSegmentedBar(
-        selectedIndex: controller.selectedSaleTypeIndex,
-        onSegmentChanged: controller.setSaleTypeIndex,
-        items: [
-          CustomSegmentItem(
-            label: cashPres.label,
-            icon: cashPres.icon ?? Icons.payments_outlined,
-          ),
-          CustomSegmentItem(
-            label: creditPres.label,
-            icon: creditPres.icon ?? Icons.credit_score_rounded,
-          ),
-        ],
-      ),
+    return CustomSegmentedBar(
+      selectedIndex: 0,
+      onSegmentChanged: (_) {},
+      items: [
+        CustomSegmentItem(
+          label: cashPres.label,
+          icon: cashPres.icon ?? Icons.payments_outlined,
+        ),
+      ],
     );
   }
 }
