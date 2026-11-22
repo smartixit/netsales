@@ -138,7 +138,7 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                             text: 'إضافة بند',
                             icon: Icons.add_rounded,
                             size: AppButtonSize.small,
-                            shape: AppButtonShape.pill,
+                            shape: AppButtonShape.rounded,
                             onPressed: controller.addItemRow,
                           ),
                         ),

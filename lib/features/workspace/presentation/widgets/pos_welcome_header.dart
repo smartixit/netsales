@@ -20,6 +20,7 @@ class PosWelcomeHeader extends StatelessWidget {
       userInitials: controller.userInitials,
       role: controller.userRole,
       artwork: WorkspaceWelcomeArtwork.pos,
+      dateText: controller.todayFormatted,
       actionLabel: 'ربط شبكة',
       onAction: onQrTap,
     );

@@ -148,7 +148,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                 child: CustomButton.outline(
                   text: 'إلغاء',
                   size: AppButtonSize.medium,
-                  shape: AppButtonShape.pill,
+                  shape: AppButtonShape.rounded,
                   onPressed: onCancel ?? () => Get.back<bool>(result: false),
                 ),
               ),
@@ -159,7 +159,7 @@ class NetworkPosLinkConfirmSheet extends StatelessWidget {
                   text: 'تأكيد وإتمام الارتباط',
                   icon: Icons.check_circle_outline_rounded,
                   size: AppButtonSize.medium,
-                  shape: AppButtonShape.pill,
+                  shape: AppButtonShape.rounded,
                   onPressed: onConfirm,
                 ),
               ),

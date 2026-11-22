@@ -94,7 +94,7 @@ class NetworkExpensesController extends GetxController {
       ? CustomButton.primary(
           text: 'تسجيل مصروف',
           icon: Icons.add_rounded,
-          shape: AppButtonShape.pill,
+          shape: AppButtonShape.rounded,
           size: AppButtonSize.small,
           onPressed: () => Get.toNamed<void>(AppRoutes.createOperatingExpense),
         )

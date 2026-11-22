@@ -56,13 +56,16 @@ class PosWalletPurchasingPowerGauge extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: AppSpacing.xxs),
-                Text(
-                  creditLimitFormatted,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.executiveGoldAccent,
-                    fontWeight: AppTypography.bold,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    creditLimitFormatted,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: colors.executiveGoldAccent,
+                      fontWeight: AppTypography.bold,
+                    ),
                   ),
                 ),
               ],
@@ -91,13 +94,16 @@ class PosWalletPurchasingPowerGauge extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: AppSpacing.xxs),
-                Text(
-                  overdraftFormatted,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: Colors.white,
-                    fontWeight: AppTypography.semiBold,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    overdraftFormatted,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: AppTypography.semiBold,
+                    ),
                   ),
                 ),
               ],
@@ -126,13 +132,16 @@ class PosWalletPurchasingPowerGauge extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: AppSpacing.xxs),
-                Text(
-                  purchasingPowerFormatted,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: const Color(0xFF5EEAD4),
-                    fontWeight: AppTypography.bold,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    purchasingPowerFormatted,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: const Color(0xFF5EEAD4),
+                      fontWeight: AppTypography.bold,
+                    ),
                   ),
                 ),
               ],

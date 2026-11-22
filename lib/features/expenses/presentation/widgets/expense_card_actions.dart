@@ -34,7 +34,7 @@ class ExpenseCardActions extends StatelessWidget {
             text: 'تفاصيل المصروف',
             icon: Icons.receipt_long_rounded,
             size: AppButtonSize.small,
-            shape: AppButtonShape.pill,
+            shape: AppButtonShape.rounded,
             onPressed: onDetails,
           ),
         ),

@@ -64,7 +64,7 @@ class PosMembershipsController extends BaseMembershipsController {
       ? CustomButton.primary(
           text: 'إضافة عضو',
           icon: Icons.person_add_alt_1_rounded,
-          shape: AppButtonShape.pill,
+          shape: AppButtonShape.rounded,
           size: AppButtonSize.small,
           onPressed: openAddMemberSheet,
         )

@@ -58,7 +58,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
       ? CustomButton.primary(
           text: 'طلب توريد جديد',
           icon: Icons.add_shopping_cart_rounded,
-          shape: AppButtonShape.pill,
+          shape: AppButtonShape.rounded,
           size: AppButtonSize.small,
           onPressed: navigateToNewOrder,
         )

@@ -227,11 +227,13 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       width: 42.r,
                       height: 42.r,
                       decoration: BoxDecoration(
-                        color: colors.surfaceContainerLow,
+                        color: isDark
+                            ? const Color(0xFF131D2E)
+                            : colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
                           color: isDark
-                              ? colors.onSurface.withValues(alpha: 0.1)
+                              ? Colors.white.withValues(alpha: 0.1)
                               : colors.outlineVariant,
                         ),
                       ),

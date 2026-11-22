@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -98,7 +99,8 @@ class NetworkCommercialDirectoryController
 
   final authorizedNetworks = <NetworkEntity>[].obs;
 
-  final TextEditingController invitationBusinessCodeController = TextEditingController();
+  final TextEditingController invitationBusinessCodeController =
+      TextEditingController();
   final RxString invitationSearchQuery = ''.obs;
   final RxList<NetworkLinkablePosEntity> invitationTargets =
       <NetworkLinkablePosEntity>[].obs;
@@ -111,7 +113,8 @@ class NetworkCommercialDirectoryController
   int _invitationTargetsRevision = 0;
   final RxBool hasMoreInvitationTargets = false.obs;
 
-  final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
+  final Rx<LinkingChallengeStatus> invitationStatus =
+      LinkingChallengeStatus.pending.obs;
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
   final Rx<DateTime> invitationClock = DateTime.now().obs;
   final RxBool isExportingInvitation = false.obs;
@@ -166,10 +169,12 @@ class NetworkCommercialDirectoryController
   @override
   Widget? get headerAction {
     if (!canManageCommercial) return null;
-    return CustomButton.primary(
-      text: 'دعوة نقطة بيع +',
+    return CustomButton.icon(
+      tooltip: 'دعوة نقطة بيع',
       icon: Icons.qr_code_rounded,
-      shape: AppButtonShape.pill,
+      shape: AppButtonShape.rounded,
+      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
+      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
       size: AppButtonSize.small,
       onPressed: openCreateQrInvitation,
     );
@@ -383,10 +388,7 @@ class NetworkCommercialDirectoryController
   void openPosWalletStatement(NetworkPosLinkEntity link) {
     Get.toNamed<void>(
       AppRoutes.posWalletStatement,
-      arguments: {
-        'network_id': link.networkId,
-        'pos_id': link.posId,
-      },
+      arguments: {'network_id': link.networkId, 'pos_id': link.posId},
     );
   }
 
@@ -534,8 +536,6 @@ class NetworkCommercialDirectoryController
     );
   }
 
-
-
   void onInvitationBusinessCodeChanged(String value) {
     _invitationTargetsRevision++;
     invitationSearchQuery.value = value.trim();
@@ -632,8 +632,7 @@ class NetworkCommercialDirectoryController
   }
 
   void selectInvitationTarget(NetworkLinkablePosEntity target) {
-    if (!_isInvitationTargetDialogOpen ||
-        isLoadingInvitationTargets.value) {
+    if (!_isInvitationTargetDialogOpen || isLoadingInvitationTargets.value) {
       return;
     }
     resolvedInvitationTarget.value = target;
@@ -669,22 +668,31 @@ class NetworkCommercialDirectoryController
     invitationStatusRefreshError.value = null;
     _refreshInvitationStatus();
     if (invitationStatus.value == LinkingChallengeStatus.pending) {
-      _invitationStatusTimer = Timer.periodic(const Duration(seconds: 10), (_) => _refreshInvitationStatus());
+      _invitationStatusTimer = Timer.periodic(
+        const Duration(seconds: 10),
+        (_) => _refreshInvitationStatus(),
+      );
       _invitationClockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         invitationClock.value = DateTime.now();
-        if (invitationStatus.value != LinkingChallengeStatus.pending) _cancelInvitationTimers();
+        if (invitationStatus.value != LinkingChallengeStatus.pending) {
+          _cancelInvitationTimers();
+        }
       });
     }
   }
 
   bool get isInvitationActive {
     final expiry = invitationExpiresAt.value;
-    return invitationStatus.value == LinkingChallengeStatus.pending && expiry != null && expiry.isAfter(invitationClock.value);
+    return invitationStatus.value == LinkingChallengeStatus.pending &&
+        expiry != null &&
+        expiry.isAfter(invitationClock.value);
   }
 
   String get invitationExpiresAtLabel {
     final expiry = invitationExpiresAt.value;
-    return expiry == null ? 'غير متاح' : DateFormatter.dateTime(expiry.toLocal());
+    return expiry == null
+        ? 'غير متاح'
+        : DateFormatter.dateTime(expiry.toLocal());
   }
 
   String get invitationRemainingLabel {
@@ -710,18 +718,28 @@ class NetworkCommercialDirectoryController
 
   Future<void> _refreshInvitationStatus() async {
     final challenge = _activeInvitation;
-    if (challenge == null || invitationStatus.value != LinkingChallengeStatus.pending || _isInvitationStatusRequestInFlight) return;
+    if (challenge == null ||
+        invitationStatus.value != LinkingChallengeStatus.pending ||
+        _isInvitationStatusRequestInFlight) {
+      return;
+    }
     _isInvitationStatusRequestInFlight = true;
     try {
-      final latest = await getNetworkPosLinkChallengeStatusUseCase(challenge.challengeUuid);
+      final latest = await getNetworkPosLinkChallengeStatusUseCase(
+        challenge.challengeUuid,
+      );
       if (_activeInvitation?.challengeUuid != challenge.challengeUuid) return;
       invitationStatus.value = latest.status;
       invitationExpiresAt.value = latest.expiresAt ?? invitationExpiresAt.value;
       invitationStatusRefreshError.value = null;
-      if (latest.status != LinkingChallengeStatus.pending) _cancelInvitationTimers();
+      if (latest.status != LinkingChallengeStatus.pending) {
+        _cancelInvitationTimers();
+      }
     } catch (error) {
       if (_activeInvitation?.challengeUuid == challenge.challengeUuid) {
-        invitationStatusRefreshError.value = AppException.sanitizeMessage(error);
+        invitationStatusRefreshError.value = AppException.sanitizeMessage(
+          error,
+        );
       }
     } finally {
       _isInvitationStatusRequestInFlight = false;
@@ -733,12 +751,26 @@ class NetworkCommercialDirectoryController
     isExportingInvitation.value = true;
     try {
       final bytes = await captureCard();
-      final result = await ShareService.instance.shareBytes(bytes: bytes, fileName: 'NetSales_Invitation.png', mimeType: 'image/png', subject: 'دعوة ربط عبر NetSales', text: 'امسح رمز الدعوة من داخل تطبيق NetSales.');
+      final result = await ShareService.instance.shareBytes(
+        bytes: bytes,
+        fileName: 'NetSales_Invitation.png',
+        mimeType: 'image/png',
+        subject: 'دعوة ربط عبر NetSales',
+        text: 'امسح رمز الدعوة من داخل تطبيق NetSales.',
+      );
       if (result.status == ShareResultStatus.success) {
-        CustomSnackbar.show(title: 'تمت المشاركة', message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.', type: SnackType.success);
+        CustomSnackbar.show(
+          title: 'تمت المشاركة',
+          message: 'تم إرسال بطاقة الدعوة إلى تطبيق المشاركة المختار.',
+          type: SnackType.success,
+        );
       }
     } catch (error) {
-      CustomSnackbar.show(title: 'تعذرت المشاركة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+      CustomSnackbar.show(
+        title: 'تعذرت المشاركة',
+        message: AppException.sanitizeMessage(error),
+        type: SnackType.error,
+      );
     } finally {
       isExportingInvitation.value = false;
     }
@@ -749,10 +781,27 @@ class NetworkCommercialDirectoryController
     isExportingInvitation.value = true;
     try {
       final bytes = await captureCard();
-      final result = await FileExportService.instance.saveFile(bytes: bytes, fileName: 'NetSales_Invitation', extension: 'png', folderName: 'NetSales', autoOpen: false, showFeedback: false);
-      CustomSnackbar.show(title: result.isSuccess ? 'تم حفظ الدعوة' : 'تعذر حفظ الدعوة', message: result.isSuccess ? 'تم حفظ بطاقة الدعوة في مجلد تنزيلات NetSales.' : (result.errorMessage ?? 'لم نتمكن من حفظ صورة الدعوة.'), type: result.isSuccess ? SnackType.success : SnackType.error);
+      final result = await FileExportService.instance.saveFile(
+        bytes: bytes,
+        fileName: 'NetSales_Invitation',
+        extension: 'png',
+        folderName: 'NetSales',
+        autoOpen: false,
+        showFeedback: false,
+      );
+      CustomSnackbar.show(
+        title: result.isSuccess ? 'تم حفظ الدعوة' : 'تعذر حفظ الدعوة',
+        message: result.isSuccess
+            ? 'تم حفظ بطاقة الدعوة في مجلد تنزيلات NetSales.'
+            : (result.errorMessage ?? 'لم نتمكن من حفظ صورة الدعوة.'),
+        type: result.isSuccess ? SnackType.success : SnackType.error,
+      );
     } catch (error) {
-      CustomSnackbar.show(title: 'تعذر حفظ الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+      CustomSnackbar.show(
+        title: 'تعذر حفظ الدعوة',
+        message: AppException.sanitizeMessage(error),
+        type: SnackType.error,
+      );
     } finally {
       isExportingInvitation.value = false;
     }
@@ -800,7 +849,11 @@ class NetworkCommercialDirectoryController
     }
     final netId = resolvedNetworkId;
     if (netId == null) {
-      CustomSnackbar.show(title: 'تنبيه', message: 'يرجى اختيار الشبكة أولاً', type: SnackType.warning);
+      CustomSnackbar.show(
+        title: 'تنبيه',
+        message: 'يرجى اختيار الشبكة أولاً',
+        type: SnackType.warning,
+      );
       return;
     }
     _invitationTargetsRevision++;
@@ -864,7 +917,9 @@ class NetworkCommercialDirectoryController
           networkName.isEmpty ||
           posName.isEmpty ||
           challenge.expiresAt == null) {
-        throw const AppException('لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.');
+        throw const AppException(
+          'لم يؤكد الخادم تطابق الشبكة ونقطة البيع ووقت انتهاء الدعوة.',
+        );
       }
       startInvitationMonitoring(challenge);
       try {
@@ -892,7 +947,11 @@ class NetworkCommercialDirectoryController
         stopInvitationMonitoring();
       }
     } catch (error) {
-      CustomSnackbar.show(title: 'فشل إنشاء الدعوة', message: AppException.sanitizeMessage(error), type: SnackType.error);
+      CustomSnackbar.show(
+        title: 'فشل إنشاء الدعوة',
+        message: AppException.sanitizeMessage(error),
+        type: SnackType.error,
+      );
     } finally {
       _isInvitationTargetConfirmed = false;
       resolvedInvitationTarget.value = null;
