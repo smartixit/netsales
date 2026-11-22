@@ -31,7 +31,7 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
   final RxList<NetworkLinkablePosEntity> targets;
   final RxBool isLoading;
   final RxBool isLoadingMore;
-  final bool hasMore;
+  final RxBool hasMore;
   final RxnString errorMessage;
   final Rxn<NetworkLinkablePosEntity> resolvedTarget;
   final ValueChanged<String> onChanged;
@@ -200,7 +200,7 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                 ),
               );
             }
-            if (!hasMore || targets.isEmpty || isLoading.value) {
+            if (!hasMore.value || targets.isEmpty || isLoading.value) {
               return const SizedBox.shrink();
             }
             return Align(
