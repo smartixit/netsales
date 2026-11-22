@@ -95,6 +95,28 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<PaginatedList<NetworkLinkablePosEntity>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final result = await _remoteDataSource.searchNetworkLinkablePos(
+      networkId: networkId,
+      search: search,
+      cursor: cursor,
+      perPage: perPage,
+    );
+
+    return PaginatedList<NetworkLinkablePosEntity>(
+      items: result.items,
+      nextCursor: result.nextCursor,
+      prevCursor: result.prevCursor,
+      perPage: result.perPage,
+    );
+  }
+
+  @override
   Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
