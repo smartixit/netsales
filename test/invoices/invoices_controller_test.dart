@@ -62,6 +62,7 @@ class MockInvoiceRepository implements InvoiceRepository {
     required SaleType saleType,
     required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
+    double? paidAmount,
   }) async {
     if (networkId <= 0 ||
         posId <= 0 ||
