@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -10,6 +11,8 @@ import 'package:sodium/sodium.dart' show KeyPair;
 
 const String infinityFreeVerificationProbeFlagKey =
     '__netsales_infinityfree_verification_probe';
+const String infinityFreeChallengeFailureFlagKey =
+    '__netsales_infinityfree_challenge_failure';
 
 /// Handles the InfinityFree JavaScript test-cookie challenge.
 ///
@@ -102,12 +105,58 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     required String message,
     Object? cause,
   }) {
+    options.extra[infinityFreeChallengeFailureFlagKey] = true;
     return DioException(
       requestOptions: options,
       response: response,
       type: DioExceptionType.badResponse,
       error: AppException(message),
       message: cause?.toString(),
+    );
+  }
+
+  Map<String, dynamic>? _responseBodyAsJson(dynamic data) {
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    if (data is! String) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(data);
+      return decoded is Map ? Map<String, dynamic>.from(decoded) : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  bool _isBackendAuthenticationFailure(Response<dynamic> response) {
+    final statusCode = response.statusCode;
+    if (statusCode != 401 && statusCode != 403) {
+      return false;
+    }
+
+    final body = _responseBodyAsJson(response.data);
+    return body?['success'] == false &&
+        body?['message'] is String &&
+        body!.containsKey('data') &&
+        body.containsKey('errors');
+  }
+
+  Response<dynamic> _responseForOriginalRequest(
+    Response<dynamic> response,
+    RequestOptions original,
+  ) {
+    return Response<dynamic>(
+      requestOptions: original,
+      data: response.data,
+      headers: response.headers,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
+      isRedirect: response.isRedirect,
+      redirects: response.redirects,
+      extra: response.extra,
     );
   }
 
@@ -126,6 +175,16 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       ),
       'User-Agent': InfinityFreeChallengeSolver.browserUserAgent,
     };
+
+    // The probe stays on the exact same origin and path (validated by the
+    // challenge solver). Forward only the two credentials required by
+    // SessionAuthMiddleware; never copy the original payload or other headers.
+    for (final name in const ['X-Session-Id', 'X-Device-Uuid']) {
+      final value = _headerValue(original.headers, name);
+      if (value != null && value.isNotEmpty) {
+        headers[name] = value;
+      }
+    }
 
     final verificationOptions = original.copyWith(
       method: 'GET',
@@ -251,6 +310,23 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         );
       }
 
+      // A Laravel 401/403 with the canonical API envelope is an actual
+      // authentication/authorization decision, not a hosting challenge.
+      // Return it against the original request so Splash can preserve its
+      // established 401/403 behavior.
+      if (_isBackendAuthenticationFailure(probeResponse)) {
+        _finishCryptoLifecycle(options);
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            response: _responseForOriginalRequest(probeResponse, options),
+            type: DioExceptionType.badResponse,
+            message: probeResponse.statusMessage,
+          ),
+        );
+        return;
+      }
+
       final verificationStatus = probeResponse.statusCode;
       final acceptedVerificationStatus =
           verificationStatus != null &&
@@ -334,6 +410,20 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       final failedOptions = dioError?.requestOptions ?? replayOptions;
       final failedResponse = dioError?.response ?? response;
       _finishCryptoLifecycle(replayOptions);
+
+      if (dioError?.response != null &&
+          _isBackendAuthenticationFailure(dioError!.response!)) {
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            response: _responseForOriginalRequest(dioError.response!, options),
+            type: DioExceptionType.badResponse,
+            message: dioError.message,
+          ),
+        );
+        return;
+      }
+
       if (AppEnvironment.enableLogging) {
         log(
           'فشلت إعادة الطلب الأصلي بعد تحقق InfinityFree: '
