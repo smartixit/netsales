@@ -228,6 +228,14 @@ void main() {
             _headerValue(request.headers, 'X-Device-Uuid'),
             'device-test-value',
           );
+          expect(
+            _headerValue(request.headers, 'Accept'),
+            'application/json',
+          );
+          expect(
+            _headerValue(request.headers, 'X-Requested-With'),
+            'XMLHttpRequest',
+          );
           expect(_headerValue(request.headers, 'X-Client-Public-Key'), isNull);
           expect(_headerValue(request.headers, 'Authorization'), isNull);
           expect(body, isNull);
@@ -268,6 +276,133 @@ void main() {
       expect(replay.header('X-Device-Uuid'), 'device-test-value');
       dio.close(force: true);
     });
+
+
+    test(
+      'follows bounded redirects only when they remain on the exact API endpoint',
+      () async {
+        final baseUri = Uri.parse('https://safe-redirect.example');
+        final meUri = baseUri.resolve('/api/v1/auth/me');
+        var originalGetCount = 0;
+        final adapter = _ScriptedAdapter((request, body) async {
+          final isProbe =
+              request.extra[infinityFreeVerificationProbeFlagKey] == true;
+          if (request.uri.path == meUri.path &&
+              request.uri.queryParameters.isEmpty &&
+              !isProbe) {
+            originalGetCount++;
+            return originalGetCount == 1
+                ? _html(_challenge(meUri))
+                : _text('profile-ok', 200);
+          }
+
+          if (isProbe && request.uri.queryParameters['i'] == '1') {
+            expect(
+              _headerValue(request.headers, 'X-Session-Id'),
+              'session-test-value',
+            );
+            expect(
+              _headerValue(request.headers, 'X-Device-Uuid'),
+              'device-test-value',
+            );
+            return _redirect('/api/v1/auth/me?i=2', 302);
+          }
+
+          if (isProbe && request.uri.queryParameters['i'] == '2') {
+            expect(
+              _headerValue(request.headers, 'X-Session-Id'),
+              'session-test-value',
+            );
+            expect(
+              _headerValue(request.headers, 'X-Device-Uuid'),
+              'device-test-value',
+            );
+            expect(
+              _headerValue(request.headers, 'Accept'),
+              'application/json',
+            );
+            expect(body, isNull);
+            return _text('verification accepted', 200);
+          }
+
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        final response = await dio.get<String>(
+          '/api/v1/auth/me',
+          options: Options(
+            responseType: ResponseType.plain,
+            headers: {
+              'X-Session-Id': 'session-test-value',
+              'X-Device-Uuid': 'device-test-value',
+            },
+          ),
+        );
+
+        expect(response.statusCode, 200);
+        expect(response.data, 'profile-ok');
+        expect(adapter.requests, hasLength(4));
+        expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+        expect(adapter.requests[2].uri.queryParameters, {'i': '2'});
+        expect(
+          adapter.requests[2].header('X-Session-Id'),
+          'session-test-value',
+        );
+        expect(
+          adapter.requests[2].header('X-Device-Uuid'),
+          'device-test-value',
+        );
+        expect(adapter.requests[3].uri.queryParameters, isEmpty);
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'does not follow a verification redirect to another origin or path',
+      () async {
+        final baseUri = Uri.parse('https://unsafe-redirect.example');
+        final meUri = baseUri.resolve('/api/v1/auth/me');
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == meUri.path) {
+            return request.uri.queryParameters.isEmpty
+                ? _html(_challenge(meUri))
+                : _redirect(
+                    'https://attacker.example/api/v1/auth/me?i=2',
+                    302,
+                  );
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        DioException? failure;
+        try {
+          await dio.get<String>(
+            '/api/v1/auth/me',
+            options: Options(
+              responseType: ResponseType.plain,
+              headers: {
+                'X-Session-Id': 'session-test-value',
+                'X-Device-Uuid': 'device-test-value',
+              },
+            ),
+          );
+        } on DioException catch (error) {
+          failure = error;
+        }
+
+        expect(failure, isNotNull);
+        expect(failure!.response?.statusCode, 302);
+        expect(
+          failure.requestOptions.extra[infinityFreeChallengeFailureFlagKey],
+          isTrue,
+        );
+        expect(adapter.requests, hasLength(2));
+        expect(adapter.requests.last.uri.host, baseUri.host);
+        dio.close(force: true);
+      },
+    );
 
     test('returns canonical Laravel 401 from authenticated probe as a real session rejection', () async {
       final baseUri = Uri.parse('https://authenticated-rejection.example');
@@ -522,6 +657,17 @@ ResponseBody _json(String body, int statusCode) {
     statusCode,
     headers: {
       Headers.contentTypeHeader: ['application/json; charset=utf-8'],
+    },
+  );
+}
+
+ResponseBody _redirect(String location, int statusCode) {
+  return ResponseBody.fromString(
+    '',
+    statusCode,
+    headers: {
+      'location': [location],
+      Headers.contentTypeHeader: ['text/plain; charset=utf-8'],
     },
   );
 }
