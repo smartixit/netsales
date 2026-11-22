@@ -145,7 +145,6 @@ class MockRequestRepository implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
-    double? paidAmount,
   }) async {
     final index = this.items.indexWhere((r) => r.requestId == requestId);
     final existing = this.items[index];
@@ -328,7 +327,7 @@ void main() {
     requestId: 2,
     networkId: 10,
     posId: 20,
-    saleTypeRaw: 'CREDIT',
+    saleTypeRaw: 'CASH',
     requestTotalAmount: 8000.0,
     statusRaw: 'APPROVED',
     statusLabel: 'تمت الموافقة',
