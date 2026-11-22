@@ -145,81 +145,109 @@ void main() {
     testWidgets('minute increment carries into the next hour at midnight', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _harness(
-          Builder(
-            builder: (context) => TextButton(
-              onPressed: () {
-                CustomDatePickerModal.showBottomSheet(
-                  context: context,
-                  title: 'اختيار التاريخ والوقت',
-                  mode: DatePickerSelectionMode.single,
-                  enableTime: true,
-                  initialValue: [DateTime(2026, 11, 18, 23, 55)],
-                );
-              },
-              child: const Text('فتح المنتقي'),
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+
+      try {
+        late Future<List<DateTime?>?> selectionResult;
+
+        await tester.pumpWidget(
+          _harness(
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  selectionResult = CustomDatePickerModal.showBottomSheet(
+                    context: context,
+                    title: 'اختيار التاريخ والوقت',
+                    mode: DatePickerSelectionMode.single,
+                    enableTime: true,
+                    initialValue: [DateTime(2026, 11, 18, 23, 55)],
+                  );
+                },
+                child: const Text('فتح المنتقي'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('فتح المنتقي'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('فتح المنتقي'));
+        await tester.pumpAndSettle();
 
-      final minuteIncrement = find.byTooltip('زيادة').last;
-      await tester.ensureVisible(minuteIncrement);
-      await tester.tap(minuteIncrement);
-      await tester.pump();
+        expect(find.text('55'), findsOneWidget);
+        final minuteIncrement = find.byTooltip('زيادة').last;
+        await tester.ensureVisible(minuteIncrement);
+        await tester.tap(minuteIncrement);
+        await tester.pumpAndSettle();
 
-      expect(find.text('00'), findsOneWidget);
-      expect(find.text('صباحاً (ص)'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+        expect(find.text('00'), findsOneWidget);
+        expect(find.text('صباحاً (ص)'), findsOneWidget);
+        expect(tester.takeException(), isNull);
 
-      final cancelButton = find.text('إلغاء');
-      await tester.ensureVisible(cancelButton);
-      await tester.tap(cancelButton);
-      await tester.pumpAndSettle();
+        final cancelButton = find.text('إلغاء');
+        await tester.ensureVisible(cancelButton);
+        await tester.tap(cancelButton);
+        await tester.pumpAndSettle();
+
+        expect(await selectionResult, isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      }
     });
 
     testWidgets('minute decrement carries into the previous hour at midnight', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _harness(
-          Builder(
-            builder: (context) => TextButton(
-              onPressed: () {
-                CustomDatePickerModal.showBottomSheet(
-                  context: context,
-                  title: 'اختيار التاريخ والوقت',
-                  mode: DatePickerSelectionMode.single,
-                  enableTime: true,
-                  initialValue: [DateTime(2026, 11, 18, 0, 0)],
-                );
-              },
-              child: const Text('فتح المنتقي'),
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+
+      try {
+        late Future<List<DateTime?>?> selectionResult;
+
+        await tester.pumpWidget(
+          _harness(
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  selectionResult = CustomDatePickerModal.showBottomSheet(
+                    context: context,
+                    title: 'اختيار التاريخ والوقت',
+                    mode: DatePickerSelectionMode.single,
+                    enableTime: true,
+                    initialValue: [DateTime(2026, 11, 18, 0, 0)],
+                  );
+                },
+                child: const Text('فتح المنتقي'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('فتح المنتقي'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('فتح المنتقي'));
+        await tester.pumpAndSettle();
 
-      final minuteDecrement = find.byTooltip('إنقاص').last;
-      await tester.ensureVisible(minuteDecrement);
-      await tester.tap(minuteDecrement);
-      await tester.pump();
+        expect(find.text('00'), findsOneWidget);
+        final minuteDecrement = find.byTooltip('إنقاص').last;
+        await tester.ensureVisible(minuteDecrement);
+        await tester.tap(minuteDecrement);
+        await tester.pumpAndSettle();
 
-      expect(find.text('55'), findsOneWidget);
-      expect(find.text('مساءً (م)'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+        expect(find.text('55'), findsOneWidget);
+        expect(find.text('مساءً (م)'), findsOneWidget);
+        expect(tester.takeException(), isNull);
 
-      final cancelButton = find.text('إلغاء');
-      await tester.ensureVisible(cancelButton);
-      await tester.tap(cancelButton);
-      await tester.pumpAndSettle();
+        final cancelButton = find.text('إلغاء');
+        await tester.ensureVisible(cancelButton);
+        await tester.tap(cancelButton);
+        await tester.pumpAndSettle();
+
+        expect(await selectionResult, isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      }
     });
 
     testWidgets('does not overflow in compact landscape with time enabled', (
