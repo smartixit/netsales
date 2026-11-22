@@ -28,8 +28,6 @@ class NetworkDirectInvoiceController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
 
-  bool _suppressPackageSearchListener = false;
-
   // روابط نقاط البيع التابعة للشبكة
   final posLinks = <NetworkPosLinkEntity>[].obs;
   final selectedPosId = RxnInt();
@@ -140,25 +138,6 @@ class NetworkDirectInvoiceController extends GetxController {
       return false;
     }
     return true;
-  }
-
-  void _refreshPackageSearchResults() {
-    final networkId = activeNetworkId;
-    if (networkId != null) {
-      _fetchNetworkPackages(networkId, reset: true);
-    }
-  }
-
-  void onPackageSearchChanged(String value) {
-    packageSearchQuery.value = value.trim();
-  }
-
-  void clearPackageSearch() {
-    _suppressPackageSearchListener = true;
-    packageSearchController.clear();
-    packageSearchQuery.value = '';
-    _suppressPackageSearchListener = false;
-    _refreshPackageSearchResults();
   }
 
   TextEditingController getQuantityController(int packageId) {

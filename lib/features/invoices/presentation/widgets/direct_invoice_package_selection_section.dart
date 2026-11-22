@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_package_tariff_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
@@ -24,24 +24,28 @@ class DirectInvoicePackageSelectionSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'باقات الكروت والكميات',
+          style: AppTypography.titleSmall.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        AppSpacing.vXxs,
+        Text(
+          'حدد كمية كل باقة كروت مراد إدراجها في الفاتورة المباشرة.',
+          style: AppTypography.bodySmall.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        AppSpacing.vSm,
         CustomTextField(
-                controller: controller.packageSearchController,
-                label: 'البحث في الباقات',
-                hint: 'اكتب اسم الباقة',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: controller.packageSearchQuery.value.isNotEmpty
-                    ? CustomButton.icon(
-                        icon: Icons.close_rounded,
-                        tooltip: 'مسح البحث',
-                        dimension: 36,
-                        backgroundColor: Colors.transparent,
-                        onPressed: controller.clearPackageSearch,
-                      )
-                    : null,
-                isRequired: false,
-                onChanged: controller.onPackageSearchChanged,
-              ),
-        AppSpacing.vXs,
+          controller: controller.packageSearchController,
+          label: 'البحث عن باقة',
+          hint: 'بحث باسم الباقة أو السعر...',
+          prefixIcon: const Icon(Icons.search_rounded),
+        ),
+        AppSpacing.vSm,
         Obx(() {
           if (controller.isLoadingPackages.value) {
             return const CustomStateView.loading(

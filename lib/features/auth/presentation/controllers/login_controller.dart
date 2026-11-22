@@ -103,10 +103,10 @@ class LoginController extends GetxController {
     }
 
     try {
-      isLoading.value = true;
-
       // 1. إطلاق شاشة التحميل المتدفقة مع Lottie Overlay
       await CustomAnimationOverlay.showLoading();
+      isLoading.value = true;
+
 
       final device = DeviceService.to;
       final fcmToken = await PushNotificationService.instance
@@ -180,9 +180,6 @@ class LoginController extends GetxController {
       if (isClosed) return;
       await Get.offAllNamed<void>(AppRoutes.dashboard);
     } catch (error) {
-      // 6. إغلاق الـ Overlay فوراً وعرض رسالة الخطأ عبر CustomSnackbar أو حوار المراجعة المخصص
-      await CustomAnimationOverlay.hide();
-
       // الحارس يمنع التنبيه والحوار بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;
 

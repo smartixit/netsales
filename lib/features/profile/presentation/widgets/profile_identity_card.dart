@@ -110,7 +110,7 @@ class ProfileIdentityCard extends StatelessWidget {
                 // زر إكمال الملف / تفاصيل الحساب على اليسار
                 CustomButton.primary(
                   text: 'إكمال الملف',
-                  isCompact: true,
+                  size: AppButtonSize.small,
                   onPressed: onCompleteProfile,
                 ),
                 SizedBox(width: AppSpacing.sm),

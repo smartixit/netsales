@@ -43,15 +43,13 @@ class ProfileController extends GetxController {
     }
     final ws = WorkspaceService.to.activeWorkspace;
     if (ws == AppWorkspace.network) {
-      final name = WorkspaceService.to.activeNetwork.value?.name;
-      return name != null && name.trim().isNotEmpty
-          ? 'شبكة ${name.trim()}'
-          : 'مساحة الشبكة';
+      final id = WorkspaceService.to.savedActiveNetworkId;
+      return id != null && id > 0 ? 'شبكة العمل المعتمدة' : 'لوحة تحكم الشبكة';
     } else {
-      final name = WorkspaceService.to.activePos.value?.name;
-      return name != null && name.trim().isNotEmpty
-          ? 'نقطة بيع ${name.trim()}'
-          : 'مساحة نقطة البيع';
+      final id = WorkspaceService.to.savedActivePosId;
+      return id != null && id > 0
+          ? 'نقطة البيع المعتمدة'
+          : 'لوحة تحكم نقطة البيع';
     }
   }
 
