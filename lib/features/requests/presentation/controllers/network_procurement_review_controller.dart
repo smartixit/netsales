@@ -1026,10 +1026,7 @@ class NetworkProcurementReviewController
   Future<void> promptApproveRequest(RequestEntity request) async {
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
-      onConfirm: (note) => approveRequest(
-        request.requestId,
-        requestNote: note,
-      ),
+      onConfirm: (note) => approveRequest(request.requestId, requestNote: note),
     );
   }
 
