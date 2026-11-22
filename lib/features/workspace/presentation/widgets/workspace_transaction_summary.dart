@@ -65,7 +65,7 @@ class WorkspaceTransactionSummary extends StatelessWidget {
           ),
         if (showChevron)
           Icon(
-            Icons.chevron_left_rounded,
+            Icons.chevron_right_rounded,
             size: 19.r,
             color: colors.onSurfaceVariant,
           ),
