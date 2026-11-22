@@ -127,13 +127,11 @@ class RequestRepositoryImpl implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
-    double? paidAmount,
   }) async {
     final data = <String, dynamic>{
       if (requestNote != null && requestNote.isNotEmpty)
         'request_note': requestNote,
       if (items != null) 'items': _mapModificationItems(items),
-      if (paidAmount != null && paidAmount > 0) 'paid_amount': paidAmount,
     };
 
     final response = await _remoteDataSource.approveRequest(
