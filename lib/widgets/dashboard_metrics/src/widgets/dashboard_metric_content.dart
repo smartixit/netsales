@@ -89,9 +89,9 @@ class DashboardMetricContent extends StatelessWidget {
                 child: Text(
                   metric.value,
                   maxLines: 1,
-                  style: textTheme.headlineMedium?.copyWith(
+                  style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.6,
+                    letterSpacing: -0.4,
                     color: scheme.onSurface,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),

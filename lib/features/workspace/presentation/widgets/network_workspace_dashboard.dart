@@ -104,11 +104,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             AppSpacing.vLg,
             ExecutiveMetricsGrid(
               items: dashboard.kpiMetrics,
-              onPointsOfSaleTap: () => controller.onNavItemSelected(2),
-              onRequestsTap: () => controller.onNavItemSelected(1),
-              onPackagesTap: controller.openPackagesCatalog,
-              onTodaySalesTap: controller.openWholesaleInvoices,
-              onWalletTap: controller.openWalletStatement,
+              onMetricTap: controller.onMetricTap,
             ),
             if (dashboard.kpiMetrics.isNotEmpty) AppSpacing.vLg,
             if (dashboard.showSalesSection) ...[

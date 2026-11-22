@@ -111,7 +111,7 @@ class NetworkWorkspaceDashboardMapper {
   }) {
     final items = <DashboardMetricData>[];
 
-    // 1. مبيعات اليوم وفواتير المبيعات
+    // 1. مبيعات اليوم أو فواتير المبيعات
     if (sales != null) {
       if (sales.todaySales != null) {
         final today = sales.todaySales!;
@@ -138,23 +138,30 @@ class NetworkWorkspaceDashboardMapper {
             description: '${today.invoiceCount} فاتورة صادرة اليوم',
           ),
         );
+      } else {
+        items.add(
+          DashboardMetricData(
+            id: 'sales',
+            title: 'فواتير المبيعات',
+            value: AmountFormatter.format(sales.totalAmount),
+            icon: Icons.receipt_long_rounded,
+            tone: DashboardMetricTone.success,
+            variant: DashboardMetricVariant.standard,
+            description: '${sales.invoiceCount} فاتورة',
+          ),
+        );
       }
-
-      items.add(
-        DashboardMetricData(
-          id: 'sales',
-          title: 'فواتير المبيعات',
-          value: AmountFormatter.format(sales.totalAmount),
-          icon: Icons.receipt_long_rounded,
-          tone: DashboardMetricTone.success,
-          variant: DashboardMetricVariant.standard,
-          description: '${sales.invoiceCount} فاتورة',
-        ),
-      );
     }
 
-    // 2. رصيد محفظة الشبكة (Live Available Liquidity)
+    // 2. رصيد محفظة الشبكة أو باقات الكتالوج
     if (wallet != null) {
+      final String walletDesc;
+      if (wallet.todayCashCollected.isNotEmpty && wallet.todayCashCollected != '0.00') {
+        walletDesc = 'تحصيل اليوم: ${AmountFormatter.format(wallet.todayCashCollected)} ر.ي';
+      } else {
+        walletDesc = wallet.isActive ? 'السيولة النقدية المتاحة' : 'المحفظة مجمدة';
+      }
+
       items.add(
         DashboardMetricData(
           id: 'wallet',
@@ -163,62 +170,25 @@ class NetworkWorkspaceDashboardMapper {
           icon: Icons.account_balance_wallet_rounded,
           tone: DashboardMetricTone.primary,
           variant: DashboardMetricVariant.standard,
-          description: wallet.isActive ? 'السيولة النقدية المتاحة' : 'المحفظة مجمدة',
+          description: walletDesc,
         ),
       );
-
-      // 3. التحصيل النقدي اليومي (Today's Cash Collected)
-      if (wallet.todayCashCollected.isNotEmpty && wallet.todayCashCollected != '0.00') {
-        items.add(
-          DashboardMetricData(
-            id: 'today_cash',
-            title: 'تحصيل اليوم',
-            value: AmountFormatter.format(wallet.todayCashCollected),
-            icon: Icons.payments_rounded,
-            tone: DashboardMetricTone.success,
-            variant: DashboardMetricVariant.standard,
-            description: 'إيداعات نقدية محصلة اليوم',
-          ),
-        );
-      }
-    }
-
-    // 4. المستحقات والمديونية الآجلة (Outstanding Receivables)
-    if (sales != null &&
-        sales.outstandingAmount != null &&
-        sales.outstandingAmount!.isNotEmpty &&
-        sales.outstandingAmount != '0.00') {
+    } else if (packages != null) {
       items.add(
         DashboardMetricData(
-          id: 'receivables',
-          title: 'المستحقات الآجلة',
-          value: AmountFormatter.format(sales.outstandingAmount!),
-          icon: Icons.hourglass_bottom_rounded,
-          tone: DashboardMetricTone.warning,
+          id: 'packages',
+          title: 'باقات الكتالوج',
+          value: packages.total.toString(),
+          unit: 'باقة',
+          icon: Icons.widgets_rounded,
+          tone: DashboardMetricTone.info,
           variant: DashboardMetricVariant.standard,
-          description: 'مبيعات آجلة قيد التحصيل',
+          description: 'باقات نشطة: ${packages.active}',
         ),
       );
     }
 
-    // 5. نقاط البيع (Points of Sale)
-    if (pointsOfSale != null) {
-      items.add(
-        DashboardMetricData(
-          id: 'pos',
-          title: 'نقاط البيع',
-          value: pointsOfSale.total.toString(),
-          unit: 'نقطة',
-          icon: Icons.storefront_rounded,
-          tone: DashboardMetricTone.primary,
-          variant: DashboardMetricVariant.standard,
-          description:
-              'نشطة ${pointsOfSale.active} · غير نشطة ${pointsOfSale.inactive}',
-        ),
-      );
-    }
-
-    // 6. طلبات التوريد (Procurement Requests)
+    // 3. طلبات التوريد (Procurement Requests)
     if (requests != null) {
       items.add(
         DashboardMetricData(
@@ -234,32 +204,19 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
-    // 7. باقات الكتالوج (Voucher Packages)
-    if (packages != null) {
+    // 4. نقاط البيع (Points of Sale)
+    if (pointsOfSale != null) {
       items.add(
         DashboardMetricData(
-          id: 'packages',
-          title: 'باقات الكتالوج',
-          value: packages.total.toString(),
-          unit: 'باقة',
-          icon: Icons.widgets_rounded,
-          tone: DashboardMetricTone.info,
+          id: 'pos',
+          title: 'نقاط البيع',
+          value: pointsOfSale.total.toString(),
+          unit: 'نقطة',
+          icon: Icons.storefront_rounded,
+          tone: DashboardMetricTone.primary,
           variant: DashboardMetricVariant.standard,
-          description: 'باقات نشطة: ${packages.active}',
-        ),
-      );
-    }
-
-    if (expenses != null) {
-      items.add(
-        DashboardMetricData(
-          id: 'expenses',
-          title: 'مصروفات الشبكة',
-          value: AmountFormatter.format(expenses.totalAmount),
-          icon: Icons.trending_down_rounded,
-          tone: DashboardMetricTone.danger,
-          variant: DashboardMetricVariant.standard,
-          description: '${expenses.count} سند موثق',
+          description:
+              'نشطة ${pointsOfSale.active} · غير نشطة ${pointsOfSale.inactive}',
         ),
       );
     }

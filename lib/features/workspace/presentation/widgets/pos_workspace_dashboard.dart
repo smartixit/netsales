@@ -71,21 +71,7 @@ class PosWorkspaceDashboard extends StatelessWidget {
             if (controller.selectedNetworkLink.value != null) ...[
               ExecutiveMetricsGrid(
                 items: controller.posKpiMetrics,
-                onTodaySalesTap: controller.openPurchaseInvoices,
-                onWalletTap: controller.openWalletStatement,
-                onMetricTap: (id) {
-                  switch (id) {
-                    case 'today_procurement':
-                      controller.openPurchaseInvoices();
-                    case 'wallet' || 'purchasing_power':
-                      controller.openWalletStatement();
-                    case 'active_orders':
-                      final order = controller.activeSupplyOrder;
-                      if (order != null) {
-                        controller.openProcurementOrder(order.request);
-                      }
-                  }
-                },
+                onMetricTap: controller.onMetricTap,
               ),
               AppSpacing.vLg,
               PosActiveSupplyOrderTracker(controller: controller),

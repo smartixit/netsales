@@ -83,7 +83,7 @@ void main() {
         now: now,
       );
 
-      expect(result, hasLength(4));
+      expect(result, hasLength(3));
 
       // 1. Today Procurement
       final procurement = result.firstWhere((m) => m.id == 'today_procurement');
@@ -98,13 +98,9 @@ void main() {
       expect(walletMetric.title, 'رصيد المحفظة');
       expect(walletMetric.value, '12,500.00');
       expect(walletMetric.tone, DashboardMetricTone.success);
+      expect(walletMetric.description, contains('سقف ائتماني'));
 
-      // 3. Purchasing Power
-      final power = result.firstWhere((m) => m.id == 'purchasing_power');
-      expect(power.title, 'القوة الشرائية');
-      expect(power.value, '62,500.00');
-
-      // 4. Active Orders
+      // 3. Active Orders
       final active = result.firstWhere((m) => m.id == 'active_orders');
       expect(active.title, 'الطلبات النشطة');
       expect(active.value, '2'); // 1 pending + 1 approved

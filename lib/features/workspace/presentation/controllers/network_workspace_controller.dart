@@ -146,6 +146,21 @@ class NetworkWorkspaceController extends GetxController {
   void openWalletStatement() =>
       Get.toNamed<void>(AppRoutes.networkWalletStatement);
 
+  void onMetricTap(String id) {
+    switch (id) {
+      case 'today_sales' || 'sales':
+        openWholesaleInvoices();
+      case 'wallet':
+        openWalletStatement();
+      case 'requests':
+        onNavItemSelected(1);
+      case 'pos':
+        onNavItemSelected(2);
+      case 'packages':
+        openPackagesCatalog();
+    }
+  }
+
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/widgets/cards/custom_package_tariff_card.dart';

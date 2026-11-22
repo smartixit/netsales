@@ -77,8 +77,19 @@ class PosWorkspaceDashboardMapper {
       ),
     );
 
-    // 2. رصيد المحفظة المعتمد (Authoritative POS Wallet Balance)
+    // 2. رصيد المحفظة المعتمد (Authoritative POS Wallet Balance & Purchasing Power)
     if (wallet != null) {
+      final String walletDesc;
+      if (wallet.isDebit) {
+        walletDesc =
+            'مديونية مسحوبة (القوة الشرائية: ${AmountFormatter.format(wallet.totalPurchasingPower.toStringAsFixed(2))})';
+      } else if (wallet.hasCreditFacility) {
+        walletDesc =
+            'رصيد دائن (سقف ائتماني: ${AmountFormatter.format((wallet.creditLimit ?? 0).toStringAsFixed(2))})';
+      } else {
+        walletDesc = wallet.isCredit ? 'رصيد دائن متاح للشراء' : 'الرصيد متزن (0.00)';
+      }
+
       items.add(
         DashboardMetricData(
           id: 'wallet',
@@ -91,26 +102,7 @@ class PosWorkspaceDashboardMapper {
                   ? DashboardMetricTone.success
                   : DashboardMetricTone.neutral),
           variant: DashboardMetricVariant.standard,
-          description: wallet.isDebit
-              ? 'مديونية مسحوبة على المكشوف'
-              : (wallet.isCredit
-                  ? 'رصيد دائن متاح للشراء'
-                  : 'الرصيد متزن (0.00)'),
-        ),
-      );
-
-      // 3. القوة الشرائية المتاحة / السقف الائتماني (Purchasing Power)
-      items.add(
-        DashboardMetricData(
-          id: 'purchasing_power',
-          title: 'القوة الشرائية',
-          value: AmountFormatter.format(wallet.totalPurchasingPower.toStringAsFixed(2)),
-          icon: Icons.bolt_rounded,
-          tone: DashboardMetricTone.primary,
-          variant: DashboardMetricVariant.standard,
-          description: wallet.hasCreditFacility
-              ? 'سقف ائتماني: ${AmountFormatter.format((wallet.creditLimit ?? 0).toStringAsFixed(2))}'
-              : 'رصيد نقدي فقط',
+          description: walletDesc,
         ),
       );
     }
