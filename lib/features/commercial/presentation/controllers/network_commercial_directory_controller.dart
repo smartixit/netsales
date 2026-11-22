@@ -604,6 +604,7 @@ class NetworkCommercialDirectoryController
     }
 
     isLoadingMoreInvitationTargets.value = true;
+    invitationTargetsError.value = null;
     try {
       final result = await searchNetworkLinkablePosUseCase(
         networkId: networkId,
