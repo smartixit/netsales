@@ -141,7 +141,7 @@ abstract final class ScreenRegistry {
     ScreenDescriptor(
       screenId: 'NET-06',
       route: AppRoutes.voucherPackagesCatalog,
-      titleAr: 'كتالوج باقات الكروت وأسعار الجملة',
+      titleAr: 'كتالوج الباقات وأسعار الجملة',
       titleEn: 'Voucher Package Catalog',
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.voucherPackagesView,

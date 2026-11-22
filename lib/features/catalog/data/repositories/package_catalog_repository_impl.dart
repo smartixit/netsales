@@ -5,7 +5,7 @@ import 'package:netsales/features/catalog/domain/entities/effective_package_disc
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 
-/// تطبيق مستودع كتالوج باقات الكروت
+/// تطبيق مستودع كتالوج الباقات
 class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
   final PackageCatalogRemoteDataSource _remoteDataSource;
 

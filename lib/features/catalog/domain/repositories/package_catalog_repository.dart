@@ -2,7 +2,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 
-/// واجهة مستودع كتالوج باقات الكروت (Clean Architecture Domain Contract)
+/// واجهة مستودع كتالوج الباقات (Clean Architecture Domain Contract)
 abstract class PackageCatalogRepository {
   /// استرجاع قائمة الباقات مع الفلترة والبحث وترقيم المؤشر
   Future<PaginatedList<PackageEntity>> getPackages({

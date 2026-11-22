@@ -25,6 +25,15 @@ class CustomChip extends StatelessWidget {
   /// وضع الكثافة المصغرة
   final bool isCompact;
 
+  /// لون الخلفية المخصص
+  final Color? backgroundColor;
+
+  /// لون النص والأيقونة المخصص
+  final Color? foregroundColor;
+
+  /// لون الإطار المخصص
+  final Color? borderColor;
+
   const CustomChip({
     super.key,
     required this.label,
@@ -32,6 +41,9 @@ class CustomChip extends StatelessWidget {
     this.onTap,
     this.onDeleted,
     this.isCompact = false,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
   });
 
   /// إنشاء رقاقة من كائن العرض الدلالي
@@ -41,6 +53,9 @@ class CustomChip extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onDeleted,
     bool isCompact = false,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    Color? borderColor,
   }) {
     return CustomChip(
       key: key,
@@ -49,6 +64,9 @@ class CustomChip extends StatelessWidget {
       onTap: onTap,
       onDeleted: onDeleted,
       isCompact: isCompact,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      borderColor: borderColor,
     );
   }
 
@@ -59,13 +77,14 @@ class CustomChip extends StatelessWidget {
     final horizontalPadding = isCompact ? 8.w : 10.w;
     final verticalPadding = isCompact ? 3.h : 4.h;
     final iconSize = isCompact ? 13.r : 15.r;
+    final effectiveFg = foregroundColor ?? colors.onSurface;
     final textStyle = isCompact
         ? AppTypography.badgeText.copyWith(
-            color: colors.onSurface,
+            color: effectiveFg,
             fontWeight: FontWeight.w600,
           )
         : AppTypography.labelSmall.copyWith(
-            color: colors.onSurface,
+            color: effectiveFg,
             fontWeight: FontWeight.w600,
           );
 
@@ -75,10 +94,12 @@ class CustomChip extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.40),
+        color: backgroundColor ??
+            colors.surfaceContainerHighest.withValues(alpha: 0.40),
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.35),
+          color: borderColor ??
+              colors.outlineVariant.withValues(alpha: 0.35),
           width: 1,
         ),
       ),
@@ -86,7 +107,7 @@ class CustomChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: iconSize, color: colors.onSurfaceVariant),
+            Icon(icon, size: iconSize, color: foregroundColor ?? colors.onSurfaceVariant),
             SizedBox(width: 4.w),
           ],
           Flexible(

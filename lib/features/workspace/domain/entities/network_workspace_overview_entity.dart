@@ -4,6 +4,7 @@ import 'package:netsales/features/workspace/domain/entities/network_pending_requ
 import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_wallet_metrics_entity.dart';
 
 /// Typed operational overview for one authorized network.
 class NetworkWorkspaceOverviewEntity {
@@ -21,6 +22,7 @@ class NetworkWorkspaceOverviewEntity {
     required this.requests,
     required this.packages,
     required this.expenses,
+    this.wallet,
     required this.recentPendingRequests,
   });
 
@@ -37,5 +39,6 @@ class NetworkWorkspaceOverviewEntity {
   final NetworkRequestsMetricsEntity? requests;
   final NetworkPackagesMetricsEntity? packages;
   final NetworkExpensesMetricsEntity? expenses;
+  final NetworkWalletMetricsEntity? wallet;
   final List<NetworkPendingRequestEntity> recentPendingRequests;
 }

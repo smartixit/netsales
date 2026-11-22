@@ -46,12 +46,15 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 1. رقاقة التاريخ الموحدة إن وجد
+        // 1. رقاقة التاريخ الموحدة إن وجد (Frosted Glass Contrast)
         if (dateText != null) ...[
           CustomChip(
             label: dateText!,
             icon: Icons.calendar_today_rounded,
             isCompact: true,
+            backgroundColor: Colors.white.withValues(alpha: 0.14),
+            foregroundColor: Colors.white,
+            borderColor: Colors.white.withValues(alpha: 0.25),
           ),
           SizedBox(height: AppSpacing.sm),
         ],
@@ -111,7 +114,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
         ),
         SizedBox(height: AppSpacing.sm),
 
-        // 3. شارات الصلاحيات وحالة الجلسة الموحدة من lib/widgets/badges
+        // 3. شارات الصلاحيات وحالة الجلسة الموحدة بتباين عالي وفاخر (High Contrast VIP)
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.xs,
@@ -121,12 +124,18 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               label: role,
               icon: Icons.verified_user_rounded,
               isCompact: true,
+              backgroundColor: Colors.white.withValues(alpha: 0.14),
+              foregroundColor: Colors.white,
+              borderColor: Colors.white.withValues(alpha: 0.25),
             ),
             const CustomStatusBadge(
               label: 'جلسة نشطة',
               tone: SemanticTone.success,
               showDot: true,
               isCompact: true,
+              backgroundColor: Color(0xB3064E3B),
+              foregroundColor: Color(0xFF6EE7B7),
+              borderColor: Color(0x8034D399),
             ),
           ],
         ),

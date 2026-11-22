@@ -27,12 +27,16 @@ import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/get_pos_invoices_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/usecases/get_requests_use_case.dart';
+import 'package:netsales/features/wallet/domain/entities/pos_wallet_entity.dart';
+import 'package:netsales/features/wallet/domain/usecases/get_pos_wallet_by_network_and_pos_use_case.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_active_supply_order_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_linked_network_option_mapper.dart';
+import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_dashboard_mapper.dart';
 import 'package:netsales/features/workspace/presentation/mappers/pos_workspace_transaction_mapper.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_active_supply_order_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/pos_linked_network_option_view_model.dart';
 import 'package:netsales/features/workspace/presentation/models/workspace_transaction_item_view_model.dart';
+import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 
 /// Coordinates POS selection, linked supplier selection and dashboard data.
 class PosWorkspaceController extends GetxController {
@@ -43,6 +47,7 @@ class PosWorkspaceController extends GetxController {
     required this.getRequestsUseCase,
     required this.previewNetworkPosLinkChallengeUseCase,
     required this.confirmNetworkPosLinkChallengeUseCase,
+    this.getPosWalletByNetworkAndPosUseCase,
   });
 
   final GetMyPosUseCase getMyPosUseCase;
@@ -53,6 +58,7 @@ class PosWorkspaceController extends GetxController {
   previewNetworkPosLinkChallengeUseCase;
   final ConfirmNetworkPosLinkChallengeUseCase
   confirmNetworkPosLinkChallengeUseCase;
+  final GetPosWalletByNetworkAndPosUseCase? getPosWalletByNetworkAndPosUseCase;
 
   final RxInt selectedNavIndex = 0.obs;
   final RxInt selectedMobileNavIndex = 0.obs;
@@ -62,6 +68,7 @@ class PosWorkspaceController extends GetxController {
       <NetworkPosLinkEntity>[].obs;
   final Rxn<NetworkPosLinkEntity> selectedNetworkLink =
       Rxn<NetworkPosLinkEntity>();
+  final Rxn<PosWalletEntity> activeWallet = Rxn<PosWalletEntity>();
 
   final RxList<InvoiceEntity> recentInvoices = <InvoiceEntity>[].obs;
   final RxList<RequestEntity> recentRequests = <RequestEntity>[].obs;
@@ -128,6 +135,13 @@ class PosWorkspaceController extends GetxController {
   }
 
   String get userRole => rolePresentation.label;
+
+  List<DashboardMetricData> get posKpiMetrics =>
+      PosWorkspaceDashboardMapper.map(
+        wallet: activeWallet.value,
+        recentInvoices: recentInvoices,
+        recentRequests: recentRequests,
+      );
 
   PosActiveSupplyOrderViewModel? get activeSupplyOrder =>
       PosActiveSupplyOrderMapper.map(recentRequests);
@@ -431,8 +445,26 @@ class PosWorkspaceController extends GetxController {
       }
     }
 
+    Future<void> loadWallet() async {
+      if (getPosWalletByNetworkAndPosUseCase == null) return;
+      try {
+        final wallet = await getPosWalletByNetworkAndPosUseCase!(
+          networkId: networkId,
+          posId: posId,
+        );
+        if (generation == _scopedDataGeneration &&
+            activePos.value?.posId == posId &&
+            selectedNetworkLink.value?.networkPosId == networkPosId &&
+            !isClosed) {
+          activeWallet.value = wallet;
+        }
+      } catch (error) {
+        log('⚠️ [PosWorkspaceController] Could not load POS wallet: $error');
+      }
+    }
+
     try {
-      await Future.wait<void>([loadInvoices(), loadRequests()]);
+      await Future.wait<void>([loadInvoices(), loadRequests(), loadWallet()]);
     } finally {
       if (generation == _scopedDataGeneration && !isClosed) {
         isLoadingRecentData.value = false;
@@ -469,6 +501,7 @@ class PosWorkspaceController extends GetxController {
     ++_scopedDataGeneration;
     recentInvoices.clear();
     recentRequests.clear();
+    activeWallet.value = null;
     recentInvoicesError.value = null;
     recentRequestsError.value = null;
     isLoadingRecentData.value = false;
@@ -549,6 +582,9 @@ class PosWorkspaceController extends GetxController {
       Get.toNamed<void>(AppRoutes.newProcurementOrder);
 
   void openPurchaseInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
+
+  void openWalletStatement() =>
+      Get.toNamed<void>(AppRoutes.posWalletStatement);
 
   void openProcurementOrder(RequestEntity request) =>
       Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);

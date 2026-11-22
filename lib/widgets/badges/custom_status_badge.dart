@@ -24,6 +24,15 @@ class CustomStatusBadge extends StatelessWidget {
   /// وضع الكثافة المصغرة (للجداول والبطاقات المضغوطة)
   final bool isCompact;
 
+  /// لون الخلفية المخصص
+  final Color? backgroundColor;
+
+  /// لون النص والأيقونة والنقطة المخصص
+  final Color? foregroundColor;
+
+  /// لون الإطار المخصص
+  final Color? borderColor;
+
   const CustomStatusBadge({
     super.key,
     required this.label,
@@ -31,6 +40,9 @@ class CustomStatusBadge extends StatelessWidget {
     this.icon,
     this.showDot = false,
     this.isCompact = false,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
   });
 
   /// إنشاء شارة مباشرة من كائن العرض الدلالي (EnumPresentation)
@@ -39,6 +51,9 @@ class CustomStatusBadge extends StatelessWidget {
     Key? key,
     bool isCompact = false,
     bool showDot = false,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    Color? borderColor,
   }) {
     return CustomStatusBadge(
       key: key,
@@ -47,6 +62,9 @@ class CustomStatusBadge extends StatelessWidget {
       icon: presentation.icon,
       showDot: showDot,
       isCompact: isCompact,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      borderColor: borderColor,
     );
   }
 
@@ -54,6 +72,9 @@ class CustomStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final palette = _resolvePalette(colors, tone);
+    final effectiveBg = backgroundColor ?? palette.background;
+    final effectiveFg = foregroundColor ?? palette.foreground;
+    final effectiveBorder = borderColor ?? palette.border;
 
     final horizontalPadding = isCompact ? 8.w : 10.w;
     final verticalPadding = isCompact ? 3.h : 4.h;
@@ -61,11 +82,11 @@ class CustomStatusBadge extends StatelessWidget {
     final dotSize = isCompact ? 5.r : 6.r;
     final textStyle = isCompact
         ? AppTypography.badgeText.copyWith(
-            color: palette.foreground,
+            color: effectiveFg,
             fontWeight: FontWeight.w700,
           )
         : AppTypography.labelSmall.copyWith(
-            color: palette.foreground,
+            color: effectiveFg,
             fontWeight: FontWeight.bold,
           );
 
@@ -75,9 +96,9 @@ class CustomStatusBadge extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: palette.background,
+        color: effectiveBg,
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: palette.border, width: 1),
+        border: Border.all(color: effectiveBorder, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -87,13 +108,13 @@ class CustomStatusBadge extends StatelessWidget {
               width: dotSize,
               height: dotSize,
               decoration: BoxDecoration(
-                color: palette.foreground,
+                color: effectiveFg,
                 shape: BoxShape.circle,
               ),
             ),
             SizedBox(width: 4.w),
           ] else if (icon != null) ...[
-            Icon(icon, size: iconSize, color: palette.foreground),
+            Icon(icon, size: iconSize, color: effectiveFg),
             SizedBox(width: 4.w),
           ],
           Flexible(

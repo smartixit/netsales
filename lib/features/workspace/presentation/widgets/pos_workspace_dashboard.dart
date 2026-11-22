@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
 import 'package:netsales/features/workspace/presentation/flows/pos_network_linking_flow.dart';
+import 'package:netsales/features/workspace/presentation/widgets/executive_metrics_grid.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_active_supply_order_tracker.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_linked_network_selector.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_quick_actions_section.dart';
@@ -68,6 +69,25 @@ class PosWorkspaceDashboard extends StatelessWidget {
             PosLinkedNetworkSelector(controller: controller),
             AppSpacing.vLg,
             if (controller.selectedNetworkLink.value != null) ...[
+              ExecutiveMetricsGrid(
+                items: controller.posKpiMetrics,
+                onTodaySalesTap: controller.openPurchaseInvoices,
+                onWalletTap: controller.openWalletStatement,
+                onMetricTap: (id) {
+                  switch (id) {
+                    case 'today_procurement':
+                      controller.openPurchaseInvoices();
+                    case 'wallet' || 'purchasing_power':
+                      controller.openWalletStatement();
+                    case 'active_orders':
+                      final order = controller.activeSupplyOrder;
+                      if (order != null) {
+                        controller.openProcurementOrder(order.request);
+                      }
+                  }
+                },
+              ),
+              AppSpacing.vLg,
               PosActiveSupplyOrderTracker(controller: controller),
               AppSpacing.vLg,
             ],

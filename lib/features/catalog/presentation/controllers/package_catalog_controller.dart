@@ -28,7 +28,7 @@ import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم إدارة كتالوج باقات الكروت والأسعار التعاقدية للشبكة
+/// متحكم إدارة كتالوج الباقات والأسعار التعاقدية للشبكة
 class PackageCatalogController extends GetxController {
   final GetPackagesUseCase getPackagesUseCase;
   final GetNetworkPackagesUseCase getNetworkPackagesUseCase;

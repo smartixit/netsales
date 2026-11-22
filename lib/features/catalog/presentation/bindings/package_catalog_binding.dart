@@ -18,7 +18,7 @@ import 'package:netsales/features/commercial/data/repositories/commercial_reposi
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 
-/// ربط التبعيات لميزة كتالوج باقات الكروت والأسعار التعاقدية
+/// ربط التبعيات لميزة كتالوج الباقات والأسعار التعاقدية
 class PackageCatalogBinding extends Bindings {
   @override
   void dependencies() {

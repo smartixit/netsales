@@ -1,4 +1,5 @@
 import 'package:netsales/core/enums/request_status.dart';
+import 'package:netsales/features/workspace/domain/entities/network_daily_sales_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_expenses_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_packages_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_pending_request_entity.dart';
@@ -6,6 +7,7 @@ import 'package:netsales/features/workspace/domain/entities/network_points_of_sa
 import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_sales_trend_point_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_wallet_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 
 class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
@@ -23,6 +25,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     required super.requests,
     required super.packages,
     required super.expenses,
+    super.wallet,
     required super.recentPendingRequests,
   });
 
@@ -90,6 +93,7 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       requests: _parseRequests(metrics['requests']),
       packages: _parsePackages(metrics['packages']),
       expenses: _parseExpenses(metrics['expenses']),
+      wallet: _parseWallet(metrics['wallet']),
       recentPendingRequests: List.unmodifiable(pendingRequests),
     );
   }
@@ -191,11 +195,32 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
       throw const FormatException('مؤشرات المبيعات غير مكتملة أو غير صالحة.');
     }
 
+    final todaySalesRaw = json['today_sales'];
+    NetworkDailySalesEntity? todaySales;
+    if (todaySalesRaw is Map<String, dynamic>) {
+      final todayAmount = todaySalesRaw['amount']?.toString() ?? '0.00';
+      final todayCount = (todaySalesRaw['invoice_count'] as num?)?.toInt() ?? 0;
+      final yestAmount = todaySalesRaw['yesterday_amount']?.toString() ?? '0.00';
+      final todayGrowth = (todaySalesRaw['growth_rate'] as num?)?.toDouble() ?? 0.0;
+      todaySales = NetworkDailySalesEntity(
+        amount: todayAmount,
+        invoiceCount: todayCount,
+        yesterdayAmount: yestAmount,
+        growthRate: todayGrowth,
+      );
+    }
+
+    final paidAmount = json['paid_amount']?.toString();
+    final outstandingAmount = json['outstanding_amount']?.toString();
+
     return NetworkSalesMetricsEntity(
       totalAmount: totalAmount,
       invoiceCount: _requiredInt(invoiceCount, 'sales.invoice_count'),
       growthRate: growthRate.toDouble(),
       trend: List.unmodifiable(trend),
+      paidAmount: paidAmount != null && _isAmount(paidAmount) ? paidAmount : null,
+      outstandingAmount: outstandingAmount != null && _isAmount(outstandingAmount) ? outstandingAmount : null,
+      todaySales: todaySales,
     );
   }
 
@@ -241,6 +266,22 @@ class NetworkWorkspaceOverviewModel extends NetworkWorkspaceOverviewEntity {
     return NetworkExpensesMetricsEntity(
       count: _requiredInt(json['count'], 'expenses.count'),
       totalAmount: totalAmount,
+    );
+  }
+
+  static NetworkWalletMetricsEntity? _parseWallet(dynamic raw) {
+    if (raw == null) return null;
+    final json = _requiredMap(raw, 'wallet');
+    final balance = json['balance'];
+    final todayCash = json['today_cash_collected'] ?? '0.00';
+    if (balance is! String || !_isAmount(balance)) {
+      throw const FormatException('رصيد محفظة الشبكة غير صالح.');
+    }
+    return NetworkWalletMetricsEntity(
+      walletId: _requiredInt(json['wallet_id'], 'wallet.wallet_id'),
+      balance: balance,
+      isActive: json['is_active'] == true,
+      todayCashCollected: todayCash is String && _isAmount(todayCash) ? todayCash : '0.00',
     );
   }
 

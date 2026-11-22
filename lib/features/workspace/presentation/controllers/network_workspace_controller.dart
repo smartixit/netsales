@@ -143,6 +143,9 @@ class NetworkWorkspaceController extends GetxController {
   void openCreateSaleInvoice() =>
       Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice);
 
+  void openWalletStatement() =>
+      Get.toNamed<void>(AppRoutes.networkWalletStatement);
+
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;

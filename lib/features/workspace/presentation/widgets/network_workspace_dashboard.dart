@@ -107,6 +107,8 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               onPointsOfSaleTap: () => controller.onNavItemSelected(2),
               onRequestsTap: () => controller.onNavItemSelected(1),
               onPackagesTap: controller.openPackagesCatalog,
+              onTodaySalesTap: controller.openWholesaleInvoices,
+              onWalletTap: controller.openWalletStatement,
             ),
             if (dashboard.kpiMetrics.isNotEmpty) AppSpacing.vLg,
             if (dashboard.showSalesSection) ...[

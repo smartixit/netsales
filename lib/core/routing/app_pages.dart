@@ -250,7 +250,7 @@ abstract final class AppPages {
     ),
 
     // ========================================================================
-    // 7. مسارات كتالوج باقات الكروت والأسعار (Voucher Packages Catalog M5.1)
+    // 7. مسارات كتالوج الباقات والأسعار (Voucher Packages Catalog M5.1)
     // ========================================================================
     GetPage(
       name: AppRoutes.voucherPackagesCatalog,

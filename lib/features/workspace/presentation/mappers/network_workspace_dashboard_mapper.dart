@@ -5,6 +5,7 @@ import 'package:netsales/features/workspace/domain/entities/network_packages_met
 import 'package:netsales/features/workspace/domain/entities/network_points_of_sale_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_requests_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_sales_metrics_entity.dart';
+import 'package:netsales/features/workspace/domain/entities/network_wallet_metrics_entity.dart';
 import 'package:netsales/features/workspace/domain/entities/network_workspace_overview_entity.dart';
 import 'package:netsales/features/workspace/presentation/models/network_workspace_dashboard_view_model.dart';
 import 'package:netsales/widgets/charts/charting.dart';
@@ -74,6 +75,7 @@ class NetworkWorkspaceDashboardMapper {
         packages: packages,
         sales: sales,
         expenses: expenses,
+        wallet: overview.wallet,
       ),
     );
   }
@@ -105,9 +107,101 @@ class NetworkWorkspaceDashboardMapper {
     required NetworkPackagesMetricsEntity? packages,
     required NetworkSalesMetricsEntity? sales,
     required NetworkExpensesMetricsEntity? expenses,
+    required NetworkWalletMetricsEntity? wallet,
   }) {
     final items = <DashboardMetricData>[];
 
+    // 1. مبيعات اليوم وفواتير المبيعات
+    if (sales != null) {
+      if (sales.todaySales != null) {
+        final today = sales.todaySales!;
+        final isPositive = today.growthRate >= 0;
+        final growthSign = isPositive ? '+' : '';
+        items.add(
+          DashboardMetricData(
+            id: 'today_sales',
+            title: 'مبيعات اليوم',
+            value: AmountFormatter.format(today.amount),
+            icon: Icons.trending_up_rounded,
+            tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.warning,
+            variant: DashboardMetricVariant.trend,
+            trend: DashboardMetricTrend(
+              direction: today.growthRate > 0
+                  ? DashboardMetricDirection.increase
+                  : (today.growthRate < 0
+                      ? DashboardMetricDirection.decrease
+                      : DashboardMetricDirection.unchanged),
+              tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.danger,
+              valueLabel: '$growthSign${today.growthRate.toStringAsFixed(1)}%',
+              comparisonLabel: 'مقارنة بالأمس (${AmountFormatter.format(today.yesterdayAmount)})',
+            ),
+            description: '${today.invoiceCount} فاتورة صادرة اليوم',
+          ),
+        );
+      }
+
+      items.add(
+        DashboardMetricData(
+          id: 'sales',
+          title: 'فواتير المبيعات',
+          value: AmountFormatter.format(sales.totalAmount),
+          icon: Icons.receipt_long_rounded,
+          tone: DashboardMetricTone.success,
+          variant: DashboardMetricVariant.standard,
+          description: '${sales.invoiceCount} فاتورة',
+        ),
+      );
+    }
+
+    // 2. رصيد محفظة الشبكة (Live Available Liquidity)
+    if (wallet != null) {
+      items.add(
+        DashboardMetricData(
+          id: 'wallet',
+          title: 'رصيد المحفظة',
+          value: AmountFormatter.format(wallet.balance),
+          icon: Icons.account_balance_wallet_rounded,
+          tone: DashboardMetricTone.primary,
+          variant: DashboardMetricVariant.standard,
+          description: wallet.isActive ? 'السيولة النقدية المتاحة' : 'المحفظة مجمدة',
+        ),
+      );
+
+      // 3. التحصيل النقدي اليومي (Today's Cash Collected)
+      if (wallet.todayCashCollected.isNotEmpty && wallet.todayCashCollected != '0.00') {
+        items.add(
+          DashboardMetricData(
+            id: 'today_cash',
+            title: 'تحصيل اليوم',
+            value: AmountFormatter.format(wallet.todayCashCollected),
+            icon: Icons.payments_rounded,
+            tone: DashboardMetricTone.success,
+            variant: DashboardMetricVariant.standard,
+            description: 'إيداعات نقدية محصلة اليوم',
+          ),
+        );
+      }
+    }
+
+    // 4. المستحقات والمديونية الآجلة (Outstanding Receivables)
+    if (sales != null &&
+        sales.outstandingAmount != null &&
+        sales.outstandingAmount!.isNotEmpty &&
+        sales.outstandingAmount != '0.00') {
+      items.add(
+        DashboardMetricData(
+          id: 'receivables',
+          title: 'المستحقات الآجلة',
+          value: AmountFormatter.format(sales.outstandingAmount!),
+          icon: Icons.hourglass_bottom_rounded,
+          tone: DashboardMetricTone.warning,
+          variant: DashboardMetricVariant.standard,
+          description: 'مبيعات آجلة قيد التحصيل',
+        ),
+      );
+    }
+
+    // 5. نقاط البيع (Points of Sale)
     if (pointsOfSale != null) {
       items.add(
         DashboardMetricData(
@@ -124,6 +218,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
+    // 6. طلبات التوريد (Procurement Requests)
     if (requests != null) {
       items.add(
         DashboardMetricData(
@@ -139,6 +234,7 @@ class NetworkWorkspaceDashboardMapper {
       );
     }
 
+    // 7. باقات الكتالوج (Voucher Packages)
     if (packages != null) {
       items.add(
         DashboardMetricData(
@@ -150,20 +246,6 @@ class NetworkWorkspaceDashboardMapper {
           tone: DashboardMetricTone.info,
           variant: DashboardMetricVariant.standard,
           description: 'باقات نشطة: ${packages.active}',
-        ),
-      );
-    }
-
-    if (sales != null) {
-      items.add(
-        DashboardMetricData(
-          id: 'sales',
-          title: 'فواتير المبيعات',
-          value: AmountFormatter.format(sales.totalAmount),
-          icon: Icons.receipt_long_rounded,
-          tone: DashboardMetricTone.success,
-          variant: DashboardMetricVariant.standard,
-          description: '${sales.invoiceCount} فاتورة',
         ),
       );
     }

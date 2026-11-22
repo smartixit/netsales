@@ -24,21 +24,6 @@ class DirectInvoicePackageSelectionSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'باقات الكروت والكميات',
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        AppSpacing.vXxs,
-        Text(
-          'حدد كمية كل باقة كروت مراد إدراجها في الفاتورة المباشرة.',
-          style: AppTypography.bodySmall.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        AppSpacing.vSm,
         CustomTextField(
           controller: controller.packageSearchController,
           label: 'البحث عن باقة',

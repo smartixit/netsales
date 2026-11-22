@@ -15,7 +15,7 @@ import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
-/// واجهة استعراض وإدارة كتالوج باقات الكروت للشبكة (PackageCatalogScreen)
+/// واجهة استعراض وإدارة كتالوج الباقات للشبكة (PackageCatalogScreen)
 ///
 /// تجسد المعمارية المؤسسية النظيفة (Enterprise Clean Architecture):
 /// - كلاس واحد في ملف واحد بمسؤولية واحدة واضحة (One Public Class Per File).
@@ -42,7 +42,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CustomPageHeroCard(
-                title: 'كتالوج باقات الكروت',
+                title: 'كتالوج الباقات',
                 subtitle: 'إدارة وتسعير باقات كروت الإنترنت وتحديد نسب الخصم النقدي والآجل.',
                 icon: Icons.inventory_2_rounded,
                 action: controller.canCreatePackage
@@ -183,6 +183,6 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
 
     if (embedded) return content;
 
-    return CustomAppScaffold(appBarTitle: 'كتالوج باقات الكروت', body: content);
+    return CustomAppScaffold(appBarTitle: 'كتالوج الباقات', body: content);
   }
 }
