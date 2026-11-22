@@ -737,37 +737,9 @@ class _NetworkRequestApprovalNotesSection
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isCredit =
-          controller.editingRequest.value?.saleType == SaleType.credit;
-      final maxAmount =
-          controller.currentPreview.value?.previewTotalAmount ??
-          controller.editingRequest.value?.requestTotalAmount;
-
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isCredit) ...[
-            CustomTextField(
-              controller: controller.modificationPaidAmountController,
-              label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
-              hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
-              isRequired: false,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              prefixIcon: const Icon(Icons.payments_outlined),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-              ],
-              validator: FormValidators.amountValidator(
-                fieldName: 'المبلغ المقبوض كاش',
-                isRequired: false,
-                minValue: 0,
-                maxValue: maxAmount,
-              ),
-            ),
-            AppSpacing.vSm,
-          ],
           CustomTextField(
             controller: controller.modificationNoteController,
             label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
