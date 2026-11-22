@@ -304,6 +304,14 @@ void main() {
       );
       expect(controller.links.length, equals(1));
     });
+
+    test('onPartnerCardTap delegates to openPosWalletStatement', () async {
+      await controller.loadInitialData();
+      final link = controller.links.first;
+
+      // Ensure calling onPartnerCardTap does not throw
+      expect(() => controller.onPartnerCardTap(link), returnsNormally);
+    });
   });
 
   group('PosCommercialDirectoryController Tests', () {

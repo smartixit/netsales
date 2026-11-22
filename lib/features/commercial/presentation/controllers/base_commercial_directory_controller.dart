@@ -76,6 +76,9 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   /// فتح الشيت التعريفي لبيانات الشريك
   void openPartnerDetails(NetworkPosLinkEntity link);
 
+  /// معالجة النقر المباشر على كرت الشريك التجاري
+  void onPartnerCardTap(NetworkPosLinkEntity link) => openPartnerDetails(link);
+
   /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
   List<CustomKpiCardData> buildKpiCards(BuildContext context);
 

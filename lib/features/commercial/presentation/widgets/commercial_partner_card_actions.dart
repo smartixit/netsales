@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_network_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_pos_actions.dart';
@@ -40,6 +42,20 @@ class CommercialPartnerCardActions extends StatelessWidget {
         onTap: onViewDetails,
       ),
       if (isNetworkView) ...[
+        CustomBottomSheetActionItem(
+          title: 'دفتر أستاذ المحفظة',
+          subtitle: 'عرض الحركات المالية والعمليات لنقطة البيع',
+          icon: Icons.account_balance_wallet_outlined,
+          onTap: () {
+            Get.toNamed(
+              AppRoutes.posWalletStatement,
+              arguments: {
+                'network_id': link.networkId,
+                'pos_id': link.posId,
+              },
+            );
+          },
+        ),
         if (onToggleStatus != null)
           CustomBottomSheetActionItem(
             title: link.isActive

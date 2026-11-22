@@ -8,6 +8,7 @@ import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/share_service.dart';
@@ -355,6 +356,22 @@ class NetworkCommercialDirectoryController
       subtitle: 'البيانات التجارية المعتمدة للشريك',
       leadingIcon: Icons.storefront_rounded,
       child: CommercialPartnerDetailsSheet(link: link, isNetworkView: true),
+    );
+  }
+
+  @override
+  void onPartnerCardTap(NetworkPosLinkEntity link) {
+    openPosWalletStatement(link);
+  }
+
+  /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
+  void openPosWalletStatement(NetworkPosLinkEntity link) {
+    Get.toNamed(
+      AppRoutes.posWalletStatement,
+      arguments: {
+        'network_id': link.networkId,
+        'pos_id': link.posId,
+      },
     );
   }
 

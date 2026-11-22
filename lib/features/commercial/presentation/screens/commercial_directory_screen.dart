@@ -164,6 +164,7 @@ class CommercialDirectoryScreen
                   onToggleExpand: () =>
                       controller.toggleAccordion(link.networkPosId),
                   onDetails: () => controller.openPartnerDetails(link),
+                  onTap: () => controller.onPartnerCardTap(link),
                   actions: controller.buildCardActions(context, link),
                 );
               });

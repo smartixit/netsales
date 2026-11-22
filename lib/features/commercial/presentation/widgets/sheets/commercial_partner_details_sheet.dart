@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/network_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -151,9 +152,81 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
               ],
             ),
           ),
+
+          // 3. قسم دفتر الأستاذ والمحفظة المالية (خاص بسياق مساحة الشبكة)
+          if (isNetworkView) ...[
+            SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: .04),
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: .2),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: .1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: colors.primary,
+                      size: 20.r,
+                    ),
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'دفتر أستاذ محفظة نقطة البيع',
+                          style: AppTypography.titleSmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          'متابعة الرصيد والحركات المالية والعمليات',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  CustomButton.outline(
+                    text: 'دفتر الأستاذ',
+                    icon: Icons.receipt_long_rounded,
+                    size: AppButtonSize.small,
+                    foregroundColor: colors.primary,
+                    borderColor: colors.primary.withValues(alpha: .5),
+                    onPressed: () {
+                      Get.back<void>();
+                      Get.toNamed(
+                        AppRoutes.posWalletStatement,
+                        arguments: {
+                          'network_id': link.networkId,
+                          'pos_id': link.posId,
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           SizedBox(height: AppSpacing.lg),
 
-          // 3. زر الإغلاق
+          // 4. زر الإغلاق
           CustomButton.primary(
             text: 'إغلاق',
             size: AppButtonSize.medium,

@@ -76,5 +76,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(detailsTapped, isTrue);
     });
+
+    testWidgets('Triggers onTap callback when partner card body is tapped directly', (tester) async {
+      bool cardBodyTapped = false;
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          CommercialPartnerCard(
+            link: link,
+            isNetworkView: true,
+            onDetails: () {},
+            onTap: () => cardBodyTapped = true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('مركز المدينة للاتصالات'));
+      await tester.pumpAndSettle();
+      expect(cardBodyTapped, isTrue);
+    });
   });
 }
