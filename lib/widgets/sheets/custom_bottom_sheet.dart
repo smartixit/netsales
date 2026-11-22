@@ -67,7 +67,7 @@ class CustomBottomSheet extends StatelessWidget {
     this.padding,
     this.maxHeightFactor,
     this.maxWidth,
-  }) : assert(maxWidth == null || (maxWidth.isFinite && maxWidth > 0));
+  }) : assert(maxWidth == null || (maxWidth > 0 && maxWidth < double.infinity));
 
   /// 1. مصنع النوافذ السفلية لقائمة الإجراءات والخيارات (Actions List)
   factory CustomBottomSheet.actions({
