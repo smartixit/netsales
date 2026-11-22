@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_package_selection_section.dart';
 import 'package:netsales/features/invoices/presentation/widgets/direct_invoice_pos_context_section.dart';
@@ -15,7 +13,6 @@ import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
 import 'package:netsales/widgets/forms/custom_section_heading.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// مساحة إنشاء وإصدار فاتورة بيع مباشرة لنقطة بيع (NetworkDirectInvoiceScreen)
 ///
@@ -126,30 +123,6 @@ class NetworkDirectInvoiceScreen
                         ),
                         AppSpacing.vXs,
                         const DirectInvoiceSaleTypeSelector(),
-                        if (isCredit) ...[
-                          AppSpacing.vSm,
-                          CustomTextField(
-                            controller: controller.paidAmountController,
-                            label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
-                            hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
-                            isRequired: false,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            prefixIcon: const Icon(Icons.payments_outlined),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d*\.?\d*'),
-                              ),
-                            ],
-                            validator: FormValidators.amountValidator(
-                              fieldName: 'المبلغ المقبوض كاش',
-                              isRequired: false,
-                              minValue: 0,
-                              maxValue: controller.checkoutNetAmount,
-                            ),
-                          ),
-                        ],
                         AppSpacing.vLg,
 
                         // 4. اختيار الباقات والكميات
