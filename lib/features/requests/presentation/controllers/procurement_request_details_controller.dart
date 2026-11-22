@@ -250,12 +250,11 @@ class ProcurementRequestDetailsController extends GetxController {
   Future<void> promptApproveRequest() async {
     final current = request.value;
     if (current == null) return;
-    const isCredit = false;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: current.requestUuid ?? '-',
       isCredit: isCredit,
       maxAmount: current.requestTotalAmount,
-      onConfirm: (note, _) => approveRequest(note: note),
+      onConfirm: (note) => approveRequest(note: note),
     );
   }
 
