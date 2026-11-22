@@ -320,10 +320,19 @@ void main() {
         );
         expect(adapter.requests, hasLength(3));
         expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
-        expect(adapter.requests[1].header('X-Session-Id'), 'session-test-value');
+        expect(
+          adapter.requests[1].header('X-Session-Id'),
+          'session-test-value',
+        );
         expect(adapter.requests[2].uri.queryParameters, isEmpty);
-        expect(adapter.requests[2].header('X-Session-Id'), 'session-test-value');
-        expect(adapter.requests[2].header('X-Device-Uuid'), 'device-test-value');
+        expect(
+          adapter.requests[2].header('X-Session-Id'),
+          'session-test-value',
+        );
+        expect(
+          adapter.requests[2].header('X-Device-Uuid'),
+          'device-test-value',
+        );
         dio.close(force: true);
       },
     );
