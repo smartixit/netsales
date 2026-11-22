@@ -334,6 +334,7 @@ void main() {
             tenantId: 10,
             roleKey: 'NETWORK_OWNER',
             roleName: 'مالك شبكة',
+            permissions: ['vouchers.view', 'network.settings.manage'],
           ),
         ],
       );
@@ -438,6 +439,7 @@ void main() {
             tenantId: 50,
             roleKey: 'POS_AGENT',
             roleName: 'وكيل',
+            permissions: ['pos.sales.create'],
           ),
         ],
       );
@@ -685,6 +687,7 @@ void main() {
               'tenant_id': 10,
               'role_key': 'NETWORK_USER',
               'role_name': 'مستخدم',
+              'permissions': ['vouchers.view'],
             },
           ],
         });
@@ -712,6 +715,7 @@ void main() {
               'tenant_id': 10,
               'role_key': 'NETWORK_OWNER',
               'role_name': 'مالك',
+              'permissions': ['vouchers.view', 'network.settings.manage'],
             },
           ],
         });
@@ -810,6 +814,7 @@ void main() {
             'tenant_id': 888,
             'role_key': 'POS_AGENT',
             'role_name': 'وكيل إعادة تشغيل',
+            'permissions': ['pos.sales.create', 'reports.view'],
           },
         ],
       });
@@ -1028,6 +1033,7 @@ void main() {
               'tenant_id': 10,
               'role_key': 'NETWORK_USER',
               'role_name': 'مستخدم',
+              'permissions': ['vouchers.view'],
             },
           ],
         });
@@ -1055,6 +1061,7 @@ void main() {
               'tenant_id': 10,
               'role_key': 'NETWORK_OWNER',
               'role_name': 'مالك',
+              'permissions': ['vouchers.view', 'network.settings.manage'],
             },
           ],
         });
@@ -1153,6 +1160,7 @@ void main() {
             'tenant_id': 888,
             'role_key': 'POS_AGENT',
             'role_name': 'وكيل إعادة تشغيل',
+            'permissions': ['pos.sales.create', 'reports.view'],
           },
         ],
       });
