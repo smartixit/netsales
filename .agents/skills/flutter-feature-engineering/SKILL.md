@@ -88,7 +88,7 @@ lib/features/<feature_name>/
   - **Dividers, Menus & Indicators:** Reuse `CustomLabeledDivider`, `CustomPopupMenu`, `CustomPageIndicator`, `CustomSegmentedBar`, `CustomInteractiveBounce`.
   - **Utils:** Reuse `DateFormatter`, `AmountFormatter`, `TextFormatter`, `FileSizeFormatter`, `FormValidators`, `IdempotencyHelper`, `SystemUiStyleResolver`.
 - **Zero Financial Calculations:**
-  - Never compute invoice line sums, discount subtotals, or repayment allocations on the client.
+  - Never compute invoice line sums, discount subtotals,  on the client.
   - Display financial amounts originating directly from authoritative Laravel API responses.
 - **Required View State Coverage:**
   - Explicit Loading, Empty, Error (with retry), and Success states on all data screens.
