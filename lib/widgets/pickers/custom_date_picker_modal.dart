@@ -36,12 +36,7 @@ class CustomDatePickerModal extends StatelessWidget {
     required this.title,
     required this.onConfirm,
     required this.onCancel,
-  }) : assert(
-         firstDate == null ||
-             lastDate == null ||
-             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
-         'firstDate must be on or before lastDate.',
-       );
+  });
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -172,12 +167,7 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
     this.currentDate,
     this.selectableDayPredicate,
     required this.title,
-  }) : assert(
-         firstDate == null ||
-             lastDate == null ||
-             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
-         'firstDate must be on or before lastDate.',
-       );
+  });
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -223,12 +213,7 @@ class CustomDatePickerDialogContent extends StatelessWidget {
     this.currentDate,
     this.selectableDayPredicate,
     required this.title,
-  }) : assert(
-         firstDate == null ||
-             lastDate == null ||
-             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
-         'firstDate must be on or before lastDate.',
-       );
+  });
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -446,6 +431,7 @@ class _DatePickerModalController extends GetxController {
     required this.currentDate,
     required this.selectableDayPredicate,
   }) {
+    _validateDatePickerBounds(firstDate, lastDate);
     selectedDates = _filterSelectableDates(_normalizeDates(initialValue, mode));
     DateTime? initialDate;
     for (final date in selectedDates) {
@@ -1153,6 +1139,61 @@ class _DatePickerActions extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+List<DateTime?> _normalizeDates(
+  List<DateTime?>? source,
+  DatePickerSelectionMode mode,
+) {
+  final values = source ?? const <DateTime?>[];
+
+  switch (mode) {
+    case DatePickerSelectionMode.single:
+      for (final date in values) {
+        if (date != null) return <DateTime?>[date];
+      }
+      return <DateTime?>[];
+
+    case DatePickerSelectionMode.range:
+      if (values.isEmpty) return <DateTime?>[];
+      final start = values.first;
+      final end = values.length > 1 ? values[1] : null;
+
+      if (start == null && end == null) return <DateTime?>[];
+      if (start == null) return <DateTime?>[null, end];
+      if (end == null) return <DateTime?>[start];
+
+      return end.isBefore(start)
+          ? <DateTime?>[end, start]
+          : <DateTime?>[start, end];
+
+    case DatePickerSelectionMode.multi:
+      final dates = values.whereType<DateTime>().toList()..sort();
+      final uniqueDates = <DateTime>[];
+      for (final date in dates) {
+        final duplicate = uniqueDates.any(
+          (selected) =>
+              selected.year == date.year &&
+              selected.month == date.month &&
+              selected.day == date.day,
+        );
+        if (!duplicate) uniqueDates.add(date);
+      }
+      return uniqueDates;
+  }
+}
+
+void _validateDatePickerBounds(DateTime? firstDate, DateTime? lastDate) {
+  if (firstDate != null &&
+      lastDate != null &&
+      _dateOnly(firstDate).isAfter(_dateOnly(lastDate))) {
+    throw ArgumentError.value(
+      <DateTime?>[firstDate, lastDate],
+      'firstDate/lastDate',
+      'firstDate must be on or before lastDate.',
     );
   }
 }
