@@ -12,6 +12,7 @@ import 'package:netsales/features/workspace/presentation/widgets/adaptive_worksp
 import 'package:netsales/features/workspace/presentation/widgets/pos_workspace_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
+import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 
 class PosWorkspaceShell extends GetView<PosWorkspaceController> {
   const PosWorkspaceShell({super.key});
@@ -71,26 +72,36 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
     ];
     final loading =
         controller.isLoadingPos.value && controller.activePos.value == null;
-    return AdaptiveWorkspaceScaffold(
-      appBar: WorkspaceAppBar(
-        title: controller.activePosName.isNotEmpty
-            ? controller.activePosName
-            : 'اختر نقطة البيع',
-        workspace: AppWorkspace.pos,
-        isLoading: loading,
-        rolePresentation: controller.rolePresentation,
-        entityLogo: controller.entityLogo,
-        entityInitials: controller.entityInitials,
-        onProfileTap: controller.openProfile,
+    return DoubleBackExitScope(
+      onFallback: () async {
+        if (controller.selectedMobileNavIndex.value != 0 ||
+            controller.selectedNavIndex.value != 0) {
+          controller.onNavItemSelected(0);
+          return true;
+        }
+        return false;
+      },
+      child: AdaptiveWorkspaceScaffold(
+        appBar: WorkspaceAppBar(
+          title: controller.activePosName.isNotEmpty
+              ? controller.activePosName
+              : 'اختر نقطة البيع',
+          workspace: AppWorkspace.pos,
+          isLoading: loading,
+          rolePresentation: controller.rolePresentation,
+          entityLogo: controller.entityLogo,
+          entityInitials: controller.entityInitials,
+          onProfileTap: controller.openProfile,
+        ),
+        items: items,
+        mobileItems: items.take(4).toList(growable: false),
+        currentIndex: controller.selectedNavIndex.value,
+        mobileCurrentIndex: controller.selectedMobileNavIndex.value,
+        onIndexChanged: controller.onNavItemSelected,
+        centerActionIcon: Icons.add_rounded,
+        centerActionTooltip: 'طلب توريد جديد',
+        onCenterActionTap: controller.openNewProcurementOrder,
       ),
-      items: items,
-      mobileItems: items.take(4).toList(growable: false),
-      currentIndex: controller.selectedNavIndex.value,
-      mobileCurrentIndex: controller.selectedMobileNavIndex.value,
-      onIndexChanged: controller.onNavItemSelected,
-      centerActionIcon: Icons.add_rounded,
-      centerActionTooltip: 'طلب توريد جديد',
-      onCenterActionTap: controller.openNewProcurementOrder,
     );
   });
 }

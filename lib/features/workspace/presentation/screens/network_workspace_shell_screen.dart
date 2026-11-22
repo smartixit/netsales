@@ -15,6 +15,7 @@ import 'package:netsales/features/workspace/presentation/widgets/adaptive_worksp
 import 'package:netsales/features/workspace/presentation/widgets/network_workspace_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_nav_item.dart';
+import 'package:netsales/widgets/navigations/double_back_exit_scope.dart';
 
 class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
   const NetworkWorkspaceShell({super.key});
@@ -93,26 +94,36 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         (controller.isLoadingNetworks.value ||
             controller.isLoadingOverview.value) &&
         controller.selectedNetwork == null;
-    return AdaptiveWorkspaceScaffold(
-      appBar: WorkspaceAppBar(
-        title: controller.activeNetworkName.isNotEmpty
-            ? controller.activeNetworkName
-            : 'اختر شبكة العمل',
-        workspace: AppWorkspace.network,
-        isLoading: loading,
-        rolePresentation: controller.rolePresentation,
-        entityLogo: controller.entityLogo,
-        entityInitials: controller.entityInitials,
-        onProfileTap: controller.openProfile,
+    return DoubleBackExitScope(
+      onFallback: () async {
+        if (controller.selectedMobileNavIndex.value != 0 ||
+            controller.selectedNavIndex.value != 0) {
+          controller.onNavItemSelected(0);
+          return true;
+        }
+        return false;
+      },
+      child: AdaptiveWorkspaceScaffold(
+        appBar: WorkspaceAppBar(
+          title: controller.activeNetworkName.isNotEmpty
+              ? controller.activeNetworkName
+              : 'اختر شبكة العمل',
+          workspace: AppWorkspace.network,
+          isLoading: loading,
+          rolePresentation: controller.rolePresentation,
+          entityLogo: controller.entityLogo,
+          entityInitials: controller.entityInitials,
+          onProfileTap: controller.openProfile,
+        ),
+        items: items,
+        mobileItems: items.take(4).toList(growable: false),
+        currentIndex: controller.selectedNavIndex.value,
+        mobileCurrentIndex: controller.selectedMobileNavIndex.value,
+        onIndexChanged: controller.onNavItemSelected,
+        centerActionIcon: Icons.add_rounded,
+        centerActionTooltip: 'إصدار فاتورة بيع جديدة',
+        onCenterActionTap: controller.openCreateSaleInvoice,
       ),
-      items: items,
-      mobileItems: items.take(4).toList(growable: false),
-      currentIndex: controller.selectedNavIndex.value,
-      mobileCurrentIndex: controller.selectedMobileNavIndex.value,
-      onIndexChanged: controller.onNavItemSelected,
-      centerActionIcon: Icons.add_rounded,
-      centerActionTooltip: 'إصدار فاتورة بيع جديدة',
-      onCenterActionTap: controller.openCreateSaleInvoice,
     );
   });
 }
