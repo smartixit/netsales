@@ -4,8 +4,6 @@ import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/core/enums/repayment_status.dart';
-import 'package:netsales/core/enums/receivable_aging_bucket.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
@@ -53,15 +51,10 @@ class OperationalReportRecordCard extends StatelessWidget {
         EnumPresentationRegistry.resolveWalletOperationType(
           WalletOperationType.fromWire(normalized),
         ),
-      OperationalReportType.repayments =>
-        EnumPresentationRegistry.resolveRepaymentStatus(
-          RepaymentStatus.fromWire(normalized),
-        ),
       OperationalReportType.requests =>
         EnumPresentationRegistry.resolveRequestStatus(
           RequestStatus.fromWire(normalized),
         ),
-      OperationalReportType.debtAging => _debtAgingPresentation(normalized),
       OperationalReportType.expenses => EnumPresentation(
         label: normalized,
         tone: SemanticTone.neutral,
@@ -73,20 +66,6 @@ class OperationalReportRecordCard extends StatelessWidget {
     return presentation.isKnown
         ? presentation
         : EnumPresentation.unknown(rawValue: normalized);
-  }
-
-  EnumPresentation _debtAgingPresentation(String value) {
-    final bucket = ReceivableAgingBucket.fromWire(value);
-    if (bucket.isKnown) {
-      return EnumPresentationRegistry.resolveReceivableAgingBucket(bucket);
-    }
-    final paymentStatus = InvoicePaymentStatus.fromWire(value);
-    final presentation = EnumPresentationRegistry.resolveInvoicePaymentStatus(
-      paymentStatus,
-    );
-    return presentation.isKnown
-        ? presentation
-        : EnumPresentation.unknown(rawValue: value);
   }
 
   String _date(String key) => _dateFirst([key]);
@@ -155,27 +134,6 @@ class OperationalReportRecordCard extends StatelessWidget {
         amount: _amount('log_amount'),
         status: _first(['log_operation_type']),
         detail: _first(['log_statement'], fallback: 'حركة محفظة نقطة البيع'),
-      ),
-      OperationalReportType.repayments => (
-        reference: _first(['repayment_uuid', 'repayment_id']),
-        party: _first(['pos_name', 'pos_id', 'created_by_name']),
-        date: _date('repayment_date'),
-        amount: _amount('amount'),
-        status: _first(['status']),
-        detail: _first([
-          'payment_method',
-          'reference_number',
-          'reversal_reason',
-        ]),
-      ),
-      OperationalReportType.debtAging => (
-        reference: _first(['invoice_uuid', 'invoice_id']),
-        party: _first(['pos_name', 'pos_id']),
-        date: _date('invoice_date'),
-        amount: _amount('remaining_amount'),
-        status: _first(['aging_bucket', 'payment_status']),
-        detail:
-            'إجمالي الفاتورة: ${_amount('invoice_total_amount')}  •  عمر الدين: ${_first(['age_days'])} يوم',
       ),
       OperationalReportType.requests => (
         reference: _first(['request_uuid', 'request_id']),
