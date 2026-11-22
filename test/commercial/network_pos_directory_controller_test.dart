@@ -131,8 +131,7 @@ class _FakeCommercialRepository implements CommercialRepository {
   @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) async {
     return const NetworkPosLinkChallengeEntity(
@@ -158,8 +157,7 @@ class _FakeCommercialRepository implements CommercialRepository {
   @override
   Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) async {
     return const NetworkPosLinkPreviewEntity(
       challengeUuid: 'CH-123',
@@ -175,8 +173,7 @@ class _FakeCommercialRepository implements CommercialRepository {
   @override
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) async {
     return const NetworkPosLinkEntity(
       networkPosId: 99,

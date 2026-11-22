@@ -108,12 +108,13 @@ When a cart snapshot expires, refreshing the tariff must request the cart's pack
 
 ## Network–POS targeted QR invitations — 2026-11-22
 
-The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, section **M4 POS–Network Linking Challenge API Contracts (Targeted QR Workflow)**.
+The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, section **M4 POS–Network Linking Challenge API Contracts (Targeted QR Workflow)**. The approved wire decision is DEC-QR-02.
 
 - A Network invitation always targets exactly one Network and one POS. Never expose or call a public POS directory/search endpoint.
 - Resolve a POS by its commercial business code using `POST /network-pos/challenges/resolve-target` with `network_id` and `pos_uuid`. The value called `pos_uuid` on the wire is the formatted business code (for example `POS-YYMM-00001-AB12`), not an RFC UUID. Keep the target dialog open after resolution, display the verified POS name and business code, and require explicit user confirmation before creating the challenge.
-- The minimal resolve response includes only `pos_id`, `pos_uuid`, and `pos_name`; it must not include owner, contact, or geographic metadata. The `pos_uuid` field is required by Flutter's subsequent create-challenge call; do not infer it from `pos_id`. Flutter maps this projection to `NetworkLinkablePosEntity`/`NetworkLinkablePosModel`, never to the full `PosEntity`.
-- Create challenge with the same `network_id` and resolved `pos_uuid`. The API requires exactly one of `pos_id` or `pos_uuid`; never create an untargeted challenge. Its nested network projection is limited to ID/name, and its POS projection to ID/business-code/name; do not depend on owner, contact, address, or administrative fields in this response.
+- The minimal resolve response includes only `pos_id`, `pos_uuid`, and `pos_name`; it must not include owner, contact, or geographic metadata. Flutter maps this projection to `NetworkLinkablePosEntity`/`NetworkLinkablePosModel`, never to the full `PosEntity`.
+- **Create, preview, and confirmation requests MUST send `pos_uuid` only.** The request field is required and carries the formatted POS commercial business code. `pos_id` is not an accepted request field; sending it alone or alongside `pos_uuid` must return validation failure. Do not add aliases, fallbacks, or dual-selector compatibility.
+- The API may retain internal `pos_id` in its narrowly scoped response projection for database identity and response consistency checks. This does not make `pos_id` a request identifier. The server resolves `pos_uuid` and uses the resolved internal ID for challenge binding and persistence.
 - The encrypted QR payload is the only challenge payload rendered in the QR. Do not expose internal IDs, nonce, or secret fields on the share card.
 - Read challenge lifecycle from `GET /network-pos/challenges/{uuid}`; the safe response contains only `status`, `status_label`, and `expires_at`. It must not include challenge UUID, target IDs, or encrypted payload.
 - Parse challenge expiry as an ISO-8601 instant. Display the server-confirmed status and exact expiry; client countdown is presentation only and never changes server status.

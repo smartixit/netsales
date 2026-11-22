@@ -193,15 +193,12 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
-      'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty)
-        'pos_uuid': posUuid.trim(),
+      'pos_uuid': posUuid.trim(),
       'duration_minutes': durationMinutes,
     };
 
@@ -224,14 +221,11 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<NetworkPosLinkPreviewModel> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) async {
     final body = <String, dynamic>{
       'payload': payload,
-      'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty)
-        'pos_uuid': posUuid.trim(),
+      'pos_uuid': posUuid.trim(),
     };
 
     final response = await ApiService.instance.post<NetworkPosLinkPreviewModel>(
@@ -251,14 +245,11 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<NetworkPosLinkModel> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) async {
     final body = <String, dynamic>{
       'challenge_uuid': challengeUuid,
-      'pos_id': ?posId,
-      if (posUuid != null && posUuid.trim().isNotEmpty)
-        'pos_uuid': posUuid.trim(),
+      'pos_uuid': posUuid.trim(),
     };
 
     final response = await ApiService.instance.post<NetworkPosLinkModel>(

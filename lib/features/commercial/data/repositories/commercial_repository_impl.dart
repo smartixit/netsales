@@ -108,13 +108,11 @@ class CommercialRepositoryImpl implements CommercialRepository {
   @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   }) {
     return _remoteDataSource.createNetworkPosLinkChallenge(
       networkId: networkId,
-      posId: posId,
       posUuid: posUuid,
       durationMinutes: durationMinutes,
     );
@@ -123,12 +121,10 @@ class CommercialRepositoryImpl implements CommercialRepository {
   @override
   Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) {
     return _remoteDataSource.previewNetworkPosLinkChallenge(
       payload: payload,
-      posId: posId,
       posUuid: posUuid,
     );
   }
@@ -136,12 +132,10 @@ class CommercialRepositoryImpl implements CommercialRepository {
   @override
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   }) {
     return _remoteDataSource.confirmNetworkPosLinkChallenge(
       challengeUuid: challengeUuid,
-      posId: posId,
       posUuid: posUuid,
     );
   }

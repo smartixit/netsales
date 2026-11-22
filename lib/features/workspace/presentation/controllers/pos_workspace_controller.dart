@@ -487,8 +487,9 @@ class PosWorkspaceController extends GetxController {
   Future<NetworkPosLinkPreviewEntity> previewNetworkLinkChallenge({
     required String payload,
     required int posId,
+    required String posUuid,
   }) {
-    if (activePos.value?.posId != posId) {
+    if (activePos.value?.posId != posId || activePos.value?.posUuid != posUuid) {
       throw const AppException(
         'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
       );
@@ -496,15 +497,16 @@ class PosWorkspaceController extends GetxController {
 
     return previewNetworkPosLinkChallengeUseCase(
       payload: payload,
-      posId: posId,
+      posUuid: posUuid,
     );
   }
 
   Future<bool> confirmNetworkLinkChallenge({
     required String challengeUuid,
     required int posId,
+    required String posUuid,
   }) async {
-    if (activePos.value?.posId != posId) {
+    if (activePos.value?.posId != posId || activePos.value?.posUuid != posUuid) {
       throw const AppException(
         'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
       );
@@ -512,7 +514,7 @@ class PosWorkspaceController extends GetxController {
 
     final newLink = await confirmNetworkPosLinkChallengeUseCase(
       challengeUuid: challengeUuid,
-      posId: posId,
+      posUuid: posUuid,
     );
 
     if (newLink.posId != posId) {

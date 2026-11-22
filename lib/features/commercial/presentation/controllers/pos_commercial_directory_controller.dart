@@ -421,10 +421,15 @@ class PosCommercialDirectoryController
 
   Future<void> openQrScannerFlow() async {
     final posId = resolvedPosId;
-    if (posId == null) {
+    final pos = authorizedPosList.firstWhereOrNull(
+      (item) => item.posId == posId,
+    );
+    final posUuid = pos?.posUuid.trim();
+
+    if (posId == null || posUuid == null || posUuid.isEmpty) {
       CustomSnackbar.show(
         title: 'تنبيه',
-        message: 'يرجى اختيار وتفعيل نقطة البيع أولاً قبل مسح رمز الارتباط',
+        message: 'يرجى اختيار نقطة بيع صالحة قبل مسح رمز الارتباط',
         type: SnackType.warning,
       );
       return;
@@ -438,19 +443,33 @@ class PosCommercialDirectoryController
         onClose: () => Get.back<void>(),
         onScan: (result) async {
           Get.back<void>();
-          await handleScannedQrPayload(result.rawValue, posId);
+          await handleScannedQrPayload(result.rawValue, posId, posUuid);
         },
       ),
       fullscreenDialog: true,
     );
   }
 
-  Future<void> handleScannedQrPayload(String payload, int posId) async {
+  Future<void> handleScannedQrPayload(
+    String payload,
+    int posId,
+    String posUuid,
+  ) async {
     try {
+      if (resolvedPosId != posId ||
+          authorizedPosList.firstWhereOrNull(
+                (item) => item.posId == posId,
+              )?.posUuid !=
+              posUuid) {
+        throw const AppException(
+          'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
+        );
+      }
+
       await HapticFeedback.lightImpact();
       final preview = await previewNetworkPosLinkChallengeUseCase(
         payload: payload,
-        posId: posId,
+        posUuid: posUuid,
       );
       final confirmed = await NetworkPosLinkConfirmSheet.show(
         preview: preview,
@@ -458,7 +477,7 @@ class PosCommercialDirectoryController
           try {
             await confirmNetworkPosLinkChallengeUseCase(
               challengeUuid: preview.challengeUuid,
-              posId: posId,
+              posUuid: posUuid,
             );
             await CustomAnimationOverlay.showSuccess(
               message:

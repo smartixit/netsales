@@ -54,23 +54,20 @@ abstract class CommercialRepository {
   /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   });
 
   /// فحص ومعاينة دعوة الربط المشفرة
   Future<NetworkPosLinkPreviewEntity> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   /// تأكيد اعتماد الربط التجاري عبر التحدي المشفر
   Future<NetworkPosLinkEntity> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   /// استرجاع الحالة الآمنة الحالية لدعوة الربط.

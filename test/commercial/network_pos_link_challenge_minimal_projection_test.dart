@@ -3,7 +3,7 @@ import 'package:netsales/features/commercial/data/models/network_pos_link_challe
 
 void main() {
   group('NetworkPosLinkChallengeModel minimal response projection', () {
-    test('parses network and POS identity without owner or contact fields', () {
+    test('parses only the approved network and POS identity projection', () {
       final model = NetworkPosLinkChallengeModel.fromJson({
         'challenge_id': 91,
         'challenge_uuid': 'CH-91',
@@ -24,20 +24,23 @@ void main() {
         },
       });
 
-      expect(model.network?.networkId, 7);
-      expect(model.network?.networkName, 'شبكة التوزيع');
-      expect(model.network?.ownerId, 0);
-      expect(model.network?.networkPhoneNumber, '');
-
+      expect(model.networkId, 7);
+      expect(model.networkName, 'شبكة التوزيع');
       expect(model.pos?.posId, 13);
       expect(model.pos?.posUuid, 'POS-2611-00013-AB12');
       expect(model.pos?.posName, 'نقطة البيع المركزية');
-      expect(model.pos?.ownerId, 0);
-      expect(model.pos?.posPhoneNumber, '');
-      expect(model.pos?.governorateName, isNull);
-      expect(model.pos?.directorateName, isNull);
-
       expect(model.expiresAt, '2026-11-22T18:30:00+03:00');
+
+      final serialized = model.toJson();
+      expect(serialized['network'], {
+        'network_id': 7,
+        'network_name': 'شبكة التوزيع',
+      });
+      expect(serialized['pos'], {
+        'pos_id': 13,
+        'pos_uuid': 'POS-2611-00013-AB12',
+        'pos_name': 'نقطة البيع المركزية',
+      });
     });
   });
 }

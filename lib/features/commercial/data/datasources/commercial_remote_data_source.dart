@@ -45,21 +45,18 @@ abstract class CommercialRemoteDataSource {
 
   Future<NetworkPosLinkChallengeModel> createNetworkPosLinkChallenge({
     required int networkId,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
     int durationMinutes = 15,
   });
 
   Future<NetworkPosLinkPreviewModel> previewNetworkPosLinkChallenge({
     required String payload,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   Future<NetworkPosLinkModel> confirmNetworkPosLinkChallenge({
     required String challengeUuid,
-    int? posId,
-    String? posUuid,
+    required String posUuid,
   });
 
   Future<NetworkPosLinkChallengeStatusModel> getNetworkPosLinkChallengeStatus(
