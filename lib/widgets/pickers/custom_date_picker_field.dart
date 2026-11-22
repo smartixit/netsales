@@ -50,7 +50,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
        assert(
          firstDate == null ||
              lastDate == null ||
-             !firstDate.isAfter(lastDate),
+             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        ),
        assert(maxDisplayLines >= 1 && maxDisplayLines <= 3),
@@ -267,7 +267,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
         _normalizeDatePickerValue(
           dates,
           DatePickerSelectionMode.multi,
-        ).whereType<DateTime>().toList(growable: false);
+        ).whereType<DateTime>().toList();
 
     return CustomDatePickerField(
       key: key,
@@ -362,7 +362,9 @@ class _CustomDatePickerFieldState
         previous.unselectableDateMessage != current.unselectableDateMessage ||
         previous.firstDate != current.firstDate ||
         previous.lastDate != current.lastDate ||
-        previous.selectableDayPredicate != current.selectableDayPredicate;
+        previous.selectableDayPredicate != current.selectableDayPredicate ||
+        previous.validator != current.validator ||
+        previous.autovalidateMode != current.autovalidateMode;
 
     if (valueChanged || selectionModeChanged) {
       setValue(
@@ -482,7 +484,9 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
             ),
         ],
       ),
-      style: AppTypography.inputLabel.copyWith(color: colors.onSurfaceVariant),
+      style: AppTypography.inputLabel.copyWith(
+        color: field.enabled ? colors.onSurfaceVariant : colors.onDisabled,
+      ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     ),
@@ -587,20 +591,33 @@ List<DateTime?> _normalizeDatePickerValue(
   List<DateTime?>? source,
   DatePickerSelectionMode mode,
 ) {
-  final dates = source?.whereType<DateTime>().toList() ?? <DateTime>[];
+  final values = source ?? const <DateTime?>[];
 
   switch (mode) {
     case DatePickerSelectionMode.single:
-      return dates.isEmpty ? <DateTime?>[] : <DateTime?>[dates.first];
+      for (final date in values) {
+        if (date != null) return <DateTime?>[date];
+      }
+      return <DateTime?>[];
 
     case DatePickerSelectionMode.range:
-      if (dates.isEmpty) return <DateTime?>[];
-      dates.sort();
-      if (dates.length == 1) return <DateTime?>[dates.first];
-      return <DateTime?>[dates.first, dates.last];
+      if (values.isEmpty) return <DateTime?>[];
+
+      // Preserve which side of a partially selected range is populated.
+      // Filtering nulls first would incorrectly convert [null, end] into [end].
+      final start = values.first;
+      final end = values.length > 1 ? values[1] : null;
+
+      if (start == null && end == null) return <DateTime?>[];
+      if (start == null) return <DateTime?>[null, end];
+      if (end == null) return <DateTime?>[start];
+
+      return end.isBefore(start)
+          ? <DateTime?>[end, start]
+          : <DateTime?>[start, end];
 
     case DatePickerSelectionMode.multi:
-      dates.sort();
+      final dates = values.whereType<DateTime>().toList()..sort();
       final uniqueDates = <DateTime>[];
       for (final date in dates) {
         final alreadyExists = uniqueDates.any(
@@ -614,6 +631,8 @@ List<DateTime?> _normalizeDatePickerValue(
       return uniqueDates;
   }
 }
+
+DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
 String? _validateDatePickerValue(
   List<DateTime?>? source, {
@@ -632,7 +651,7 @@ String? _validateDatePickerValue(
   final selectedDates = dates.whereType<DateTime>().toList();
 
   if (selectedDates.isEmpty) {
-    return isRequired ? requiredMessage : null;
+    return isRequired ? requiredMessage : validator?.call(dates);
   }
 
   if (pickerType == DatePickerSelectionMode.range &&
@@ -693,6 +712,23 @@ String _formatDatePickerValue(
     case DatePickerSelectionMode.range:
       final start = dates.isNotEmpty ? dates.first : null;
       final end = dates.length > 1 ? dates[1] : null;
+
+      if (start != null && end == null) {
+        return 'من ${DatePickerService.instance.formatArabicDate(
+          start,
+          includeDayName: false,
+          includeTime: field.enableTime,
+        )}';
+      }
+
+      if (start == null && end != null) {
+        return 'إلى ${DatePickerService.instance.formatArabicDate(
+          end,
+          includeDayName: false,
+          includeTime: field.enableTime,
+        )}';
+      }
+
       return DatePickerService.instance.formatArabicRange(
         start,
         end,
