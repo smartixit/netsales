@@ -250,7 +250,6 @@ class NetworkDirectInvoiceController extends GetxController {
         saleType: selectedSaleType,
         items: itemsPayload,
         idempotencyKey: idempotencyKey,
-        paidAmount: null,
       );
 
       await CustomAnimationOverlay.showSuccess(
