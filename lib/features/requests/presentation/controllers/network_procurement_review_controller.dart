@@ -1025,7 +1025,6 @@ class NetworkProcurementReviewController
 
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
-    const isCredit = false;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
       onConfirm: (note) => approveRequest(
