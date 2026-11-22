@@ -333,6 +333,8 @@ class _DatePickerContainerView extends StatelessWidget {
     _DatePickerModalController controller,
   ) {
     final colors = context.colors;
+    final compactCalendar =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.maxModalWidth;
     final calendarConfig = CalendarDatePicker2Config(
       calendarType: controller.calendarType,
       firstDate: controller.effectiveFirstDate,
@@ -370,8 +372,8 @@ class _DatePickerContainerView extends StatelessWidget {
       ),
       weekdayLabels: DatePickerService.weekdayShortLabels,
       centerAlignModePicker: true,
-      disableModePicker: true,
-      disableMonthPicker: true,
+      disableModePicker: compactCalendar,
+      disableMonthPicker: compactCalendar,
       useAbbrLabelForMonthModePicker: true,
       modePickersGap: 0,
       controlsHeight: 44.h,
