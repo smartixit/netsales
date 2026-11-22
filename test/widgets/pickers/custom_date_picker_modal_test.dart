@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/widgets/pickers/custom_date_picker_modal.dart';
 
 Widget _harness(Widget child) {
   return ScreenUtilInit(
