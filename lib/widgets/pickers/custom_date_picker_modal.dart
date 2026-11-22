@@ -887,24 +887,28 @@ class _TimePickerSection extends StatelessWidget {
     );
   }
 
-  void _incrementMinute() {
-    HapticFeedback.selectionClick();
+  void _adjustMinutes(int delta) {
+    const minutesPerDay = 24 * 60;
+    final totalMinutes = selectedTime.hour * 60 + selectedTime.minute + delta;
+    final normalizedMinutes =
+        (totalMinutes % minutesPerDay + minutesPerDay) % minutesPerDay;
+
     onTimeChanged(
       TimeOfDay(
-        hour: selectedTime.hour,
-        minute: (selectedTime.minute + 5) % 60,
+        hour: normalizedMinutes ~/ 60,
+        minute: normalizedMinutes % 60,
       ),
     );
   }
 
+  void _incrementMinute() {
+    HapticFeedback.selectionClick();
+    _adjustMinutes(5);
+  }
+
   void _decrementMinute() {
     HapticFeedback.selectionClick();
-    onTimeChanged(
-      TimeOfDay(
-        hour: selectedTime.hour,
-        minute: (selectedTime.minute - 5 + 60) % 60,
-      ),
-    );
+    _adjustMinutes(-5);
   }
 
   void _togglePeriod() {
