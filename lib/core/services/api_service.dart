@@ -562,8 +562,7 @@ class ApiService {
         success: false,
         message: AppException.sanitizeMessage(
           e.error,
-          fallback:
-              'تعذر إكمال تحقق الاستضافة. لم يتم تغيير حالة الجلسة، يرجى إعادة المحاولة.',
+          fallback: 'تعذر إكمال تحقق الاستضافة. لم يتم تغيير حالة الجلسة، يرجى إعادة المحاولة.',
         ),
         statusCode: null,
       );
