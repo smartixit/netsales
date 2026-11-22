@@ -65,6 +65,11 @@ jobs:
         if: github.event_name == 'push' && github.ref_name != 'chore/pub-dependency-maintenance'
         run: >-
           dart format lib/widgets/data_grid test/widgets/data_grid
+          lib/widgets/pickers/custom_date_picker_field.dart
+          lib/widgets/pickers/custom_date_picker_modal.dart
+          lib/widgets/sheets/custom_bottom_sheet.dart
+          test/widgets/pickers/custom_date_picker_field_test.dart
+          test/widgets/pickers/custom_date_picker_modal_test.dart
           lib/core/services/api_service.dart
           lib/core/services/infinityfree_challenge_interceptor.dart
           lib/core/services/infinityfree_challenge_solver.dart
@@ -79,6 +84,11 @@ jobs:
         run: >-
           dart format --output=none --set-exit-if-changed
           lib/widgets/data_grid test/widgets/data_grid
+          lib/widgets/pickers/custom_date_picker_field.dart
+          lib/widgets/pickers/custom_date_picker_modal.dart
+          lib/widgets/sheets/custom_bottom_sheet.dart
+          test/widgets/pickers/custom_date_picker_field_test.dart
+          test/widgets/pickers/custom_date_picker_modal_test.dart
           lib/core/services/api_service.dart
           lib/core/services/infinityfree_challenge_interceptor.dart
           lib/core/services/infinityfree_challenge_solver.dart
