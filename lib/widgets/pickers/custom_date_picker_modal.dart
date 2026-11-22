@@ -714,7 +714,8 @@ class _DatePickerHeader extends StatelessWidget {
               icon: Icons.clear_rounded,
               tooltip: 'مسح',
               iconSize: 18.r,
-              dimension: 36.r,
+              dimension: 44.r,
+              enableFeedback: false,
               foregroundColor: colors.onSurfaceVariant,
               backgroundColor: Colors.transparent,
               onPressed: onClear,
@@ -820,25 +821,25 @@ class _PresetChip extends StatelessWidget {
           opacity: enabled ? 1 : 0.38,
           duration: AppMotion.duration(context, AppMotion.fast),
           child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(AppRadius.full.r),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.3),
-            width: 1.w,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelMedium.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(AppRadius.full.r),
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: 0.3),
+                width: 1.w,
+              ),
+            ),
+            child: Text(
+              label,
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ),
       ),
@@ -859,128 +860,170 @@ class _TimePickerSection extends StatelessWidget {
   final ValueChanged<TimeOfDay> onTimeChanged;
 
   void _incrementHour() {
-    HapticFeedback.lightImpact();
-    final newHour = (selectedTime.hour + 1) % 24;
-    onTimeChanged(TimeOfDay(hour: newHour, minute: selectedTime.minute));
+    HapticFeedback.selectionClick();
+    onTimeChanged(
+      TimeOfDay(
+        hour: (selectedTime.hour + 1) % 24,
+        minute: selectedTime.minute,
+      ),
+    );
   }
 
   void _decrementHour() {
-    HapticFeedback.lightImpact();
-    final newHour = (selectedTime.hour - 1 + 24) % 24;
-    onTimeChanged(TimeOfDay(hour: newHour, minute: selectedTime.minute));
+    HapticFeedback.selectionClick();
+    onTimeChanged(
+      TimeOfDay(
+        hour: (selectedTime.hour - 1 + 24) % 24,
+        minute: selectedTime.minute,
+      ),
+    );
   }
 
   void _incrementMinute() {
-    HapticFeedback.lightImpact();
-    final newMinute = (selectedTime.minute + 5) % 60;
-    onTimeChanged(TimeOfDay(hour: selectedTime.hour, minute: newMinute));
+    HapticFeedback.selectionClick();
+    onTimeChanged(
+      TimeOfDay(
+        hour: selectedTime.hour,
+        minute: (selectedTime.minute + 5) % 60,
+      ),
+    );
   }
 
   void _decrementMinute() {
-    HapticFeedback.lightImpact();
-    final newMinute = (selectedTime.minute - 5 + 60) % 60;
-    onTimeChanged(TimeOfDay(hour: selectedTime.hour, minute: newMinute));
+    HapticFeedback.selectionClick();
+    onTimeChanged(
+      TimeOfDay(
+        hour: selectedTime.hour,
+        minute: (selectedTime.minute - 5 + 60) % 60,
+      ),
+    );
   }
 
   void _togglePeriod() {
-    HapticFeedback.lightImpact();
-    final isPm = selectedTime.hour >= 12;
-    final newHour = isPm ? selectedTime.hour - 12 : selectedTime.hour + 12;
-    onTimeChanged(TimeOfDay(hour: newHour, minute: selectedTime.minute));
+    HapticFeedback.selectionClick();
+    final nextHour = selectedTime.hour >= 12
+        ? selectedTime.hour - 12
+        : selectedTime.hour + 12;
+    onTimeChanged(TimeOfDay(hour: nextHour, minute: selectedTime.minute));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isPm = selectedTime.hour >= 12;
+  Widget _buildTimeControls(AppColors colors) {
     final displayHour = selectedTime.hour % 12 == 0
         ? 12
         : selectedTime.hour % 12;
     final displayMinute = selectedTime.minute.toString().padLeft(2, '0');
 
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(AppRadius.lg.r),
-        border: Border.all(
-          color: colors.outlineVariant.withValues(alpha: 0.25),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _TimeUnitCounter(
+          value: displayHour.toString().padLeft(2, '0'),
+          onIncrement: _incrementHour,
+          onDecrement: _decrementHour,
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.access_time_rounded, color: colors.primary, size: 20.r),
-          AppSpacing.hSm,
-          Text(
-            'الوقت:',
-            style: AppTypography.labelMedium.copyWith(
-              color: colors.onSurfaceVariant,
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: Text(
+            ':',
+            style: AppTypography.titleLarge.copyWith(
+              color: colors.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const Spacer(),
+        ),
+        _TimeUnitCounter(
+          value: displayMinute,
+          onIncrement: _incrementMinute,
+          onDecrement: _decrementMinute,
+        ),
+      ],
+    );
+  }
 
-          // عداد الساعات
-          _TimeUnitCounter(
-            value: displayHour.toString().padLeft(2, '0'),
-            onIncrement: _incrementHour,
-            onDecrement: _decrementHour,
+  Widget _buildPeriodButton(AppColors colors) {
+    return CustomButton.secondary(
+      text: selectedTime.hour >= 12 ? 'مساءً (م)' : 'صباحاً (ص)',
+      size: AppButtonSize.small,
+      height: 44.r,
+      enableFeedback: false,
+      enableScaleAnimation: false,
+      onPressed: _togglePeriod,
+      backgroundColor: colors.primaryContainer.withValues(alpha: 0.5),
+      foregroundColor: colors.primary,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 440;
+        final decoration = BoxDecoration(
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(AppRadius.lg.r),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.25),
           ),
+        );
 
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            child: Text(
-              ':',
-              style: AppTypography.titleLarge.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
           ),
-
-          // عداد الدقائق
-          _TimeUnitCounter(
-            value: displayMinute,
-            onIncrement: _incrementMinute,
-            onDecrement: _decrementMinute,
-          ),
-
-          AppSpacing.hSm,
-
-          // زر التبديل بين صباحاً ومساءً
-          CustomInteractiveBounce(
-            onTap: _togglePeriod,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(AppRadius.sm.r),
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.35),
-                  width: 1.w,
+          padding: EdgeInsets.all(AppSpacing.sm),
+          decoration: decoration,
+          child: compact
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          color: colors.primary,
+                          size: 20.r,
+                        ),
+                        AppSpacing.hSm,
+                        Text(
+                          'الوقت:',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                        AppSpacing.hSm,
+                        _buildPeriodButton(colors),
+                      ],
+                    ),
+                    AppSpacing.vSm,
+                    Center(child: _buildTimeControls(colors)),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      color: colors.primary,
+                      size: 20.r,
+                    ),
+                    AppSpacing.hSm,
+                    Text(
+                      'الوقت:',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const Spacer(),
+                    _buildTimeControls(colors),
+                    AppSpacing.hSm,
+                    _buildPeriodButton(colors),
+                  ],
                 ),
-              ),
-              child: Text(
-                isPm ? 'مساءً (م)' : 'صباحاً (ص)',
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -1015,9 +1058,11 @@ class _TimeUnitCounter extends StatelessWidget {
             icon: Icons.remove_rounded,
             tooltip: 'إنقاص',
             iconSize: 14.r,
-            dimension: 28.r,
+            dimension: 44.r,
             foregroundColor: colors.onSurfaceVariant,
             backgroundColor: Colors.transparent,
+            enableFeedback: false,
+            enableScaleAnimation: false,
             onPressed: onDecrement,
           ),
           Padding(
@@ -1034,9 +1079,11 @@ class _TimeUnitCounter extends StatelessWidget {
             icon: Icons.add_rounded,
             tooltip: 'زيادة',
             iconSize: 14.r,
-            dimension: 28.r,
+            dimension: 44.r,
             foregroundColor: colors.onSurfaceVariant,
             backgroundColor: Colors.transparent,
+            enableFeedback: false,
+            enableScaleAnimation: false,
             onPressed: onIncrement,
           ),
         ],
