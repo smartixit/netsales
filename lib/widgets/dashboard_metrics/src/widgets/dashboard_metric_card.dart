@@ -58,7 +58,7 @@ class DashboardMetricCard extends StatelessWidget {
               boxShadow: tokens.cardShadows,
             ),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: height ?? 110),
+              constraints: BoxConstraints(minHeight: height ?? 92),
               child: state == DashboardMetricState.data
                   ? DashboardMetricContent(
                       metric: metric,

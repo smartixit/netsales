@@ -586,6 +586,20 @@ class PosWorkspaceController extends GetxController {
   void openWalletStatement() =>
       Get.toNamed<void>(AppRoutes.posWalletStatement);
 
+  void onMetricTap(String id) {
+    switch (id) {
+      case 'today_procurement':
+        openPurchaseInvoices();
+      case 'wallet':
+        openWalletStatement();
+      case 'active_orders':
+        final order = activeSupplyOrder;
+        if (order != null) {
+          openProcurementOrder(order.request);
+        }
+    }
+  }
+
   void openProcurementOrder(RequestEntity request) =>
       Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
 

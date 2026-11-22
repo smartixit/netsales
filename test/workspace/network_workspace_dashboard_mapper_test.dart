@@ -62,7 +62,11 @@ void main() {
       expect(result.pendingRequestsCount, 2);
       expect(result.salesTrendSummary.invoiceCount, 2);
       expect(result.salesTrendSummary.totalSales, '2,500.00');
-      expect(result.kpiMetrics, hasLength(5));
+      expect(result.kpiMetrics, hasLength(4));
+      expect(
+        result.kpiMetrics.map((metric) => metric.id),
+        containsAll(['sales', 'packages', 'requests', 'pos']),
+      );
       expect(
         result.kpiMetrics.map((metric) => metric.id),
         isNot(contains('wallet')),
