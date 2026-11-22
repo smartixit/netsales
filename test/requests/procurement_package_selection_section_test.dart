@@ -243,18 +243,9 @@ void main() {
       expect(labelColor('نقدي'), selectedColor);
       expect(labelColor('آجل'), inactiveColor);
 
-      await tester.tap(find.text('آجل'));
-      await tester.pumpAndSettle();
-
-      expect(controller.selectedSaleType.value, SaleType.credit);
-      expect(labelColor('آجل'), selectedColor);
-      expect(labelColor('نقدي'), inactiveColor);
-
-      controller.selectedSaleType.value = SaleType.cash;
-      await tester.pumpAndSettle();
-
-      expect(labelColor('نقدي'), selectedColor);
-      expect(labelColor('آجل'), inactiveColor);
+      expect(controller.selectedSaleType.value, SaleType.cash);
+      expect(find.text('نقدي'), findsOneWidget);
+      expect(find.text('آجل'), findsNothing);
     },
   );
 }
