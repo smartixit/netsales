@@ -566,8 +566,8 @@ class PosNewProcurementOrderController extends GetxController {
       _setSelectedNetworkId(null);
       _setSelectedPackage(null);
     } finally {
-      isLoadingNetworks.value = false;
-      isLoadingPackages.value = false;
+      // isLoadingNetworks.value = false;
+      // isLoadingPackages.value = false;
     }
   }
 
@@ -852,6 +852,7 @@ class PosNewProcurementOrderController extends GetxController {
       if (revision == _packageRevision) {
         isLoadingPackages.value = false;
         isLoadingMorePackages.value = false;
+        isLoadingNetworks.value = false;
       }
     }
   }

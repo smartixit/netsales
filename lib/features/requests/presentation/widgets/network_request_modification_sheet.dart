@@ -467,40 +467,9 @@ class _NetworkRequestProposedItemsSection
         ),
         AppSpacing.vSm,
         if (lines.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: .4),
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.remove_shopping_cart_rounded,
-                  size: 32.r,
-                  color: colors.onSurfaceVariant,
-                ),
-                AppSpacing.vSm,
-                Text(
-                  'قائمة الباقات فارغة',
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                AppSpacing.vXxs,
-                Text(
-                  'يمكنك إضافة باقات جديدة من كتالوج الشبكة أدناه.',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+          CustomStateView.empty(
+            title: 'قائمة الباقات فارغة',
+            subtitle: 'يمكنك إضافة باقات جديدة من كتالوج الشبكة أدناه.',
           )
         else
           ...lines.map((line) {
