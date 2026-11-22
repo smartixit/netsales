@@ -25,6 +25,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_link_challenge_status_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/search_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
@@ -55,6 +56,7 @@ class NetworkCommercialDirectoryController
     this.getMyNetworksUseCase,
     required this.getNetworkPosLinkChallengeStatusUseCase,
     required this.resolveNetworkLinkablePosUseCase,
+    required this.searchNetworkLinkablePosUseCase,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -68,6 +70,7 @@ class NetworkCommercialDirectoryController
   final GetNetworkPosLinkChallengeStatusUseCase
   getNetworkPosLinkChallengeStatusUseCase;
   final ResolveNetworkLinkablePosUseCase resolveNetworkLinkablePosUseCase;
+  final SearchNetworkLinkablePosUseCase searchNetworkLinkablePosUseCase;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -99,8 +102,20 @@ class NetworkCommercialDirectoryController
   final authorizedNetworks = <NetworkEntity>[].obs;
 
   final TextEditingController invitationBusinessCodeController = TextEditingController();
-  final RxBool isResolvingInvitationTarget = false.obs;
-  final Rxn<NetworkLinkablePosEntity> resolvedInvitationTarget = Rxn<NetworkLinkablePosEntity>();
+  final RxString invitationSearchQuery = ''.obs;
+  final RxList<NetworkLinkablePosEntity> invitationTargets =
+      <NetworkLinkablePosEntity>[].obs;
+  final RxBool isLoadingInvitationTargets = false.obs;
+  final RxBool isLoadingMoreInvitationTargets = false.obs;
+  final RxnString invitationTargetsError = RxnString();
+  final Rxn<NetworkLinkablePosEntity> resolvedInvitationTarget =
+      Rxn<NetworkLinkablePosEntity>();
+  String? _invitationTargetsNextCursor;
+  int _invitationTargetsRevision = 0;
+
+  bool get hasMoreInvitationTargets =>
+      _invitationTargetsNextCursor != null &&
+      _invitationTargetsNextCursor!.isNotEmpty;
 
   final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
@@ -177,12 +192,18 @@ class NetworkCommercialDirectoryController
       (_) => loadLinks(isRefresh: true, clearOnStart: true),
       time: const Duration(milliseconds: 350),
     );
+    debounce(
+      invitationSearchQuery,
+      (_) => loadInvitationTargets(),
+      time: const Duration(milliseconds: 350),
+    );
     loadInitialData();
   }
 
   @override
   void onClose() {
     _listRevision++;
+    _invitationTargetsRevision++;
     searchController.dispose();
     invitationBusinessCodeController.dispose();
     _isInvitationTargetDialogOpen = false;
@@ -522,14 +543,108 @@ class NetworkCommercialDirectoryController
 
 
   void onInvitationBusinessCodeChanged(String value) {
+    invitationSearchQuery.value = value.trim();
     resolvedInvitationTarget.value = null;
   }
 
+  Future<void> loadInvitationTargets() async {
+    final networkId = resolvedNetworkId;
+    final search = invitationSearchQuery.value.trim();
+    final revision = ++_invitationTargetsRevision;
+
+    invitationTargets.clear();
+    _invitationTargetsNextCursor = null;
+    invitationTargetsError.value = null;
+
+    if (networkId == null || search.length < 2) {
+      isLoadingInvitationTargets.value = false;
+      isLoadingMoreInvitationTargets.value = false;
+      return;
+    }
+
+    isLoadingInvitationTargets.value = true;
+    try {
+      final result = await searchNetworkLinkablePosUseCase(
+        networkId: networkId,
+        search: search,
+        perPage: 15,
+      );
+      if (revision != _invitationTargetsRevision ||
+          search != invitationSearchQuery.value.trim() ||
+          networkId != resolvedNetworkId) {
+        return;
+      }
+      invitationTargets.assignAll(result.items);
+      _invitationTargetsNextCursor = result.nextCursor;
+    } catch (error) {
+      if (revision == _invitationTargetsRevision) {
+        invitationTargetsError.value = AppException.sanitizeMessage(error);
+      }
+    } finally {
+      if (revision == _invitationTargetsRevision) {
+        isLoadingInvitationTargets.value = false;
+      }
+    }
+  }
+
+  Future<void> loadMoreInvitationTargets() async {
+    final networkId = resolvedNetworkId;
+    final cursor = _invitationTargetsNextCursor;
+    final search = invitationSearchQuery.value.trim();
+    final revision = _invitationTargetsRevision;
+
+    if (networkId == null ||
+        cursor == null ||
+        cursor.isEmpty ||
+        isLoadingMoreInvitationTargets.value) {
+      return;
+    }
+
+    isLoadingMoreInvitationTargets.value = true;
+    try {
+      final result = await searchNetworkLinkablePosUseCase(
+        networkId: networkId,
+        search: search,
+        cursor: cursor,
+        perPage: 15,
+      );
+      if (revision != _invitationTargetsRevision ||
+          search != invitationSearchQuery.value.trim() ||
+          networkId != resolvedNetworkId) {
+        return;
+      }
+      invitationTargets.addAll(result.items);
+      _invitationTargetsNextCursor = result.nextCursor;
+    } catch (error) {
+      if (revision == _invitationTargetsRevision) {
+        invitationTargetsError.value = AppException.sanitizeMessage(error);
+      }
+    } finally {
+      if (revision == _invitationTargetsRevision) {
+        isLoadingMoreInvitationTargets.value = false;
+      }
+    }
+  }
+
+  void selectInvitationTarget(NetworkLinkablePosEntity target) {
+    if (!_isInvitationTargetDialogOpen ||
+        isLoadingInvitationTargets.value ||
+        isLoadingMoreInvitationTargets.value) {
+      return;
+    }
+    resolvedInvitationTarget.value = target;
+  }
+
   void cancelInvitationTargetDialog() {
-    if (isResolvingInvitationTarget.value) return;
+    if (isLoadingInvitationTargets.value ||
+        isLoadingMoreInvitationTargets.value) {
+      return;
+    }
+    _invitationTargetsRevision++;
     _isInvitationTargetDialogOpen = false;
     _isInvitationTargetConfirmed = false;
     resolvedInvitationTarget.value = null;
+    invitationTargets.clear();
     Get.back<void>();
   }
 
@@ -541,37 +656,6 @@ class NetworkCommercialDirectoryController
     _isInvitationTargetDialogOpen = false;
     _isInvitationTargetConfirmed = true;
     Get.back<void>();
-  }
-
-  Future<void> resolveInvitationTarget() async {
-    final code = invitationBusinessCodeController.text.trim().toUpperCase();
-    final existingTarget = resolvedInvitationTarget.value;
-    if (existingTarget != null && existingTarget.posUuid.toUpperCase() == code) {
-      return;
-    }
-    if (!RegExp(r'^POS-\d{4}-\d{5}-[A-F0-9]{4}$').hasMatch(code)) {
-      CustomSnackbar.show(title: 'تحقق من المعرف', message: 'أدخل المعرف التجاري لنقطة البيع بالصيغة الموجودة في ملفها.', type: SnackType.warning);
-      return;
-    }
-    if (isResolvingInvitationTarget.value) return;
-    final networkId = resolvedNetworkId;
-    if (networkId == null) {
-      CustomSnackbar.show(title: 'تعذر تحديد الشبكة', message: 'اختر الشبكة التي ستصدر الدعوة باسمها أولاً.', type: SnackType.warning);
-      return;
-    }
-    isResolvingInvitationTarget.value = true;
-    try {
-      final target = await resolveNetworkLinkablePosUseCase(networkId: networkId, posBusinessCode: code);
-      if (!_isInvitationTargetDialogOpen) return;
-      if (target.posId <= 0 || target.posUuid.trim().isEmpty) {
-        throw const AppException('لم يُرجع الخادم هوية صالحة لنقطة البيع المستهدفة.');
-      }
-      resolvedInvitationTarget.value = target;
-    } catch (error) {
-      CustomSnackbar.show(title: 'لم يتم العثور على جهة مؤهلة', message: AppException.sanitizeMessage(error), type: SnackType.error);
-    } finally {
-      isResolvingInvitationTarget.value = false;
-    }
   }
 
   void startInvitationMonitoring(NetworkPosLinkChallengeEntity challenge) {
@@ -709,7 +793,7 @@ class NetworkCommercialDirectoryController
   }
 
   Future<void> openCreateQrInvitation() async {
-    if (_isInvitationTargetDialogOpen || isResolvingInvitationTarget.value) {
+    if (_isInvitationTargetDialogOpen || isLoadingInvitationTargets.value) {
       return;
     }
     final netId = resolvedNetworkId;
@@ -718,6 +802,9 @@ class NetworkCommercialDirectoryController
       return;
     }
     invitationBusinessCodeController.clear();
+    invitationSearchQuery.value = '';
+    invitationTargets.clear();
+    _invitationTargetsNextCursor = null;
     resolvedInvitationTarget.value = null;
     try {
       _isInvitationTargetDialogOpen = true;
@@ -726,10 +813,15 @@ class NetworkCommercialDirectoryController
           title: 'تحديد نقطة البيع المستهدفة',
           content: NetworkPosInvitationTargetDialog(
             codeController: invitationBusinessCodeController,
-            isResolving: isResolvingInvitationTarget,
+            targets: invitationTargets,
+            isLoading: isLoadingInvitationTargets,
+            isLoadingMore: isLoadingMoreInvitationTargets,
+            hasMore: hasMoreInvitationTargets,
+            errorMessage: invitationTargetsError,
             resolvedTarget: resolvedInvitationTarget,
             onChanged: onInvitationBusinessCodeChanged,
-            onResolve: resolveInvitationTarget,
+            onLoadMore: loadMoreInvitationTargets,
+            onSelect: selectInvitationTarget,
             onConfirm: confirmInvitationTarget,
             onCancel: cancelInvitationTargetDialog,
           ),
