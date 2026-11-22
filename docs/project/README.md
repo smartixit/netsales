@@ -42,3 +42,6 @@ This script checks the status and synchronization of canonical documents in `net
 - Billing Reports continues to use the shared `ReportConfigurationStudio`; filters, PDF presentation, column visibility, summary/charts, and records are composed from focused feature widgets.
 - Operational Reports scope changes invalidate catalogue, preset, export-status, CSV and PDF actions; record status labels use the central enum presentation registry.
 - Implementation branch: `feat/subscriptions-network-module`. Source changes only. Formatter/analyzer/tests, PDF extraction/visual QA and GitHub Actions remain pending for final validation.
+
+
+POS invoices are cash-settled only. POS credit facilities, debt ledgers, debt aging, repayment collection/reversal, and repayment documents are outside the active product scope.
