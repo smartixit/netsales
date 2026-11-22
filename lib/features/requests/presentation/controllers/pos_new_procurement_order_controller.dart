@@ -254,11 +254,12 @@ class PosNewProcurementOrderController extends GetxController {
   }
 
   /// فهرس محدد نوع البيع (0: نقدي، 1: آجل)
-  int get selectedSaleTypeIndex => 0;
+  int get selectedSaleTypeIndex =>
+      selectedSaleType.value == SaleType.cash ? 0 : 1;
 
   /// تعيين نوع البيع عبر الفهرس
   void setSaleTypeIndex(int index) {
-    selectedSaleType.value = SaleType.cash;
+    selectedSaleType.value = index == 0 ? SaleType.cash : SaleType.credit;
   }
 
   bool get canSubmitOrder =>
@@ -1210,7 +1211,7 @@ class PosNewProcurementOrderController extends GetxController {
 
     isEditing.value = true;
     editingRequestId.value = request.requestId;
-    selectedSaleType.value = SaleType.cash;
+    selectedSaleType.value = request.saleType;
     notesController.text = request.requestNote ?? '';
 
     // تصفير السلة ووحدات التحكم السابقة
