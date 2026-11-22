@@ -270,6 +270,8 @@ abstract final class ApiConstants {
       '/sale-invoices/batch-force-delete';
 
 
+  static String posWalletCreditLimit(int id) => '/pos-wallets/$id/credit-limit';
+
   // ==========================================================================
   // 15. المصروفات التشغيلية والبنود والمرفقات (Expenses & Operational Disbursals)
   // ==========================================================================
