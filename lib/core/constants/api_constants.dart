@@ -269,13 +269,6 @@ abstract final class ApiConstants {
   static const String saleInvoicesBatchForceDelete =
       '/sale-invoices/batch-force-delete';
 
-  static const String posDebtsSummary = '/pos-debts/summary';
-  static const String posDebtsInvoices = '/pos-debts/invoices';
-  static const String posDebtsRepayments = '/pos-debts/repayments';
-  static String posDebtRepayment(int id) => '/pos-debts/repayments/$id';
-  static String posDebtRepaymentReverse(int id) =>
-      '/pos-debts/repayments/$id/reverse';
-  static String posWalletCreditLimit(int id) => '/pos-wallets/$id/credit-limit';
 
   // ==========================================================================
   // 15. المصروفات التشغيلية والبنود والمرفقات (Expenses & Operational Disbursals)
