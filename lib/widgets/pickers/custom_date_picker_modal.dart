@@ -369,6 +369,12 @@ class _DatePickerContainerView extends StatelessWidget {
         fontWeight: FontWeight.bold,
       ),
       weekdayLabels: DatePickerService.weekdayShortLabels,
+      centerAlignModePicker: true,
+      disableModePicker: true,
+      disableMonthPicker: true,
+      useAbbrLabelForMonthModePicker: true,
+      modePickersGap: 0,
+      controlsHeight: 44.h,
       dayBorderRadius: BorderRadius.circular(AppRadius.md.r),
     );
 
@@ -968,8 +974,9 @@ class _TimePickerSection extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact =
-            constraints.maxWidth < AppBreakpoints.maxModalWidth - AppSpacing.xl;
+        final compact = !constraints.hasBoundedWidth ||
+            constraints.maxWidth <
+                AppBreakpoints.maxModalWidth - AppSpacing.xl;
         final decoration = BoxDecoration(
           color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(AppRadius.lg.r),
