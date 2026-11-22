@@ -391,7 +391,7 @@ void main() {
           'network_id': 5,
           'pos_id': 12,
           'request_uuid': 'req-uuid-12345',
-          'sale_type': 'CREDIT',
+          'sale_type': 'CASH',
           'request_total_amount': 25000.0,
           'status': 'APPROVED',
           'invoice_id': 901,
@@ -429,7 +429,7 @@ void main() {
         requestId: 101,
         networkId: 5,
         posId: 12,
-        saleTypeRaw: 'CREDIT',
+        saleTypeRaw: 'CASH',
         requestTotalAmount: 5000.0,
         items: const [
           RequestItemModel(
@@ -447,7 +447,7 @@ void main() {
 
       expect(json['network_id'], 5);
       expect(json['pos_id'], 12);
-      expect(json['sale_type'], 'CREDIT');
+      expect(json['sale_type'], 'CASH');
       expect(json.containsKey('currency'), false);
     });
   });
