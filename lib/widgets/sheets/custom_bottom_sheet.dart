@@ -49,6 +49,7 @@ class CustomBottomSheet extends StatelessWidget {
   final bool scrollable;
   final EdgeInsetsGeometry? padding;
   final double? maxHeightFactor;
+  final double? maxWidth;
 
   const CustomBottomSheet({
     super.key,
@@ -63,6 +64,7 @@ class CustomBottomSheet extends StatelessWidget {
     this.scrollable = false,
     this.padding,
     this.maxHeightFactor,
+    this.maxWidth,
   });
 
   /// 1. مصنع النوافذ السفلية لقائمة الإجراءات والخيارات (Actions List)
@@ -269,6 +271,7 @@ class CustomBottomSheet extends StatelessWidget {
     bool scrollable = false,
     EdgeInsetsGeometry? padding,
     double? maxHeightFactor,
+    double? maxWidth,
     bool isScrollControlled = true,
     bool isDismissible = true,
     bool enableDrag = true,
@@ -286,6 +289,7 @@ class CustomBottomSheet extends StatelessWidget {
         scrollable: scrollable,
         padding: padding,
         maxHeightFactor: maxHeightFactor,
+        maxWidth: maxWidth,
         child: child,
       ),
       isScrollControlled: isScrollControlled,
@@ -356,7 +360,10 @@ class CustomBottomSheet extends StatelessWidget {
         mediaQuery.size.height * (maxHeightFactor ?? 0.88);
 
     return Container(
-      constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
+      constraints: BoxConstraints(
+        maxHeight: effectiveMaxHeight,
+        maxWidth: maxWidth ?? double.infinity,
+      ),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.vertical(
