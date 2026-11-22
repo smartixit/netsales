@@ -109,10 +109,7 @@ class NetworkCommercialDirectoryController
       Rxn<NetworkLinkablePosEntity>();
   String? _invitationTargetsNextCursor;
   int _invitationTargetsRevision = 0;
-
-  bool get hasMoreInvitationTargets =>
-      _invitationTargetsNextCursor != null &&
-      _invitationTargetsNextCursor!.isNotEmpty;
+  final RxBool hasMoreInvitationTargets = false.obs;
 
   final Rx<LinkingChallengeStatus> invitationStatus = LinkingChallengeStatus.pending.obs;
   final Rxn<DateTime> invitationExpiresAt = Rxn<DateTime>();
@@ -545,6 +542,7 @@ class NetworkCommercialDirectoryController
     resolvedInvitationTarget.value = null;
     invitationTargets.clear();
     _invitationTargetsNextCursor = null;
+    hasMoreInvitationTargets.value = false;
     invitationTargetsError.value = null;
     isLoadingInvitationTargets.value = false;
     isLoadingMoreInvitationTargets.value = false;
@@ -579,6 +577,7 @@ class NetworkCommercialDirectoryController
       }
       invitationTargets.assignAll(result.items);
       _invitationTargetsNextCursor = result.nextCursor;
+      hasMoreInvitationTargets.value = result.hasMore;
     } catch (error) {
       if (revision == _invitationTargetsRevision) {
         invitationTargetsError.value = AppException.sanitizeMessage(error);
@@ -618,6 +617,7 @@ class NetworkCommercialDirectoryController
       }
       invitationTargets.addAll(result.items);
       _invitationTargetsNextCursor = result.nextCursor;
+      hasMoreInvitationTargets.value = result.hasMore;
     } catch (error) {
       if (revision == _invitationTargetsRevision) {
         invitationTargetsError.value = AppException.sanitizeMessage(error);
@@ -806,6 +806,7 @@ class NetworkCommercialDirectoryController
     invitationSearchQuery.value = '';
     invitationTargets.clear();
     _invitationTargetsNextCursor = null;
+    hasMoreInvitationTargets.value = false;
     resolvedInvitationTarget.value = null;
     try {
       _isInvitationTargetDialogOpen = true;
