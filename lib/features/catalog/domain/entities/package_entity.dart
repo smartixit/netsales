@@ -95,7 +95,14 @@ class PackageEntity {
       ? procurementCreditDiscountBasisPoints! / 100.0
       : packageDefaultCreditDiscount;
 
-  String get balanceDisplay => PackageSpecFormatter.formatData(packageBalance);
+  /// The API stores package balance in megabytes; convert to canonical bytes
+  /// before using the shared data-size formatter.
+  String get balanceDisplay => PackageSpecFormatter.formatData(
+    PackageSpecFormatter.toCanonicalBytes(
+      packageBalance,
+      DataSizeUnit.megabytes,
+    ),
+  );
 
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);
