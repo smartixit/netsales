@@ -51,6 +51,14 @@ abstract class CommercialRepository {
     required String posBusinessCode,
   });
 
+  /// Search POS candidates eligible for a new invitation in one authorized Network.
+  Future<PaginatedList<NetworkLinkablePosEntity>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  });
+
   /// إنشاء وتوليد دعوة وتحدي ربط مشفر عبر رمز QR
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
     required int networkId,

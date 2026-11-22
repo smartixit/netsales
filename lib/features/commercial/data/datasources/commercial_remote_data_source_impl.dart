@@ -167,6 +167,40 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<PaginatedList<NetworkLinkablePosModel>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.get<List<NetworkLinkablePosModel>>(
+      ApiConstants.networkPosChallengesLinkableTargets,
+      queryParameters: {
+        'network_id': networkId,
+        'search': search.trim(),
+        'per_page': perPage,
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+      },
+      fromJson: (data) {
+        if (data is List) {
+          return data
+              .whereType<Map<String, dynamic>>()
+              .map(NetworkLinkablePosModel.fromJson)
+              .toList(growable: false);
+        }
+        return const [];
+      },
+    );
+
+    return PaginatedList<NetworkLinkablePosModel>(
+      items: response.data ?? const [],
+      nextCursor: response.meta?['next_cursor'] as String?,
+      prevCursor: response.meta?['prev_cursor'] as String?,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
   Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,

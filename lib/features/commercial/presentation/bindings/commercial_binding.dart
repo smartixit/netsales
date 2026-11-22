@@ -20,7 +20,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/search_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
@@ -69,8 +69,8 @@ class CommercialBinding extends Bindings {
       () => DeleteNetworkPosLinkUseCase(Get.find<CommercialRepository>()),
       fenix: true,
     );
-    registerLazyIfAbsent<ResolveNetworkLinkablePosUseCase>(
-      () => ResolveNetworkLinkablePosUseCase(
+    registerLazyIfAbsent<SearchNetworkLinkablePosUseCase>(
+      () => SearchNetworkLinkablePosUseCase(
         Get.find<CommercialRepository>(),
       ),
       fenix: true,
@@ -123,8 +123,8 @@ class CommercialBinding extends Bindings {
         deleteNetworkPosLinkUseCase: Get.find<DeleteNetworkPosLinkUseCase>(),
         createNetworkPosLinkChallengeUseCase:
             Get.find<CreateNetworkPosLinkChallengeUseCase>(),
-        resolveNetworkLinkablePosUseCase:
-            Get.find<ResolveNetworkLinkablePosUseCase>(),
+        searchNetworkLinkablePosUseCase:
+            Get.find<SearchNetworkLinkablePosUseCase>(),
         revokeNetworkPosLinkChallengeUseCase:
             Get.find<RevokeNetworkPosLinkChallengeUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),
