@@ -38,6 +38,13 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> deleteNetworkPosLink(int networkPosId);
 
+  Future<PaginatedList<NetworkLinkablePosModel>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  });
+
   Future<NetworkLinkablePosModel> resolveNetworkLinkablePos({
     required int networkId,
     required String posBusinessCode,
