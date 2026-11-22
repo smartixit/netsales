@@ -735,21 +735,19 @@ class _NetworkRequestApprovalNotesSection
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomTextField(
-            controller: controller.modificationNoteController,
-            label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
-            hint: 'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
-            maxLines: 2,
-            isRequired: false,
-            validator: FormValidators.descriptionValidator(isRequired: false),
-          ),
-        ],
-      );
-    });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextField(
+          controller: controller.modificationNoteController,
+          label: 'ملاحظة الاعتماد لنقطة البيع (اختياري)',
+          hint: 'أضف توضيحاً يظهر لنقطة البيع في تفاصيل الطلب والفاتورة الصادرة...',
+          maxLines: 2,
+          isRequired: false,
+          validator: FormValidators.descriptionValidator(isRequired: false),
+        ),
+      ],
+    );
   }
 }
 
