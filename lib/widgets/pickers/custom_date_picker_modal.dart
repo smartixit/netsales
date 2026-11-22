@@ -1143,7 +1143,6 @@ class _DatePickerActions extends StatelessWidget {
   }
 }
 
-
 List<DateTime?> _normalizeDates(
   List<DateTime?>? source,
   DatePickerSelectionMode mode,
