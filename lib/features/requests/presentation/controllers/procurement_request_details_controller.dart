@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -150,7 +151,7 @@ class ProcurementRequestDetailsController extends GetxController {
   }
 
   /// اعتماد الطلب وتوليد الفاتورة من قبل إدارة الشبكة
-  Future<void> approveRequest({String? note}) async {
+  Future<void> approveRequest({String? note, double? paidAmount}) async {
     final current = request.value;
     if (current == null) return;
 
@@ -168,6 +169,7 @@ class ProcurementRequestDetailsController extends GetxController {
       final result = await approveUseCase(
         current.requestId,
         requestNote: note,
+        paidAmount: paidAmount,
       );
       request.value = result.request;
 
@@ -248,9 +250,13 @@ class ProcurementRequestDetailsController extends GetxController {
   Future<void> promptApproveRequest() async {
     final current = request.value;
     if (current == null) return;
+    final isCredit = current.saleType == SaleType.credit;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: current.requestUuid ?? '-',
-      onConfirm: (note) => approveRequest(note: note),
+      isCredit: isCredit,
+      maxAmount: current.requestTotalAmount,
+      onConfirm: (note, paidAmount) =>
+          approveRequest(note: note, paidAmount: paidAmount),
     );
   }
 
