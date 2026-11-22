@@ -157,7 +157,7 @@ business documents:
   business vouchers and receipts.
 
 These primitives are deliberately generic. A host application composes them
-into distinct invoice, repayment, expense, statement, and report templates.
+into distinct invoice, expense, statement, and report templates.
 Business labels, source values, currency rules, permissions, and financial
 calculations remain owned by the host API and domain layer. The renderer only
 lays out the supplied content.

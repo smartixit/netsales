@@ -19,7 +19,6 @@ import 'package:netsales/core/enums/network_status.dart';
 import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/enums/package_status.dart';
 import 'package:netsales/core/enums/pos_status.dart';
-import 'package:netsales/core/enums/repayment_status.dart';
 import 'package:netsales/core/enums/receivable_aging_bucket.dart';
 
 /// السجل المركزي الموحد لتمثيل الـ Enums بصرياً (Centralized Enum Presentation Registry)
@@ -384,27 +383,6 @@ class EnumPresentationRegistry {
       WalletOperationType.unknown => EnumPresentation.unknown(
         fallbackLabel: label,
       ),
-    };
-  }
-
-  /// Centralized presentation for debt repayment statement states.
-  static EnumPresentation resolveRepaymentStatus(
-    RepaymentStatus status, {
-    String? serverLabel,
-  }) {
-    final label = _effectiveLabel(serverLabel, status.label);
-    return switch (status) {
-      RepaymentStatus.completed => EnumPresentation(
-        label: label,
-        tone: SemanticTone.success,
-        icon: Icons.check_circle_rounded,
-      ),
-      RepaymentStatus.reversed => EnumPresentation(
-        label: label,
-        tone: SemanticTone.danger,
-        icon: Icons.undo_rounded,
-      ),
-      RepaymentStatus.unknown => EnumPresentation.unknown(fallbackLabel: label),
     };
   }
 

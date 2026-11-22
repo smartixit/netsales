@@ -36,12 +36,12 @@ This document provides direct mapping from Flutter feature domains to their cano
 - Canonical API contract: `netsales_api/docs/project/API_CONTRACTS.md`, section **Operational Reports Provider Contract**.
 - `OperationalReportCatalogModel` parses the Laravel catalog into `document_engine` `ReportDefinition` schemas and registers exact schema versions with `ReportDefinitionRegistry`.
 - Localized labels and chart slots are catalog metadata; view/export permissions and supported workspace scopes are carried separately as access descriptors. They are not security grants. Laravel reauthorizes catalog availability, report execution, CSV export, document issue, and artifact download.
-- Operational report data and financial summaries are server-computed. Flutter may display returned metrics/chart series but must not derive balances, aging buckets, wallet totals, or accounting results.
+- Operational report data and financial summaries are server-computed. Flutter may display returned metrics/chart series but must not derive balances, wallet totals, or accounting results.
 - Report execution, summary, and CSV export requests send provider-defined values only under the nested `filters` object. Laravel validates filter IDs, types, choices, and workspace authorization; the retired top-level flat filter contract is prohibited.
 - The Flutter integration currently exposes the seven known `OperationalReportType` values and fixed filter arguments through its existing GetX controller/use cases. The package-level schema studio is not yet hosted by the operational reports feature, so arbitrary provider-defined filter controls are not yet end-to-end dynamic.
 - `document_engine` includes a controlled `ReportConfigurationStudio` and versioned `SavedReportPreset` value object. NetSales has not yet integrated the studio into its reports navigation/controller or added server-side preset persistence endpoints/migrations.
 - Current report PDF output is an executive summary based on server metrics and charts; row-level report results are delivered through CSV. A detailed PDF wallet ledger statement remains outstanding.
-- Official invoice, repayment, and expense PDFs are rendered only from the server-issued immutable `source_snapshot`. The app uploads the rendered PDF artifact, retrieves the canonical protected artifact, and verifies its SHA-256 before save/share/print.
+- Official invoice and expense PDFs are rendered only from the server-issued immutable `source_snapshot`. The app uploads the rendered PDF artifact, retrieves the canonical protected artifact, and verifies its SHA-256 before save/share/print.
 - Currency shown in an official document comes from the snapshot's `currency_code`; snapshots with missing/invalid currency are rejected. No fixed currency symbol or client-side currency conversion is allowed.
 - Validation of migrations, typed contract parsing, platform PDF rendering, Arabic text extraction/order, and final CI remains pending for the final plan stage. Do not interpret source integration as verified platform readiness.
 
@@ -66,7 +66,7 @@ Preset schema version is currently 1. The API validates the saved report schema 
 
 The Reports feature is embedded in both workspace shells and uses the shared Report Configuration Studio. User-owned saved presets are stored by the API with `ReportCriteria` and `ReportPresentationOptions` JSON; see the preset endpoint contract above.
 Detailed report PDF rendering consumes the current presentation options (columns, sorts, grouping, template/version, locale, page profile, metrics, charts). It rejects more than 1,500 rows and never recomputes financial values.
-Network/POS wallet statements use server-supplied opening/current balances and per-entry balance snapshots, reject mixed currencies or concurrent source changes, and render a branded landscape ledger PDF. Invoice/expense/repayment PDFs use the immutable API document snapshot and artifact workflow.
+Network/POS wallet statements use server-supplied opening/current balances and per-entry balance snapshots, reject mixed currencies or concurrent source changes, and render a branded landscape ledger PDF. Invoice/expense PDFs use the immutable API document snapshot and artifact workflow.
 
 
 ## Billing self-service collections — 2026-11-14
@@ -123,3 +123,6 @@ The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, sect
 - The invitation share-card composition is Commercial-specific and belongs under `features/commercial/presentation/widgets`; generic QR rendering remains in `lib/widgets/qr`.
 - The server remains the sole authority for Network/POS eligibility, tenant authorization, target binding, challenge lifecycle, and expiry.
 
+
+
+POS invoices and procurement flows support both CASH and CREDIT. CREDIT may include an initial partial payment where the API endpoint permits it. The backend is authoritative for paid_amount, remaining_amount, payment_status, credit-limit enforcement, wallet settlement, and accounting; Flutter only collects the initial amount and displays returned fields. POS Repayment collection, reversal, invoice allocations/FIFO, and repayment-specific reports/documents are removed. Receivables aging and invoice payment state remain distinct from repayment collection. Wallet transfers and ordinary wallet ledger statements remain supported.

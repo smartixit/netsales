@@ -4,7 +4,6 @@ import 'package:netsales/core/enums/invoice_payment_status.dart';
 import 'package:netsales/core/enums/request_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/enums/sale_type.dart';
-import 'package:netsales/core/enums/repayment_status.dart';
 import 'package:netsales/core/enums/receivable_aging_bucket.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
@@ -52,10 +51,6 @@ class OperationalReportRecordCard extends StatelessWidget {
       OperationalReportType.networkWallet || OperationalReportType.posWallet =>
         EnumPresentationRegistry.resolveWalletOperationType(
           WalletOperationType.fromWire(normalized),
-        ),
-      OperationalReportType.repayments =>
-        EnumPresentationRegistry.resolveRepaymentStatus(
-          RepaymentStatus.fromWire(normalized),
         ),
       OperationalReportType.requests =>
         EnumPresentationRegistry.resolveRequestStatus(
@@ -155,18 +150,6 @@ class OperationalReportRecordCard extends StatelessWidget {
         amount: _amount('log_amount'),
         status: _first(['log_operation_type']),
         detail: _first(['log_statement'], fallback: 'حركة محفظة نقطة البيع'),
-      ),
-      OperationalReportType.repayments => (
-        reference: _first(['repayment_uuid', 'repayment_id']),
-        party: _first(['pos_name', 'pos_id', 'created_by_name']),
-        date: _date('repayment_date'),
-        amount: _amount('amount'),
-        status: _first(['status']),
-        detail: _first([
-          'payment_method',
-          'reference_number',
-          'reversal_reason',
-        ]),
       ),
       OperationalReportType.debtAging => (
         reference: _first(['invoice_uuid', 'invoice_id']),
