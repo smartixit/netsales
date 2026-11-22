@@ -10,6 +10,7 @@ on:
       - chore/pub-audioplayers-6.8.1
       - chore/pub-compatible-updates
       - fix/infinityfree-two-step-verification
+      - fix/session-restore-infinityfree-challenge
   pull_request:
     branches:
       - main
