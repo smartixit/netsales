@@ -12,10 +12,12 @@ enum WorkspaceWelcomeArtwork { network, pos }
 
 /// Shared welcome banner used by both mobile workspaces.
 ///
-/// The avatar is sourced from the authenticated user's profile, never from
-/// the active network/POS entity logo displayed by the workspace selector.
-/// The illustration is rendered in the background layer of the Stack, allowing
-/// the foreground details to occupy full width with generous breathing room.
+/// Built strictly using centralized core tokens and canonical widgets:
+/// - The avatar is sourced from the authenticated user's profile, never from
+///   the active network/POS entity logo displayed by the workspace selector.
+/// - The illustration is rendered in the background layer of the Stack as an
+///   artistic watermark, allowing the foreground details to occupy full width
+///   with generous breathing room and crystal-clear contrast.
 class WorkspaceWelcomeHero extends StatelessWidget {
   const WorkspaceWelcomeHero({
     super.key,
@@ -59,37 +61,37 @@ class WorkspaceWelcomeHero extends StatelessWidget {
                 child: CustomPaint(painter: WorkspaceHeroRibbonPainter()),
               ),
             ),
-            // 3. التوهج النيوني المحيطي
+            // 3. التوهج النيوني المحيطي بألوان النظام المركزية
             Positioned(
-              left: -26.w,
-              bottom: -48.h,
+              left: -AppSpacing.xxl,
+              bottom: -AppSpacing.giant,
               child: IgnorePointer(
                 child: Container(
                   width: 190.w,
                   height: 110.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF2DD4BF).withValues(alpha: 0.11),
+                    color: colors.secondary.withValues(alpha: 0.11),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2DD4BF).withValues(alpha: 0.16),
-                        blurRadius: 42.r,
-                        spreadRadius: 12.r,
+                        color: colors.secondary.withValues(alpha: 0.16),
+                        blurRadius: AppSpacing.huge,
+                        spreadRadius: AppSpacing.md,
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-            // 4. الرسمة التعبيرية المخصصة في خلفية الكرت (Background Watermark Artwork)
+            // 4. الرسمة التعبيرية المخصصة كخلفية فنية مائية (Background Artistic Watermark)
             PositionedDirectional(
-              end: -12.w,
-              bottom: -15.h,
-              top: 5.h,
+              end: -AppSpacing.sm,
+              bottom: -AppSpacing.cardPadding,
+              top: AppSpacing.xs,
               width: 175.w,
               child: IgnorePointer(
                 child: Opacity(
-                  opacity: 0.85,
+                  opacity: 0.38,
                   child: CustomPaint(
                     painter: WorkspaceHeroIllustrationPainter(
                       isNetwork: artwork == WorkspaceWelcomeArtwork.network,
@@ -98,7 +100,7 @@ class WorkspaceWelcomeHero extends StatelessWidget {
                 ),
               ),
             ),
-            // 5. محتوى الكرت الترحيبي في الواجهة بكامل العرض والانسيابية (Foreground Content)
+            // 5. محتوى الكرت الترحيبي القيادي في الواجهة (Foreground Content)
             Padding(
               padding: EdgeInsets.all(AppSpacing.cardPadding),
               child: WorkspaceWelcomeDetails(

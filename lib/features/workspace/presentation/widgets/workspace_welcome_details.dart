@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
+import 'package:netsales/core/utils/greeting_formatter.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// تفاصيل المحتوى الترحيبي داخل بطاقة الترحيب القيادية (WorkspaceWelcomeDetails)
+/// تفاصيل المحتوى الترحيبي القيادي الموحد (WorkspaceWelcomeDetails)
+///
+/// مبني بالكامل على المكونات المعيارية والرموز المركزية من lib/core و lib/widgets:
+/// - نصوص وتيبوغرافي: [AppTypography] و [GreetingFormatter]
+/// - ألوان وهوية: [AppColors] (context.colors)
+/// - مسافات وهوامش: [AppSpacing] و [AppRadius]
+/// - شارات وأزرار ومؤشرات: [CustomChip], [CustomStatusBadge], [CustomButton], [CustomAvatarBadge]
 class WorkspaceWelcomeDetails extends StatelessWidget {
   const WorkspaceWelcomeDetails({
     super.key,
@@ -29,12 +39,24 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 1. هوية المستخدم والأفاتار
+        // 1. رقاقة التاريخ الموحدة إن وجد
+        if (dateText != null) ...[
+          CustomChip(
+            label: dateText!,
+            icon: Icons.calendar_today_rounded,
+            isCompact: true,
+          ),
+          SizedBox(height: AppSpacing.sm),
+        ],
+
+        // 2. بطاقة هوية القائد والأفاتار مع الترحيب الزمني الموحد
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -42,34 +64,44 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               imageUrl: userAvatarUrl,
               initials: userInitials,
               size: AvatarBadgeSize.md,
-              customDimension: 46.r,
-              hasPulse: false,
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              gradientColors: const [Color(0xFFFFE7AD), Color(0xFFE7B45D)],
+              hasPulse: true,
+              pulseColor: colors.emeraldGlow,
+              borderRadius: BorderRadius.circular(AppRadius.avatar),
+              gradientColors: [colors.executiveGoldAccent, colors.executiveGoldIcon],
             ),
-            SizedBox(width: 10.w),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'مرحباً بعودتك',
-                    maxLines: 1,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: Colors.white.withValues(alpha: 0.94),
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        GreetingFormatter.greeting(),
+                        maxLines: 1,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.executiveGoldAccent,
+                          fontWeight: AppTypography.medium,
+                        ),
+                      ),
+                      SizedBox(width: AppSpacing.xs),
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        size: AppSpacing.md,
+                        color: colors.executiveGoldIcon,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: AppSpacing.xxs),
                   Text(
                     userName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.titleLarge.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
+                      color: colors.onPrimary,
+                      fontWeight: AppTypography.bold,
                     ),
                   ),
                 ],
@@ -77,114 +109,37 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: AppSpacing.sm),
 
-        // 2. شارة الدور ونقطة حالة الجلسة
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        // 3. شارات الصلاحيات وحالة الجلسة الموحدة من lib/widgets/badges
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Icon(
-              Icons.verified_user_rounded,
-              size: 14.r,
-              color: Colors.white.withValues(alpha: 0.92),
+            CustomChip(
+              label: role,
+              icon: Icons.verified_user_rounded,
+              isCompact: true,
             ),
-            SizedBox(width: 5.w),
-            Flexible(
-              child: Text(
-                role,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
-                  color: Colors.white.withValues(alpha: 0.90),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Container(
-              width: 3.r,
-              height: 3.r,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.7),
-                shape: BoxShape.circle,
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              'جلسة نشطة',
-              maxLines: 1,
-              style: AppTypography.labelSmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.88),
-              ),
+            const CustomStatusBadge(
+              label: 'جلسة نشطة',
+              tone: SemanticTone.success,
+              showDot: true,
+              isCompact: true,
             ),
           ],
         ),
 
-        // 3. التاريخ الحالي إن وجد
-        if (dateText != null) ...[
-          SizedBox(height: 6.h),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.calendar_month_rounded,
-                size: 14.r,
-                color: Colors.white.withValues(alpha: 0.92),
-              ),
-              SizedBox(width: 6.w),
-              Flexible(
-                child: Text(
-                  dateText!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.92),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-
-        // 4. زر الإجراء التفاعلي (مثل ربط شبكة لنقطة البيع)
+        // 4. زر الإجراء التفاعلي الموحد من lib/widgets/buttons
         if (actionLabel != null && onAction != null) ...[
-          SizedBox(height: 10.h),
-          CustomInteractiveBounce(
-            onTap: onAction,
-            child: Container(
-              constraints: BoxConstraints(minHeight: 35.h),
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppRadius.full),
-                border: Border.all(
-                  color: const Color(0xFF63E6D0).withValues(alpha: 0.85),
-                  width: 1.2,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.qr_code_scanner_rounded,
-                    size: 18.r,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    actionLabel!,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          SizedBox(height: AppSpacing.sm),
+          CustomButton.secondary(
+            text: actionLabel,
+            icon: Icons.qr_code_scanner_rounded,
+            onPressed: onAction,
+            size: AppButtonSize.small,
+            shape: AppButtonShape.pill,
           ),
         ],
       ],
