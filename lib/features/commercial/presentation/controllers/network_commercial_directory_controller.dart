@@ -555,6 +555,7 @@ class NetworkCommercialDirectoryController
 
     invitationTargets.clear();
     _invitationTargetsNextCursor = null;
+    hasMoreInvitationTargets.value = false;
     invitationTargetsError.value = null;
 
     if (networkId == null || search.length < 2) {
