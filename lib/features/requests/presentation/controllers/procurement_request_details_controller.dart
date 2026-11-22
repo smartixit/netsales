@@ -59,8 +59,24 @@ class ProcurementRequestDetailsController extends GetxController {
     if (args is RequestEntity) {
       request.value = args;
       loadRequestDetails(args.requestId);
-    } else if (args is int) {
+    } else if (args is int && args > 0) {
       loadRequestDetails(args);
+    } else if (args is String) {
+      final parsed = int.tryParse(args);
+      if (parsed != null && parsed > 0) {
+        loadRequestDetails(parsed);
+      }
+    } else if (args is Map<String, dynamic>) {
+      if (args['request'] is RequestEntity) {
+        request.value = args['request'] as RequestEntity;
+      }
+      final reqId =
+          args['request_id'] as int? ??
+          int.tryParse(args['request_id']?.toString() ?? '') ??
+          (args['request'] as RequestEntity?)?.requestId;
+      if (reqId != null && reqId > 0) {
+        loadRequestDetails(reqId);
+      }
     }
   }
 

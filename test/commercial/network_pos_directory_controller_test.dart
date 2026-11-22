@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
@@ -55,14 +56,14 @@ class _FakeCommercialRepository implements CommercialRepository {
 
   @override
   Future<List<PosEntity>> getMyPos() async => const [
-        PosEntity(
-          posId: 10,
-          ownerId: 2,
-          posUuid: 'POS-10',
-          posName: 'نقطة الأمل',
-          posPhoneNumber: '772222222',
-        ),
-      ];
+    PosEntity(
+      posId: 10,
+      ownerId: 2,
+      posUuid: 'POS-10',
+      posName: 'نقطة الأمل',
+      posPhoneNumber: '772222222',
+    ),
+  ];
 
   @override
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
@@ -77,9 +78,11 @@ class _FakeCommercialRepository implements CommercialRepository {
       filtered = filtered.where((l) => l.isActive == status);
     }
     if (search != null && search.trim().isNotEmpty) {
-      filtered = filtered.where((l) =>
-          l.displayPosName.contains(search) ||
-          l.displayPosReference.contains(search));
+      filtered = filtered.where(
+        (l) =>
+            l.displayPosName.contains(search) ||
+            l.displayPosReference.contains(search),
+      );
     }
     return PaginatedList<NetworkPosLinkEntity>(
       items: filtered.toList(),
@@ -115,7 +118,8 @@ class _FakeCommercialRepository implements CommercialRepository {
 
   @override
   Future<NetworkPosLinkEntity> toggleNetworkPosLinkStatus(
-      int networkPosId) async {
+    int networkPosId,
+  ) async {
     final index = links.indexWhere((l) => l.networkPosId == networkPosId);
     final current = links[index];
     final updated = current.copyWith(status: !current.status);
@@ -205,6 +209,7 @@ void main() {
     late NetworkCommercialDirectoryController controller;
 
     setUp(() {
+      Get.testMode = true;
       final sampleLinks = [
         const NetworkPosLinkEntity(
           networkPosId: 1,
@@ -238,8 +243,9 @@ void main() {
 
       controller = NetworkCommercialDirectoryController(
         getNetworkPosListUseCase: GetNetworkPosListUseCase(repo),
-        toggleNetworkPosLinkStatusUseCase:
-            ToggleNetworkPosLinkStatusUseCase(repo),
+        toggleNetworkPosLinkStatusUseCase: ToggleNetworkPosLinkStatusUseCase(
+          repo,
+        ),
         deleteNetworkPosLinkUseCase: DeleteNetworkPosLinkUseCase(repo),
         createNetworkPosLinkChallengeUseCase:
             CreateNetworkPosLinkChallengeUseCase(repo),
@@ -248,8 +254,9 @@ void main() {
         getMyNetworksUseCase: GetMyNetworksUseCase(repo),
         getNetworkPosLinkChallengeStatusUseCase:
             GetNetworkPosLinkChallengeStatusUseCase(repo),
-        resolveNetworkLinkablePosUseCase:
-            ResolveNetworkLinkablePosUseCase(repo),
+        resolveNetworkLinkablePosUseCase: ResolveNetworkLinkablePosUseCase(
+          repo,
+        ),
       );
     });
 
@@ -289,8 +296,9 @@ void main() {
       await controller.loadInitialData();
       final link = controller.links.first;
 
-      final updated =
-          await controller.toggleNetworkPosLinkStatusUseCase(link.networkPosId);
+      final updated = await controller.toggleNetworkPosLinkStatusUseCase(
+        link.networkPosId,
+      );
       expect(updated.isActive, isFalse);
     });
 
@@ -319,6 +327,7 @@ void main() {
     late PosCommercialDirectoryController controller;
 
     setUp(() {
+      Get.testMode = true;
       final sampleLinks = [
         const NetworkPosLinkEntity(
           networkPosId: 1,

@@ -148,8 +148,10 @@ class PosWorkspaceController extends GetxController {
           AppRoutes.purchaseInvoiceDetails,
           arguments: invoice,
         ),
-        onOpenRequest: (request) =>
-            Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request),
+        onOpenRequest: (request) => Get.toNamed<void>(
+          AppRoutes.voucherRequestDetails,
+          arguments: request,
+        ),
       );
 
   @override
@@ -489,7 +491,8 @@ class PosWorkspaceController extends GetxController {
     required int posId,
     required String posUuid,
   }) {
-    if (activePos.value?.posId != posId || activePos.value?.posUuid != posUuid) {
+    if (activePos.value?.posId != posId ||
+        activePos.value?.posUuid != posUuid) {
       throw const AppException(
         'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
       );
@@ -506,7 +509,8 @@ class PosWorkspaceController extends GetxController {
     required int posId,
     required String posUuid,
   }) async {
-    if (activePos.value?.posId != posId || activePos.value?.posUuid != posUuid) {
+    if (activePos.value?.posId != posId ||
+        activePos.value?.posUuid != posUuid) {
       throw const AppException(
         'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',
       );

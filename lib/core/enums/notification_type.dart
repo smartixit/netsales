@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -85,7 +86,11 @@ enum NotificationType {
   }
 
   String get defaultRoute {
-    final isPos = WorkspaceService.instance.activeWorkspace == AppWorkspace.pos;
+    final isPos =
+        (Get.isRegistered<WorkspaceService>()
+            ? WorkspaceService.to.activeWorkspace
+            : WorkspaceService.instance.activeWorkspace) ==
+        AppWorkspace.pos;
 
     switch (this) {
       case NotificationType.saleInvoiceCreated:
@@ -129,7 +134,7 @@ enum NotificationType {
       case NotificationType.supportTicketReplied:
       case NotificationType.supportTicketClosed:
       case NotificationType.unknown:
-        return AppRoutes.notifications;
+        return '';
     }
   }
 }

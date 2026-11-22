@@ -39,16 +39,27 @@ class InvoiceDetailsController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args is Map<String, dynamic>) {
+    if (args is InvoiceEntity) {
+      invoice.value = args;
+      loadInvoiceDetails(args.invoiceId);
+    } else if (args is int && args > 0) {
+      loadInvoiceDetails(args);
+    } else if (args is String) {
+      final parsed = int.tryParse(args);
+      if (parsed != null && parsed > 0) {
+        loadInvoiceDetails(parsed);
+      }
+    } else if (args is Map<String, dynamic>) {
       if (args['invoice'] is InvoiceEntity) {
         invoice.value = args['invoice'] as InvoiceEntity;
       }
-      final invoiceId = args['invoice_id'] as int?;
+      final invoiceId =
+          args['invoice_id'] as int? ??
+          int.tryParse(args['invoice_id']?.toString() ?? '') ??
+          (args['invoice'] as InvoiceEntity?)?.invoiceId;
       if (invoiceId != null && invoiceId > 0) {
         loadInvoiceDetails(invoiceId);
       }
-    } else if (args is int && args > 0) {
-      loadInvoiceDetails(args);
     }
   }
 
