@@ -35,49 +35,53 @@ class DashboardMetricContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // ── Row 1: Header (Title on Start, Trend Badge OR Icon on End) ──
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Text(
                 metric.title,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.titleSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
               ),
             ),
-            if (metric.icon != null) ...[
-              const SizedBox(width: 8),
+            const SizedBox(width: 8),
+            if (metric.trend != null)
+              _TrendBadge(trend: metric.trend!, tokens: tokens)
+            else if (metric.icon != null)
               Tooltip(
                 message: metric.tooltip ?? metric.title,
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: 26,
+                  height: 26,
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(tokens.iconRadius),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(metric.icon, size: 18, color: accent),
+                  child: Icon(metric.icon, size: 14, color: accent),
                 ),
-              ),
-            ] else if (metric.tooltip != null) ...[
-              const SizedBox(width: 6),
+              )
+            else if (metric.tooltip != null)
               Tooltip(
                 message: metric.tooltip!,
                 child: Icon(
                   Icons.info_outline_rounded,
-                  size: 16,
+                  size: 15,
                   color: tokens.mutedForeground,
                 ),
               ),
-            ],
           ],
         ),
         const SizedBox(height: 8),
+
+        // ── Row 2: Value & Unit ──
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
@@ -91,6 +95,7 @@ class DashboardMetricContent extends StatelessWidget {
                   maxLines: 1,
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
+                    fontSize: 18,
                     letterSpacing: -0.4,
                     color: scheme.onSurface,
                     fontFeatures: const [FontFeature.tabularFigures()],
@@ -99,31 +104,38 @@ class DashboardMetricContent extends StatelessWidget {
               ),
             ),
             if (metric.unit != null) ...[
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  metric.unit!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              const SizedBox(width: 4),
+              Text(
+                metric.unit!,
+                maxLines: 1,
+                style: textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ],
         ),
-        if (metric.description != null) ...[
+
+        // ── Row 3: Description / Context ──
+        if (metric.description != null && metric.description!.trim().isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
             metric.description!,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.bodySmall?.copyWith(color: tokens.mutedForeground),
+            style: textTheme.bodySmall?.copyWith(
+              color: tokens.mutedForeground,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              height: 1.2,
+            ),
           ),
         ],
-        if (showTrend) ...[
-          const SizedBox(height: 8),
+
+        if (showTrend && metric.trend!.comparisonLabel.trim().isNotEmpty) ...[
+          const SizedBox(height: 6),
           _TrendLine(trend: metric.trend!, tokens: tokens),
         ],
         if (showSparkline) ...[
@@ -157,6 +169,59 @@ class DashboardMetricContent extends StatelessWidget {
         ],
       ],
     );
+  }
+}
+
+class _TrendBadge extends StatelessWidget {
+  const _TrendBadge({required this.trend, required this.tokens});
+
+  final DashboardMetricTrend trend;
+  final DashboardMetricsTheme tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = trend.tone;
+    final direction = trend.direction;
+    final color = tokens.colorFor(tone);
+    final icon = switch (direction) {
+      DashboardMetricDirection.increase => Icons.trending_up_rounded,
+      DashboardMetricDirection.decrease => Icons.trending_down_rounded,
+      DashboardMetricDirection.unchanged => Icons.trending_flat_rounded,
+    };
+
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(tokens.iconRadius),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(
+            trend.valueLabel,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                  height: 1.1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+          ),
+        ],
+      ),
+    );
+
+    if (trend.comparisonLabel.trim().isNotEmpty) {
+      return Tooltip(
+        message: trend.comparisonLabel,
+        child: badge,
+      );
+    }
+    return badge;
   }
 }
 

@@ -122,6 +122,7 @@ class NetworkWorkspaceDashboardMapper {
             id: 'today_sales',
             title: 'مبيعات اليوم',
             value: AmountFormatter.format(today.amount),
+            unit: 'ر.ي',
             icon: Icons.trending_up_rounded,
             tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.warning,
             variant: DashboardMetricVariant.trend,
@@ -133,9 +134,10 @@ class NetworkWorkspaceDashboardMapper {
                       : DashboardMetricDirection.unchanged),
               tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.danger,
               valueLabel: '$growthSign${today.growthRate.toStringAsFixed(1)}%',
-              comparisonLabel: 'مقارنة بالأمس (${AmountFormatter.format(today.yesterdayAmount)})',
+              comparisonLabel: '',
             ),
-            description: '${today.invoiceCount} فاتورة صادرة اليوم',
+            description: '${today.invoiceCount} فاتورة صادرة',
+            tooltip: 'مقارنة بالأمس (${AmountFormatter.format(today.yesterdayAmount)})',
           ),
         );
       } else {
@@ -144,6 +146,7 @@ class NetworkWorkspaceDashboardMapper {
             id: 'sales',
             title: 'فواتير المبيعات',
             value: AmountFormatter.format(sales.totalAmount),
+            unit: 'ر.ي',
             icon: Icons.receipt_long_rounded,
             tone: DashboardMetricTone.success,
             variant: DashboardMetricVariant.standard,
@@ -157,9 +160,9 @@ class NetworkWorkspaceDashboardMapper {
     if (wallet != null) {
       final String walletDesc;
       if (wallet.todayCashCollected.isNotEmpty && wallet.todayCashCollected != '0.00') {
-        walletDesc = 'تحصيل اليوم: ${AmountFormatter.format(wallet.todayCashCollected)} ر.ي';
+        walletDesc = 'تحصيل اليوم: ${AmountFormatter.format(wallet.todayCashCollected)}';
       } else {
-        walletDesc = wallet.isActive ? 'السيولة النقدية المتاحة' : 'المحفظة مجمدة';
+        walletDesc = wallet.isActive ? 'السيولة المتاحة' : 'المحفظة مجمدة';
       }
 
       items.add(
@@ -167,6 +170,7 @@ class NetworkWorkspaceDashboardMapper {
           id: 'wallet',
           title: 'رصيد المحفظة',
           value: AmountFormatter.format(wallet.balance),
+          unit: 'ر.ي',
           icon: Icons.account_balance_wallet_rounded,
           tone: DashboardMetricTone.primary,
           variant: DashboardMetricVariant.standard,

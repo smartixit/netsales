@@ -51,14 +51,17 @@ class DashboardMetricCard extends StatelessWidget {
           child: AnimatedContainer(
             duration: tokens.motionDuration,
             curve: tokens.motionCurve,
-            padding: EdgeInsets.all(tokens.cardPadding),
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.cardPadding,
+              vertical: tokens.cardPadding * 0.85,
+            ),
             decoration: BoxDecoration(
               borderRadius: radius,
               border: Border.all(color: tokens.cardBorder),
               boxShadow: tokens.cardShadows,
             ),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: height ?? 92),
+              constraints: BoxConstraints(minHeight: height ?? 88),
               child: state == DashboardMetricState.data
                   ? DashboardMetricContent(
                       metric: metric,

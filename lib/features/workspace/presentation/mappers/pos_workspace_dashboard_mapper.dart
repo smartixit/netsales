@@ -60,6 +60,7 @@ class PosWorkspaceDashboardMapper {
         id: 'today_procurement',
         title: 'مشتريات اليوم',
         value: AmountFormatter.format(todayTotal.toStringAsFixed(2)),
+        unit: 'ر.ي',
         icon: Icons.shopping_bag_rounded,
         tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.warning,
         variant: DashboardMetricVariant.trend,
@@ -71,9 +72,10 @@ class PosWorkspaceDashboardMapper {
                   : DashboardMetricDirection.unchanged),
           tone: isPositive ? DashboardMetricTone.success : DashboardMetricTone.danger,
           valueLabel: '$growthSign${growthRate.toStringAsFixed(1)}%',
-          comparisonLabel: 'مقارنة بالأمس (${AmountFormatter.format(yesterdayTotal.toStringAsFixed(2))})',
+          comparisonLabel: '',
         ),
-        description: '${todayInvoices.length} فاتورة مشتريات اليوم',
+        description: '${todayInvoices.length} فاتورة مشتريات',
+        tooltip: 'مقارنة بالأمس (${AmountFormatter.format(yesterdayTotal.toStringAsFixed(2))})',
       ),
     );
 
@@ -81,11 +83,10 @@ class PosWorkspaceDashboardMapper {
     if (wallet != null) {
       final String walletDesc;
       if (wallet.isDebit) {
-        walletDesc =
-            'مديونية مسحوبة (القوة الشرائية: ${AmountFormatter.format(wallet.totalPurchasingPower.toStringAsFixed(2))})';
+        walletDesc = 'مديونية مسحوبة';
       } else if (wallet.hasCreditFacility) {
         walletDesc =
-            'رصيد دائن (سقف ائتماني: ${AmountFormatter.format((wallet.creditLimit ?? 0).toStringAsFixed(2))})';
+            'سقف ائتماني: ${AmountFormatter.format((wallet.creditLimit ?? 0).toStringAsFixed(2))}';
       } else {
         walletDesc = wallet.isCredit ? 'رصيد دائن متاح للشراء' : 'الرصيد متزن (0.00)';
       }
@@ -95,6 +96,7 @@ class PosWorkspaceDashboardMapper {
           id: 'wallet',
           title: 'رصيد المحفظة',
           value: AmountFormatter.format(wallet.walletBalance.toStringAsFixed(2)),
+          unit: 'ر.ي',
           icon: Icons.account_balance_wallet_rounded,
           tone: wallet.isDebit
               ? DashboardMetricTone.danger
