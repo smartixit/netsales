@@ -46,7 +46,8 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
     this.dialogTitle,
     this.useDialog = false,
     this.maxDisplayLines = 2,
-  }) : value = _normalizeDatePickerValue(value, pickerType),
+  }) : fieldValidator = validator,
+       value = _normalizeDatePickerValue(value, pickerType),
        assert(
          firstDate == null ||
              lastDate == null ||
@@ -310,6 +311,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
   /// القيمة الخارجية الحالية. عند تمرير onChanged تكون القيمة متحكماً بها.
   final List<DateTime?>? value;
   final ValueChanged<List<DateTime?>>? onChanged;
+  final FormFieldValidator<List<DateTime?>>? fieldValidator;
 
   final String label;
   final String? hint;
@@ -363,7 +365,7 @@ class _CustomDatePickerFieldState
         previous.firstDate != current.firstDate ||
         previous.lastDate != current.lastDate ||
         previous.selectableDayPredicate != current.selectableDayPredicate ||
-        previous.validator != current.validator ||
+        previous.fieldValidator != current.fieldValidator ||
         previous.autovalidateMode != current.autovalidateMode;
 
     if (valueChanged || selectionModeChanged) {
