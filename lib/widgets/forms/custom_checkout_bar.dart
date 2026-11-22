@@ -91,15 +91,42 @@ class CustomCheckoutBar extends StatelessWidget {
                 if (customLeading != null)
                   customLeading!
                 else if (metrics.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      for (var i = 0; i < metrics.length; i++) ...[
-                        if (i > 0) AppSpacing.hXs,
-                        Expanded(
-                          child: _CheckoutMetricItem(metric: metrics[i]),
-                        ),
-                      ],
-                    ],
+                  Builder(
+                    builder: (context) {
+                      const chunkSize = 3;
+                      final chunks = <List<CheckoutMetricData>>[];
+                      for (var i = 0; i < metrics.length; i += chunkSize) {
+                        chunks.add(
+                          metrics.sublist(
+                            i,
+                            i + chunkSize > metrics.length
+                                ? metrics.length
+                                : i + chunkSize,
+                          ),
+                        );
+                      }
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var c = 0; c < chunks.length; c++) ...[
+                            if (c > 0) SizedBox(height: AppSpacing.xs),
+                            Row(
+                              children: [
+                                for (var i = 0; i < chunks[c].length; i++) ...[
+                                  if (i > 0) AppSpacing.hXs,
+                                  Expanded(
+                                    child: _CheckoutMetricItem(
+                                      metric: chunks[c][i],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                   if (unitCount != null || itemCount != null) ...[
                     AppSpacing.vXs,

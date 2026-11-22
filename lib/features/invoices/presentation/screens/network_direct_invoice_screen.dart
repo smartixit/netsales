@@ -58,25 +58,30 @@ class NetworkDirectInvoiceScreen
             CheckoutMetricData(
               label: 'الإجمالي',
               value: AmountFormatter.formatValue(gross),
+              currency: controller.checkoutCurrency,
             ),
             CheckoutMetricData(
               label: 'الخصم',
               value: AmountFormatter.formatValue(discount),
+              currency: controller.checkoutCurrency,
               isDiscount: true,
             ),
             CheckoutMetricData(
               label: 'الصافي التقديري',
               value: AmountFormatter.formatValue(net),
+              currency: controller.checkoutCurrency,
               isNet: !isCredit,
             ),
             if (isCredit) ...[
               CheckoutMetricData(
                 label: 'المقبوض كاش',
                 value: AmountFormatter.formatValue(paid),
+                currency: controller.checkoutCurrency,
               ),
               CheckoutMetricData(
                 label: 'المتبقي الآجل',
                 value: AmountFormatter.formatValue(remaining),
+                currency: controller.checkoutCurrency,
                 isNet: true,
               ),
             ],
