@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -36,9 +35,6 @@ class NetworkDirectInvoiceScreen
       final gross = controller.checkoutGrossAmount;
       final discount = controller.checkoutDiscountAmount;
       final net = controller.checkoutNetAmount;
-      final isCredit = controller.selectedSaleType == SaleType.credit;
-      final paid = controller.checkoutPaidAmount;
-      final remaining = controller.checkoutRemainingCreditAmount;
       final count = controller.checkoutTotalVouchers;
 
       return CustomAppScaffold(
@@ -67,19 +63,8 @@ class NetworkDirectInvoiceScreen
             CheckoutMetricData(
               label: 'الصافي التقديري',
               value: AmountFormatter.formatValue(net),
-              isNet: !isCredit,
+              isNet: true,
             ),
-            if (isCredit) ...[
-              CheckoutMetricData(
-                label: 'المقبوض كاش',
-                value: AmountFormatter.formatValue(paid),
-              ),
-              CheckoutMetricData(
-                label: 'المتبقي الآجل',
-                value: AmountFormatter.formatValue(remaining),
-                isNet: true,
-              ),
-            ],
           ],
           itemCount: controller.cartPackagesCount,
           itemCountLabel: 'باقة مختارة',
@@ -123,7 +108,7 @@ class NetworkDirectInvoiceScreen
                         // 1. ترويسة الصفحة القيادية (CustomPageHeroCard)
                         const CustomPageHeroCard(
                           title: 'مساحة إصدار الفاتورة المباشرة',
-                          subtitle: 'حدد المنفذ التجاري وطريقة السداد، ثم اختر الباقات والكميات لإصدار الفاتورة فورياً.',
+                          subtitle: 'حدد نقطة البيع ثم اختر الباقات والكميات لإصدار فاتورة نقدية فورياً.',
                           icon: Icons.point_of_sale_rounded,
                         ),
                         AppSpacing.vMd,
@@ -134,7 +119,7 @@ class NetworkDirectInvoiceScreen
 
                         // 3. نوع البيع (نقدي / آجل)
                         const CustomSectionHeading(
-                          title: 'نوع البيع وشروط التسوية',
+                          title: 'التسوية النقدية',
                           subtitle:
                               'اختر طريقة التحصيل المالي المقررة للفاتورة',
                           icon: Icons.payments_rounded,
