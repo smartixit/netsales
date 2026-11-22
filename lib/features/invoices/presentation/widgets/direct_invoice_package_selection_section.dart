@@ -5,6 +5,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_package_tariff_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
@@ -24,12 +25,23 @@ class DirectInvoicePackageSelectionSection
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
-          controller: controller.packageSearchController,
-          label: 'البحث عن باقة',
-          hint: 'بحث باسم الباقة أو السعر...',
-          prefixIcon: const Icon(Icons.search_rounded),
-        ),
-        AppSpacing.vSm,
+                controller: controller.packageSearchController,
+                label: 'البحث في الباقات',
+                hint: 'اكتب اسم الباقة',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: controller.packageSearchQuery.value.isNotEmpty
+                    ? CustomButton.icon(
+                        icon: Icons.close_rounded,
+                        tooltip: 'مسح البحث',
+                        dimension: 36,
+                        backgroundColor: Colors.transparent,
+                        onPressed: controller.clearPackageSearch,
+                      )
+                    : null,
+                isRequired: false,
+                onChanged: controller.onPackageSearchChanged,
+              ),
+        AppSpacing.vXs,
         Obx(() {
           if (controller.isLoadingPackages.value) {
             return const CustomStateView.loading(

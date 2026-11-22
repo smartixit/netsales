@@ -145,8 +145,8 @@ class NetworkDirectInvoiceScreen
                           AppSpacing.vSm,
                           CustomTextField(
                             controller: controller.paidAmountController,
-                            label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
-                            hint: 'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
+                            label: 'الدفعة النقدية المقبوضة (اختياري)',
+                            hint: 'أدخل المبلغ المسلَّم نقداً',
                             isRequired: false,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
@@ -158,7 +158,7 @@ class NetworkDirectInvoiceScreen
                               ),
                             ],
                             validator: FormValidators.amountValidator(
-                              fieldName: 'المبلغ المقبوض كاش',
+                              fieldName: 'المبلغ المقبوض',
                               isRequired: false,
                               minValue: 0,
                               maxValue: controller.checkoutNetAmount,
@@ -173,7 +173,7 @@ class NetworkDirectInvoiceScreen
                           subtitle: 'حدد الباقات وكمية الكروت لكل صنف مع تطبيق تعرفة السعر',
                           icon: Icons.inventory_2_rounded,
                         ),
-                        AppSpacing.vXs,
+                        AppSpacing.vSm,
                         const DirectInvoicePackageSelectionSection(),
                         AppSpacing.vXxl,
                       ],

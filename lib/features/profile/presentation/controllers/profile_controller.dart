@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
 import 'package:netsales/features/profile/domain/entities/profile_membership_entity.dart';
 import 'package:netsales/features/profile/domain/usecases/get_profile_use_case.dart';
+import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// Coordinates profile presentation and account-centre navigation.
 class ProfileController extends GetxController {
@@ -20,6 +24,7 @@ class ProfileController extends GetxController {
   final Rxn<ProfileEntity> profile = Rxn<ProfileEntity>();
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
+  final RxBool isUpdatingAvatar = false.obs;
 
   int _loadRevision = 0;
 
@@ -29,6 +34,29 @@ class ProfileController extends GetxController {
         '';
     return name.isEmpty ? 'المستخدم' : name;
   }
+
+  /// التسمية الرسمية لبيئة ومساحة العمل النشطة حالياً
+  String get activeWorkspaceLabel {
+    if (!Get.isRegistered<WorkspaceService>()) {
+      return 'المساحة التشغيلية المعتمدة';
+    }
+    final ws = WorkspaceService.to.activeWorkspace;
+    if (ws == AppWorkspace.network) {
+      final name = WorkspaceService.to.activeNetwork.value?.name;
+      return name != null && name.trim().isNotEmpty
+          ? 'شبكة ${name.trim()}'
+          : 'مساحة الشبكة';
+    } else {
+      final name = WorkspaceService.to.activePos.value?.name;
+      return name != null && name.trim().isNotEmpty
+          ? 'نقطة بيع ${name.trim()}'
+          : 'مساحة نقطة البيع';
+    }
+  }
+
+  /// هل التطبيق في الوضع الداكن
+  bool get isDarkMode =>
+      Get.isRegistered<ThemeService>() && ThemeService.to.isDarkMode;
 
   @override
   void onInit() {
@@ -55,6 +83,43 @@ class ProfileController extends GetxController {
       if (revision == _loadRevision && !isClosed) {
         isLoading.value = false;
       }
+    }
+  }
+
+  /// نسخ نص إلى الحافظة مع تغذية حسية وإشعار عائم
+  Future<void> copyToClipboard(String text, String successMessage) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: trimmed));
+    await HapticFeedback.lightImpact();
+    CustomToast.show(message: successMessage);
+  }
+
+  /// معالجة تغيير الصورة الشخصية عبر منتقي الصور الموحد
+  Future<void> onAvatarChanged(File? file) async {
+    if (file == null) return;
+    CustomToast.show(message: 'تم اختيار صورة شخصية جديدة بنجاح.');
+  }
+
+  /// التبديل السلس للمظهر الليلي / النهاري
+  void toggleTheme() {
+    if (Get.isRegistered<ThemeService>()) {
+      ThemeService.to.toggleTheme();
+    }
+  }
+
+  /// تسجيل الخروج الرسمي وإنهاء الجلسة
+  Future<void> logout() async {
+    isLoading.value = true;
+    try {
+      if (Get.isRegistered<SessionService>()) {
+        await SessionService.to.terminateSession();
+      }
+    } catch (_) {
+      // إكمال مسار العودة لتسجيل الدخول في حال تعذر اتصال الشبكة
+    } finally {
+      isLoading.value = false;
+      await Get.offAllNamed<void>(AppRoutes.login);
     }
   }
 

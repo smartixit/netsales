@@ -69,8 +69,10 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               size: AvatarBadgeSize.md,
               hasPulse: true,
               pulseColor: colors.emeraldGlow,
-              borderRadius: BorderRadius.circular(AppRadius.avatar),
-              gradientColors: [colors.executiveGoldAccent, colors.executiveGoldIcon],
+              gradientColors: [
+                colors.executiveGoldAccent,
+                colors.executiveGoldIcon,
+              ],
             ),
             SizedBox(width: AppSpacing.md),
             Expanded(
@@ -81,20 +83,38 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        GreetingFormatter.greeting(),
-                        maxLines: 1,
-                        style: AppTypography.titleSmall.copyWith(
-                          color: colors.executiveGoldAccent,
-                          fontWeight: AppTypography.medium,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              GreetingFormatter.greeting(),
+                              maxLines: 1,
+                              style: AppTypography.titleSmall.copyWith(
+                                color: colors.executiveGoldAccent,
+                                fontWeight: AppTypography.medium,
+                              ),
+                            ),
+                            SizedBox(width: AppSpacing.xs),
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              size: AppSpacing.md,
+                              color: colors.executiveGoldIcon,
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(width: AppSpacing.xs),
-                      Icon(
-                        Icons.auto_awesome_rounded,
-                        size: AppSpacing.md,
-                        color: colors.executiveGoldIcon,
-                      ),
+                      // 4. زر الإجراء التفاعلي الموحد من lib/widgets/buttons
+                      if (actionLabel != null && onAction != null) ...[
+                        CustomButton.icon(
+                          tooltip: actionLabel,
+                          icon: Icons.qr_code_scanner_rounded,
+                          onPressed: onAction,
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.surface,
+                          size: AppButtonSize.medium,
+                          shape: AppButtonShape.pill,
+                        ),
+                      ],
                     ],
                   ),
                   SizedBox(height: AppSpacing.xxs),
@@ -139,18 +159,6 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
             ),
           ],
         ),
-
-        // 4. زر الإجراء التفاعلي الموحد من lib/widgets/buttons
-        if (actionLabel != null && onAction != null) ...[
-          SizedBox(height: AppSpacing.sm),
-          CustomButton.secondary(
-            text: actionLabel,
-            icon: Icons.qr_code_scanner_rounded,
-            onPressed: onAction,
-            size: AppButtonSize.small,
-            shape: AppButtonShape.pill,
-          ),
-        ],
       ],
     );
   }

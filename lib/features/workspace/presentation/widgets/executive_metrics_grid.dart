@@ -42,8 +42,9 @@ class ExecutiveMetricsGrid extends StatelessWidget {
 
     final columns = AppBreakpoints.kpiColumnsFor(context).clamp(1, 4);
     final minCardWidth = AppBreakpoints.isMobile(context) ? 140.w : 170.w;
-    final displayMetrics =
-        (items.isEmpty && isLoading) ? _placeholderMetrics : items;
+    final displayMetrics = (items.isEmpty && isLoading)
+        ? _placeholderMetrics
+        : items;
 
     final grid = DashboardMetricGrid(
       metrics: displayMetrics,

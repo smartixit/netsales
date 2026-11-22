@@ -150,10 +150,18 @@ class PosNewProcurementOrderScreen
                           title: 'طريقة التسعير',
                           subtitle:
                               'تتغير تعرفة العرض حسب طريقة الدفع المختارة.',
+                              icon: Icons.payments_rounded,
                         ),
                         AppSpacing.vSm,
                         const ProcurementSaleTypeSelector(),
                         AppSpacing.vLg,
+                        // 4. اختيار الباقات والكميات
+                        const CustomSectionHeading(
+                          title: 'باقات الكروت والكميات',
+                          subtitle: 'حدد الباقات وكمية الكروت لكل صنف مع تطبيق تعرفة السعر',
+                          icon: Icons.inventory_2_rounded,
+                        ),
+                        AppSpacing.vSm,
                         const ProcurementPackageSelectionSection(),
                         AppSpacing.vLg,
                         CustomTextField(

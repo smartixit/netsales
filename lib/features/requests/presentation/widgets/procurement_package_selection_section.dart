@@ -27,21 +27,6 @@ class ProcurementPackageSelectionSection
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'اختر باقة التوريد',
-          style: AppTypography.titleSmall.copyWith(
-            color: colors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        AppSpacing.vXxs,
-        Text(
-          'عدّل كمية كل باقة من بطاقتها مباشرة. يمكنك إضافة أكثر من باقة، وتظهر تعرفة النقدي والآجل مباشرة داخل كل بطاقة.',
-          style: AppTypography.bodySmall.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        AppSpacing.vSm,
         Obx(() {
           if (controller.selectedNetworkId.value == null) {
             return SizedBox(

@@ -161,7 +161,9 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerEnd,
                           child: Text(
-                            summary.totalSales.isEmpty ? '—' : summary.totalSales,
+                            summary.totalSales.isEmpty
+                                ? '—'
+                                : summary.totalSales,
                             maxLines: 1,
                             style: AppTypography.headlineSmall.copyWith(
                               color: colors.onSurface,
@@ -178,7 +180,9 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                             height: 18.h,
                             decoration: BoxDecoration(
                               color: colors.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(AppRadius.full),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
                             ),
                           ),
                         )
@@ -190,7 +194,9 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color:
-                                (isGrowthPositive ? colors.success : colors.error)
+                                (isGrowthPositive
+                                        ? colors.success
+                                        : colors.error)
                                     .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
