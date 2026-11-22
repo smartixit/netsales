@@ -181,9 +181,10 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                     ),
                     );
                   },
-                ),
-              ],
-            );
+                    ),
+                  ),
+                ],
+              );
             }),
           ),
           Obx(() {
