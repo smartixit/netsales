@@ -18,9 +18,9 @@
   - **NOT** a router/RADIUS gateway configuration tool.
 
 ## 2. Financial Authority — Zero Client-Side Accounting
-- The Laravel API backend is the **100% authoritative entity** for all prices, package tariffs, contractual discounts, invoice line items, wallet balances, credit ceilings, debt aging tiers, and FIFO repayment allocations.
+- The Laravel API backend is the **100% authoritative entity** for all prices, package tariffs, contractual discounts, invoice line items, and wallet balances.
 - Flutter is a **presentation-only consumer**. Flutter collects input, optionally requests server previews where endpoints exist, submits operations, and renders authoritative server responses.
-- **Strict Prohibition:** Flutter code must **never** calculate, extrapolate, or persist authoritative financial totals, ledger statements, or repayment allocations.
+- **Strict Prohibition:** Flutter code must **never** calculate, extrapolate, or persist authoritative financial totals, ledger statements, .
 
 ## 3. Security and Authorization Boundary
 - The Laravel backend is the **sole security boundary**.
@@ -47,7 +47,7 @@
      - Belongs here when its presentation meaning is tied to the feature (e.g., `network_pos_card.dart`, `network_pos_search_filter_header.dart`, `link_pos_bottom_sheet.dart`).
      - Do NOT move feature-specific widgets into `lib/widgets/` merely because they are reusable within the feature.
   3. **Shared Generic Widgets (`lib/widgets/`):**
-     - Exclusively for genuinely shared, feature-independent presentation components with zero business domain concepts (no Network, POS, voucher, wallet, or debt entities).
+     - Exclusively for genuinely shared, feature-independent presentation components with zero business domain concepts (no Network, POS, voucher, or wallet entities).
      - Must be reusable across unrelated features without domain coupling.
   4. **Shared Infrastructure (`lib/core/`):**
      - Exclusively for services, configuration, utilities, and infrastructure. NEVER for presentation widgets.
