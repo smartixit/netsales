@@ -633,8 +633,7 @@ class NetworkCommercialDirectoryController
 
   void selectInvitationTarget(NetworkLinkablePosEntity target) {
     if (!_isInvitationTargetDialogOpen ||
-        isLoadingInvitationTargets.value ||
-        isLoadingMoreInvitationTargets.value) {
+        isLoadingInvitationTargets.value) {
       return;
     }
     resolvedInvitationTarget.value = target;
