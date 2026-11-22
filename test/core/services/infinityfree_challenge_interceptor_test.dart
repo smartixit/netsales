@@ -202,6 +202,121 @@ void main() {
     );
 
     test(
+      'authenticated /auth/me probe preserves only session credentials and replays the original GET',
+      () async {
+        final baseUri = Uri.parse('https://authenticated-me.example');
+        final meUri = baseUri.resolve('/api/v1/auth/me');
+        final challenge = _challenge(meUri);
+        var originalGetCount = 0;
+
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.method == 'GET' &&
+              request.uri.path == meUri.path &&
+              request.uri.queryParameters.isEmpty) {
+            originalGetCount++;
+            return originalGetCount == 1
+                ? _html(challenge)
+                : _text('profile-ok', 200);
+          }
+
+          if (request.method == 'GET' &&
+              request.uri.path == meUri.path &&
+              request.uri.queryParameters['i'] == '1') {
+            expect(request.header('X-Session-Id'), 'session-test-value');
+            expect(request.header('X-Device-Uuid'), 'device-test-value');
+            expect(request.header('X-Client-Public-Key'), isNull);
+            expect(request.header('Authorization'), isNull);
+            expect(body, isNull);
+            return _text('verification accepted', 200);
+          }
+
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        final response = await dio.get<String>(
+          '/api/v1/auth/me',
+          options: Options(
+            responseType: ResponseType.plain,
+            headers: {
+              'X-Session-Id': 'session-test-value',
+              'X-Device-Uuid': 'device-test-value',
+              'X-Client-Public-Key': 'must-not-be-forwarded',
+              'Authorization': 'must-not-be-forwarded',
+            },
+          ),
+        );
+
+        expect(response.statusCode, 200);
+        expect(response.data, 'profile-ok');
+        expect(adapter.requests, hasLength(3));
+        final probe = adapter.requests[1];
+        final replay = adapter.requests[2];
+        expect(probe.method, 'GET');
+        expect(probe.uri.queryParameters, {'i': '1'});
+        expect(probe.header('X-Session-Id'), 'session-test-value');
+        expect(probe.header('X-Device-Uuid'), 'device-test-value');
+        expect(probe.header('X-Client-Public-Key'), isNull);
+        expect(probe.header('Authorization'), isNull);
+        expect(replay.method, 'GET');
+        expect(replay.uri, meUri);
+        expect(replay.header('X-Session-Id'), 'session-test-value');
+        expect(replay.header('X-Device-Uuid'), 'device-test-value');
+        dio.close(force: true);
+      },
+    );
+
+    test(
+      'returns canonical Laravel 401 from authenticated probe as a real session rejection',
+      () async {
+        final baseUri = Uri.parse('https://authenticated-rejection.example');
+        final meUri = baseUri.resolve('/api/v1/auth/me');
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == meUri.path &&
+              request.uri.queryParameters.isEmpty) {
+            return _html(_challenge(meUri));
+          }
+          if (request.uri.path == meUri.path &&
+              request.uri.queryParameters['i'] == '1') {
+            return _json(
+              '{"success":false,"message":"الجلسة غير صالحة","data":{},"errors":[]}',
+              401,
+            );
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        DioException? failure;
+        try {
+          await dio.get<String>(
+            '/api/v1/auth/me',
+            options: Options(
+              responseType: ResponseType.plain,
+              headers: {
+                'X-Session-Id': 'session-test-value',
+                'X-Device-Uuid': 'device-test-value',
+              },
+            ),
+          );
+        } on DioException catch (error) {
+          failure = error;
+        }
+
+        expect(failure, isNotNull);
+        expect(failure!.response?.statusCode, 401);
+        expect(failure.requestOptions.path, '/api/v1/auth/me');
+        expect(
+          failure.requestOptions.extra[infinityFreeVerificationProbeFlagKey],
+          isNot(true),
+        );
+        expect(adapter.requests, hasLength(2));
+        expect(adapter.requests[1].header('X-Session-Id'), 'session-test-value');
+        dio.close(force: true);
+      },
+    );
+
+    test(
       'does not replay or cache cookie when verification GET is challenged',
       () async {
         final baseUri = Uri.parse('https://probe-fails.example');
@@ -345,6 +460,16 @@ ResponseBody _text(String body, int statusCode) {
     statusCode,
     headers: {
       Headers.contentTypeHeader: ['text/plain; charset=utf-8'],
+    },
+  );
+}
+
+ResponseBody _json(String body, int statusCode) {
+  return ResponseBody.fromString(
+    body,
+    statusCode,
+    headers: {
+      Headers.contentTypeHeader: ['application/json; charset=utf-8'],
     },
   );
 }
