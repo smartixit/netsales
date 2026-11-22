@@ -56,7 +56,6 @@ abstract interface class RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
-    double? paidAmount,
   });
 
   /// رفض طلب الكروت مع توثيق السبب المعتمد من قبل مزود الشبكة
