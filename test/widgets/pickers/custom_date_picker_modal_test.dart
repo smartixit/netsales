@@ -167,7 +167,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('00'), findsOneWidget);
-      expect(find.text('12'), findsOneWidget);
+      expect(find.text('صباحاً (ص)'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -201,7 +201,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('55'), findsOneWidget);
-      expect(find.text('11'), findsOneWidget);
+      expect(find.text('مساءً (م)'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
