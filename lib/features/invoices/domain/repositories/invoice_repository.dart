@@ -28,6 +28,5 @@ abstract interface class InvoiceRepository {
     required SaleType saleType,
     required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
-    double? paidAmount,
   });
 }
