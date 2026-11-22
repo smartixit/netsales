@@ -733,8 +733,7 @@ class OperationalReportsController extends GetxController {
     OperationalReportType type,
   ) {
     final identity = switch (type) {
-      OperationalReportType.sales ||
-      OperationalReportType.debtAging => record.textAt(
+      OperationalReportType.sales => record.textAt(
         'invoice_id',
         fallback: record.textAt('invoice_uuid', fallback: ''),
       ),
@@ -744,10 +743,6 @@ class OperationalReportsController extends GetxController {
       ),
       OperationalReportType.networkWallet ||
       OperationalReportType.posWallet => record.textAt('log_id', fallback: ''),
-      OperationalReportType.repayments => record.textAt(
-        'repayment_id',
-        fallback: record.textAt('repayment_uuid', fallback: ''),
-      ),
       OperationalReportType.requests => record.textAt(
         'request_id',
         fallback: record.textAt('request_uuid', fallback: ''),
