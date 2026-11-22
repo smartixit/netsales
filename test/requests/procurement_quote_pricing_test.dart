@@ -494,11 +494,11 @@ void main() {
           ),
         );
 
-        // Change from CASH to CREDIT
-        controller.selectedSaleType.value = SaleType.credit;
+        // The procurement workflow is cash-only; attempts to select credit are ignored.
+        controller.setSaleTypeIndex(1);
         await pumpEventQueue();
 
-        expect(controller.selectedSaleType.value, SaleType.credit);
+        expect(controller.selectedSaleType.value, SaleType.cash);
         expect(mockRepo.lastQuotePayload, isNull);
       },
     );
