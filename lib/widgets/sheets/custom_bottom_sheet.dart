@@ -527,11 +527,14 @@ class CustomBottomSheet extends StatelessWidget {
 
     if (maxWidth == null) return sheet;
 
+    final effectiveWidth = mediaQuery.size.width < maxWidth!
+        ? mediaQuery.size.width
+        : maxWidth!;
+
     return Align(
       alignment: Alignment.bottomCenter,
-      heightFactor: 1,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth!),
+      child: SizedBox(
+        width: effectiveWidth,
         child: sheet,
       ),
     );
