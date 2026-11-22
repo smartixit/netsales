@@ -115,8 +115,14 @@ class ApiService {
       _logResponse(endpoint, response.statusCode);
       return _processResponse<T>(response, fromJson);
     } on DioException catch (e) {
+      final Object? statusLabel;
+      if (e.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true) {
+        statusLabel = 'verification-unavailable';
+      } else {
+        statusLabel = e.response?.statusCode;
+      }
       log(
-        '⚠️ DioException on [$endpoint]: type=${e.type}, status=${e.response?.statusCode} ${e.message}',
+        '⚠️ DioException on [$endpoint]: type=${e.type}, status=$statusLabel ${e.message}',
       );
       return _handleDioError<T>(e, endpoint);
     } catch (e) {
@@ -551,6 +557,17 @@ class ApiService {
   }
 
   ApiResponse<T> _handleDioError<T>(DioException e, String endpoint) {
+    if (e.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true) {
+      return ApiResponse<T>(
+        success: false,
+        message: AppException.sanitizeMessage(
+          e.error,
+          fallback: 'تعذر إكمال تحقق الاستضافة. لم يتم تغيير حالة الجلسة، يرجى إعادة المحاولة.',
+        ),
+        statusCode: null,
+      );
+    }
+
     if (AppEnvironment.enableLogging) {
       log(
         '❌ Dio Error [$endpoint]: ${e.type} | Status: ${e.response?.statusCode}',
@@ -734,8 +751,11 @@ class _SessionAuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] ==
-        true) {
+    final isVerificationProbe =
+        err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true;
+    final isChallengeFailure =
+        err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true;
+    if (isVerificationProbe || isChallengeFailure) {
       return handler.next(err);
     }
 

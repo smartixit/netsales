@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -10,6 +11,8 @@ import 'package:sodium/sodium.dart' show KeyPair;
 
 const String infinityFreeVerificationProbeFlagKey =
     '__netsales_infinityfree_verification_probe';
+const String infinityFreeChallengeFailureFlagKey =
+    '__netsales_infinityfree_challenge_failure';
 
 /// Handles the InfinityFree JavaScript test-cookie challenge.
 ///
@@ -102,12 +105,60 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     required String message,
     Object? cause,
   }) {
+    options.extra[infinityFreeChallengeFailureFlagKey] = true;
     return DioException(
       requestOptions: options,
       response: response,
       type: DioExceptionType.badResponse,
       error: AppException(message),
       message: cause?.toString(),
+    );
+  }
+
+  Map<String, dynamic>? _responseBodyAsJson(dynamic data) {
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    if (data is! String) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(data);
+      return decoded is Map ? Map<String, dynamic>.from(decoded) : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  bool _isBackendApiResponse(Response<dynamic> response) {
+    final contentType = response.headers.value(Headers.contentTypeHeader);
+    if (contentType == null ||
+        !contentType.toLowerCase().contains('application/json')) {
+      return false;
+    }
+
+    final body = _responseBodyAsJson(response.data);
+    return body != null &&
+        body['success'] is bool &&
+        body['message'] is String &&
+        body.containsKey('data') &&
+        body.containsKey('errors');
+  }
+
+  Response<dynamic> _responseForOriginalRequest(
+    Response<dynamic> response,
+    RequestOptions original,
+  ) {
+    return Response<dynamic>(
+      requestOptions: original,
+      data: response.data,
+      headers: response.headers,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
+      isRedirect: response.isRedirect,
+      redirects: response.redirects,
+      extra: response.extra,
     );
   }
 
@@ -126,6 +177,16 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       ),
       'User-Agent': InfinityFreeChallengeSolver.browserUserAgent,
     };
+
+    // The probe stays on the exact same origin and path (validated by the
+    // challenge solver). Forward only the two credentials required by
+    // SessionAuthMiddleware; never copy the original payload or other headers.
+    for (final name in const ['X-Session-Id', 'X-Device-Uuid']) {
+      final value = _headerValue(original.headers, name);
+      if (value != null && value.isNotEmpty) {
+        headers[name] = value;
+      }
+    }
 
     final verificationOptions = original.copyWith(
       method: 'GET',
@@ -251,12 +312,17 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         );
       }
 
+      // A canonical Laravel 401/403 proves that the hosting challenge is
+      // cleared and the request reached the application. It is therefore
+      // safe to replay the exact original request, allowing the normal
+      // interceptors and Splash flow to process the real auth decision.
       final verificationStatus = probeResponse.statusCode;
       final acceptedVerificationStatus =
-          verificationStatus != null &&
-          ((verificationStatus >= 200 && verificationStatus < 300) ||
-              verificationStatus == 404 ||
-              verificationStatus == 405);
+          (verificationStatus != null &&
+              ((verificationStatus >= 200 && verificationStatus < 300) ||
+                  verificationStatus == 404 ||
+                  verificationStatus == 405)) ||
+          _isBackendApiResponse(probeResponse);
       if (!acceptedVerificationStatus) {
         throw _challengeFailure(
           options: verificationOptions,
@@ -334,6 +400,20 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       final failedOptions = dioError?.requestOptions ?? replayOptions;
       final failedResponse = dioError?.response ?? response;
       _finishCryptoLifecycle(replayOptions);
+
+      if (dioError?.response != null &&
+          _isBackendApiResponse(dioError!.response!)) {
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            response: _responseForOriginalRequest(dioError.response!, options),
+            type: DioExceptionType.badResponse,
+            message: dioError.message,
+          ),
+        );
+        return;
+      }
+
       if (AppEnvironment.enableLogging) {
         log(
           'فشلت إعادة الطلب الأصلي بعد تحقق InfinityFree: '
