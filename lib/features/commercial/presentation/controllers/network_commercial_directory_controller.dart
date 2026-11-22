@@ -803,11 +803,15 @@ class NetworkCommercialDirectoryController
       CustomSnackbar.show(title: 'تنبيه', message: 'يرجى اختيار الشبكة أولاً', type: SnackType.warning);
       return;
     }
+    _invitationTargetsRevision++;
     invitationBusinessCodeController.clear();
     invitationSearchQuery.value = '';
     invitationTargets.clear();
     _invitationTargetsNextCursor = null;
     hasMoreInvitationTargets.value = false;
+    invitationTargetsError.value = null;
+    isLoadingInvitationTargets.value = false;
+    isLoadingMoreInvitationTargets.value = false;
     resolvedInvitationTarget.value = null;
     try {
       _isInvitationTargetDialogOpen = true;
@@ -832,6 +836,9 @@ class NetworkCommercialDirectoryController
           maxWidth: 480,
         ).showDialog();
       } finally {
+        _invitationTargetsRevision++;
+        isLoadingInvitationTargets.value = false;
+        isLoadingMoreInvitationTargets.value = false;
         _isInvitationTargetDialogOpen = false;
       }
       if (!_isInvitationTargetConfirmed) return;
