@@ -228,10 +228,7 @@ void main() {
             _headerValue(request.headers, 'X-Device-Uuid'),
             'device-test-value',
           );
-          expect(
-            _headerValue(request.headers, 'Accept'),
-            'application/json',
-          );
+          expect(_headerValue(request.headers, 'Accept'), 'application/json');
           expect(
             _headerValue(request.headers, 'X-Requested-With'),
             'XMLHttpRequest',
@@ -277,86 +274,73 @@ void main() {
       dio.close(force: true);
     });
 
+    test('follows bounded redirects only when they remain on the exact API endpoint', () async {
+      final baseUri = Uri.parse('https://safe-redirect.example');
+      final meUri = baseUri.resolve('/api/v1/auth/me');
+      var originalGetCount = 0;
+      final adapter = _ScriptedAdapter((request, body) async {
+        final isProbe =
+            request.extra[infinityFreeVerificationProbeFlagKey] == true;
+        if (request.uri.path == meUri.path &&
+            request.uri.queryParameters.isEmpty &&
+            !isProbe) {
+          originalGetCount++;
+          return originalGetCount == 1
+              ? _html(_challenge(meUri))
+              : _text('profile-ok', 200);
+        }
 
-    test(
-      'follows bounded redirects only when they remain on the exact API endpoint',
-      () async {
-        final baseUri = Uri.parse('https://safe-redirect.example');
-        final meUri = baseUri.resolve('/api/v1/auth/me');
-        var originalGetCount = 0;
-        final adapter = _ScriptedAdapter((request, body) async {
-          final isProbe =
-              request.extra[infinityFreeVerificationProbeFlagKey] == true;
-          if (request.uri.path == meUri.path &&
-              request.uri.queryParameters.isEmpty &&
-              !isProbe) {
-            originalGetCount++;
-            return originalGetCount == 1
-                ? _html(_challenge(meUri))
-                : _text('profile-ok', 200);
-          }
+        if (isProbe && request.uri.queryParameters['i'] == '1') {
+          expect(
+            _headerValue(request.headers, 'X-Session-Id'),
+            'session-test-value',
+          );
+          expect(
+            _headerValue(request.headers, 'X-Device-Uuid'),
+            'device-test-value',
+          );
+          return _redirect('/api/v1/auth/me?i=2', 302);
+        }
 
-          if (isProbe && request.uri.queryParameters['i'] == '1') {
-            expect(
-              _headerValue(request.headers, 'X-Session-Id'),
-              'session-test-value',
-            );
-            expect(
-              _headerValue(request.headers, 'X-Device-Uuid'),
-              'device-test-value',
-            );
-            return _redirect('/api/v1/auth/me?i=2', 302);
-          }
+        if (isProbe && request.uri.queryParameters['i'] == '2') {
+          expect(
+            _headerValue(request.headers, 'X-Session-Id'),
+            'session-test-value',
+          );
+          expect(
+            _headerValue(request.headers, 'X-Device-Uuid'),
+            'device-test-value',
+          );
+          expect(_headerValue(request.headers, 'Accept'), 'application/json');
+          expect(body, isNull);
+          return _text('verification accepted', 200);
+        }
 
-          if (isProbe && request.uri.queryParameters['i'] == '2') {
-            expect(
-              _headerValue(request.headers, 'X-Session-Id'),
-              'session-test-value',
-            );
-            expect(
-              _headerValue(request.headers, 'X-Device-Uuid'),
-              'device-test-value',
-            );
-            expect(
-              _headerValue(request.headers, 'Accept'),
-              'application/json',
-            );
-            expect(body, isNull);
-            return _text('verification accepted', 200);
-          }
+        return _text('unexpected request', 400);
+      });
+      final dio = _dio(baseUri, adapter);
 
-          return _text('unexpected request', 400);
-        });
-        final dio = _dio(baseUri, adapter);
+      final response = await dio.get<String>(
+        '/api/v1/auth/me',
+        options: Options(
+          responseType: ResponseType.plain,
+          headers: {
+            'X-Session-Id': 'session-test-value',
+            'X-Device-Uuid': 'device-test-value',
+          },
+        ),
+      );
 
-        final response = await dio.get<String>(
-          '/api/v1/auth/me',
-          options: Options(
-            responseType: ResponseType.plain,
-            headers: {
-              'X-Session-Id': 'session-test-value',
-              'X-Device-Uuid': 'device-test-value',
-            },
-          ),
-        );
-
-        expect(response.statusCode, 200);
-        expect(response.data, 'profile-ok');
-        expect(adapter.requests, hasLength(4));
-        expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
-        expect(adapter.requests[2].uri.queryParameters, {'i': '2'});
-        expect(
-          adapter.requests[2].header('X-Session-Id'),
-          'session-test-value',
-        );
-        expect(
-          adapter.requests[2].header('X-Device-Uuid'),
-          'device-test-value',
-        );
-        expect(adapter.requests[3].uri.queryParameters, isEmpty);
-        dio.close(force: true);
-      },
-    );
+      expect(response.statusCode, 200);
+      expect(response.data, 'profile-ok');
+      expect(adapter.requests, hasLength(4));
+      expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+      expect(adapter.requests[2].uri.queryParameters, {'i': '2'});
+      expect(adapter.requests[2].header('X-Session-Id'), 'session-test-value');
+      expect(adapter.requests[2].header('X-Device-Uuid'), 'device-test-value');
+      expect(adapter.requests[3].uri.queryParameters, isEmpty);
+      dio.close(force: true);
+    });
 
     test(
       'does not follow a verification redirect to another origin or path',
@@ -367,10 +351,7 @@ void main() {
           if (request.uri.path == meUri.path) {
             return request.uri.queryParameters.isEmpty
                 ? _html(_challenge(meUri))
-                : _redirect(
-                    'https://attacker.example/api/v1/auth/me?i=2',
-                    302,
-                  );
+                : _redirect('https://attacker.example/api/v1/auth/me?i=2', 302);
           }
           return _text('unexpected request', 400);
         });

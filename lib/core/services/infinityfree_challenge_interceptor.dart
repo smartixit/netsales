@@ -163,7 +163,6 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     );
   }
 
-
   bool _isSafeVerificationRedirect({
     required Uri target,
     required Uri original,
@@ -186,7 +185,8 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     while (true) {
       final response = await _dio.fetch<dynamic>(currentOptions);
       final statusCode = response.statusCode;
-      final isRedirect = statusCode == 301 ||
+      final isRedirect =
+          statusCode == 301 ||
           statusCode == 302 ||
           statusCode == 303 ||
           statusCode == 307 ||
