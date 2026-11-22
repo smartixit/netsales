@@ -894,10 +894,7 @@ class _TimePickerSection extends StatelessWidget {
         (totalMinutes % minutesPerDay + minutesPerDay) % minutesPerDay;
 
     onTimeChanged(
-      TimeOfDay(
-        hour: normalizedMinutes ~/ 60,
-        minute: normalizedMinutes % 60,
-      ),
+      TimeOfDay(hour: normalizedMinutes ~/ 60, minute: normalizedMinutes % 60),
     );
   }
 
