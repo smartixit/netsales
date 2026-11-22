@@ -220,8 +220,14 @@ void main() {
         if (request.method == 'GET' &&
             request.uri.path == meUri.path &&
             request.uri.queryParameters['i'] == '1') {
-          expect(_headerValue(request.headers, 'X-Session-Id'), 'session-test-value');
-          expect(_headerValue(request.headers, 'X-Device-Uuid'), 'device-test-value');
+          expect(
+            _headerValue(request.headers, 'X-Session-Id'),
+            'session-test-value',
+          );
+          expect(
+            _headerValue(request.headers, 'X-Device-Uuid'),
+            'device-test-value',
+          );
           expect(_headerValue(request.headers, 'X-Client-Public-Key'), isNull);
           expect(_headerValue(request.headers, 'Authorization'), isNull);
           expect(body, isNull);
