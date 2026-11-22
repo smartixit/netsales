@@ -363,7 +363,9 @@ class _CustomDatePickerFieldState extends FormFieldState<List<DateTime?>> {
     // Re-evaluate an existing or previously interacted field after an
     // external value or rule update so stale validation messages cannot linger.
     if ((valueChanged || selectionModeChanged || validationRulesChanged) &&
-        (hasError || hasInteractedByUser)) {
+        (hasError ||
+            hasInteractedByUser ||
+            current.autovalidateMode == AutovalidateMode.always)) {
       validate();
     }
   }
