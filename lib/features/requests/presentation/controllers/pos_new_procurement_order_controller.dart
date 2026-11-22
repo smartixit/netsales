@@ -92,10 +92,11 @@ class PosNewProcurementOrderController extends GetxController {
   final selectedPosId = RxnInt();
   final isLoadingMyPos = false.obs;
 
+  RequestEntity raw = Get.arguments as RequestEntity;
+
   /// عنوان الشاشة المنسق بحسب وضع الإنشاء أو التعديل
-  String get screenTitle => isEditing.value
-      ? 'تعديل طلب التوريد #${editingRequestId.value}'
-      : 'طلب توريد جديد';
+  String get screenTitle =>
+      isEditing.value ? 'تعديل #${raw.requestUuid}' : 'طلب توريد جديد';
 
   /// نقطة البيع النشطة المحددة حالياً
   PosEntity? get activePos =>
@@ -452,8 +453,8 @@ class PosNewProcurementOrderController extends GetxController {
 
     final lifecycleRevision = _lifecycleRevision;
     isLoadingMyPos.value = true;
-    isLoadingNetworks.value=true;
-    isLoadingPackages.value=true;
+    isLoadingNetworks.value = true;
+    isLoadingPackages.value = true;
     late final List<PosEntity> posList;
     try {
       posList = await getMyPosUseCase!();
@@ -565,7 +566,7 @@ class PosNewProcurementOrderController extends GetxController {
       _setSelectedPackage(null);
     } finally {
       isLoadingNetworks.value = false;
-      isLoadingPackages.value=false;
+      isLoadingPackages.value = false;
     }
   }
 

@@ -109,7 +109,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                           tooltip: actionLabel,
                           icon: Icons.qr_code_scanner_rounded,
                           onPressed: onAction,
-                          backgroundColor: colors.surface,
+                          backgroundColor: colors.onPrimary,
                           foregroundColor: colors.primary,
                           size: AppButtonSize.medium,
                           shape: AppButtonShape.pill,

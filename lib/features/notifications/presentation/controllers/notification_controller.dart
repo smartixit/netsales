@@ -8,6 +8,7 @@ import 'package:netsales/features/notifications/domain/usecases/get_my_notificat
 import 'package:netsales/features/notifications/domain/usecases/get_unread_notifications_count_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/mark_all_notifications_as_read_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/mark_notification_as_read_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم مركز الإشعارات والتنبيهات الموجهة (Notification Center Controller)
@@ -239,7 +240,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  /// تعليم كافة الإشعارات كمقروءة دفعة واحدة
+  /// تعليم كافة الإشعارات كمقروءة دفعة واحدة مع مؤشرات التحميل والنجاح الموحدة
   Future<void> markAllAsRead() async {
     if (unreadCount.value == 0 && notifications.every((n) => n.isRead)) {
       return;
@@ -258,16 +259,22 @@ class NotificationController extends GetxController {
     );
 
     try {
+      await CustomAnimationOverlay.showLoading(
+        message: 'جاري تعليم كافة الإشعارات كمقروءة...',
+      );
+
       await markAllNotificationsAsReadUseCase();
-      CustomSnackbar.show(
-        title: 'تم التحديث',
+
+      await CustomAnimationOverlay.showSuccess(
         message: 'تم تعليم جميع الإشعارات كمقروءة بنجاح.',
-        type: SnackType.success,
       );
     } catch (e) {
       // Revert
       unreadCount.value = previousUnread;
       notifications.assignAll(previousList);
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
       CustomSnackbar.show(
         title: 'فشل التحديث',
         message: e is AppException
@@ -277,6 +284,9 @@ class NotificationController extends GetxController {
       );
     } finally {
       isMarkingAllRead.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
     }
   }
 

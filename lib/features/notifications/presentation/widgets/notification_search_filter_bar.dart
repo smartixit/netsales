@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 import 'package:netsales/widgets/badges/custom_filter_chip.dart';
@@ -20,7 +19,7 @@ class NotificationSearchFilterBar extends StatelessWidget {
     final controller = NotificationController.to;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6.h),
+      padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

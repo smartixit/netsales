@@ -1137,7 +1137,7 @@ class _TariffQuantityControls extends StatelessWidget {
               tooltip: 'إنقاص $unitLabel',
               dimension: 36.r,
               size: AppButtonSize.small,
-              backgroundColor: colors.surfaceContainerLow,
+              backgroundColor: colors.surfaceContainer,
               foregroundColor: colors.onSurfaceVariant,
               onPressed: quantity > 0 ? () => onChanged(quantity - 1) : null,
             ),

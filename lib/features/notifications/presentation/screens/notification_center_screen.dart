@@ -15,15 +15,16 @@ import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
+import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 /// شاشة مركز الإشعارات والتنبيهات الموجهة داخل التطبيق (NotificationCenterScreen - VIP)
 ///
 /// صُممت الشاشة وفق المعيار الهندسي الأعلى:
-/// - ملف تركيبي صفحة (Page-Level Composition) لا يتجاوز 160 سطراً.
-/// - خالٍ تماماً من دوال البناء الخاصة (_buildXxx Helpers) والفئات المضمنة.
-/// - شريط مؤشرات تنفيذية VIP في المقدمة، يعقبه شريط بحث وتصفية متكامل.
-/// - حالات تفاعلية قياسية (CustomStateView, CustomEmptyState, CustomErrorState).
-/// - عزل واستدعاء سلس لعناصر القائمة عبر بطاقة [NotificationItemCard] مع التحميل التدريجي.
+/// - مبنية بنمط [CustomRefreshablePage.slivers] الموحد لجميع شاشات المنظومة مع مطابقة هوامش الشاشة المركزية بالكامل.
+/// - تجميع عناصر التحكم العلوية (المؤشرات، البحث والتصفية، وعداد النتائج) في شريحة موحدة.
+/// - ظهور حالة التحميل [CustomStateView.loading] بالهيكل الشبحي فوراً عند الفلترة أو البحث أو التحديث.
+/// - استخدام [CustomCursorLoadMore] القياسي في ذيل القائمة للترقيم اللانهائي.
 class NotificationCenterScreen extends GetView<NotificationController> {
   const NotificationCenterScreen({super.key});
 
@@ -78,130 +79,151 @@ class NotificationCenterScreen extends GetView<NotificationController> {
             if (!hasUnread) return const SizedBox.shrink();
 
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: CustomButton.text(
-                text: 'تعليم الكل كمقروء',
-                loading: controller.isMarkingAllRead.value,
+              padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
+              child: CustomButton.icon(
+                icon: Icons.done_all_rounded,
+                tooltip: 'تعليم الكل كمقروء',
+                size: AppButtonSize.small,
                 foregroundColor: colors.primary,
+                backgroundColor: colors.primary.withValues(alpha: 0.1),
+                loading: controller.isMarkingAllRead.value,
                 onPressed: controller.markAllAsRead,
               ),
             );
           }),
         ],
       ),
-      body: Column(
-        children: [
-          // 1. شريط المؤشرات الحيوية التنفيذية (KPIs)
-          const NotificationKpiStrip(),
-
-          // 2. شريط البحث المباشر وشرائح التصفية
-          const NotificationSearchFilterBar(),
-
-          // 3. شريط عداد النتائج والتصفية الموحد
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Obx(
-              () => CustomResultsCounterBar(
-                count: controller.filteredNotifications.length,
-                recordLabel: 'إشعار',
-                isFiltered:
-                    controller.searchQuery.value.isNotEmpty ||
-                    controller.selectedFilter.value != null ||
-                    controller.selectedCategory.value != null,
-                isLoading:
-                    controller.isLoading.value &&
-                    controller.notifications.isEmpty,
-                onClear: controller.resetFilters,
-              ),
+      body: CustomRefreshablePage.slivers(
+        onRefresh: () => controller.loadInitialData(),
+        onLoadMore: controller.loadMoreNotifications,
+        hasMorePredicate: () =>
+            controller.hasMore && !controller.isLoadingMore.value,
+        slivers: [
+          // 1. ترويسة الصفحة الموحدة: المؤشرات الحيوية، البحث والتصفية، وعداد النتائج
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const NotificationKpiStrip(),
+                SizedBox(height: AppSpacing.xs),
+                const NotificationSearchFilterBar(),
+                SizedBox(height: AppSpacing.xs),
+                Obx(
+                  () => CustomResultsCounterBar(
+                    count: controller.filteredNotifications.length,
+                    recordLabel: 'إشعار',
+                    isFiltered:
+                        controller.searchQuery.value.isNotEmpty ||
+                        controller.selectedFilter.value != null ||
+                        controller.selectedCategory.value != null,
+                    isLoading: controller.isLoading.value,
+                    onClear: controller.resetFilters,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.sm),
+              ],
             ),
           ),
 
-          // 4. منطقة المحتوى وحالات العرض القياسية
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value &&
-                  controller.notifications.isEmpty) {
-                return const CustomStateView.loading(
-                  presentation: CustomStatePresentation.skeletonOnly,
-                  skeleton: CustomStateSkeleton(
-                    layout: CustomStateSkeletonLayout.list,
-                    itemCount: 4,
-                    cardHeight: 120,
-                  ),
-                );
-              }
-
-              if (controller.errorMessage.value != null &&
-                  controller.notifications.isEmpty) {
-                return CustomErrorState(
-                  title: controller.errorMessage.value!,
-                  onRetry: () => controller.loadNotifications(isRefresh: true),
-                );
-              }
-
-              if (controller.filteredNotifications.isEmpty) {
-                return CustomEmptyState(
-                  title: 'لا توجد إشعارات',
-                  subtitle: controller.selectedFilter.value == false
-                      ? 'لا توجد أي إشعارات غير مقروءة في الوقت الحالي.'
-                      : 'سوف تظهر هنا كافة التنبيهات وإشعارات العمليات فور ورودها.',
-                  icon: Icons.notifications_none_rounded,
-                  actionLabel: 'تحديث القائمة',
-                  onAction: () => controller.loadNotifications(isRefresh: true),
-                );
-              }
-
-              return RefreshIndicator(
-                onRefresh: () => controller.loadInitialData(),
-                color: colors.primary,
-                backgroundColor: colors.surface,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (scrollInfo.metrics.pixels >=
-                            scrollInfo.metrics.maxScrollExtent - 200 &&
-                        controller.hasMore &&
-                        !controller.isLoadingMore.value) {
-                      controller.loadMoreNotifications();
-                    }
-                    return false;
-                  },
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.symmetric(vertical: 4.h),
-                    itemCount:
-                        controller.filteredNotifications.length +
-                        (controller.hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= controller.filteredNotifications.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.xs,
-                          ),
-                          child: CustomStateView.loading(
-                            presentation: CustomStatePresentation.skeletonOnly,
-                            skeleton: CustomStateSkeleton(
-                              layout: CustomStateSkeletonLayout.cards,
-                              itemCount: 1,
-                              cardHeight: 80.h,
-                              maxColumns: 1,
-                              minItemWidth: 180,
-                            ),
-                          ),
-                        );
-                      }
-
-                      final item = controller.filteredNotifications[index];
-                      return NotificationItemCard(
-                        notification: item,
-                        onTap: () => controller.onNotificationTap(item),
-                        onMarkAsRead: () => controller.markAsRead(item),
-                      );
-                    },
+          // 2. منطقة المحتوى: حالات التحميل والخطأ والفراغ أو عناصر الإشعارات
+          Obx(() {
+            // إظهار هيكل التحميل الموحد عند أي عملية جلب أو فلترة أو بحث
+            if (controller.isLoading.value) {
+              return const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: CustomStateView.loading(
+                    presentation: CustomStatePresentation.skeletonOnly,
+                    skeleton: CustomStateSkeleton(
+                      layout: CustomStateSkeletonLayout.list,
+                      itemCount: 4,
+                      cardHeight: 120,
+                      maxColumns: 1,
+                      hasLeading: true,
+                    ),
                   ),
                 ),
               );
-            }),
+            }
+
+            if (controller.errorMessage.value != null &&
+                controller.notifications.isEmpty) {
+              return SliverToBoxAdapter(
+                child: CustomErrorState(
+                  title: 'تعذر تحميل الإشعارات',
+                  subtitle: controller.errorMessage.value,
+                  onRetry: () => controller.loadNotifications(isRefresh: true),
+                ),
+              );
+            }
+
+            if (controller.filteredNotifications.isEmpty) {
+              final isSearching = controller.searchQuery.value
+                  .trim()
+                  .isNotEmpty;
+              final isFiltering =
+                  controller.selectedFilter.value != null ||
+                  controller.selectedCategory.value != null;
+
+              if (isSearching) {
+                return SliverToBoxAdapter(
+                  child: CustomEmptyState.search(
+                    query: controller.searchQuery.value.trim(),
+                    onClearSearch: controller.resetFilters,
+                  ),
+                );
+              }
+
+              if (isFiltering) {
+                return SliverToBoxAdapter(
+                  child: CustomEmptyState(
+                    icon: Icons.filter_alt_off_rounded,
+                    title: 'لا توجد إشعارات مطابقة للتصفية',
+                    subtitle: 'جرّب تغيير فئة الإشعارات المحددة أو تصفية حالة القراءة.',
+                    actionLabel: 'إعادة تعيين الفلاتر',
+                    actionIcon: Icons.refresh_rounded,
+                    onAction: controller.resetFilters,
+                  ),
+                );
+              }
+
+              return SliverToBoxAdapter(
+                child: CustomEmptyState(
+                  title: 'لا توجد إشعارات',
+                  subtitle: 'سوف تظهر هنا كافة التنبيهات وإشعارات العمليات فور ورودها.',
+                  icon: Icons.notifications_none_rounded,
+                  actionLabel: 'تحديث القائمة',
+                  actionIcon: Icons.refresh_rounded,
+                  onAction: () => controller.loadNotifications(isRefresh: true),
+                ),
+              );
+            }
+
+            final items = controller.filteredNotifications;
+
+            return SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final item = items[index];
+                return NotificationItemCard(
+                  key: ValueKey('notification_${item.notificationId}'),
+                  notification: item,
+                  onTap: () => controller.onNotificationTap(item),
+                  onMarkAsRead: () => controller.markAsRead(item),
+                );
+              }, childCount: items.length),
+            );
+          }),
+
+          // 3. ذيل التحميل الإضافي الموحد (CustomCursorLoadMore)
+          SliverToBoxAdapter(
+            child: Obx(
+              () => CustomCursorLoadMore(
+                hasMore: controller.hasMore,
+                isLoading: controller.isLoadingMore.value,
+                error: null,
+                onPressed: controller.loadMoreNotifications,
+              ),
+            ),
           ),
         ],
       ),

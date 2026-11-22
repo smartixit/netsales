@@ -209,7 +209,7 @@ class _CheckoutMetricItem extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 6.r),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerLowest,
+        color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: colors.outlineVariant.withValues(alpha: .30)),
       ),

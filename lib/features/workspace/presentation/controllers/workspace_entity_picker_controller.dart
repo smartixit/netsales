@@ -126,10 +126,10 @@ class WorkspaceEntityPickerController extends GetxController {
     if (network == null) return;
 
     if (Get.isRegistered<NetworkWorkspaceController>()) {
+      Get.back<void>();
       await Get.find<NetworkWorkspaceController>().selectNetwork(
         network.networkId,
       );
-      Get.back<void>();
       return;
     }
 
@@ -147,14 +147,14 @@ class WorkspaceEntityPickerController extends GetxController {
     if (pos == null) return;
 
     if (Get.isRegistered<PosWorkspaceController>()) {
-      await Get.find<PosWorkspaceController>().selectPos(pos);
       Get.back<void>();
+      await Get.find<PosWorkspaceController>().selectPos(pos);
       return;
     }
 
     await WorkspaceService.to.saveActivePosId(pos.posId);
+    Get.back<void>();
     if (Get.isRegistered<WorkspaceCoordinatorController>()) {
-      Get.back<void>();
       await WorkspaceCoordinatorController.to.switchWorkspace(AppWorkspace.pos);
     }
   }
