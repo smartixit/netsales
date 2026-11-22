@@ -198,7 +198,6 @@ class MockRequestRepository implements RequestRepository {
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
-    double? paidAmount,
   }) async {
     final index = _requests.indexWhere((r) => r.requestId == requestId);
     if (index >= 0) {
@@ -227,7 +226,6 @@ class MockRequestRepository implements RequestRepository {
           posId: updated.posId,
           requestId: updated.requestId,
           invoiceTotalAmount: updated.requestTotalAmount,
-          paidAmount: updated.requestTotalAmount,
           remainingAmount: 0,
           paymentStatusRaw: 'PAID',
           isFullyPaid: true,
@@ -408,11 +406,11 @@ void main() {
           'invoice_uuid': 'inv-uuid-901',
           'sale_type': 'CREDIT',
           'invoice_total_amount': 27000.0,
-          'paid_amount': 12000.0,
-          'remaining_amount': 15000.0,
-          'payment_status': 'PARTIALLY_PAID',
-          'payment_status_label': 'مسددة جزئياً',
-          'is_fully_paid': false,
+          'paid_amount': 27000.0,
+          'remaining_amount': 0.0,
+          'payment_status': 'PAID',
+          'payment_status_label': 'مسددة بالكامل',
+          'is_fully_paid': true,
           'items': <Map<String, dynamic>>[],
         },
       });
@@ -421,9 +419,9 @@ void main() {
       expect(result.request.status, RequestStatus.approved);
       expect(result.invoice.invoiceId, 901);
       expect(result.invoice.invoiceTotalAmount, 27000.0);
-      expect(result.invoice.paidAmount, 12000.0);
-      expect(result.invoice.remainingAmount, 15000.0);
-      expect(result.invoice.isPartiallyPaid, isTrue);
+      expect(result.invoice.paidAmount, 27000.0);
+      expect(result.invoice.remainingAmount, 0.0);
+      expect(result.invoice.isFullyPaid, isTrue);
     });
 
     test('RequestModel toJson serializes accurately without currency keys', () {
