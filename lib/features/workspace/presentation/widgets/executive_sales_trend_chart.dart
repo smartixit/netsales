@@ -8,6 +8,7 @@ import 'package:netsales/features/workspace/presentation/models/network_workspac
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/charts/charting.dart';
 import 'package:netsales/widgets/menus/custom_popup_menu.dart';
+import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 
 /// Sales trend panel arranged to match the mobile dashboard reference:
 /// compact period selector, chart, server-provided total and growth.
@@ -18,12 +19,14 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
     required this.selectedPeriod,
     required this.onPeriodChanged,
     required this.summary,
+    this.isLoading = false,
   });
 
   final ChartDefinition chartDefinition;
   final String selectedPeriod;
   final ValueChanged<String> onPeriodChanged;
   final NetworkSalesTrendSummary summary;
+  final bool isLoading;
 
   static const List<ChartPeriodOption> periodOptions = [
     ChartPeriodOption(id: '7d', label: 'آخر 7 أيام'),
@@ -142,56 +145,80 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 5.h),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: Text(
-                          summary.totalSales.isEmpty ? '—' : summary.totalSales,
-                          maxLines: 1,
-                          style: AppTypography.headlineSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.4,
+                      if (isLoading)
+                        CustomSkeletonShimmer(
+                          child: Container(
+                            width: 90.w,
+                            height: 22.h,
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                            ),
+                          ),
+                        )
+                      else
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Text(
+                            summary.totalSales.isEmpty ? '—' : summary.totalSales,
+                            maxLines: 1,
+                            style: AppTypography.headlineSmall.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.4,
+                            ),
                           ),
                         ),
-                      ),
                       SizedBox(height: 9.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              (isGrowthPositive ? colors.success : colors.error)
-                                  .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.full),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isGrowthPositive
-                                  ? Icons.trending_up_rounded
-                                  : Icons.trending_down_rounded,
-                              size: 15.r,
-                              color: isGrowthPositive
-                                  ? colors.success
-                                  : colors.error,
+                      if (isLoading)
+                        CustomSkeletonShimmer(
+                          child: Container(
+                            width: 55.w,
+                            height: 18.h,
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(AppRadius.full),
                             ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              '${isGrowthPositive ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
-                              style: AppTypography.labelMedium.copyWith(
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                (isGrowthPositive ? colors.success : colors.error)
+                                    .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isGrowthPositive
+                                    ? Icons.trending_up_rounded
+                                    : Icons.trending_down_rounded,
+                                size: 15.r,
                                 color: isGrowthPositive
                                     ? colors.success
                                     : colors.error,
-                                fontWeight: FontWeight.w700,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 4.w),
+                              Text(
+                                '${isGrowthPositive ? '+' : ''}${summary.growthRate.toStringAsFixed(1)}%',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: isGrowthPositive
+                                      ? colors.success
+                                      : colors.error,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -203,7 +230,11 @@ class ExecutiveSalesTrendChart extends StatelessWidget {
                   height: 148.h,
                   child: NetSalesChartsThemeAdapter.wrap(
                     context: context,
-                    child: ChartRenderer(definition: chartDefinition),
+                    child: ChartRenderer(
+                      definition: isLoading
+                          ? chartDefinition.copyWith(state: ChartState.loading)
+                          : chartDefinition,
+                    ),
                   ),
                 ),
               ),

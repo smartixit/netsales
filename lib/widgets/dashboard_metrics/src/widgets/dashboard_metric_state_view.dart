@@ -99,12 +99,19 @@ class _MetricSkeleton extends StatelessWidget {
     final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _SkeletonBlock(width: 112, height: 13, color: color),
-        const SizedBox(height: 18),
-        _SkeletonBlock(width: 150, height: 30, color: color),
-        const SizedBox(height: 14),
-        _SkeletonBlock(width: 190, height: 11, color: color),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _SkeletonBlock(width: 75, height: 12, color: color),
+            _SkeletonBlock(width: 24, height: 24, color: color, radius: 8),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _SkeletonBlock(width: 100, height: 20, color: color),
+        const SizedBox(height: 8),
+        _SkeletonBlock(width: 60, height: 10, color: color),
       ],
     );
   }
@@ -115,11 +122,13 @@ class _SkeletonBlock extends StatelessWidget {
     required this.width,
     required this.height,
     required this.color,
+    this.radius = 6,
   });
 
   final double width;
   final double height;
   final Color color;
+  final double radius;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -127,7 +136,7 @@ class _SkeletonBlock extends StatelessWidget {
     height: height,
     decoration: BoxDecoration(
       color: color,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(radius),
     ),
   );
 }

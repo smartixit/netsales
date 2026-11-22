@@ -507,7 +507,7 @@ class _NetworkRequestProposedItemsSection
             final pkg = controller.resolvePackageForModification(
               line.packageId,
             );
-            final isAdded = controller.isItemNewlyAdded(line.packageId);
+            // final isAdded = controller.isItemNewlyAdded(line.packageId);
             final authoritativeTotal = controller
                 .authoritativeTotalForModificationLine(line);
 
@@ -526,8 +526,8 @@ class _NetworkRequestProposedItemsSection
                 ),
                 onDelete: () =>
                     controller.removeModificationPackage(line.packageId),
-                customHeaderTag: isAdded ? 'باقة مضافة' : null,
-                customHeaderTagColor: isAdded ? colors.tertiary : null,
+              //   customHeaderTag: isAdded ? 'باقة مضافة' : null,
+              //   customHeaderTagColor: isAdded ? colors.tertiary : null,
               ),
             );
           }),

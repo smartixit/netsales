@@ -92,7 +92,7 @@ class PosWorkspaceController extends GetxController {
 
   String get userName {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
-    return name.isEmpty ? 'مرحباً بك' : name;
+    return name.isEmpty ? '...' : TextFormatter.takeWords(name,3);
   }
 
   String get welcomeGreeting => GreetingFormatter.greeting();

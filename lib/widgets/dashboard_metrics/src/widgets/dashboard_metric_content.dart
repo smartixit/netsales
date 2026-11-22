@@ -233,38 +233,18 @@ class _TrendLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tone = trend.tone;
-    final direction = trend.direction;
-    final color = tokens.colorFor(tone);
-    final icon = switch (direction) {
-      DashboardMetricDirection.increase => Icons.trending_up_rounded,
-      DashboardMetricDirection.decrease => Icons.trending_down_rounded,
-      DashboardMetricDirection.unchanged => Icons.trending_flat_rounded,
-    };
+    final label = trend.description != null
+        ? '${trend.comparisonLabel} · ${trend.description}'
+        : trend.comparisonLabel;
 
-    return Wrap(
-      spacing: 7,
-      runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Icon(icon, size: 17, color: color),
-        Text(
-          trend.valueLabel,
-          style: Theme.of(context).textTheme.labelLarge
-              ?.copyWith(color: color, fontWeight: FontWeight.w700),
-        ),
-        Text(
-          trend.comparisonLabel,
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: tokens.mutedForeground),
-        ),
-        if (trend.description != null)
-          Text(
-            trend.description!,
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: tokens.mutedForeground),
+    return Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: tokens.mutedForeground,
+            fontSize: 11,
           ),
-      ],
     );
   }
 }

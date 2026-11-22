@@ -223,19 +223,21 @@ class NetworkWorkspaceController extends GetxController {
     }
   }
 
-  Future<void> loadOverview({int? revision}) async {
+  Future<void> loadOverview({int? revision, bool clearOverview = false}) async {
     final requestRevision = revision ?? ++_revision;
     final networkId = selectedNetworkId.value;
     if (networkId == null) {
       overview.value = null;
       overviewError.value = null;
-      isLoadingOverview.value = false;
+      // isLoadingOverview.value = false;
       return;
     }
 
     isLoadingOverview.value = true;
     overviewError.value = null;
-    overview.value = null;
+    if (clearOverview) {
+      overview.value = null;
+    }
     try {
       final result = await getOverviewUseCase(
         networkId,
@@ -276,13 +278,13 @@ class NetworkWorkspaceController extends GetxController {
     overviewError.value = null;
     isLoadingOverview.value = true;
     await WorkspaceService.to.saveActiveNetworkId(networkId);
-    await loadOverview(revision: revision);
+    await loadOverview(revision: revision, clearOverview: true);
   }
 
   Future<void> selectPeriod(String period) async {
     if (selectedPeriod.value == period) return;
     selectedPeriod.value = period;
-    await loadOverview();
+    await loadOverview(clearOverview: false);
   }
 
   Future<void> retryNetworks() => loadWorkspace();

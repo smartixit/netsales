@@ -35,4 +35,22 @@ class ChartDefinition {
   /// Keep an empty live source mounted so Syncfusion can register its series
   /// controller before the first point is appended.
   bool get canRender => hasData || hasLiveSources;
+
+  ChartDefinition copyWith({
+    ChartFamily? family,
+    ChartType? type,
+    List<ChartSeries>? series,
+    ChartOptions? options,
+    ChartState? state,
+    String? stateMessage,
+    String? stateDetails,
+  }) => ChartDefinition(
+    family: family ?? this.family,
+    type: type ?? this.type,
+    series: series ?? this.series,
+    options: options ?? this.options,
+    state: state ?? this.state,
+    stateMessage: stateMessage ?? this.stateMessage,
+    stateDetails: stateDetails ?? this.stateDetails,
+  );
 }
