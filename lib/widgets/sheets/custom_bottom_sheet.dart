@@ -533,10 +533,7 @@ class CustomBottomSheet extends StatelessWidget {
 
     return Align(
       alignment: Alignment.bottomCenter,
-      child: SizedBox(
-        width: effectiveWidth,
-        child: sheet,
-      ),
+      child: SizedBox(width: effectiveWidth, child: sheet),
     );
   }
 }
