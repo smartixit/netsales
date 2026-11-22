@@ -733,7 +733,8 @@ class OperationalReportsController extends GetxController {
     OperationalReportType type,
   ) {
     final identity = switch (type) {
-      OperationalReportType.sales => record.textAt(
+      OperationalReportType.sales ||
+      OperationalReportType.debtAging => record.textAt(
         'invoice_id',
         fallback: record.textAt('invoice_uuid', fallback: ''),
       ),
