@@ -602,7 +602,7 @@ class PosWorkspaceController extends GetxController {
   }
 
   void openProcurementOrder(RequestEntity request) =>
-      Get.toNamed<void>(AppRoutes.procurementOrders, arguments: request);
+      Get.toNamed<void>(AppRoutes.voucherRequestDetails, arguments: request.requestId);
 
   void onNavItemSelected(int index) {
     if (index < 0) return;

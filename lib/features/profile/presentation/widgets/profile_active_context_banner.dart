@@ -53,11 +53,14 @@ class ProfileActiveContextBanner extends StatelessWidget {
                 ),
               ),
               SizedBox(width: AppSpacing.xs),
-              Text(
-                'المساحة النشطة: $activeWorkspaceLabel',
-                style: AppTypography.labelSmall.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  'المساحة النشطة: $activeWorkspaceLabel',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
