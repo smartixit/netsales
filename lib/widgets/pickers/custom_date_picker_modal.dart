@@ -333,8 +333,6 @@ class _DatePickerContainerView extends StatelessWidget {
     _DatePickerModalController controller,
   ) {
     final colors = context.colors;
-    final compactCalendar =
-        MediaQuery.sizeOf(context).width < AppBreakpoints.maxModalWidth;
     final calendarConfig = CalendarDatePicker2Config(
       calendarType: controller.calendarType,
       firstDate: controller.effectiveFirstDate,
@@ -372,8 +370,10 @@ class _DatePickerContainerView extends StatelessWidget {
       ),
       weekdayLabels: DatePickerService.weekdayShortLabels,
       centerAlignModePicker: true,
-      disableModePicker: compactCalendar,
-      disableMonthPicker: compactCalendar,
+      // Keep the month/year header as one compact control. Year selection
+      // remains available, while month navigation stays on the calendar arrows.
+      disableModePicker: false,
+      disableMonthPicker: true,
       useAbbrLabelForMonthModePicker: true,
       modePickersGap: 0,
       controlsHeight: 44.h,
@@ -978,7 +978,7 @@ class _TimePickerSection extends StatelessWidget {
       builder: (context, constraints) {
         final compact =
             !constraints.hasBoundedWidth ||
-            constraints.maxWidth < AppBreakpoints.maxModalWidth - AppSpacing.xl;
+            constraints.maxWidth < AppBreakpoints.maxFormWidth;
         final decoration = BoxDecoration(
           color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(AppRadius.lg.r),
