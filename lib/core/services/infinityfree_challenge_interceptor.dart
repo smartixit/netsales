@@ -131,17 +131,25 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     }
   }
 
-  bool _isBackendAuthenticationFailure(Response<dynamic> response) {
-    final statusCode = response.statusCode;
-    if (statusCode != 401 && statusCode != 403) {
+  bool _isBackendApiResponse(Response<dynamic> response) {
+    final contentType = response.headers.value(Headers.contentTypeHeader);
+    if (contentType == null ||
+        !contentType.toLowerCase().contains('application/json')) {
       return false;
     }
 
     final body = _responseBodyAsJson(response.data);
-    return body?['success'] == false &&
-        body?['message'] is String &&
-        body!.containsKey('data') &&
+    return body != null &&
+        body['success'] is bool &&
+        body['message'] is String &&
+        body.containsKey('data') &&
         body.containsKey('errors');
+  }
+
+  bool _isBackendAuthenticationFailure(Response<dynamic> response) {
+    final statusCode = response.statusCode;
+    return (statusCode == 401 || statusCode == 403) &&
+        _isBackendApiResponse(response);
   }
 
   Response<dynamic> _responseForOriginalRequest(
@@ -320,7 +328,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
               ((verificationStatus >= 200 && verificationStatus < 300) ||
                   verificationStatus == 404 ||
                   verificationStatus == 405)) ||
-          _isBackendAuthenticationFailure(probeResponse);
+          _isBackendApiResponse(probeResponse);
       if (!acceptedVerificationStatus) {
         throw _challengeFailure(
           options: verificationOptions,
@@ -400,7 +408,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       _finishCryptoLifecycle(replayOptions);
 
       if (dioError?.response != null &&
-          _isBackendAuthenticationFailure(dioError!.response!)) {
+          _isBackendApiResponse(dioError!.response!)) {
         handler.reject(
           DioException(
             requestOptions: options,
