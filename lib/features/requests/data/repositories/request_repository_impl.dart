@@ -1,3 +1,4 @@
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/requests/data/datasources/request_remote_data_source.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
@@ -30,6 +31,9 @@ class RequestRepositoryImpl implements RequestRepository {
   @override
   Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {
     final response = await _remoteDataSource.getQuote(payload);
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 
@@ -55,6 +59,10 @@ class RequestRepositoryImpl implements RequestRepository {
       query: query.isNotEmpty ? query : null,
     );
 
+    if (!response.success) {
+      throw AppException(response.message);
+    }
+
     final items = response.data ?? [];
 
     return PaginatedList<RequestEntity>(
@@ -67,6 +75,9 @@ class RequestRepositoryImpl implements RequestRepository {
   @override
   Future<RequestEntity> getRequestDetails(int requestId) async {
     final response = await _remoteDataSource.getRequestDetails(requestId);
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 
@@ -79,6 +90,9 @@ class RequestRepositoryImpl implements RequestRepository {
       data,
       idempotencyKey: idempotencyKey,
     );
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 
@@ -88,18 +102,27 @@ class RequestRepositoryImpl implements RequestRepository {
     Map<String, dynamic> data,
   ) async {
     final response = await _remoteDataSource.updateRequest(requestId, data);
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 
   @override
   Future<RequestEntity> cancelRequest(int requestId) async {
     final response = await _remoteDataSource.cancelRequest(requestId);
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 
   @override
   Future<bool> deleteRequest(int requestId) async {
     final response = await _remoteDataSource.deleteRequest(requestId);
+    if (!response.success) {
+      throw AppException(response.message);
+    }
     return response.success;
   }
 
@@ -113,6 +136,9 @@ class RequestRepositoryImpl implements RequestRepository {
       requestId,
       payload,
     );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
     final data = response.data;
     if (data == null) {
       throw const FormatException(
@@ -140,6 +166,9 @@ class RequestRepositoryImpl implements RequestRepository {
       requestId,
       data: data.isNotEmpty ? data : null,
     );
+    if (!response.success) {
+      throw AppException(response.message);
+    }
     final result = response.data;
     if (result == null) {
       throw const FormatException(
@@ -171,6 +200,9 @@ class RequestRepositoryImpl implements RequestRepository {
     final response = await _remoteDataSource.rejectRequest(requestId, {
       'rejection_reason': rejectionReason,
     });
+    if (!response.success || response.data == null) {
+      throw AppException(response.message);
+    }
     return response.data!;
   }
 }

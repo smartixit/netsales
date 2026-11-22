@@ -92,11 +92,12 @@ class PosNewProcurementOrderController extends GetxController {
   final selectedPosId = RxnInt();
   final isLoadingMyPos = false.obs;
 
-  RequestEntity raw = Get.arguments as RequestEntity;
+  RequestEntity? raw = Get.arguments as RequestEntity?;
 
   /// عنوان الشاشة المنسق بحسب وضع الإنشاء أو التعديل
-  String get screenTitle =>
-      isEditing.value ? 'تعديل #${raw.requestUuid}' : 'طلب توريد جديد';
+  String get screenTitle => isEditing.value
+      ? 'تعديل #${raw?.requestUuid ?? editingRequestId.value}'
+      : 'طلب توريد جديد';
 
   /// نقطة البيع النشطة المحددة حالياً
   PosEntity? get activePos =>
