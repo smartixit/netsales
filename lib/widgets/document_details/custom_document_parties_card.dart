@@ -9,7 +9,6 @@ import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/document_details/models/document_party_data.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 export 'package:netsales/widgets/document_details/models/document_party_data.dart';
 
