@@ -317,6 +317,49 @@ void main() {
     );
 
     test(
+      'does not treat an unstructured verification 401 as an authenticated session rejection',
+      () async {
+        final baseUri = Uri.parse('https://untrusted-401.example');
+        final meUri = baseUri.resolve('/api/v1/auth/me');
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == meUri.path) {
+            return request.uri.queryParameters.isEmpty
+                ? _html(_challenge(meUri))
+                : _text('Access denied by hosting gateway', 401);
+          }
+          return _text('unexpected request', 400);
+        });
+        final dio = _dio(baseUri, adapter);
+
+        DioException? failure;
+        try {
+          await dio.get<String>(
+            '/api/v1/auth/me',
+            options: Options(
+              responseType: ResponseType.plain,
+              headers: {
+                'X-Session-Id': 'session-test-value',
+                'X-Device-Uuid': 'device-test-value',
+              },
+            ),
+          );
+        } on DioException catch (error) {
+          failure = error;
+        }
+
+        expect(failure, isNotNull);
+        expect(failure!.response?.statusCode, 401);
+        expect(
+          failure.requestOptions.extra[infinityFreeChallengeFailureFlagKey],
+          isTrue,
+        );
+        expect(adapter.requests, hasLength(2));
+        expect(adapter.requests.last.uri.queryParameters, {'i': '1'});
+        dio.close(force: true);
+      },
+    );
+
+    test(
       'does not replay or cache cookie when verification GET is challenged',
       () async {
         final baseUri = Uri.parse('https://probe-fails.example');
