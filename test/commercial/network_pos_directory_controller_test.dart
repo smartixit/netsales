@@ -21,6 +21,7 @@ import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_li
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/resolve_network_linkable_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/search_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_commercial_directory_controller.dart';
@@ -51,6 +52,28 @@ class _FakeCommercialRepository implements CommercialRepository {
       posId: 30,
       posUuid: 'POS-2611-00030-A1B2',
       posName: 'نقطة الاختبار',
+    );
+  }
+
+  @override
+  Future<PaginatedList<NetworkLinkablePosEntity>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final candidates = [
+      const NetworkLinkablePosEntity(
+        posId: 30,
+        posUuid: 'POS-2611-00030-A1B2',
+        posName: 'نقطة الاختبار',
+      ),
+    ].where((item) =>
+        item.posName.contains(search) || item.posUuid.contains(search));
+
+    return PaginatedList<NetworkLinkablePosEntity>(
+      items: candidates.toList(),
+      nextCursor: null,
     );
   }
 
@@ -257,7 +280,23 @@ void main() {
         resolveNetworkLinkablePosUseCase: ResolveNetworkLinkablePosUseCase(
           repo,
         ),
+        searchNetworkLinkablePosUseCase:
+            SearchNetworkLinkablePosUseCase(repo),
       );
+    });
+
+    test('Searches eligible invitation targets without manual code entry', () async {
+      await controller.loadInitialData();
+
+      controller.onInvitationBusinessCodeChanged('نقطة الاختبار');
+      await controller.loadInvitationTargets();
+
+      expect(controller.invitationTargets, hasLength(1));
+      expect(controller.invitationTargets.single.posName, 'نقطة الاختبار');
+
+      controller.selectInvitationTarget(controller.invitationTargets.single);
+      expect(controller.resolvedInvitationTarget.value?.posUuid,
+          'POS-2611-00030-A1B2');
     });
 
     test('Loads initial networks and links successfully', () async {
