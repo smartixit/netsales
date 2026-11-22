@@ -122,7 +122,8 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                       subtitle: error,
                       presentation: CustomStatePresentation.compact,
                     ),
-                  Flexible(
+                  SizedBox(
+                    height: targets.length > 4 ? 280 : targets.length * 70,
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: targets.length,
