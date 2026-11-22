@@ -87,7 +87,7 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
               }
 
               final error = errorMessage.value;
-              if (error != null) {
+              if (error != null && targets.isEmpty) {
                 return CustomStateView.error(
                   title: 'تعذر البحث عن نقاط البيع',
                   subtitle: error,
@@ -113,9 +113,19 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                 );
               }
 
-              return ListView.separated(
-                shrinkWrap: true,
-                itemCount: targets.length,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (error != null)
+                    CustomStateView.error(
+                      title: 'تعذر تحميل بقية النتائج',
+                      subtitle: error,
+                      presentation: CustomStatePresentation.compact,
+                    ),
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: targets.length,
                 separatorBuilder: (_, _) => SizedBox(height: AppSpacing.xs),
                 itemBuilder: (context, index) {
                   final target = targets[index];
@@ -168,9 +178,11 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
                           Icon(Icons.check_rounded, color: colors.primary),
                       ],
                     ),
-                  );
-                },
-              );
+                    );
+                  },
+                ),
+              ],
+            );
             }),
           ),
           Obx(() {
