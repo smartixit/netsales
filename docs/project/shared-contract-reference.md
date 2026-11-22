@@ -125,4 +125,4 @@ The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, sect
 
 
 
-POS invoices are cash-settled only. The client and API expose no POS debt-aging or repayment workflows; wallet transfers and ordinary wallet ledger statements remain supported.
+POS invoices and procurement flows support both CASH and CREDIT. CREDIT may include an initial partial payment where the API endpoint permits it. The backend is authoritative for paid_amount, remaining_amount, payment_status, credit-limit enforcement, wallet settlement, and accounting; Flutter only collects the initial amount and displays returned fields. POS Repayment collection, reversal, invoice allocations/FIFO, and repayment-specific reports/documents are removed. Receivables aging and invoice payment state remain distinct from repayment collection. Wallet transfers and ordinary wallet ledger statements remain supported.
