@@ -972,7 +972,8 @@ class _TimePickerSection extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 440;
+        final compact =
+            constraints.maxWidth < AppBreakpoints.maxModalWidth - AppSpacing.xl;
         final decoration = BoxDecoration(
           color: colors.surfaceContainerHighest.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(AppRadius.lg.r),
