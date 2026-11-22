@@ -151,7 +151,7 @@ class ProcurementRequestDetailsController extends GetxController {
   }
 
   /// اعتماد الطلب وتوليد الفاتورة من قبل إدارة الشبكة
-  Future<void> approveRequest({String? note, double? paidAmount}) async {
+  Future<void> approveRequest({String? note}) async {
     final current = request.value;
     if (current == null) return;
 
@@ -250,13 +250,12 @@ class ProcurementRequestDetailsController extends GetxController {
   Future<void> promptApproveRequest() async {
     final current = request.value;
     if (current == null) return;
-    final isCredit = current.saleType == SaleType.credit;
+    const isCredit = false;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: current.requestUuid ?? '-',
       isCredit: isCredit,
       maxAmount: current.requestTotalAmount,
-      onConfirm: (note, paidAmount) =>
-          approveRequest(note: note, paidAmount: paidAmount),
+      onConfirm: (note, _) => approveRequest(note: note),
     );
   }
 
