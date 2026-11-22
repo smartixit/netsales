@@ -79,7 +79,7 @@ void main() {
       final invoice = await repository.createDirectInvoice(
         networkId: 10,
         posId: 20,
-        saleType: SaleType.cash,
+        saleType: SaleType.credit,
         idempotencyKey: 'sale-pos20-idempotent-key',
         items: const [
           DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
@@ -91,7 +91,7 @@ void main() {
       expect(remote.submittedIdempotencyKey, 'sale-pos20-idempotent-key');
       expect(remote.submittedData?['network_id'], 10);
       expect(remote.submittedData?['pos_id'], 20);
-      expect(remote.submittedData?['sale_type'], 'CASH');
+      expect(remote.submittedData?['sale_type'], 'CREDIT');
 
       final items = remote.submittedData?['items'] as List;
       expect(items.length, 2);
