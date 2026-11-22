@@ -2,6 +2,7 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
@@ -12,6 +13,7 @@ import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// ============================================================================
 /// ودجت نافذة منتقي التاريخ والوقت الموحدة (CustomDatePickerModal)
@@ -34,7 +36,10 @@ class CustomDatePickerModal extends StatelessWidget {
     required this.title,
     required this.onConfirm,
     required this.onCancel,
-  });
+  }) : assert(
+         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         'firstDate must be on or before lastDate.',
+       );
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -49,6 +54,7 @@ class CustomDatePickerModal extends StatelessWidget {
   final VoidCallback onCancel;
 
   /// إظهار المنتقي كنافذة سفلية (Bottom Sheet)
+  /// يعرض المنتقي عبر النافذة السفلية المشتركة، مع تثبيته عند الحافة السفلية.
   static Future<List<DateTime?>?> showBottomSheet({
     required BuildContext context,
     List<DateTime?>? initialValue,
@@ -62,11 +68,11 @@ class CustomDatePickerModal extends StatelessWidget {
     required String title,
   }) {
     HapticFeedback.lightImpact();
-    return showModalBottomSheet<List<DateTime?>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => CustomDatePickerBottomSheetContent(
+
+    if (!context.mounted) return Future<List<DateTime?>?>.value(null);
+
+    return CustomBottomSheet.show<List<DateTime?>>(
+      child: CustomDatePickerBottomSheetContent(
         initialValue: initialValue,
         mode: mode,
         enableTime: enableTime,
@@ -77,6 +83,15 @@ class CustomDatePickerModal extends StatelessWidget {
         selectableDayPredicate: selectableDayPredicate,
         title: title,
       ),
+      maxHeightFactor: 0.94,
+      maxWidth: AppBreakpoints.maxModalWidth,
+      showDragHandle: true,
+      showCloseButton: false,
+      scrollable: true,
+      padding: EdgeInsets.zero,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
     );
   }
 
@@ -155,7 +170,10 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
     this.currentDate,
     this.selectableDayPredicate,
     required this.title,
-  });
+  }) : assert(
+         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         'firstDate must be on or before lastDate.',
+       );
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -169,52 +187,20 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: AppBreakpoints.maxModalWidth),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(AppRadius.xl.r),
-            ),
-            boxShadow: AppElevation.level4(context),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 36.w,
-                    height: 4.h,
-                    margin: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                    decoration: BoxDecoration(
-                      color: colors.outlineVariant.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(AppRadius.full.r),
-                    ),
-                  ),
-                  _DatePickerContainerView(
-                    initialValue: initialValue,
-                    mode: mode,
-                    enableTime: enableTime,
-                    showQuickPresets: showQuickPresets,
-                    firstDate: firstDate,
-                    lastDate: lastDate,
-                    currentDate: currentDate,
-                    selectableDayPredicate: selectableDayPredicate,
-                    title: title,
-                    onConfirm: (dates) => Navigator.of(context).pop(dates),
-                    onCancel: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+    return KeyedSubtree(
+      key: const ValueKey<String>('custom-date-picker-sheet-content'),
+      child: _DatePickerContainerView(
+        initialValue: initialValue,
+        mode: mode,
+        enableTime: enableTime,
+        showQuickPresets: showQuickPresets,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        currentDate: currentDate,
+        selectableDayPredicate: selectableDayPredicate,
+        title: title,
+        onConfirm: (dates) => Get.back<List<DateTime?>>(result: dates),
+        onCancel: () => Get.back<List<DateTime?>>(),
       ),
     );
   }
@@ -233,7 +219,10 @@ class CustomDatePickerDialogContent extends StatelessWidget {
     this.currentDate,
     this.selectableDayPredicate,
     required this.title,
-  });
+  }) : assert(
+         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         'firstDate must be on or before lastDate.',
+       );
 
   final List<DateTime?>? initialValue;
   final DatePickerSelectionMode mode;
@@ -248,35 +237,50 @@ class CustomDatePickerDialogContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final mediaQuery = MediaQuery.of(context);
+    final availableHeight = (mediaQuery.size.height -
+            mediaQuery.viewInsets.vertical -
+            AppSpacing.xxl)
+        .clamp(0.0, mediaQuery.size.height)
+        .toDouble();
 
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          margin: EdgeInsets.all(AppSpacing.md),
-          constraints: BoxConstraints(maxWidth: AppBreakpoints.maxModalWidth),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.xl.r),
-            border: Border.all(
-              color: colors.outlineVariant.withValues(alpha: 0.4),
-              width: 1.w,
-            ),
-            boxShadow: AppElevation.level3(context),
+    return SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: AppBreakpoints.maxModalWidth,
+            maxHeight: availableHeight,
           ),
-          clipBehavior: Clip.antiAlias,
-          child: _DatePickerContainerView(
-            initialValue: initialValue,
-            mode: mode,
-            enableTime: enableTime,
-            showQuickPresets: showQuickPresets,
-            firstDate: firstDate,
-            lastDate: lastDate,
-            currentDate: currentDate,
-            selectableDayPredicate: selectableDayPredicate,
-            title: title,
-            onConfirm: (dates) => Navigator.of(context).pop(dates),
-            onCancel: () => Navigator.of(context).pop(),
+          child: Container(
+            width: double.infinity,
+            margin: EdgeInsets.all(AppSpacing.md),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.xl.r),
+              border: Border.all(
+                color: colors.outlineVariant.withValues(alpha: 0.4),
+                width: 1.w,
+              ),
+              boxShadow: AppElevation.level3(context),
+            ),
+            child: SingleChildScrollView(
+              primary: false,
+              physics: const ClampingScrollPhysics(),
+              child: _DatePickerContainerView(
+                initialValue: initialValue,
+                mode: mode,
+                enableTime: enableTime,
+                showQuickPresets: showQuickPresets,
+                firstDate: firstDate,
+                lastDate: lastDate,
+                currentDate: currentDate,
+                selectableDayPredicate: selectableDayPredicate,
+                title: title,
+                onConfirm: (dates) => Navigator.of(context).pop(dates),
+                onCancel: () => Navigator.of(context).pop(),
+              ),
+            ),
           ),
         ),
       ),
@@ -287,7 +291,8 @@ class CustomDatePickerDialogContent extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // المحتوى الداخلي للمنتقي (_DatePickerContainerView)
 // ─────────────────────────────────────────────────────────────────────────────
-class _DatePickerContainerView extends StatefulWidget {
+/// واجهة Stateless للحاوية؛ حالة كل نافذة مملوكة لمتحكم GetX محلي.
+class _DatePickerContainerView extends StatelessWidget {
   const _DatePickerContainerView({
     this.initialValue,
     required this.mode,
@@ -315,98 +320,33 @@ class _DatePickerContainerView extends StatefulWidget {
   final VoidCallback onCancel;
 
   @override
-  State<_DatePickerContainerView> createState() =>
-      _DatePickerContainerViewState();
-}
-
-class _DatePickerContainerViewState extends State<_DatePickerContainerView> {
-  late List<DateTime?> _selectedDates;
-  late TimeOfDay _selectedTime;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDates = widget.initialValue != null
-        ? List<DateTime?>.from(widget.initialValue!)
-        : [DateTime.now()];
-
-    final firstDate = _selectedDates.isNotEmpty ? _selectedDates.first : null;
-    if (firstDate != null) {
-      _selectedTime = TimeOfDay(hour: firstDate.hour, minute: firstDate.minute);
-    } else {
-      _selectedTime = TimeOfDay.now();
-    }
-  }
-
-  void _onDatesChanged(List<DateTime?> dates) {
-    setState(() {
-      _selectedDates = dates;
-      _applyTimeToDates();
-    });
-  }
-
-  void _onTimeChanged(TimeOfDay time) {
-    setState(() {
-      _selectedTime = time;
-      _applyTimeToDates();
-    });
-  }
-
-  void _applyTimeToDates() {
-    if (!widget.enableTime || _selectedDates.isEmpty) return;
-    _selectedDates = _selectedDates.map((date) {
-      if (date == null) return null;
-      return DateTime(
-        date.year,
-        date.month,
-        date.day,
-        _selectedTime.hour,
-        _selectedTime.minute,
-      );
-    }).toList();
-  }
-
-  void _onQuickPresetSelected(List<DateTime?> presetDates) {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _selectedDates = presetDates;
-      _applyTimeToDates();
-    });
-  }
-
-  void _onClear() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _selectedDates = [];
-    });
-  }
-
-  void _handleConfirm() {
-    HapticFeedback.mediumImpact();
-    widget.onConfirm(_selectedDates);
-  }
-
-  CalendarDatePicker2Type get _mappedCalendarType {
-    switch (widget.mode) {
-      case DatePickerSelectionMode.single:
-        return CalendarDatePicker2Type.single;
-      case DatePickerSelectionMode.range:
-        return CalendarDatePicker2Type.range;
-      case DatePickerSelectionMode.multi:
-        return CalendarDatePicker2Type.multi;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    return GetBuilder<_DatePickerModalController>(
+      global: false,
+      init: _DatePickerModalController(
+        initialValue: initialValue,
+        mode: mode,
+        enableTime: enableTime,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        currentDate: currentDate,
+        selectableDayPredicate: selectableDayPredicate,
+      ),
+      builder: (controller) => _buildContent(context, controller),
+    );
+  }
 
+  Widget _buildContent(
+    BuildContext context,
+    _DatePickerModalController controller,
+  ) {
+    final colors = context.colors;
     final calendarConfig = CalendarDatePicker2Config(
-      calendarType: _mappedCalendarType,
-      firstDate: widget.firstDate ?? DateTime(2000),
-      lastDate: widget.lastDate ?? DateTime(2100),
-      currentDate: widget.currentDate ?? DateTime.now(),
-      selectableDayPredicate: widget.selectableDayPredicate,
+      calendarType: controller.calendarType,
+      firstDate: controller.effectiveFirstDate,
+      lastDate: controller.effectiveLastDate,
+      currentDate: controller.effectiveCurrentDate,
+      selectableDayPredicate: controller.selectableDayPredicate,
       rangeBidirectional: true,
       selectedDayHighlightColor: colors.primary,
       selectedDayTextStyle: AppTypography.bodyMedium.copyWith(
@@ -444,53 +384,227 @@ class _DatePickerContainerViewState extends State<_DatePickerContainerView> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 1. ترويسة التاريخ المحدد
         _DatePickerHeader(
-          mode: widget.mode,
-          selectedDates: _selectedDates,
-          selectedTime: _selectedTime,
-          enableTime: widget.enableTime,
-          title: widget.title,
-          onClear: _selectedDates.isNotEmpty ? _onClear : null,
+          mode: controller.mode,
+          selectedDates: controller.selectedDates,
+          selectedTime: controller.selectedTime,
+          enableTime: controller.enableTime,
+          title: title,
+          onClear: controller.selectedDates.isNotEmpty
+              ? controller.clearSelection
+              : null,
         ),
-
-        // 2. شريط الفلاتر السريعة لنطاق التواريخ
-        if (widget.mode == DatePickerSelectionMode.range &&
-            widget.showQuickPresets) ...[
-          _QuickPresetsBar(onPresetSelected: _onQuickPresetSelected),
+        if (controller.mode == DatePickerSelectionMode.range &&
+            showQuickPresets) ...[
+          _QuickPresetsBar(
+            referenceDate: controller.effectiveCurrentDate,
+            isPresetSelectable: controller.isPresetSelectable,
+            onPresetSelected: controller.selectPreset,
+          ),
           AppSpacing.vXs,
         ],
-
-        // 3. التقويم الأساسي
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: CalendarDatePicker2(
             config: calendarConfig,
-            value: _selectedDates,
-            onValueChanged: _onDatesChanged,
+            value: controller.selectedDates,
+            onValueChanged: controller.updateDates,
           ),
         ),
-
-        // 4. ودجت اختيار الوقت
-        if (widget.enableTime) ...[
+        if (controller.enableTime) ...[
           _TimePickerSection(
-            selectedTime: _selectedTime,
-            onTimeChanged: _onTimeChanged,
+            selectedTime: controller.selectedTime,
+            onTimeChanged: controller.updateTime,
           ),
         ],
-
-        // 5. أزرار الإجراءات (تأكيد / إلغاء)
         AppSpacing.vSm,
         _DatePickerActions(
-          onConfirm: _handleConfirm,
-          onCancel: widget.onCancel,
-          canConfirm: _selectedDates.isNotEmpty,
+          onConfirm: () => controller.confirm(onConfirm),
+          onCancel: onCancel,
+          canConfirm: controller.canConfirm,
         ),
         AppSpacing.vXs,
       ],
     );
   }
 }
+
+class _DatePickerModalController extends GetxController {
+  _DatePickerModalController({
+    required List<DateTime?>? initialValue,
+    required this.mode,
+    required this.enableTime,
+    required this.firstDate,
+    required this.lastDate,
+    required this.currentDate,
+    required this.selectableDayPredicate,
+  }) {
+    selectedDates = _filterSelectableDates(_normalizeDates(initialValue, mode));
+    DateTime? initialDate;
+    for (final date in selectedDates) {
+      if (date != null) {
+        initialDate = date;
+        break;
+      }
+    }
+    selectedTime = TimeOfDay.fromDateTime(initialDate ?? effectiveCurrentDate);
+  }
+
+  final DatePickerSelectionMode mode;
+  final bool enableTime;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+  final DateTime? currentDate;
+  final bool Function(DateTime)? selectableDayPredicate;
+
+  late List<DateTime?> selectedDates;
+  late TimeOfDay selectedTime;
+  bool wasExplicitlyCleared = false;
+
+  CalendarDatePicker2Type get calendarType => switch (mode) {
+    DatePickerSelectionMode.single => CalendarDatePicker2Type.single,
+    DatePickerSelectionMode.range => CalendarDatePicker2Type.range,
+    DatePickerSelectionMode.multi => CalendarDatePicker2Type.multi,
+  };
+
+  DateTime get effectiveFirstDate {
+    if (firstDate != null) return _dateOnly(firstDate!);
+
+    final defaultFirstDate = DateTime(2000);
+    if (lastDate != null && _dateOnly(lastDate!).isBefore(defaultFirstDate)) {
+      return _dateOnly(lastDate!);
+    }
+    return defaultFirstDate;
+  }
+
+  DateTime get effectiveLastDate {
+    if (lastDate != null) return _dateOnly(lastDate!);
+
+    final defaultLastDate = DateTime(2100);
+    if (firstDate != null && _dateOnly(firstDate!).isAfter(defaultLastDate)) {
+      return _dateOnly(firstDate!);
+    }
+    return defaultLastDate;
+  }
+
+  DateTime get effectiveCurrentDate {
+    final preferred = _dateOnly(currentDate ?? DateTime.now());
+    if (preferred.isBefore(effectiveFirstDate)) return effectiveFirstDate;
+    if (preferred.isAfter(effectiveLastDate)) return effectiveLastDate;
+    return preferred;
+  }
+
+  bool get canConfirm {
+    if (wasExplicitlyCleared) return true;
+
+    switch (mode) {
+      case DatePickerSelectionMode.single:
+        return selectedDates.length == 1 && selectedDates.first != null;
+      case DatePickerSelectionMode.range:
+        return selectedDates.length >= 2 &&
+            selectedDates[0] != null &&
+            selectedDates[1] != null;
+      case DatePickerSelectionMode.multi:
+        return selectedDates.any((date) => date != null);
+    }
+  }
+
+  bool isSelectable(DateTime date) {
+    final normalized = _dateOnly(date);
+    if (normalized.isBefore(effectiveFirstDate) ||
+        normalized.isAfter(effectiveLastDate)) {
+      return false;
+    }
+    return selectableDayPredicate?.call(normalized) ?? true;
+  }
+
+  List<DateTime?> _filterSelectableDates(List<DateTime?> dates) {
+    switch (mode) {
+      case DatePickerSelectionMode.single:
+        if (dates.isEmpty || dates.first == null) return <DateTime?>[];
+        return isSelectable(dates.first!)
+            ? <DateTime?>[dates.first]
+            : <DateTime?>[];
+      case DatePickerSelectionMode.range:
+        if (dates.isEmpty) return <DateTime?>[];
+        final start = dates.first;
+        final end = dates.length > 1 ? dates[1] : null;
+        return _normalizeDates(
+          <DateTime?>[
+            start != null && !isSelectable(start) ? null : start,
+            end != null && !isSelectable(end) ? null : end,
+          ],
+          mode,
+        );
+      case DatePickerSelectionMode.multi:
+        return dates.whereType<DateTime>().where(isSelectable).toList();
+    }
+  }
+
+  bool isPresetSelectable(DateTime start, DateTime end) {
+    if (end.isBefore(start)) return false;
+    var day = _dateOnly(start);
+    final finalDay = _dateOnly(end);
+    while (!day.isAfter(finalDay)) {
+      if (!isSelectable(day)) return false;
+      day = DateTime(day.year, day.month, day.day + 1);
+    }
+    return true;
+  }
+
+  void updateDates(List<DateTime?> dates) {
+    selectedDates = _filterSelectableDates(_normalizeDates(dates, mode));
+    wasExplicitlyCleared = false;
+    _applyTimeToDates();
+    update();
+  }
+
+  void updateTime(TimeOfDay time) {
+    if (!enableTime) return;
+    selectedTime = time;
+    _applyTimeToDates();
+    update();
+  }
+
+  void selectPreset(List<DateTime?> dates) {
+    if (dates.length != 2 || dates[0] == null || dates[1] == null) return;
+    if (!isPresetSelectable(dates[0]!, dates[1]!)) return;
+    HapticFeedback.selectionClick();
+    selectedDates = _filterSelectableDates(_normalizeDates(dates, mode));
+    wasExplicitlyCleared = false;
+    _applyTimeToDates();
+    update();
+  }
+
+  void clearSelection() {
+    HapticFeedback.selectionClick();
+    selectedDates = <DateTime?>[];
+    wasExplicitlyCleared = true;
+    update();
+  }
+
+  void confirm(ValueChanged<List<DateTime?>> onConfirm) {
+    if (!canConfirm) return;
+    HapticFeedback.mediumImpact();
+    onConfirm(List<DateTime?>.unmodifiable(selectedDates));
+  }
+
+  void _applyTimeToDates() {
+    if (!enableTime || selectedDates.isEmpty) return;
+    selectedDates = selectedDates.map((date) {
+      if (date == null) return null;
+      return DateTime(
+        date.year,
+        date.month,
+        date.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+    }).toList();
+  }
+}
+
+DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // الترويسة الموحدة (_DatePickerHeader)
@@ -513,6 +627,11 @@ class _DatePickerHeader extends StatelessWidget {
   final VoidCallback? onClear;
 
   String _formatDisplayText() {
+    if (mode == DatePickerSelectionMode.multi) {
+      final count = selectedDates.whereType<DateTime>().length;
+      return count == 0 ? 'لم يتم تحديد تواريخ' : '$count تواريخ محددة';
+    }
+
     if (selectedDates.isEmpty) {
       return mode == DatePickerSelectionMode.range
           ? 'اختر النطاق الزمني'
@@ -610,52 +729,37 @@ class _DatePickerHeader extends StatelessWidget {
 // شريط الفلاتر السريعة لنطاق التواريخ (_QuickPresetsBar)
 // ─────────────────────────────────────────────────────────────────────────────
 class _QuickPresetsBar extends StatelessWidget {
-  const _QuickPresetsBar({required this.onPresetSelected});
+  const _QuickPresetsBar({
+    required this.referenceDate,
+    required this.isPresetSelectable,
+    required this.onPresetSelected,
+  });
 
+  final DateTime referenceDate;
+  final bool Function(DateTime, DateTime) isPresetSelectable;
   final ValueChanged<List<DateTime?>> onPresetSelected;
 
-  void _selectToday() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    onPresetSelected([today, today]);
-  }
-
-  void _selectYesterday() {
-    final now = DateTime.now();
+  List<_DateRangePreset> _presets() {
+    final now = _dateOnly(referenceDate);
     final yesterday = DateTime(now.year, now.month, now.day - 1);
-    onPresetSelected([yesterday, yesterday]);
-  }
+    final monthStart = DateTime(now.year, now.month, 1);
+    final monthEnd = DateTime(now.year, now.month + 1, 0);
+    final lastMonthStart = DateTime(now.year, now.month - 1, 1);
+    final lastMonthEnd = DateTime(now.year, now.month, 0);
 
-  void _selectLast7Days() {
-    final now = DateTime.now();
-    final end = DateTime(now.year, now.month, now.day);
-    final start = DateTime(now.year, now.month, now.day - 6);
-    onPresetSelected([start, end]);
-  }
-
-  void _selectLast30Days() {
-    final now = DateTime.now();
-    final end = DateTime(now.year, now.month, now.day);
-    final start = DateTime(now.year, now.month, now.day - 29);
-    onPresetSelected([start, end]);
-  }
-
-  void _selectThisMonth() {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, 1);
-    final end = DateTime(now.year, now.month + 1, 0);
-    onPresetSelected([start, end]);
-  }
-
-  void _selectLastMonth() {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month - 1, 1);
-    final end = DateTime(now.year, now.month, 0);
-    onPresetSelected([start, end]);
+    return [
+      _DateRangePreset('اليوم', now, now),
+      _DateRangePreset('أمس', yesterday, yesterday),
+      _DateRangePreset('آخر 7 أيام', now.subtract(const Duration(days: 6)), now),
+      _DateRangePreset('آخر 30 يوماً', now.subtract(const Duration(days: 29)), now),
+      _DateRangePreset('هذا الشهر', monthStart, monthEnd),
+      _DateRangePreset('الشهر الماضي', lastMonthStart, lastMonthEnd),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final presets = _presets();
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -665,36 +769,57 @@ class _QuickPresetsBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _PresetChip(label: 'اليوم', onTap: _selectToday),
-          AppSpacing.hXs,
-          _PresetChip(label: 'أمس', onTap: _selectYesterday),
-          AppSpacing.hXs,
-          _PresetChip(label: 'آخر 7 أيام', onTap: _selectLast7Days),
-          AppSpacing.hXs,
-          _PresetChip(label: 'آخر 30 يوماً', onTap: _selectLast30Days),
-          AppSpacing.hXs,
-          _PresetChip(label: 'هذا الشهر', onTap: _selectThisMonth),
-          AppSpacing.hXs,
-          _PresetChip(label: 'الشهر الماضي', onTap: _selectLastMonth),
+          for (var index = 0; index < presets.length; index++) ...[
+            _PresetChip(
+              label: presets[index].label,
+              enabled: isPresetSelectable(presets[index].start, presets[index].end),
+              onTap: () => onPresetSelected([
+                presets[index].start,
+                presets[index].end,
+              ]),
+            ),
+            if (index != presets.length - 1) AppSpacing.hXs,
+          ],
         ],
       ),
     );
   }
 }
 
-class _PresetChip extends StatelessWidget {
-  const _PresetChip({required this.label, required this.onTap});
+class _DateRangePreset {
+  const _DateRangePreset(this.label, this.start, this.end);
 
   final String label;
+  final DateTime start;
+  final DateTime end;
+}
+
+class _PresetChip extends StatelessWidget {
+  const _PresetChip({
+    required this.label,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return CustomInteractiveBounce(
-      onTap: onTap,
-      child: Container(
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: CustomInteractiveBounce(
+        onTap: enabled ? onTap : null,
+        enableHaptic: false,
+        child: AnimatedOpacity(
+          opacity: enabled ? 1 : 0.38,
+          duration: AppMotion.duration(context, AppMotion.fast),
+          child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
@@ -712,6 +837,8 @@ class _PresetChip extends StatelessWidget {
           style: AppTypography.labelMedium.copyWith(
             color: colors.onSurface,
             fontWeight: FontWeight.w500,
+          ),
+        ),
           ),
         ),
       ),
@@ -950,6 +1077,7 @@ class _DatePickerActions extends StatelessWidget {
             child: CustomButton.primary(
               text: 'تأكيد',
               icon: Icons.check_rounded,
+              enabled: canConfirm,
               onPressed: canConfirm ? onConfirm : null,
             ),
           ),
