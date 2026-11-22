@@ -49,6 +49,7 @@ class CustomBottomSheet extends StatelessWidget {
   final bool scrollable;
   final EdgeInsetsGeometry? padding;
   final double? maxHeightFactor;
+  /// Optional maximum surface width for centered desktop/tablet sheets.
   final double? maxWidth;
 
   const CustomBottomSheet({
@@ -65,7 +66,7 @@ class CustomBottomSheet extends StatelessWidget {
     this.padding,
     this.maxHeightFactor,
     this.maxWidth,
-  });
+  }) : assert(maxWidth == null || (maxWidth.isFinite && maxWidth > 0));
 
   /// 1. مصنع النوافذ السفلية لقائمة الإجراءات والخيارات (Actions List)
   factory CustomBottomSheet.actions({
