@@ -526,8 +526,8 @@ class _NetworkRequestProposedItemsSection
                 ),
                 onDelete: () =>
                     controller.removeModificationPackage(line.packageId),
-              //   customHeaderTag: isAdded ? 'باقة مضافة' : null,
-              //   customHeaderTagColor: isAdded ? colors.tertiary : null,
+                //   customHeaderTag: isAdded ? 'باقة مضافة' : null,
+                //   customHeaderTagColor: isAdded ? colors.tertiary : null,
               ),
             );
           }),
@@ -1162,7 +1162,7 @@ class _NetworkRequestQuotationVoucherCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                AppSpacing.vMd,
+                AppSpacing.vLg,
                 _NetworkRequestDiffAuditSection(
                   items: preview.items,
                   removedItems: preview.removedItems,
@@ -1199,7 +1199,7 @@ class _NetworkRequestDiffAuditSection extends StatelessWidget {
               size: 16.r,
               color: colors.onSurfaceVariant,
             ),
-            AppSpacing.hXxs,
+            AppSpacing.hSm,
             Expanded(
               child: Text(
                 'سجل الفروقات المباشر على البنود',
@@ -1211,7 +1211,7 @@ class _NetworkRequestDiffAuditSection extends StatelessWidget {
             ),
           ],
         ),
-        AppSpacing.vXs,
+        AppSpacing.vMd,
         ...items.map((item) => _NetworkRequestPreviewItemDiffCard(item: item)),
         if (removedItems.isNotEmpty) ...[
           AppSpacing.vXs,
@@ -1291,7 +1291,7 @@ class _NetworkRequestPreviewItemDiffCard extends StatelessWidget {
                   item.packageName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelLarge.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     fontWeight: FontWeight.w800,
                     color: colors.onSurface,
                   ),

@@ -388,6 +388,7 @@ class NetworkProcurementReviewController
     editingRequestId.value = requestId;
     editingRequest.value = request;
     isLoadingEditor.value = true;
+    isLoadingPackages.value = true;
     editorError.value = null;
     currentPreview.value = null;
     modificationLines.clear();
