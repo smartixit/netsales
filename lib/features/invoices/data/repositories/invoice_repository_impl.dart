@@ -66,14 +66,12 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     required SaleType saleType,
     required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
-    double? paidAmount,
   }) async {
     final payload = <String, dynamic>{
       'network_id': networkId,
       'pos_id': posId,
       if (saleType != SaleType.unknown) 'sale_type': saleType.wireValue,
       'items': items.map((e) => e.toJson()).toList(),
-      if (paidAmount != null && paidAmount > 0) 'paid_amount': paidAmount,
     };
 
     final response = await remoteDataSource.createDirectInvoice(
