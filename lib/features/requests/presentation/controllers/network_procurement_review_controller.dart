@@ -604,7 +604,7 @@ class NetworkProcurementReviewController
     }
   }
 
-  Future<void> approvePreview({String? requestNote, double? paidAmount}) async {
+  Future<void> approvePreview({String? requestNote}) async {
     final preview = currentPreview.value;
     final requestId = editingRequestId.value;
     if (preview == null || requestId == null || !preview.hasModifications) {
@@ -628,7 +628,6 @@ class NetworkProcurementReviewController
       requestId,
       requestNote: requestNote,
       items: preview.approvalItems,
-      paidAmount: paidAmount,
     );
   }
 
@@ -853,7 +852,6 @@ class NetworkProcurementReviewController
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
-    double? paidAmount,
   }) async {
     try {
       isProcessingDecision.value = true;
@@ -864,7 +862,6 @@ class NetworkProcurementReviewController
         requestId,
         requestNote: requestNote,
         items: items,
-        paidAmount: paidAmount,
       );
       lastApprovalResult.value = approvalResult;
 
@@ -1031,7 +1028,7 @@ class NetworkProcurementReviewController
 
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
-    final isCredit = request.saleType == SaleType.credit;
+    const isCredit = false;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
       isCredit: isCredit,
