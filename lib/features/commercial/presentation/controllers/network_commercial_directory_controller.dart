@@ -636,11 +636,9 @@ class NetworkCommercialDirectoryController
   }
 
   void cancelInvitationTargetDialog() {
-    if (isLoadingInvitationTargets.value ||
-        isLoadingMoreInvitationTargets.value) {
-      return;
-    }
     _invitationTargetsRevision++;
+    isLoadingInvitationTargets.value = false;
+    isLoadingMoreInvitationTargets.value = false;
     _isInvitationTargetDialogOpen = false;
     _isInvitationTargetConfirmed = false;
     resolvedInvitationTarget.value = null;
