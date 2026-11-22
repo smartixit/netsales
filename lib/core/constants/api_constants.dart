@@ -140,6 +140,8 @@ abstract final class ApiConstants {
   static const String networkPosChallenges = '/network-pos/challenges';
   static const String networkPosChallengesResolveTarget =
       '/network-pos/challenges/resolve-target';
+  static const String networkPosChallengesLinkableTargets =
+      '/network-pos/challenges/linkable-targets';
   static const String networkPosChallengesPreview =
       '/network-pos/challenges/preview';
   static const String networkPosChallengesConfirm =
