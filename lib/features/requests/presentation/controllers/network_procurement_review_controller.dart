@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
@@ -271,6 +272,7 @@ class NetworkProcurementReviewController
   final isLoadingEditor = false.obs;
   final editorError = RxnString();
   final modificationNoteController = TextEditingController();
+  final modificationPaidAmountController = TextEditingController();
   final Map<int, TextEditingController> _modificationQuantityControllers = {};
   int _requestListRevision = 0;
 
@@ -602,7 +604,7 @@ class NetworkProcurementReviewController
     }
   }
 
-  Future<void> approvePreview({String? requestNote}) async {
+  Future<void> approvePreview({String? requestNote, double? paidAmount}) async {
     final preview = currentPreview.value;
     final requestId = editingRequestId.value;
     if (preview == null || requestId == null || !preview.hasModifications) {
@@ -626,6 +628,7 @@ class NetworkProcurementReviewController
       requestId,
       requestNote: requestNote,
       items: preview.approvalItems,
+      paidAmount: paidAmount,
     );
   }
 
@@ -640,6 +643,7 @@ class NetworkProcurementReviewController
     modificationLines.clear();
     availablePackages.clear();
     modificationNoteController.clear();
+    modificationPaidAmountController.clear();
     for (final c in _modificationQuantityControllers.values) {
       c.dispose();
     }
@@ -667,6 +671,7 @@ class NetworkProcurementReviewController
   void onClose() {
     searchController.dispose();
     modificationNoteController.dispose();
+    modificationPaidAmountController.dispose();
     for (final c in _modificationQuantityControllers.values) {
       c.dispose();
     }
@@ -848,6 +853,7 @@ class NetworkProcurementReviewController
     int requestId, {
     String? requestNote,
     List<RequestModificationLineEntity>? items,
+    double? paidAmount,
   }) async {
     try {
       isProcessingDecision.value = true;
@@ -858,6 +864,7 @@ class NetworkProcurementReviewController
         requestId,
         requestNote: requestNote,
         items: items,
+        paidAmount: paidAmount,
       );
       lastApprovalResult.value = approvalResult;
 
@@ -1024,9 +1031,16 @@ class NetworkProcurementReviewController
 
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
+    final isCredit = request.saleType == SaleType.credit;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
-      onConfirm: (note) => approveRequest(request.requestId, requestNote: note),
+      isCredit: isCredit,
+      maxAmount: request.requestTotalAmount,
+      onConfirm: (note, paidAmount) => approveRequest(
+        request.requestId,
+        requestNote: note,
+        paidAmount: paidAmount,
+      ),
     );
   }
 
@@ -1043,6 +1057,11 @@ class NetworkProcurementReviewController
     final preview = currentPreview.value;
     if (preview == null || !preview.hasModifications) return;
 
+    final rawPaid = double.tryParse(
+      modificationPaidAmountController.text.trim(),
+    );
+    final paidAmount = (rawPaid != null && rawPaid > 0) ? rawPaid : null;
+
     await CustomBottomSheet.showConfirmation<void>(
       title: 'تأكيد اعتماد التعديل',
       message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
@@ -1052,6 +1071,7 @@ class NetworkProcurementReviewController
           requestNote: modificationNoteController.text.trim().isEmpty
               ? null
               : modificationNoteController.text.trim(),
+          paidAmount: paidAmount,
         );
         // if (success) Get.back<void>();
       },
