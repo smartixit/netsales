@@ -92,7 +92,9 @@ class PosWorkspaceController extends GetxController {
 
   String get userName {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
-    return name.isEmpty ? '...' : TextFormatter.takeWords(name,3);
+    return name.isEmpty
+        ? '...'
+        : '${TextFormatter.twoNames(name)} ${TextFormatter.lastName(name)}';
   }
 
   String get welcomeGreeting => GreetingFormatter.greeting();
@@ -583,8 +585,7 @@ class PosWorkspaceController extends GetxController {
 
   void openPurchaseInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
 
-  void openWalletStatement() =>
-      Get.toNamed<void>(AppRoutes.posWalletStatement);
+  void openWalletStatement() => Get.toNamed<void>(AppRoutes.posWalletStatement);
 
   void onMetricTap(String id) {
     switch (id) {

@@ -54,7 +54,9 @@ class NetworkWorkspaceController extends GetxController {
 
   String get userName {
     final name = SessionService.to.currentUser?.userFullName.trim() ?? '';
-    return name.isEmpty ? 'المستخدم' : name;
+    return name.isEmpty
+        ? '...'
+        : '${TextFormatter.twoNames(name)} ${TextFormatter.lastName(name)}';
   }
 
   EnumPresentation get rolePresentation {

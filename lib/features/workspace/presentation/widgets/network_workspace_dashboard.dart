@@ -104,6 +104,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             AppSpacing.vLg,
             ExecutiveMetricsGrid(
               items: dashboard.kpiMetrics,
+              isLoading: controller.isLoadingOverview.value,
               onMetricTap: controller.onMetricTap,
             ),
             if (dashboard.kpiMetrics.isNotEmpty) AppSpacing.vLg,
@@ -112,6 +113,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                 chartDefinition: dashboard.salesChartDefinition,
                 summary: dashboard.salesTrendSummary,
                 selectedPeriod: controller.selectedPeriod.value,
+                isLoading: controller.isLoadingOverview.value,
                 onPeriodChanged: controller.selectPeriod,
               ),
               AppSpacing.vLg,

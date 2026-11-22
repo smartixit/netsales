@@ -71,6 +71,7 @@ class PosWorkspaceDashboard extends StatelessWidget {
             if (controller.selectedNetworkLink.value != null) ...[
               ExecutiveMetricsGrid(
                 items: controller.posKpiMetrics,
+                isLoading: controller.isLoadingRecentData.value,
                 onMetricTap: controller.onMetricTap,
               ),
               AppSpacing.vLg,
