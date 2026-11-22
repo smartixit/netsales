@@ -169,7 +169,6 @@ class ProcurementRequestDetailsController extends GetxController {
       final result = await approveUseCase(
         current.requestId,
         requestNote: note,
-        paidAmount: paidAmount,
       );
       request.value = result.request;
 
@@ -252,8 +251,6 @@ class ProcurementRequestDetailsController extends GetxController {
     if (current == null) return;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: current.requestUuid ?? '-',
-      isCredit: isCredit,
-      maxAmount: current.requestTotalAmount,
       onConfirm: (note) => approveRequest(note: note),
     );
   }
