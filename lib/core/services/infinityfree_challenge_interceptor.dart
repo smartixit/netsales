@@ -146,12 +146,6 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         body.containsKey('errors');
   }
 
-  bool _isBackendAuthenticationFailure(Response<dynamic> response) {
-    final statusCode = response.statusCode;
-    return (statusCode == 401 || statusCode == 403) &&
-        _isBackendApiResponse(response);
-  }
-
   Response<dynamic> _responseForOriginalRequest(
     Response<dynamic> response,
     RequestOptions original,
