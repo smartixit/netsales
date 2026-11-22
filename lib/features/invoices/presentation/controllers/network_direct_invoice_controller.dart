@@ -44,9 +44,15 @@ class NetworkDirectInvoiceController extends GetxController {
   final packageQuantities = <int, int>{}.obs;
   final quantityControllers = <int, TextEditingController>{};
 
+  // نوع البيع (0 = نقدي، 1 = آجل)
   final selectedSaleTypeIndex = 0.obs;
 
-  SaleType get selectedSaleType => SaleType.cash;
+  SaleType get selectedSaleType =>
+      selectedSaleTypeIndex.value == 0 ? SaleType.cash : SaleType.credit;
+
+  // الدفعة النقدية المقبوضة كاش في البيع الآجل
+  final paidAmountController = TextEditingController();
+  final paidAmount = 0.0.obs;
 
   // حالة الإرسال
   final isSubmitting = false.obs;
@@ -104,10 +110,31 @@ class NetworkDirectInvoiceController extends GetxController {
     return net > 0 ? net : 0.0;
   }
 
+  /// المبلغ المقبوض كاش في البيع الآجل (إن وجد)
+  double get checkoutPaidAmount {
+    if (selectedSaleType != SaleType.credit) return 0.0;
+    final paid = paidAmount.value;
+    final net = checkoutNetAmount;
+    return paid > net ? net : paid;
+  }
+
+  /// المتبقي الآجل المطلوب قيده كدين على نقطة البيع
+  double get checkoutRemainingCreditAmount {
+    if (selectedSaleType != SaleType.credit) return 0.0;
+    final net = checkoutNetAmount;
+    final paid = checkoutPaidAmount;
+    final remaining = net - paid;
+    return remaining > 0 ? remaining : 0.0;
+  }
+
   bool get canSubmitInvoice {
     if (selectedPosId.value == null ||
         cartPackagesCount <= 0 ||
         isSubmitting.value) {
+      return false;
+    }
+    if (selectedSaleType == SaleType.credit &&
+        paidAmount.value > checkoutNetAmount) {
       return false;
     }
     return true;
@@ -133,7 +160,9 @@ class NetworkDirectInvoiceController extends GetxController {
     }
   }
 
-  void setSaleTypeIndex(int index) {}
+  void setSaleTypeIndex(int index) {
+    selectedSaleTypeIndex.value = index;
+  }
 
   void selectPos(int posId) {
     selectedPosId.value = posId;
@@ -150,6 +179,10 @@ class NetworkDirectInvoiceController extends GetxController {
     packageSearchController.addListener(() {
       packageSearchQuery.value = packageSearchController.text.trim();
     });
+    paidAmountController.addListener(() {
+      final parsed = double.tryParse(paidAmountController.text.trim()) ?? 0.0;
+      paidAmount.value = parsed >= 0 ? parsed : 0.0;
+    });
     loadInitialData();
   }
 
@@ -159,6 +192,7 @@ class NetworkDirectInvoiceController extends GetxController {
       ctrl.dispose();
     }
     packageSearchController.dispose();
+    paidAmountController.dispose();
     super.onClose();
   }
 
@@ -250,6 +284,9 @@ class NetworkDirectInvoiceController extends GetxController {
         saleType: selectedSaleType,
         items: itemsPayload,
         idempotencyKey: idempotencyKey,
+        paidAmount: selectedSaleType == SaleType.credit && paidAmount.value > 0
+            ? paidAmount.value
+            : null,
       );
 
       await CustomAnimationOverlay.showSuccess(
