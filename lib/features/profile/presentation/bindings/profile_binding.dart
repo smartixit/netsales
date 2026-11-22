@@ -34,9 +34,7 @@ class ProfileBinding extends Bindings {
     );
 
     Get.lazyPut<ProfileController>(
-      () => ProfileController(
-        getProfileUseCase: Get.find<GetProfileUseCase>(),
-      ),
+      () => ProfileController(getProfileUseCase: Get.find<GetProfileUseCase>()),
     );
   }
 }

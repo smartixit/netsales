@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_catalog_failure_state.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_option_card.dart';
@@ -22,7 +20,6 @@ class ProcurementPackageSelectionSection
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

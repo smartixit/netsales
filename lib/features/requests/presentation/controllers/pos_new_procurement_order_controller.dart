@@ -452,6 +452,8 @@ class PosNewProcurementOrderController extends GetxController {
 
     final lifecycleRevision = _lifecycleRevision;
     isLoadingMyPos.value = true;
+    isLoadingNetworks.value=true;
+    isLoadingPackages.value=true;
     late final List<PosEntity> posList;
     try {
       posList = await getMyPosUseCase!();
@@ -527,7 +529,7 @@ class PosNewProcurementOrderController extends GetxController {
     linkedNetworks.clear();
     availablePackages.clear();
     isLoadingNetworks.value = true;
-    isLoadingPackages.value = false;
+    isLoadingPackages.value = true;
 
     try {
       final paginated = await getPosNetworksListUseCase!(
@@ -563,6 +565,7 @@ class PosNewProcurementOrderController extends GetxController {
       _setSelectedPackage(null);
     } finally {
       isLoadingNetworks.value = false;
+      isLoadingPackages.value=false;
     }
   }
 

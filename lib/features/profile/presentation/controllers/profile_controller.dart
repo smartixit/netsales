@@ -29,7 +29,8 @@ class ProfileController extends GetxController {
   int _loadRevision = 0;
 
   String get displayName {
-    final name = profile.value?.fullName.trim() ??
+    final name =
+        profile.value?.fullName.trim() ??
         SessionService.to.currentUser?.userFullName.trim() ??
         '';
     return name.isEmpty ? 'المستخدم' : name;
@@ -129,8 +130,8 @@ class ProfileController extends GetxController {
     final workspace = membership.scope == RoleScope.network
         ? AppWorkspace.network
         : membership.scope == RoleScope.pos
-            ? AppWorkspace.pos
-            : null;
+        ? AppWorkspace.pos
+        : null;
     if (workspace == null) return;
 
     await WorkspaceService.to.setActiveWorkspace(workspace);

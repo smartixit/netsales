@@ -21,10 +21,10 @@ class ProfileMembershipEntity extends Equatable {
   bool get isPos => scope == RoleScope.pos;
 
   String get scopeLabel => switch (scope) {
-        RoleScope.network => 'مساحة شبكة',
-        RoleScope.pos => 'مساحة نقطة بيع',
-        _ => 'مساحة عمل',
-      };
+    RoleScope.network => 'مساحة شبكة',
+    RoleScope.pos => 'مساحة نقطة بيع',
+    _ => 'مساحة عمل',
+  };
 
   @override
   List<Object?> get props => [scope, tenantId, roleKey, roleName];

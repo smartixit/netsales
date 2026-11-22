@@ -76,10 +76,7 @@ class ProfileMembershipsSection extends StatelessWidget {
 }
 
 class _MembershipCard extends StatelessWidget {
-  const _MembershipCard({
-    required this.membership,
-    required this.onTap,
-  });
+  const _MembershipCard({required this.membership, required this.onTap});
 
   final ProfileMembershipEntity membership;
   final VoidCallback onTap;
@@ -101,14 +98,13 @@ class _MembershipCard extends StatelessWidget {
             width: 48.r,
             height: 48.r,
             decoration: BoxDecoration(
-              color: (isNetwork ? colors.primary : colors.skyAccent)
-                  .withValues(alpha: .12),
+              color: (isNetwork ? colors.primary : colors.skyAccent).withValues(
+                alpha: .12,
+              ),
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Icon(
-              isNetwork
-                  ? Icons.router_rounded
-                  : Icons.point_of_sale_rounded,
+              isNetwork ? Icons.router_rounded : Icons.point_of_sale_rounded,
               color: isNetwork ? colors.primary : colors.skyAccent,
               size: 24.r,
             ),
@@ -173,7 +169,11 @@ class _NoMemberships extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(Icons.domain_disabled_outlined, size: 30.r, color: colors.outline),
+          Icon(
+            Icons.domain_disabled_outlined,
+            size: 30.r,
+            color: colors.outline,
+          ),
           AppSpacing.vSm,
           Text(
             'لا توجد عضويات تشغيلية مرتبطة بهذا الحساب.',

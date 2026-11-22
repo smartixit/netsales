@@ -31,7 +31,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
 
     final userData = Map<String, dynamic>.from(rawUser);
-    final memberships = payload['workspace_roles'] ??
+    final memberships =
+        payload['workspace_roles'] ??
         payload['workspace_memberships'] ??
         userData['workspace_roles'] ??
         userData['workspace_memberships'] ??

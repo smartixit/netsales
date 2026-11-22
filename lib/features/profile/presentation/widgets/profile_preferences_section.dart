@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/inputs/custom_switch_list_tile.dart';
 
@@ -27,29 +24,12 @@ class ProfilePreferencesSection extends StatelessWidget {
       backgroundColor: colors.surfaceContainerLow,
       borderColor: colors.outlineVariant.withValues(alpha: 0.4),
       onTap: onToggleTheme,
-      child: Row(
-        children: [
-          Container(
-            width: 42.r,
-            height: 42.r,
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Icon(
-              isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_outlined,
-              color: colors.primary,
-              size: 22.r,
-            ),
-          ),
-          SizedBox(width: AppSpacing.md),
-          CustomSwitchListTile(
-            title: 'الوضع الليلي',
-            subtitle: isDarkMode ? 'الوضع الداكن مفعّل' : 'الوضع الفاتح مفعّل',
-            value: isDarkMode,
-            onChanged: (_) => onToggleTheme(),
-          ),
-        ],
+      child: CustomSwitchListTile(
+        title: 'الوضع الليلي',
+        subtitle: isDarkMode ? 'الوضع الداكن مفعّل' : 'الوضع الفاتح مفعّل',
+        value: isDarkMode,
+        icon: isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_outlined,
+        onChanged: (_) => onToggleTheme(),
       ),
     );
   }

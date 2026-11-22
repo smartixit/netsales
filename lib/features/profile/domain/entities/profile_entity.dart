@@ -41,18 +41,18 @@ class ProfileEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        userId,
-        fullName,
-        phoneNumber,
-        email,
-        avatarUrl,
-        status,
-        statusLabel,
-        lastLoginAt,
-        twoFactorEnabled,
-        mustChangePassword,
-        primaryRoleKey,
-        primaryRoleName,
-        memberships,
-      ];
+    userId,
+    fullName,
+    phoneNumber,
+    email,
+    avatarUrl,
+    status,
+    statusLabel,
+    lastLoginAt,
+    twoFactorEnabled,
+    mustChangePassword,
+    primaryRoleKey,
+    primaryRoleName,
+    memberships,
+  ];
 }

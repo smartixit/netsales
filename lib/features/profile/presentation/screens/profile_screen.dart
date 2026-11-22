@@ -1,30 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_active_context_banner.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_details_section.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_identity_card.dart';
-import 'package:netsales/features/profile/presentation/widgets/profile_memberships_section.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_logout_tile.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_preferences_section.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_security_section.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// Account & Identity Centre — composition only.
+/// مركز الحساب والسيادة الرقمية (Account & Identity Centre)
+/// مكوّن عرض نقي خاضع بالكامل لعقد الخادم ومطابق للتصميم التنفيذي المعتمد
 class ProfileScreen extends GetView<ProfileController> {
-  const ProfileScreen({
-    super.key,
-    this.embedded = false,
-  });
+  const ProfileScreen({super.key, this.embedded = false});
 
   final bool embedded;
+
+  void _openAccountDetailsSheet(BuildContext context, ProfileEntity profile) {
+    CustomBottomSheet.show<void>(
+      title: 'تفاصيل الحساب والهوية',
+      subtitle: 'البيانات المسجلة رسمياً لدى المنصة',
+      leadingIcon: Icons.badge_outlined,
+      child: ProfileDetailsSection(profile: profile),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
-      maxContentWidth: 1180,
+      maxContentWidth: 680,
       onRefresh: controller.loadProfile,
       scrollKey: const PageStorageKey<String>('profile-account-centre-scroll'),
       slivers: [
@@ -66,66 +77,58 @@ class ProfileScreen extends GetView<ProfileController> {
           }
 
           return SliverToBoxAdapter(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 900;
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 1. شريط سياق بيئة العمل النشطة حالياً
+                ProfileActiveContextBanner(
+                  activeWorkspaceLabel: controller.activeWorkspaceLabel,
+                ),
+                SizedBox(height: AppSpacing.md),
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProfileIdentityCard(profile: profile),
-                    AppSpacing.vLg,
-                    if (isWide)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 11,
-                            child: Column(
-                              children: [
-                                ProfileDetailsSection(profile: profile),
-                                AppSpacing.vLg,
-                                ProfileSecuritySection(
-                                  profile: profile,
-                                  onOpenSecurity:
-                                      controller.openSecuritySettings,
-                                  onOpenSessions:
-                                      controller.openActiveSessions,
-                                ),
-                              ],
-                            ),
-                          ),
-                          AppSpacing.hLg,
-                          Expanded(
-                            flex: 10,
-                            child: ProfileMembershipsSection(
-                              memberships: profile.memberships,
-                              onOpenMembership: controller.openMembership,
-                            ),
-                          ),
-                        ],
-                      )
-                    else ...[
-                      ProfileDetailsSection(profile: profile),
-                      AppSpacing.vLg,
-                      ProfileMembershipsSection(
-                        memberships: profile.memberships,
-                        onOpenMembership: controller.openMembership,
-                      ),
-                      AppSpacing.vLg,
-                      ProfileSecuritySection(
-                        profile: profile,
-                        onOpenSecurity: controller.openSecuritySettings,
-                        onOpenSessions: controller.openActiveSessions,
-                      ),
-                    ],
-                    if (controller.isLoading.value) ...[
-                      AppSpacing.vSm,
-                      const LinearProgressIndicator(minHeight: 2),
-                    ],
-                  ],
-                );
-              },
+                // 2. بطاقة الهوية التنفيذية الرئيسية
+                ProfileIdentityCard(
+                  profile: profile,
+                  onCopyPhone: () => controller.copyToClipboard(
+                    profile.phoneNumber,
+                    'تم نسخ رقم الهاتف بنجاح',
+                  ),
+                  onCopyEmail: () => controller.copyToClipboard(
+                    profile.email ?? '',
+                    'تم نسخ البريد الإلكتروني بنجاح',
+                  ),
+                  onAvatarChanged: controller.onAvatarChanged,
+                  onCompleteProfile: () =>
+                      _openAccountDetailsSheet(context, profile),
+                ),
+                SizedBox(height: AppSpacing.lg),
+
+                // 3. مركز الأمان والحماية (2FA، كلمة المرور، الجلسات والأجهزة)
+                ProfileSecuritySection(
+                  profile: profile,
+                  onOpenSecurity: controller.openSecuritySettings,
+                  onOpenSessions: controller.openActiveSessions,
+                ),
+                SizedBox(height: AppSpacing.lg),
+
+                // 4. تفضيلات المظهر (الوضع الليلي التفاعلي)
+                Obx(
+                  () => ProfilePreferencesSection(
+                    isDarkMode: controller.isDarkMode,
+                    onToggleTheme: controller.toggleTheme,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+
+                // 5. زر تسجيل الخروج السيادي
+                ProfileLogoutTile(onLogout: controller.logout),
+                SizedBox(height: AppSpacing.xl),
+
+                if (controller.isLoading.value) ...[
+                  SizedBox(height: AppSpacing.xs),
+                  const LinearProgressIndicator(minHeight: 2),
+                ],
+              ],
             ),
           );
         }),
@@ -136,7 +139,7 @@ class ProfileScreen extends GetView<ProfileController> {
 
     return CustomAppScaffold(
       appBarTitle: 'مركز الحساب',
-      appBarSubtitle: 'هويتك الرقمية وإدارة الوصول والحماية',
+      appBarSubtitle: 'الهوية الرقمية والحماية الشخصية',
       body: content,
     );
   }

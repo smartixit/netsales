@@ -41,14 +41,20 @@ class ProfileDetailsSection extends StatelessWidget {
             subtitle: Text(profile.fullName),
             leading: _DetailIcon(icon: Icons.person_outline_rounded),
           ),
-          Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .5)),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: .5),
+          ),
           CustomInfoListTile(
             title: Text('رقم الهاتف', style: AppTypography.labelMedium),
             subtitle: Text(profile.phoneNumber),
             leading: _DetailIcon(icon: Icons.phone_iphone_rounded),
             trailing: const _VerifiedMark(label: 'أساسي'),
           ),
-          Divider(height: 1, color: colors.outlineVariant.withValues(alpha: .5)),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: .5),
+          ),
           CustomInfoListTile(
             title: Text('البريد الإلكتروني', style: AppTypography.labelMedium),
             subtitle: Text(

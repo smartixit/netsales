@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 
-/// Security posture summary with actions backed by existing security flows.
+/// مركز الأمان والحماية التنفيذي في واجهة البروفايل
 class ProfileSecuritySection extends StatelessWidget {
   const ProfileSecuritySection({
     super.key,
@@ -28,126 +25,210 @@ class ProfileSecuritySection extends StatelessWidget {
     final colors = context.colors;
     final isProtected = profile.twoFactorEnabled;
 
-    return CustomSurfaceCard(
-      padding: EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'حماية الحساب',
-            style: AppTypography.titleMedium.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // عنوان القسم
+        Text(
+          'مركز الأمان والحماية',
+          style: AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colors.onSurface,
           ),
-          AppSpacing.vXs,
-          Text(
-            'إدارة وسائل الحماية ومراجعة الأجهزة التي تستخدم حسابك.',
-            style: AppTypography.bodySmall.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          AppSpacing.vMd,
-          Container(
-            padding: EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: (isProtected ? colors.success : colors.warning)
-                  .withValues(alpha: .08),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: (isProtected ? colors.success : colors.warning)
-                    .withValues(alpha: .24),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isProtected
-                      ? Icons.shield_rounded
-                      : Icons.shield_outlined,
+        ),
+        SizedBox(height: AppSpacing.sm),
+
+        // 1. كرت المصادقة الثنائية (2FA)
+        CustomSurfaceCard(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          backgroundColor: colors.surfaceContainerLow,
+          borderColor: colors.outlineVariant.withValues(alpha: 0.4),
+          onTap: onOpenSecurity,
+          child: Row(
+            children: [
+              Container(
+                width: 42.r,
+                height: 42.r,
+                decoration: BoxDecoration(
+                  color: (isProtected ? colors.success : colors.warning)
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  isProtected ? Icons.shield_rounded : Icons.shield_outlined,
                   color: isProtected ? colors.success : colors.warning,
-                  size: 28.r,
+                  size: 22.r,
                 ),
-                AppSpacing.hSm,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'المصادقة الثنائية',
-                        style: AppTypography.titleSmall.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      AppSpacing.vXxs,
-                      Text(
-                        isProtected
-                            ? 'مفعلة — طبقة تحقق إضافية تحمي تسجيل الدخول.'
-                            : 'غير مفعلة — أضف طبقة حماية إضافية لحسابك.',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                CustomStatusBadge(
-                  label: isProtected ? 'محمّي' : 'يحتاج إجراء',
-                  tone: isProtected
-                      ? SemanticTone.success
-                      : SemanticTone.warning,
-                  isCompact: true,
-                ),
-              ],
-            ),
-          ),
-          if (profile.mustChangePassword) ...[
-            AppSpacing.vSm,
-            Container(
-              padding: EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: colors.warning.withValues(alpha: .08),
-                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.priority_high_rounded,
-                      color: colors.warning, size: 18.r),
-                  AppSpacing.hXs,
-                  Expanded(
-                    child: Text(
-                      'يلزم تحديث كلمة المرور قبل متابعة استخدام الحساب.',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: colors.warning,
-                        fontWeight: FontWeight.w700,
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'المصادقة الثنائية',
+                      style: AppTypography.titleSmall.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          AppSpacing.vMd,
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton.outline(
-                  text: 'إعدادات الأمان',
-                  icon: Icons.security_rounded,
-                  onPressed: onOpenSecurity,
+                    SizedBox(height: 2.h),
+                    Text(
+                      isProtected ? 'محمي — طبقة تحقق إضافية' : 'غير مفعلة',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: isProtected
+                            ? colors.success
+                            : colors.onSurfaceVariant,
+                        fontWeight: isProtected
+                            ? FontWeight.w700
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              AppSpacing.hSm,
-              Expanded(
-                child: CustomButton.secondary(
-                  text: 'الأجهزة والجلسات',
-                  icon: Icons.devices_rounded,
-                  onPressed: onOpenSessions,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: (isProtected ? colors.success : colors.warning)
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(
+                  isProtected ? 'محمي' : 'يحتاج تفعيل',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: isProtected ? colors.success : colors.warning,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+
+        // 2. كرت كلمة المرور
+        CustomSurfaceCard(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          backgroundColor: colors.surfaceContainerLow,
+          borderColor: colors.outlineVariant.withValues(alpha: 0.4),
+          onTap: onOpenSecurity,
+          child: Row(
+            children: [
+              Container(
+                width: 42.r,
+                height: 42.r,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.key_rounded,
+                  color: colors.primary,
+                  size: 22.r,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'كلمة المرور',
+                      style: AppTypography.titleSmall.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      profile.mustChangePassword
+                          ? 'يلزم تحديث كلمة المرور'
+                          : 'تأمين تسجيل الدخول وتحديث الرمز',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: profile.mustChangePassword
+                            ? colors.warning
+                            : colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'تحديث',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 13.r,
+                color: colors.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+
+        // 3. كرت الجلسات والأجهزة المصرح بها
+        CustomSurfaceCard(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          backgroundColor: colors.surfaceContainerLow,
+          borderColor: colors.outlineVariant.withValues(alpha: 0.4),
+          onTap: onOpenSessions,
+          child: Row(
+            children: [
+              Container(
+                width: 42.r,
+                height: 42.r,
+                decoration: BoxDecoration(
+                  color: colors.skyAccent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.devices_rounded,
+                  color: colors.skyAccent,
+                  size: 22.r,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'الجلسات والأجهزة',
+                      style: AppTypography.titleSmall.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'مراجعة الجلسات والأجهزة المصرح بها',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'مراجعة',
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.skyAccent,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 13.r,
+                color: colors.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
