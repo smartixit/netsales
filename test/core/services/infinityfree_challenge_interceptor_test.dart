@@ -220,10 +220,10 @@ void main() {
         if (request.method == 'GET' &&
             request.uri.path == meUri.path &&
             request.uri.queryParameters['i'] == '1') {
-          expect(request.header('X-Session-Id'), 'session-test-value');
-          expect(request.header('X-Device-Uuid'), 'device-test-value');
-          expect(request.header('X-Client-Public-Key'), isNull);
-          expect(request.header('Authorization'), isNull);
+          expect(_headerValue(request.headers, 'X-Session-Id'), 'session-test-value');
+          expect(_headerValue(request.headers, 'X-Device-Uuid'), 'device-test-value');
+          expect(_headerValue(request.headers, 'X-Client-Public-Key'), isNull);
+          expect(_headerValue(request.headers, 'Authorization'), isNull);
           expect(body, isNull);
           return _text('verification accepted', 200);
         }
@@ -547,6 +547,15 @@ class _ScriptedAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+String? _headerValue(Map<String, dynamic> headers, String name) {
+  for (final entry in headers.entries) {
+    if (entry.key.toLowerCase() == name.toLowerCase()) {
+      return entry.value?.toString();
+    }
+  }
+  return null;
+}
+
 class _RecordedRequest {
   const _RecordedRequest(this.options, this.body);
 
@@ -556,12 +565,5 @@ class _RecordedRequest {
   String get method => options.method;
   Uri get uri => options.uri;
 
-  String? header(String name) {
-    for (final entry in options.headers.entries) {
-      if (entry.key.toLowerCase() == name.toLowerCase()) {
-        return entry.value?.toString();
-      }
-    }
-    return null;
-  }
+  String? header(String name) => _headerValue(options.headers, name);
 }
