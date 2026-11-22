@@ -137,6 +137,74 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('minute increment carries into the next hour at midnight', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () {
+                CustomDatePickerModal.showBottomSheet(
+                  context: context,
+                  title: 'اختيار التاريخ والوقت',
+                  mode: DatePickerSelectionMode.single,
+                  enableTime: true,
+                  initialValue: [DateTime(2026, 11, 18, 23, 55)],
+                );
+              },
+              child: const Text('فتح المنتقي'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('فتح المنتقي'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('55'), findsOneWidget);
+      await tester.tap(find.byTooltip('زيادة').last);
+      await tester.pump();
+
+      expect(find.text('00'), findsOneWidget);
+      expect(find.text('12'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('minute decrement carries into the previous hour at midnight', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () {
+                CustomDatePickerModal.showBottomSheet(
+                  context: context,
+                  title: 'اختيار التاريخ والوقت',
+                  mode: DatePickerSelectionMode.single,
+                  enableTime: true,
+                  initialValue: [DateTime(2026, 11, 18, 0, 0)],
+                );
+              },
+              child: const Text('فتح المنتقي'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('فتح المنتقي'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('00'), findsOneWidget);
+      await tester.tap(find.byTooltip('إنقاص').last);
+      await tester.pump();
+
+      expect(find.text('55'), findsOneWidget);
+      expect(find.text('11'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('does not overflow in compact landscape with time enabled', (
       tester,
     ) async {
