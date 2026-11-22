@@ -89,9 +89,14 @@ void main() {
 
       await tester.tap(find.text('فتح المنتقي'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('مسح'));
+      final clearButton = find.byTooltip('مسح');
+      expect(clearButton, findsOneWidget);
+      await tester.tap(clearButton);
       await tester.pump();
-      await tester.tap(find.text('تأكيد'));
+
+      final confirmButton = find.text('تأكيد');
+      await tester.ensureVisible(confirmButton);
+      await tester.tap(confirmButton);
       await tester.pumpAndSettle();
 
       expect(await selectionResult, isEmpty);
@@ -170,6 +175,11 @@ void main() {
       expect(find.text('00'), findsOneWidget);
       expect(find.text('صباحاً (ص)'), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      final cancelButton = find.text('إلغاء');
+      await tester.ensureVisible(cancelButton);
+      await tester.tap(cancelButton);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('minute decrement carries into the previous hour at midnight', (
@@ -205,6 +215,11 @@ void main() {
       expect(find.text('55'), findsOneWidget);
       expect(find.text('مساءً (م)'), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      final cancelButton = find.text('إلغاء');
+      await tester.ensureVisible(cancelButton);
+      await tester.tap(cancelButton);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('does not overflow in compact landscape with time enabled', (
@@ -212,8 +227,6 @@ void main() {
     ) async {
       tester.view.physicalSize = const Size(640, 360);
       tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
         _harness(
@@ -241,6 +254,15 @@ void main() {
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
+
+      final cancelButton = find.text('إلغاء');
+      await tester.ensureVisible(cancelButton);
+      await tester.tap(cancelButton);
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }
