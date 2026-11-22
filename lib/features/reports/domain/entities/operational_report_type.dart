@@ -15,8 +15,6 @@ final class OperationalReportType {
     'network_wallet_statement',
   );
   static const posWallet = OperationalReportType('pos_wallet_statement');
-  static const repayments = OperationalReportType('repayments');
-  static const debtAging = OperationalReportType('debt_aging');
   static const requests = OperationalReportType('requests');
 
   static const List<OperationalReportType> values = [
@@ -24,8 +22,6 @@ final class OperationalReportType {
     expenses,
     networkWallet,
     posWallet,
-    repayments,
-    debtAging,
     requests,
   ];
 
