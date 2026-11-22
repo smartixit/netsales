@@ -281,7 +281,7 @@ void main() {
       );
     });
 
-    test('Searches eligible invitation targets without manual code entry', () async {
+    test('Searches eligible invitation targets and blocks selection outside the dialog', () async {
       await controller.loadInitialData();
 
       controller.onInvitationBusinessCodeChanged('نقطة الاختبار');
@@ -290,9 +290,9 @@ void main() {
       expect(controller.invitationTargets, hasLength(1));
       expect(controller.invitationTargets.single.posName, 'نقطة الاختبار');
 
+      // Selection is intentionally accepted only while the target dialog is open.
       controller.selectInvitationTarget(controller.invitationTargets.single);
-      expect(controller.resolvedInvitationTarget.value?.posUuid,
-          'POS-2611-00030-A1B2');
+      expect(controller.resolvedInvitationTarget.value, isNull);
     });
 
     test('Loads initial networks and links successfully', () async {
