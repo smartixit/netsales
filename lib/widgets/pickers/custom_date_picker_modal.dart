@@ -647,19 +647,11 @@ class _DatePickerHeader extends StatelessWidget {
       final end = selectedDates.length > 1 ? selectedDates[1] : null;
 
       if (start != null && end == null) {
-        return 'من ${DatePickerService.instance.formatArabicDate(
-          start,
-          includeDayName: false,
-          includeTime: enableTime,
-        )}';
+        return 'من ${DatePickerService.instance.formatArabicDate(start, includeDayName: false, includeTime: enableTime)}';
       }
 
       if (start == null && end != null) {
-        return 'إلى ${DatePickerService.instance.formatArabicDate(
-          end,
-          includeDayName: false,
-          includeTime: enableTime,
-        )}';
+        return 'إلى ${DatePickerService.instance.formatArabicDate(end, includeDayName: false, includeTime: enableTime)}';
       }
 
       return DatePickerService.instance.formatArabicRange(
