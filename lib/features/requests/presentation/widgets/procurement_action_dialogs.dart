@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
@@ -15,15 +14,12 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 class ProcurementActionDialogs {
   ProcurementActionDialogs._();
 
-  /// نافذة حوار اعتماد طلب التوريد مع ملاحظة اختيارية ودفعة نقدية كاش للطلبات الآجلة
+  /// نافذة حوار اعتماد طلب التوريد النقدي مع ملاحظة اختيارية
   static Future<void> showApprovalDialog({
     required String requestUuid,
-    required Future<void> Function(String? note, double? paidAmount) onConfirm,
-    bool isCredit = false,
-    double? maxAmount,
+    required Future<void> Function(String? note) onConfirm,
   }) async {
     final noteController = TextEditingController();
-    final paidAmountController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     await CustomDialog.show(
@@ -40,29 +36,6 @@ class ProcurementActionDialogs {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (isCredit) ...[
-                CustomTextField(
-                  controller: paidAmountController,
-                  label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
-                  hint:
-                      'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
-                  isRequired: false,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  prefixIcon: const Icon(Icons.payments_outlined),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                  ],
-                  validator: FormValidators.amountValidator(
-                    fieldName: 'المبلغ المقبوض كاش',
-                    isRequired: false,
-                    minValue: 0,
-                    maxValue: maxAmount,
-                  ),
-                ),
-                AppSpacing.vSm,
-              ],
               CustomTextField(
                 controller: noteController,
                 label: 'ملاحظات الاعتماد (اختياري)',
@@ -81,9 +54,7 @@ class ProcurementActionDialogs {
         final note = noteController.text.trim().isEmpty
             ? null
             : noteController.text.trim();
-        final rawPaid = double.tryParse(paidAmountController.text.trim());
-        final paid = (rawPaid != null && rawPaid > 0) ? rawPaid : null;
-        await onConfirm(note, paid);
+        await onConfirm(note);
       },
     );
   }
