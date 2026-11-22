@@ -44,6 +44,8 @@ class NetworkDirectInvoiceController extends GetxController {
   final packageQuantities = <int, int>{}.obs;
   final quantityControllers = <int, TextEditingController>{};
 
+  final selectedSaleTypeIndex = 0.obs;
+
   SaleType get selectedSaleType => SaleType.cash;
 
   // حالة الإرسال
