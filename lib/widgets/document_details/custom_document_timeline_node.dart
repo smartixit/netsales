@@ -95,13 +95,17 @@ class CustomDocumentTimelineNode extends StatelessWidget {
                           color: colors.onSurfaceVariant.withValues(alpha: 0.7),
                         ),
                         SizedBox(width: 4.w),
-                        Text(
-                          node.timestamp!,
-                          style: AppTypography.caption.copyWith(
-                            color: colors.onSurfaceVariant
-                                .withValues(alpha: 0.85),
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Text(
+                            node.timestamp!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.caption.copyWith(
+                              color: colors.onSurfaceVariant
+                                  .withValues(alpha: 0.85),
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ],
