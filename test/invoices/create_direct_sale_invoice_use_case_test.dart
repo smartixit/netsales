@@ -21,7 +21,6 @@ class _RecordingInvoiceRepository implements InvoiceRepository {
     required SaleType saleType,
     required List<DirectSaleInvoiceItemInputEntity> items,
     required String idempotencyKey,
-    double? paidAmount,
   }) async {
     createCalls++;
     this.networkId = networkId;
@@ -76,7 +75,7 @@ void main() {
         final invoice = await useCase(
           networkId: 10,
           posId: 20,
-          saleType: SaleType.credit,
+          saleType: SaleType.cash,
           idempotencyKey: 'sale-pos20-unique-test-key',
           items: const [
             DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
@@ -88,7 +87,7 @@ void main() {
         expect(repository.createCalls, 1);
         expect(repository.networkId, 10);
         expect(repository.posId, 20);
-        expect(repository.saleType, SaleType.credit);
+        expect(repository.saleType, SaleType.cash);
         expect(repository.idempotencyKey, 'sale-pos20-unique-test-key');
         expect(repository.items, const [
           DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 100),
@@ -148,6 +147,22 @@ void main() {
         expect(repository.createCalls, 0);
       },
     );
+
+    test('rejects credit sale type before contacting repository', () async {
+      expect(
+        () => useCase(
+          networkId: 10,
+          posId: 20,
+          saleType: SaleType.credit,
+          idempotencyKey: 'sale-test-credit-type',
+          items: const [
+            DirectSaleInvoiceItemInputEntity(packageId: 31, voucherCount: 1),
+          ],
+        ),
+        throwsArgumentError,
+      );
+      expect(repository.createCalls, 0);
+    });
 
     test('rejects unknown sale type before contacting repository', () async {
       expect(
