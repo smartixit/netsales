@@ -123,3 +123,6 @@ The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, sect
 - The invitation share-card composition is Commercial-specific and belongs under `features/commercial/presentation/widgets`; generic QR rendering remains in `lib/widgets/qr`.
 - The server remains the sole authority for Network/POS eligibility, tenant authorization, target binding, challenge lifecycle, and expiry.
 
+
+
+POS invoices are cash-settled only. The client and API expose no POS debt-aging or repayment workflows; wallet transfers and ordinary wallet ledger statements remain supported.
