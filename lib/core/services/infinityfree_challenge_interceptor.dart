@@ -310,29 +310,17 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         );
       }
 
-      // A Laravel 401/403 with the canonical API envelope is an actual
-      // authentication/authorization decision, not a hosting challenge.
-      // Return it against the original request so Splash can preserve its
-      // established 401/403 behavior.
-      if (_isBackendAuthenticationFailure(probeResponse)) {
-        _finishCryptoLifecycle(options);
-        handler.reject(
-          DioException(
-            requestOptions: options,
-            response: _responseForOriginalRequest(probeResponse, options),
-            type: DioExceptionType.badResponse,
-            message: probeResponse.statusMessage,
-          ),
-        );
-        return;
-      }
-
+      // A canonical Laravel 401/403 proves that the hosting challenge is
+      // cleared and the request reached the application. It is therefore
+      // safe to replay the exact original request, allowing the normal
+      // interceptors and Splash flow to process the real auth decision.
       final verificationStatus = probeResponse.statusCode;
       final acceptedVerificationStatus =
-          verificationStatus != null &&
-          ((verificationStatus >= 200 && verificationStatus < 300) ||
-              verificationStatus == 404 ||
-              verificationStatus == 405);
+          (verificationStatus != null &&
+              ((verificationStatus >= 200 && verificationStatus < 300) ||
+                  verificationStatus == 404 ||
+                  verificationStatus == 405)) ||
+          _isBackendAuthenticationFailure(probeResponse);
       if (!acceptedVerificationStatus) {
         throw _challengeFailure(
           options: verificationOptions,
