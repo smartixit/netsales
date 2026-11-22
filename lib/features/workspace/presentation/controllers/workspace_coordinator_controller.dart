@@ -8,7 +8,6 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_motion.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -69,7 +68,7 @@ class WorkspaceCoordinatorController extends GetxController {
   }
 
   String get currentUserInitials =>
-      TextFormatter.avatarInitials(currentUserName,);
+      TextFormatter.avatarInitials(currentUserName);
 
   String? get currentUserPhoneNumber =>
       SessionService.to.currentUser?.userPhoneNumber;
@@ -94,13 +93,12 @@ class WorkspaceCoordinatorController extends GetxController {
     if (workspace == WorkspaceService.to.activeWorkspace) return;
 
     isLoading.value = true;
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
+      Get.back<void>();
+    }
     try {
       await WorkspaceService.to.setActiveWorkspace(workspace);
 
-      if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
-        Get.back<void>();
-        await Future<void>.delayed(AppMotion.fast);
-      }
 
       final route = workspace == AppWorkspace.network
           ? AppRoutes.networkWorkspace

@@ -182,7 +182,7 @@ class NetworkWorkspaceController extends GetxController {
     isLoadingNetworks.value = true;
     networksError.value = null;
     overviewError.value = null;
-    isLoadingOverview.value = false;
+    isLoadingOverview.value = true;
     networks.clear();
     overview.value = null;
     selectedNetworkId.value = null;

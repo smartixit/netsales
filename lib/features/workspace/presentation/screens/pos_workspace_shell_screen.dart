@@ -77,9 +77,9 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         if (controller.selectedMobileNavIndex.value != 0 ||
             controller.selectedNavIndex.value != 0) {
           controller.onNavItemSelected(0);
-          return true;
+          return false;
         }
-        return false;
+        return true;
       },
       child: AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(

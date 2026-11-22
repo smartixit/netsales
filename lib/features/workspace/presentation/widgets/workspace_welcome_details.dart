@@ -46,18 +46,38 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 1. رقاقة التاريخ الموحدة إن وجد (Frosted Glass Contrast)
-        if (dateText != null) ...[
-          CustomChip(
-            label: dateText!,
-            icon: Icons.calendar_today_rounded,
-            isCompact: true,
-            backgroundColor: Colors.white.withValues(alpha: 0.14),
-            foregroundColor: Colors.white,
-            borderColor: Colors.white.withValues(alpha: 0.25),
-          ),
-          SizedBox(height: AppSpacing.sm),
-        ],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // 1. رقاقة التاريخ الموحدة إن وجد (Frosted Glass Contrast)
+            if (dateText != null) ...[
+              CustomChip(
+                label: dateText!,
+                icon: Icons.calendar_today_rounded,
+                isCompact: true,
+                backgroundColor: Colors.white.withValues(alpha: 0.14),
+                foregroundColor: Colors.white,
+                borderColor: Colors.white.withValues(alpha: 0.25),
+              ),
+              SizedBox(height: AppSpacing.sm),
+            ],
+
+            // 4. زر الإجراء التفاعلي الموحد من lib/widgets/buttons
+            if (actionLabel != null && onAction != null) ...[
+              CustomButton.icon(
+                tooltip: actionLabel,
+                icon: Icons.qr_code_scanner_rounded,
+                onPressed: onAction,
+                backgroundColor: colors.surfaceContainer,
+                foregroundColor: colors.primary,
+                size: AppButtonSize.small,
+                shape: AppButtonShape.rounded,
+              ),
+            ],
+          ],
+        ),
+
+        AppSpacing.vSm,
 
         // 2. بطاقة هوية القائد والأفاتار مع الترحيب الزمني الموحد
         Row(
@@ -83,38 +103,20 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Text(
-                              GreetingFormatter.greeting(),
-                              maxLines: 1,
-                              style: AppTypography.titleSmall.copyWith(
-                                color: colors.executiveGoldAccent,
-                                fontWeight: AppTypography.medium,
-                              ),
-                            ),
-                            SizedBox(width: AppSpacing.xs),
-                            Icon(
-                              Icons.auto_awesome_rounded,
-                              size: AppSpacing.md,
-                              color: colors.executiveGoldIcon,
-                            ),
-                          ],
+                      Text(
+                        GreetingFormatter.greeting(),
+                        maxLines: 1,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: colors.executiveGoldAccent,
+                          fontWeight: AppTypography.medium,
                         ),
                       ),
-                      // 4. زر الإجراء التفاعلي الموحد من lib/widgets/buttons
-                      if (actionLabel != null && onAction != null) ...[
-                        CustomButton.icon(
-                          tooltip: actionLabel,
-                          icon: Icons.qr_code_scanner_rounded,
-                          onPressed: onAction,
-                          backgroundColor: colors.surface,
-                          foregroundColor: colors.primary,
-                          size: AppButtonSize.medium,
-                          shape: AppButtonShape.pill,
-                        ),
-                      ],
+                      SizedBox(width: AppSpacing.xs),
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        size: AppSpacing.md,
+                        color: colors.executiveGoldIcon,
+                      ),
                     ],
                   ),
                   SizedBox(height: AppSpacing.xxs),
@@ -124,7 +126,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.titleLarge.copyWith(
                       color: colors.onPrimary,
-                      fontWeight: AppTypography.bold,
+                      fontWeight: AppTypography.extraBold,
                     ),
                   ),
                 ],
@@ -152,7 +154,7 @@ class WorkspaceWelcomeDetails extends StatelessWidget {
               label: 'جلسة نشطة',
               tone: SemanticTone.success,
               showDot: true,
-              isCompact: true,
+              // isCompact: true,
               backgroundColor: Color(0xB3064E3B),
               foregroundColor: Color(0xFF6EE7B7),
               borderColor: Color(0x8034D399),

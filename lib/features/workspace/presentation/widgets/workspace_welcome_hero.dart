@@ -57,6 +57,7 @@ class WorkspaceWelcomeHero extends StatelessWidget {
             ),
             // 2. الشريط التموجي المضيء
             const Positioned.fill(
+              bottom: -8,
               child: IgnorePointer(
                 child: CustomPaint(painter: WorkspaceHeroRibbonPainter()),
               ),

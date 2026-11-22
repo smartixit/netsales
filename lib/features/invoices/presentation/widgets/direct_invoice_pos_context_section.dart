@@ -18,7 +18,7 @@ class DirectInvoicePosContextSection
     return Obx(() {
       final links = controller.posLinks;
       final selectedLink = controller.selectedPosLink;
-      final isExpanded = controller.isPosContextExpanded.value;
+      final isExpanded = controller.isPosContextExpanded;
 
       return CustomContextSelector(
         title: 'نقطة البيع المستلمة',

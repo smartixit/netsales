@@ -342,6 +342,8 @@ class CustomDocumentItemCard extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: onToggleExpand,
+                splashColor: accentColor.withValues(alpha: 0.08),
+                highlightColor: accentColor.withValues(alpha: 0.04),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 14.r,

@@ -92,9 +92,11 @@ class PosNewProcurementOrderController extends GetxController {
   final selectedPosId = RxnInt();
   final isLoadingMyPos = false.obs;
 
+  RequestEntity? raw = Get.arguments as RequestEntity?;
+
   /// عنوان الشاشة المنسق بحسب وضع الإنشاء أو التعديل
   String get screenTitle => isEditing.value
-      ? 'تعديل طلب التوريد #${editingRequestId.value}'
+      ? 'تعديل #${raw?.requestUuid ?? editingRequestId.value}'
       : 'طلب توريد جديد';
 
   /// نقطة البيع النشطة المحددة حالياً
@@ -452,8 +454,8 @@ class PosNewProcurementOrderController extends GetxController {
 
     final lifecycleRevision = _lifecycleRevision;
     isLoadingMyPos.value = true;
-    isLoadingNetworks.value=true;
-    isLoadingPackages.value=true;
+    isLoadingNetworks.value = true;
+    isLoadingPackages.value = true;
     late final List<PosEntity> posList;
     try {
       posList = await getMyPosUseCase!();
@@ -564,8 +566,8 @@ class PosNewProcurementOrderController extends GetxController {
       _setSelectedNetworkId(null);
       _setSelectedPackage(null);
     } finally {
-      isLoadingNetworks.value = false;
-      isLoadingPackages.value=false;
+      // isLoadingNetworks.value = false;
+      // isLoadingPackages.value = false;
     }
   }
 
@@ -850,6 +852,7 @@ class PosNewProcurementOrderController extends GetxController {
       if (revision == _packageRevision) {
         isLoadingPackages.value = false;
         isLoadingMorePackages.value = false;
+        isLoadingNetworks.value = false;
       }
     }
   }

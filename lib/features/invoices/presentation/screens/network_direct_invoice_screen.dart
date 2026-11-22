@@ -36,7 +36,7 @@ class NetworkDirectInvoiceScreen
       final gross = controller.checkoutGrossAmount;
       final discount = controller.checkoutDiscountAmount;
       final net = controller.checkoutNetAmount;
-      final isCredit = controller.selectedSaleType == SaleType.credit;
+      final isCredit = controller.selectedSaleType.value == SaleType.credit;
       final paid = controller.checkoutPaidAmount;
       final remaining = controller.checkoutRemainingCreditAmount;
       final count = controller.checkoutTotalVouchers;

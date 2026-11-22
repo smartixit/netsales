@@ -22,6 +22,7 @@ import 'package:netsales/features/invoices/presentation/controllers/invoice_deta
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_invoices_controller.dart';
 import 'package:netsales/features/invoices/presentation/controllers/pos_invoices_controller.dart';
+import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 
 /// ربط التبعيات لدورة حياة فواتير المبيعات والمشتريات (Invoices Module Binding)
 class InvoiceBinding extends Bindings {
@@ -117,6 +118,10 @@ class InvoiceBinding extends Bindings {
             : null,
         getNetworkPosListUseCase: Get.isRegistered<GetNetworkPosListUseCase>()
             ? Get.find<GetNetworkPosListUseCase>()
+            : null,
+        getProcurementQuoteUseCase:
+            Get.isRegistered<GetProcurementQuoteUseCase>()
+            ? Get.find<GetProcurementQuoteUseCase>()
             : null,
       ),
       fenix: true,

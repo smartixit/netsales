@@ -49,7 +49,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                     ? CustomButton.primary(
                         text: 'إنشاء باقة كروت',
                         icon: Icons.add_rounded,
-                        shape: AppButtonShape.pill,
+                        shape: AppButtonShape.rounded,
                         size: AppButtonSize.small,
                         onPressed: () =>
                             Get.toNamed<void>(AppRoutes.packageForm),

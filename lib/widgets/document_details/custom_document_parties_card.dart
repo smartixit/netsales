@@ -227,9 +227,9 @@ class _DocumentPartyTile extends StatelessWidget {
             AppSpacing.hSm,
             CustomButton.icon(
               icon: Icons.phone_outlined,
-              backgroundColor: colors.surfaceContainerHigh,
+              backgroundColor: colors.surfaceContainer,
               size: AppButtonSize.small,
-              shape: AppButtonShape.pill,
+              shape: AppButtonShape.rounded,
               onPressed: () =>
                   UrlLauncherService.callPhone(party.phoneNumber!.trim()),
             ),

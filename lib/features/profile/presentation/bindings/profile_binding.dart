@@ -13,10 +13,7 @@ import 'package:netsales/features/profile/presentation/controllers/profile_contr
 class ProfileBinding extends Bindings {
   @override
   void dependencies() {
-    registerLazyIfAbsent<AuthRemoteDataSource>(
-      () => const AuthRemoteDataSourceImpl(),
-      fenix: true,
-    );
+    Get.put<AuthRemoteDataSource>(AuthRemoteDataSourceImpl());
 
     registerLazyIfAbsent<ProfileRemoteDataSource>(
       () => ProfileRemoteDataSourceImpl(Get.find<AuthRemoteDataSource>()),

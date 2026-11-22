@@ -116,12 +116,17 @@ class DirectInvoicePackageSelectionSection
                                         package.packageId,
                                       );
                                   final isCashSale =
-                                      controller.selectedSaleType ==
+                                      controller.selectedSaleType.value ==
                                       SaleType.cash;
+                                  final quoteLine = controller
+                                      .serverQuote
+                                      .value
+                                      ?.findLine(package.packageId);
 
                                   return DirectInvoicePackageOptionCard(
                                     package: package,
                                     quantity: quantity,
+                                    quoteLine: quoteLine,
                                     quantityController: controller
                                         .quantityControllerForPackage(
                                           package.packageId,

@@ -230,7 +230,7 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
           CustomButton.primary(
             text: 'إغلاق',
             size: AppButtonSize.medium,
-            shape: AppButtonShape.pill,
+            shape: AppButtonShape.rounded,
             onPressed: () => Get.back<void>(),
           ),
           SizedBox(height: AppSpacing.md),

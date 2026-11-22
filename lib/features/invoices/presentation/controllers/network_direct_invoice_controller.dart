@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
+import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -14,27 +16,34 @@ import 'package:netsales/features/commercial/domain/usecases/get_network_pos_lis
 import 'package:netsales/features/invoices/domain/entities/direct_invoice_cart_line_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/direct_sale_invoice_item_input_entity.dart';
 import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
+import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شاشة إصدار فاتورة مبيعات مباشرة لنقطة بيع (NetworkDirectInvoiceController)
 ///
 /// مطابق بنسبة 100% في الهيكلية والمنطق وأسلوب الكود لدورة حياة [PosNewProcurementOrderController]:
-/// - إدارة سلة كائنات نموذجية موحدة [DirectInvoiceCartLineEntity].
-/// - بحث خادمي متقدم مع Debounce وحماية من الاستجابات المتأخرة عبر الترقيم المعتمد.
-/// - دعم الترقيم والتحميل الإضافي للباقات عبر المؤشرات (Cursor Pagination).
-/// - متحكمات كمية منفصلة للباقات ودوال معيارية [setPackageVoucherCount], [incrementQuantity], [decrementQuantity].
-/// - قياسات مالية تقديرية دقيقة للخصم النقدي/الآجل والصافي التقديري.
+/// - إدارة سلة كائنات نموذجية موحدة [DirectInvoiceCartLineEntity] مع دعم الحسابات الورقية.
+/// - اعتماد عرض الأسعار الرسمي المعتمد سيادياً من الخادم [serverQuote] كمرجع مالي أسمى.
+/// - تحديد العملة الرسمية [checkoutCurrency] ديناميكياً من عرض الأسعار الخادمي أو الباقات المختارة.
+/// - بحث خادمي متقدم مع Debounce وحماية من الاستجابات المتأخرة عبر تتبع المراجعات (_revision).
+/// - دعم الترقيم والتحميل الإضافي للباقات عبر المؤشرات (Cursor Pagination) ومنع التكرار (knownIds).
+/// - متحكمات كمية منفصلة للباقات ودوال معيارية [setPackageVoucherCount], [adjustPackageQuantity], [removeCartLine].
+/// - قياسات مالية تقديرية دقيقة للخصم النقدي/الآجل، والمقبوض كاش، والمتبقي الآجل.
+/// - توليد مفتاح منع التكرار [IdempotencyHelper] المرتبط ببصمة البيانات والمنفذ التجاري.
 class NetworkDirectInvoiceController extends GetxController {
+  final CreateDirectSaleInvoiceUseCase createDirectSaleInvoiceUseCase;
+  final GetPackagesUseCase? getPackagesUseCase;
+  final GetNetworkPosListUseCase? getNetworkPosListUseCase;
+  final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
+
   NetworkDirectInvoiceController({
     required this.createDirectSaleInvoiceUseCase,
     this.getPackagesUseCase,
     this.getNetworkPosListUseCase,
+    this.getProcurementQuoteUseCase,
   });
-
-  final CreateDirectSaleInvoiceUseCase createDirectSaleInvoiceUseCase;
-  final GetPackagesUseCase? getPackagesUseCase;
-  final GetNetworkPosListUseCase? getNetworkPosListUseCase;
 
   final formKey = GlobalKey<FormState>();
 
@@ -43,10 +52,25 @@ class NetworkDirectInvoiceController extends GetxController {
   final selectedPosId = RxnInt();
   final isLoadingPosList = false.obs;
   final posErrorMessage = RxnString();
-  final isPosContextExpanded = false.obs;
+  final expandedInvoiceContext = ''.obs;
+
+  void togglePosContextExpansion() {
+    expandedInvoiceContext.value = expandedInvoiceContext.value == 'pos'
+        ? ''
+        : 'pos';
+  }
+
+  bool get isPosContextExpanded => expandedInvoiceContext.value == 'pos';
+
+  NetworkPosLinkEntity? get activePosLink =>
+      posLinks.firstWhereOrNull((link) => link.posId == selectedPosId.value);
+
+  NetworkPosLinkEntity? get selectedPosLink => activePosLink;
 
   // 2. باقات الشبكة والبحث والترقيم الخادمي
   final availablePackages = <PackageEntity>[].obs;
+  final selectedPackage = Rxn<PackageEntity>();
+  final selectedPackageId = RxnInt();
   final isLoadingPackages = false.obs;
   final isLoadingMorePackages = false.obs;
   final packageSearchController = TextEditingController();
@@ -54,25 +78,104 @@ class NetworkDirectInvoiceController extends GetxController {
   final packageNextCursor = RxnString();
   final packageErrorMessage = RxnString();
   final packageLoadMoreErrorMessage = RxnString();
+  int _lifecycleRevision = 0;
   int _packageRevision = 0;
   bool _suppressPackageSearchListener = false;
 
-  // 3. سلة الفاتورة المباشرة ومتحكمات الكمية
-  final cart = <DirectInvoiceCartLineEntity>[].obs;
+  void _setSelectedPackage(PackageEntity? value) {
+    selectedPackage.value = value;
+    selectedPackageId.value = value?.packageId;
+  }
+
+  bool get isSelectedPackageInCart {
+    final packageId = selectedPackage.value?.packageId;
+    return packageId != null &&
+        directInvoiceCart.any((line) => line.package.packageId == packageId);
+  }
+
+  // 3. عرض الأسعار الرسمي المعتمد سيادياً من الخادم لكامل سلة الفاتورة (Server Quote)
+  final serverQuote = Rxn<ProcurementQuoteEntity>();
+  final isLoadingQuote = false.obs;
+  final quoteError = RxnString();
+  int _quoteRevision = 0;
+  final isQuotePending = false.obs;
+
+  /// هل تملك الفاتورة عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
+  bool get hasCurrentServerQuote {
+    if (getProcurementQuoteUseCase == null) return true;
+
+    final quote = serverQuote.value;
+    if (isQuotePending.value || isLoadingQuote.value || quote == null) {
+      return false;
+    }
+
+    final matchesContext =
+        quote.networkId == activeNetworkId &&
+        quote.posId == selectedPosId.value &&
+        quote.saleType == selectedSaleType.value;
+    if (!matchesContext || quote.items.length != directInvoiceCart.length) {
+      return false;
+    }
+    final matchesCart = directInvoiceCart.every((line) {
+      final quotedLine = quote.findLine(line.package.packageId);
+      return quotedLine != null && quotedLine.voucherCount == line.voucherCount;
+    });
+    if (!matchesCart) return false;
+
+    final expiresAt = quote.expiresAt;
+    return expiresAt == null || DateTime.now().isBefore(expiresAt);
+  }
+
+  bool get isQuoteReady => hasCurrentServerQuote && serverQuote.value != null;
+
+  // 4. سلة الفاتورة المباشرة ومتحكمات الكمية
+  final directInvoiceCart = <DirectInvoiceCartLineEntity>[].obs;
   final Map<int, TextEditingController> _packageQuantityControllers = {};
 
-  // 4. نوع البيع (0 = نقدي، 1 = آجل)
-  final selectedSaleTypeIndex = 0.obs;
+  TextEditingController quantityControllerForPackage(int packageId) =>
+      _packageQuantityControllers.putIfAbsent(
+        packageId,
+        TextEditingController.new,
+      );
 
-  SaleType get selectedSaleType =>
-      selectedSaleTypeIndex.value == 0 ? SaleType.cash : SaleType.credit;
+  bool get hasCartItems => directInvoiceCart.isNotEmpty;
 
-  // 5. الدفعة النقدية المقبوضة كاش في البيع الآجل
+  // للتوافق مع شاشات العرض القائمة
+  List<DirectInvoiceCartLineEntity> get cart => directInvoiceCart;
+
+  // 5. نوع البيع وشروط التسوية
+  final selectedSaleType = SaleType.cash.obs;
   final paidAmountController = TextEditingController();
   final paidAmount = 0.0.obs;
 
-  // 6. حالة الإرسال
+  int get selectedSaleTypeIndex =>
+      selectedSaleType.value == SaleType.cash ? 0 : 1;
+
+  void setSaleTypeIndex(int index) {
+    selectedSaleType.value = index == 0 ? SaleType.cash : SaleType.credit;
+  }
+
+  // 6. حالة الإرسال وبصمة مفتاح منع التكرار (Idempotency)
   final isSubmitting = false.obs;
+  String? _pendingCreatePayloadSignature;
+  String? _pendingCreateIdempotencyKey;
+
+  String _resolveCreateIdempotencyKey(Map<String, dynamic> payload) {
+    final signature = jsonEncode(payload);
+    if (_pendingCreatePayloadSignature != signature ||
+        _pendingCreateIdempotencyKey == null) {
+      _pendingCreatePayloadSignature = signature;
+      _pendingCreateIdempotencyKey = IdempotencyHelper.forSaleInvoice(
+        selectedPosId.value,
+      );
+    }
+    return _pendingCreateIdempotencyKey!;
+  }
+
+  void _clearPendingCreateIdempotencyKey() {
+    _pendingCreatePayloadSignature = null;
+    _pendingCreateIdempotencyKey = null;
+  }
 
   int? get activeNetworkId {
     if (Get.isRegistered<WorkspaceService>()) {
@@ -81,41 +184,45 @@ class NetworkDirectInvoiceController extends GetxController {
     return null;
   }
 
-  NetworkPosLinkEntity? get selectedPosLink =>
-      posLinks.firstWhereOrNull((link) => link.posId == selectedPosId.value);
-
   /// عدد الباقات المختلفة المختارة في السلة
-  int get cartPackagesCount => cart.length;
+  int get cartPackagesCount => directInvoiceCart.length;
 
   /// إجمالي عدد الكروت في سلة الفاتورة
   int get checkoutTotalVouchers =>
-      cart.fold<int>(0, (sum, line) => sum + line.voucherCount);
+      directInvoiceCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
 
-  /// عملة التسعير المعتمدة
-  String get checkoutCurrency => 'ر.ي';
+  /// عملة التسعير المعتمدة سيادياً من الخادم
+  String get checkoutCurrency => serverQuote.value?.currency ?? 'ر.ي';
 
-  /// إجمالي الفاتورة قبل الخصم
-  double get checkoutGrossAmount =>
-      cart.fold<double>(0.0, (sum, line) => sum + line.lineGrossTotal);
+  /// إجمالي الفاتورة قبل الخصم (يعتمد الخادم سيادياً عند توفره)
+  double get checkoutGrossAmount {
+    if (isQuoteReady) return serverQuote.value!.grossTotal;
+    return directInvoiceCart.fold<double>(
+      0.0,
+      (sum, line) => sum + line.lineGrossTotal,
+    );
+  }
 
-  /// إجمالي الخصم بحسب نوع البيع المحدد
+  /// إجمالي الخصم بحسب نوع البيع المحدد (يعتمد الخادم سيادياً عند توفره)
   double get checkoutDiscountAmount {
-    final isCash = selectedSaleType == SaleType.cash;
-    return cart.fold<double>(
+    if (isQuoteReady) return serverQuote.value!.discountTotal;
+    final isCash = selectedSaleType.value == SaleType.cash;
+    return directInvoiceCart.fold<double>(
       0.0,
       (sum, line) => sum + line.lineDiscountTotal(isCash),
     );
   }
 
-  /// صافي الفاتورة التقديري
+  /// صافي الفاتورة التقديري (يعتمد الخادم سيادياً عند توفره)
   double get checkoutNetAmount {
+    if (isQuoteReady) return serverQuote.value!.netTotal;
     final net = checkoutGrossAmount - checkoutDiscountAmount;
     return net > 0 ? net : 0.0;
   }
 
   /// المبلغ المقبوض كاش في البيع الآجل
   double get checkoutPaidAmount {
-    if (selectedSaleType != SaleType.credit) return 0.0;
+    if (selectedSaleType.value != SaleType.credit) return 0.0;
     final paid = paidAmount.value;
     final net = checkoutNetAmount;
     return paid > net ? net : paid;
@@ -123,7 +230,7 @@ class NetworkDirectInvoiceController extends GetxController {
 
   /// المتبقي الآجل المطلوب قيده كدين على نقطة البيع
   double get checkoutRemainingCreditAmount {
-    if (selectedSaleType != SaleType.credit) return 0.0;
+    if (selectedSaleType.value != SaleType.credit) return 0.0;
     final net = checkoutNetAmount;
     final paid = checkoutPaidAmount;
     final remaining = net - paid;
@@ -131,104 +238,215 @@ class NetworkDirectInvoiceController extends GetxController {
   }
 
   bool get canSubmitInvoice {
-    if (selectedPosId.value == null ||
-        cartPackagesCount <= 0 ||
-        isSubmitting.value) {
+    if (selectedPosId.value == null || !hasCartItems || isSubmitting.value) {
       return false;
     }
-    if (selectedSaleType == SaleType.credit &&
+    if (selectedSaleType.value == SaleType.credit &&
         paidAmount.value > checkoutNetAmount) {
       return false;
     }
     return true;
   }
 
-  /// الحصول على أو إنشاء متحكم كمية للباقة
-  TextEditingController quantityControllerForPackage(int packageId) {
-    return _packageQuantityControllers.putIfAbsent(
-      packageId,
-      () {
-        final currentCount = cartQuantityForPackage(packageId);
-        return TextEditingController(
-          text: currentCount > 0 ? '$currentCount' : '',
-        );
-      },
+  /// الكمية الحالية لباقة معينة في السلة
+  int cartQuantityForPackage(int packageId) {
+    return directInvoiceCart
+            .firstWhereOrNull((line) => line.package.packageId == packageId)
+            ?.voucherCount ??
+        0;
+  }
+
+  /// تعيين كمية كروت محددة لباقة في السلة مع ضبط وحدة التحكم النصية
+  void setPackageVoucherCount(PackageEntity package, int voucherCount) {
+    final netId = activeNetworkId;
+    if (netId != null && package.networkId != netId) {
+      CustomSnackbar.show(
+        title: 'الباقة لا تتبع الشبكة المحددة',
+        message: 'اختر باقة من كتالوج الشبكة الحالية.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final safeCount = voucherCount.clamp(0, 1000000);
+    final quantityController = quantityControllerForPackage(package.packageId);
+    final quantityText = safeCount == 0 ? '' : '$safeCount';
+    if (quantityController.text != quantityText) {
+      quantityController.value = TextEditingValue(
+        text: quantityText,
+        selection: TextSelection.collapsed(offset: quantityText.length),
+      );
+    }
+
+    final existingIndex = directInvoiceCart.indexWhere(
+      (line) => line.package.packageId == package.packageId,
+    );
+    final currentCount = existingIndex == -1
+        ? 0
+        : directInvoiceCart[existingIndex].voucherCount;
+    if (safeCount == currentCount) return;
+
+    if (safeCount == 0) {
+      if (existingIndex != -1) {
+        directInvoiceCart.removeAt(existingIndex);
+        _refreshInvoicePresentation();
+      }
+      return;
+    }
+
+    if (package.packageVoucherCount <= 0) {
+      CustomSnackbar.show(
+        title: 'سعة الباقة غير صالحة',
+        message: 'بيانات سعة الباقة غير صالحة لدى الشبكة.',
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    final line = DirectInvoiceCartLineEntity(
+      package: package,
+      voucherCount: safeCount,
+      sheets: VoucherSheetCalculator.breakdown(
+        safeCount,
+        package.packageVoucherCount,
+      ).totalSheetsFraction,
+    );
+
+    if (existingIndex == -1) {
+      directInvoiceCart.add(line);
+    } else {
+      directInvoiceCart[existingIndex] = line;
+    }
+    _refreshInvoicePresentation();
+  }
+
+  /// تعديل سريع لكمية باقة بزيادة أو إنقاص محدد
+  void adjustPackageQuantity(PackageEntity package, int delta) {
+    if (delta == 0) return;
+    setPackageVoucherCount(
+      package,
+      cartQuantityForPackage(package.packageId) + delta,
     );
   }
 
-  /// كمية باقة معينة في السلة حالياً
-  int cartQuantityForPackage(int packageId) {
-    final line = cart.firstWhereOrNull((l) => l.packageId == packageId);
-    return line?.voucherCount ?? 0;
+  /// للتوافق العكسي مع واجهات الاستدعاء السابقة
+  void incrementQuantity(PackageEntity package) =>
+      adjustPackageQuantity(package, 1);
+  void decrementQuantity(PackageEntity package) =>
+      adjustPackageQuantity(package, -1);
+
+  /// حذف بند محدد من السلة
+  void removeCartLine(int packageId) {
+    final previousLength = directInvoiceCart.length;
+    directInvoiceCart.removeWhere(
+      (line) => line.package.packageId == packageId,
+    );
+    if (directInvoiceCart.length == previousLength) return;
+    _refreshInvoicePresentation();
   }
 
-  /// تعيين كمية كروت محددة لباقة في السلة (مطابقة لـ PosNewProcurementOrderController)
-  void setPackageVoucherCount(PackageEntity package, int nextQuantity) {
-    final clamped = nextQuantity < 0 ? 0 : nextQuantity;
-    final index = cart.indexWhere((l) => l.packageId == package.packageId);
+  /// تفريغ السلة بالكامل
+  void clearDirectInvoiceCart() {
+    directInvoiceCart.clear();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.clear();
+    }
+    _clearPendingCreateIdempotencyKey();
+    _quoteRevision++;
+    isLoadingQuote.value = false;
+    isQuotePending.value = false;
+    serverQuote.value = null;
+    quoteError.value = null;
+    _refreshInvoicePresentation();
+  }
 
-    if (clamped == 0) {
-      if (index >= 0) cart.removeAt(index);
-    } else {
-      if (index >= 0) {
-        cart[index] = cart[index].copyWith(voucherCount: clamped);
-      } else {
-        cart.add(
-          DirectInvoiceCartLineEntity(
-            package: package,
-            voucherCount: clamped,
-          ),
-        );
+  void clearCart() => clearDirectInvoiceCart();
+
+  void _refreshInvoicePresentation() {
+    directInvoiceCart.refresh();
+    unawaited(fetchServerQuote());
+  }
+
+  /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
+  Future<void> fetchServerQuote() async {
+    final revision = ++_quoteRevision;
+    isQuotePending.value = false;
+    final netId = activeNetworkId;
+    final posId = selectedPosId.value;
+    final items = directInvoiceCart.toList(growable: false);
+
+    if (netId == null ||
+        posId == null ||
+        items.isEmpty ||
+        getProcurementQuoteUseCase == null) {
+      isLoadingQuote.value = false;
+      isQuotePending.value = false;
+      serverQuote.value = null;
+      quoteError.value = null;
+      return;
+    }
+
+    serverQuote.value = null;
+    isLoadingQuote.value = true;
+    quoteError.value = null;
+
+    try {
+      final payload = <String, dynamic>{
+        'network_id': netId,
+        'pos_id': posId,
+        'sale_type': selectedSaleType.value.wireValue,
+        'items': items
+            .map(
+              (line) => {
+                'package_id': line.package.packageId,
+                'voucher_count': line.voucherCount,
+              },
+            )
+            .toList(growable: false),
+      };
+
+      final quote = await getProcurementQuoteUseCase!(payload);
+
+      if (revision != _quoteRevision ||
+          activeNetworkId != netId ||
+          selectedPosId.value != posId) {
+        return;
+      }
+
+      serverQuote.value = quote;
+    } on AppException catch (e) {
+      if (revision != _quoteRevision) return;
+      quoteError.value = e.message;
+      serverQuote.value = null;
+    } catch (e) {
+      if (revision != _quoteRevision) return;
+      quoteError.value = 'تعذر جلب عرض الأسعار المعتمد: $e';
+      serverQuote.value = null;
+    } finally {
+      if (revision == _quoteRevision) {
+        isLoadingQuote.value = false;
       }
     }
-
-    final ctrl = _packageQuantityControllers[package.packageId];
-    final textValue = clamped > 0 ? '$clamped' : '';
-    if (ctrl != null && ctrl.text != textValue) {
-      ctrl.text = textValue;
-    }
   }
 
-  void incrementQuantity(PackageEntity package) {
-    final current = cartQuantityForPackage(package.packageId);
-    setPackageVoucherCount(package, current + 1);
-  }
-
-  void decrementQuantity(PackageEntity package) {
-    final current = cartQuantityForPackage(package.packageId);
-    if (current > 0) {
-      setPackageVoucherCount(package, current - 1);
-    }
-  }
-
-  void clearCart() {
-    cart.clear();
-    for (final ctrl in _packageQuantityControllers.values) {
-      ctrl.clear();
-    }
-  }
-
-  void setSaleTypeIndex(int index) {
-    selectedSaleTypeIndex.value = index;
-  }
-
-  void selectPos(int posId) {
+  /// اختيار نقطة البيع المستلمة وتحديث الباقات
+  Future<void> onPosSelected(int posId) async {
     if (selectedPosId.value == posId) {
-      isPosContextExpanded.value = false;
+      expandedInvoiceContext.value = '';
       return;
     }
     selectedPosId.value = posId;
-    isPosContextExpanded.value = false;
-    // إعادة جلب الباقات والتعرفات المحدثة الخاصة بنقطة البيع المختارة
-    unawaited(loadPackages());
+    expandedInvoiceContext.value = '';
+    clearDirectInvoiceCart();
+    _setSelectedPackage(null);
+    availablePackages.clear();
+    await loadPackages();
   }
 
-  void togglePosContextExpansion() {
-    isPosContextExpanded.value = !isPosContextExpanded.value;
-  }
+  void selectPos(int posId) => onPosSelected(posId);
 
-  void onPackageSearchChanged(String query) {
-    packageSearchQuery.value = query.trim();
+  void onPackageSearchChanged(String value) {
+    packageSearchQuery.value = value.trim();
   }
 
   void clearPackageSearch() {
@@ -236,18 +454,20 @@ class NetworkDirectInvoiceController extends GetxController {
     packageSearchController.clear();
     packageSearchQuery.value = '';
     _suppressPackageSearchListener = false;
-    unawaited(_refreshPackageSearchResults());
+    _refreshPackageSearchResults();
   }
 
-  Future<void> _refreshPackageSearchResults() async {
+  void _refreshPackageSearchResults() {
     final netId = activeNetworkId;
-    if (netId == null) return;
-    await _fetchPackages(reset: true);
+    if (netId != null) {
+      _fetchPackages(reset: true);
+    }
   }
 
   @override
   void onInit() {
     super.onInit();
+
     packageSearchController.addListener(() {
       if (!_suppressPackageSearchListener) {
         packageSearchQuery.value = packageSearchController.text.trim();
@@ -265,16 +485,26 @@ class NetworkDirectInvoiceController extends GetxController {
       paidAmount.value = parsed >= 0 ? parsed : 0.0;
     });
 
+    ever(selectedSaleType, (_) => _refreshInvoicePresentation());
+
     unawaited(loadInitialData());
   }
 
   @override
   void onClose() {
-    for (final ctrl in _packageQuantityControllers.values) {
-      ctrl.dispose();
-    }
     packageSearchController.dispose();
     paidAmountController.dispose();
+    for (final controller in _packageQuantityControllers.values) {
+      controller.dispose();
+    }
+    _lifecycleRevision++;
+    _packageRevision++;
+    _quoteRevision++;
+    isLoadingPackages.value = false;
+    isLoadingMorePackages.value = false;
+    isLoadingPosList.value = false;
+    isLoadingQuote.value = false;
+    isQuotePending.value = false;
     super.onClose();
   }
 
@@ -282,30 +512,49 @@ class NetworkDirectInvoiceController extends GetxController {
     await Future.wait([loadPosList(), loadPackages()]);
   }
 
+  /// جلب قائمة نقاط البيع المرتبطة بالشبكة
   Future<void> loadPosList() async {
     final netId = activeNetworkId;
     if (netId == null || getNetworkPosListUseCase == null) return;
 
+    final lifecycleRevision = _lifecycleRevision;
     isLoadingPosList.value = true;
     posErrorMessage.value = null;
+
     try {
       final paginated = await getNetworkPosListUseCase!(networkId: netId);
+      if (lifecycleRevision != _lifecycleRevision) return;
       posLinks.assignAll(paginated.items);
       if (posLinks.isNotEmpty && selectedPosId.value == null) {
         selectedPosId.value = posLinks.first.posId;
       }
     } catch (e) {
+      if (lifecycleRevision != _lifecycleRevision) return;
       posErrorMessage.value = AppException.sanitizeMessage(e);
     } finally {
-      isLoadingPosList.value = false;
+      if (lifecycleRevision == _lifecycleRevision) {
+        isLoadingPosList.value = false;
+      }
     }
   }
 
+  /// جلب أول صفحة من كتالوج الباقات لنقطة البيع المختارة
   Future<void> loadPackages() async {
+    final netId = activeNetworkId;
+    if (netId == null) return;
+    _suppressPackageSearchListener = true;
+    packageSearchController.clear();
+    packageSearchQuery.value = '';
+    _suppressPackageSearchListener = false;
+    packageNextCursor.value = null;
+    packageLoadMoreErrorMessage.value = null;
     await _fetchPackages(reset: true);
   }
 
+  /// تحميل المزيد من باقات الكتالوج (Cursor Pagination)
   Future<void> loadMorePackages() async {
+    final netId = activeNetworkId;
+    if (netId == null) return;
     await _fetchPackages(reset: false);
   }
 
@@ -337,7 +586,9 @@ class NetworkDirectInvoiceController extends GetxController {
         networkId: netId,
         posId: selectedPosId.value,
         status: true,
-        search: packageSearchQuery.value.isEmpty ? null : packageSearchQuery.value,
+        search: packageSearchQuery.value.isEmpty
+            ? null
+            : packageSearchQuery.value,
         cursor: cursor,
         perPage: 20,
       );
@@ -346,20 +597,28 @@ class NetworkDirectInvoiceController extends GetxController {
 
       if (reset) {
         availablePackages.assignAll(paginated.items);
+        packageNextCursor.value = paginated.nextCursor;
       } else {
-        availablePackages.addAll(paginated.items);
+        final knownIds = availablePackages
+            .map((item) => item.packageId)
+            .toSet();
+        availablePackages.addAll(
+          paginated.items.where((item) => !knownIds.contains(item.packageId)),
+        );
+        packageNextCursor.value = paginated.nextCursor;
       }
-      packageNextCursor.value = paginated.nextCursor;
-    } catch (e) {
+    } catch (error) {
       if (revision != _packageRevision || isClosed) return;
-      final msg = AppException.sanitizeMessage(
-        e,
-        fallback: 'تعذر تحميل باقات الشبكة.',
+      final message = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر تحميل كتالوج الباقات.',
       );
       if (reset) {
-        packageErrorMessage.value = msg;
+        packageErrorMessage.value = message;
+        availablePackages.clear();
+        packageNextCursor.value = null;
       } else {
-        packageLoadMoreErrorMessage.value = msg;
+        packageLoadMoreErrorMessage.value = message;
       }
     } finally {
       if (revision == _packageRevision && !isClosed) {
@@ -369,6 +628,7 @@ class NetworkDirectInvoiceController extends GetxController {
     }
   }
 
+  /// إرسال وإصدار الفاتورة المباشرة بعد اكتمال البيانات
   Future<void> submitDirectInvoice() async {
     if (!canSubmitInvoice) return;
 
@@ -384,7 +644,7 @@ class NetworkDirectInvoiceController extends GetxController {
       return;
     }
 
-    final itemsPayload = cart
+    final itemsPayload = directInvoiceCart
         .where((line) => line.voucherCount > 0)
         .map(
           (line) => DirectSaleInvoiceItemInputEntity(
@@ -392,7 +652,7 @@ class NetworkDirectInvoiceController extends GetxController {
             voucherCount: line.voucherCount,
           ),
         )
-        .toList();
+        .toList(growable: false);
 
     if (itemsPayload.isEmpty) {
       CustomSnackbar.show(
@@ -410,15 +670,34 @@ class NetworkDirectInvoiceController extends GetxController {
         message: 'جاري إصدار فاتورة المبيعات المباشرة...',
       );
 
-      final idempotencyKey = IdempotencyHelper.forSaleInvoice(posId);
+      final payloadMap = <String, dynamic>{
+        'network_id': netId,
+        'pos_id': posId,
+        'sale_type': selectedSaleType.value.wireValue,
+        'paid_amount':
+            selectedSaleType.value == SaleType.credit && paidAmount.value > 0
+            ? paidAmount.value
+            : null,
+        'items': itemsPayload
+            .map(
+              (item) => {
+                'package_id': item.packageId,
+                'voucher_count': item.voucherCount,
+              },
+            )
+            .toList(growable: false),
+      };
+
+      final idempotencyKey = _resolveCreateIdempotencyKey(payloadMap);
 
       final createdInvoice = await createDirectSaleInvoiceUseCase(
         networkId: netId,
         posId: posId,
-        saleType: selectedSaleType,
+        saleType: selectedSaleType.value,
         items: itemsPayload,
         idempotencyKey: idempotencyKey,
-        paidAmount: selectedSaleType == SaleType.credit && paidAmount.value > 0
+        paidAmount:
+            selectedSaleType.value == SaleType.credit && paidAmount.value > 0
             ? paidAmount.value
             : null,
       );
@@ -427,6 +706,7 @@ class NetworkDirectInvoiceController extends GetxController {
         message: 'تم تسجيل الفاتورة رقم ${createdInvoice.displayReference}',
       );
 
+      _clearPendingCreateIdempotencyKey();
       Get.back<void>();
       await Get.toNamed<void>(
         AppRoutes.saleInvoiceDetails,

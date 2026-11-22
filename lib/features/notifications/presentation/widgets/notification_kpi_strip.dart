@@ -30,10 +30,7 @@ class NotificationKpiStrip extends StatelessWidget {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Row(
           children: [
             NotificationKpiCard(

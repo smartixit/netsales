@@ -4,6 +4,7 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/voucher_sheet_calculator.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/requests/domain/entities/procurement_quote_line_entity.dart';
 import 'package:netsales/widgets/cards/custom_package_tariff_card.dart';
 import 'package:netsales/widgets/pickers/custom_color_picker.dart';
 
@@ -18,6 +19,7 @@ class DirectInvoicePackageOptionCard extends StatelessWidget {
     required this.isCashSale,
     required this.quantityController,
     this.customDiscount,
+    this.quoteLine,
     this.estimatedLineTotalMinor,
     this.estimatedLineTotal,
     this.isDiscountLoading = false,
@@ -33,6 +35,7 @@ class DirectInvoicePackageOptionCard extends StatelessWidget {
   final bool isCashSale;
   final TextEditingController quantityController;
   final EffectivePackageDiscountEntity? customDiscount;
+  final ProcurementQuoteLineEntity? quoteLine;
   final int? estimatedLineTotalMinor;
   final num? estimatedLineTotal;
   final bool isDiscountLoading;
@@ -63,6 +66,14 @@ class DirectInvoicePackageOptionCard extends StatelessWidget {
     if (estimatedLineTotalMinor != null) {
       return AmountFormatter.format(
         (estimatedLineTotalMinor! / 100).toStringAsFixed(2),
+      );
+    }
+    if (quoteLine != null &&
+        quantity > 0 &&
+        quoteLine!.voucherCount == quantity) {
+      return AmountFormatter.formatValue(
+        quoteLine!.lineNetTotal,
+        decimalPlaces: 2,
       );
     }
     if (quantity > 0) {

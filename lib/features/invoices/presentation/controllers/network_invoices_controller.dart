@@ -93,7 +93,7 @@ class NetworkInvoicesController extends BaseInvoicesController {
           text: 'فاتورة مباشرة',
           icon: Icons.add_rounded,
           shape: AppButtonShape.pill,
-          size: AppButtonSize.small,
+          // size: AppButtonSize.small,
           onPressed: () =>
               Get.toNamed<void>(AppRoutes.networkCreateSaleInvoice),
         )

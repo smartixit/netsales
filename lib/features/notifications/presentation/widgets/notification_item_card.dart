@@ -60,7 +60,7 @@ class NotificationItemCard extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5.h),
+        margin: EdgeInsets.symmetric(vertical: 4.h),
         decoration: BoxDecoration(
           color: isUnread
               ? colors.surfaceContainerLow
@@ -170,13 +170,15 @@ class NotificationItemCard extends StatelessWidget {
                           ],
                         ),
                         SizedBox(height: 4.h),
-                        Row(
+                        Wrap(
+                          spacing: 8.w,
+                          runSpacing: 4.h,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             CustomStatusBadge.fromPresentation(
                               presentation,
                               isCompact: true,
                             ),
-                            SizedBox(width: 8.w),
                             Text(
                               notification.relativeTime,
                               style: AppTypography.labelSmall.copyWith(

@@ -118,10 +118,12 @@ class PosCommercialDirectoryController
   @override
   Widget? get headerAction {
     if (!canManageCommercial) return null;
-    return CustomButton.primary(
-      text: 'ربط مزود شبكة +',
+    return CustomButton.icon(
+      tooltip: 'ربط مزود شبكة',
       icon: Icons.qr_code_scanner_rounded,
-      shape: AppButtonShape.pill,
+      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
+      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
+      shape: AppButtonShape.rounded,
       size: AppButtonSize.small,
       onPressed: openQrScannerFlow,
     );
@@ -457,9 +459,9 @@ class PosCommercialDirectoryController
   ) async {
     try {
       if (resolvedPosId != posId ||
-          authorizedPosList.firstWhereOrNull(
-                (item) => item.posId == posId,
-              )?.posUuid !=
+          authorizedPosList
+                  .firstWhereOrNull((item) => item.posId == posId)
+                  ?.posUuid !=
               posUuid) {
         throw const AppException(
           'تغيرت نقطة البيع النشطة. أعد بدء عملية ربط الشبكة.',

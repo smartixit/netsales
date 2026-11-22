@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -36,7 +35,7 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
                 text: 'اعتماد الطلب',
                 icon: Icons.check_circle_outline_rounded,
                 size: AppButtonSize.small,
-                shape: AppButtonShape.pill,
+                shape: AppButtonShape.rounded,
                 onPressed: onApprove,
               ),
             ),
@@ -48,8 +47,7 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
                 text: 'تعديل',
                 icon: Icons.edit_note_rounded,
                 size: AppButtonSize.small,
-                foregroundColor: colors.primary,
-                borderColor: colors.primary.withValues(alpha: .5),
+                shape: AppButtonShape.rounded,
                 onPressed: onModify,
               ),
             ),
@@ -59,7 +57,8 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
             CustomButton.icon(
               icon: Icons.cancel_outlined,
               tooltip: 'رفض الطلب',
-              dimension: 38.r,
+              size: AppButtonSize.small,
+              shape: AppButtonShape.rounded,
               backgroundColor: colors.error.withValues(alpha: .08),
               foregroundColor: colors.error,
               borderColor: colors.error.withValues(alpha: .25),
@@ -70,7 +69,8 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
           CustomButton.icon(
             icon: Icons.more_horiz_rounded,
             tooltip: 'المزيد من الخيارات',
-            dimension: 38.r,
+            size: AppButtonSize.small,
+            shape: AppButtonShape.rounded,
             backgroundColor: colors.surfaceContainer,
             foregroundColor: colors.onSurfaceVariant,
             borderColor: colors.outlineVariant.withValues(alpha: .6),
@@ -88,7 +88,7 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
             icon: Icons.chevron_right_rounded,
             iconPosition: AppButtonIconPosition.end,
             size: AppButtonSize.small,
-            shape: AppButtonShape.pill,
+            shape: AppButtonShape.rounded,
             onPressed: onDetails,
           ),
         ),
@@ -97,9 +97,10 @@ class ProcurementOrderCardNetworkActions extends StatelessWidget {
           icon: Icons.more_horiz_rounded,
           tooltip: 'المزيد من الخيارات',
           size: AppButtonSize.small,
-          shape: AppButtonShape.circle,
-          backgroundColor: colors.surfaceContainerHigh,
+          shape: AppButtonShape.rounded,
+          backgroundColor: colors.surfaceContainer,
           foregroundColor: colors.onSurfaceVariant,
+          borderColor: colors.outlineVariant.withValues(alpha: .6),
           onPressed: onMoreActions,
         ),
       ],
