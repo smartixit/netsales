@@ -272,7 +272,6 @@ class NetworkProcurementReviewController
   final isLoadingEditor = false.obs;
   final editorError = RxnString();
   final modificationNoteController = TextEditingController();
-  final modificationPaidAmountController = TextEditingController();
   final Map<int, TextEditingController> _modificationQuantityControllers = {};
   int _requestListRevision = 0;
 
@@ -642,7 +641,6 @@ class NetworkProcurementReviewController
     modificationLines.clear();
     availablePackages.clear();
     modificationNoteController.clear();
-    modificationPaidAmountController.clear();
     for (final c in _modificationQuantityControllers.values) {
       c.dispose();
     }
@@ -670,7 +668,6 @@ class NetworkProcurementReviewController
   void onClose() {
     searchController.dispose();
     modificationNoteController.dispose();
-    modificationPaidAmountController.dispose();
     for (final c in _modificationQuantityControllers.values) {
       c.dispose();
     }
@@ -1031,12 +1028,9 @@ class NetworkProcurementReviewController
     const isCredit = false;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
-      isCredit: isCredit,
-      maxAmount: request.requestTotalAmount,
-      onConfirm: (note, paidAmount) => approveRequest(
+      onConfirm: (note) => approveRequest(
         request.requestId,
         requestNote: note,
-        paidAmount: paidAmount,
       ),
     );
   }
@@ -1054,11 +1048,6 @@ class NetworkProcurementReviewController
     final preview = currentPreview.value;
     if (preview == null || !preview.hasModifications) return;
 
-    final rawPaid = double.tryParse(
-      modificationPaidAmountController.text.trim(),
-    );
-    final paidAmount = (rawPaid != null && rawPaid > 0) ? rawPaid : null;
-
     await CustomBottomSheet.showConfirmation<void>(
       title: 'تأكيد اعتماد التعديل',
       message: 'سيتم اعتماد البنود المعروضة في آخر معاينة وإنشاء الفاتورة وفق أسعار النظام المعتمدة. لا يمكن تعديل الطلب بعد اعتماده.',
@@ -1068,7 +1057,6 @@ class NetworkProcurementReviewController
           requestNote: modificationNoteController.text.trim().isEmpty
               ? null
               : modificationNoteController.text.trim(),
-          paidAmount: paidAmount,
         );
         // if (success) Get.back<void>();
       },
