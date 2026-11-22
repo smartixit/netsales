@@ -37,7 +37,7 @@ class CustomDatePickerModal extends StatelessWidget {
     required this.onConfirm,
     required this.onCancel,
   }) : assert(
-         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
@@ -171,7 +171,7 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
     this.selectableDayPredicate,
     required this.title,
   }) : assert(
-         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
@@ -220,7 +220,7 @@ class CustomDatePickerDialogContent extends StatelessWidget {
     this.selectableDayPredicate,
     required this.title,
   }) : assert(
-         firstDate == null || lastDate == null || !firstDate.isAfter(lastDate),
+         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
