@@ -22,6 +22,7 @@ const String infinityFreeChallengeFailureFlagKey =
 class InfinityFreeChallengeInterceptor extends Interceptor {
   final Dio _dio;
   static const _retryFlagKey = '__test_retried';
+  static const _maxVerificationRedirects = 3;
   static final Map<String, String> _cachedCookies = {};
   static final Map<String, DateTime> _cookieExpiry = {};
 
@@ -162,6 +163,69 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     );
   }
 
+
+  bool _isSafeVerificationRedirect({
+    required Uri target,
+    required Uri original,
+  }) {
+    return target.userInfo.isEmpty &&
+        !target.hasFragment &&
+        target.scheme.toLowerCase() == original.scheme.toLowerCase() &&
+        target.host.toLowerCase() == original.host.toLowerCase() &&
+        target.port == original.port &&
+        target.path == original.path;
+  }
+
+  Future<Response<dynamic>> _fetchVerificationResponse(
+    RequestOptions initialOptions,
+  ) async {
+    var currentOptions = initialOptions;
+    final visited = <Uri>{initialOptions.uri};
+    var followedRedirects = 0;
+
+    while (true) {
+      final response = await _dio.fetch<dynamic>(currentOptions);
+      final statusCode = response.statusCode;
+      final isRedirect = statusCode == 301 ||
+          statusCode == 302 ||
+          statusCode == 303 ||
+          statusCode == 307 ||
+          statusCode == 308;
+      if (!isRedirect) {
+        return response;
+      }
+
+      final location = response.headers.value('location');
+      if (location == null || location.trim().isEmpty) {
+        return response;
+      }
+
+      final target = currentOptions.uri.resolve(location.trim());
+      final safeRedirect = _isSafeVerificationRedirect(
+        target: target,
+        original: initialOptions.uri,
+      );
+      if (!safeRedirect ||
+          followedRedirects >= _maxVerificationRedirects ||
+          visited.contains(target)) {
+        return response;
+      }
+
+      visited.add(target);
+      followedRedirects++;
+      currentOptions = currentOptions.copyWith(
+        method: 'GET',
+        path: target.toString(),
+        queryParameters: target.queryParameters,
+        followRedirects: false,
+        validateStatus: (status) => status != null,
+      );
+      // RequestOptions.copyWith treats data:null as "keep the old data".
+      currentOptions.data = null;
+      currentOptions.contentType = null;
+    }
+  }
+
   RequestOptions _createVerificationOptions({
     required RequestOptions original,
     required Uri redirectUri,
@@ -169,8 +233,12 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
   }) {
     final existingCookie = _headerValue(original.headers, 'Cookie');
     final headers = <String, dynamic>{
-      'Accept':
-          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      // Keep API content negotiation: this request probes an API endpoint,
+      // not a browser page. This prevents Laravel from issuing HTML redirects.
+      'Accept': _headerValue(original.headers, 'Accept') ?? 'application/json',
+      'X-Requested-With':
+          _headerValue(original.headers, 'X-Requested-With') ??
+          'XMLHttpRequest',
       'Cookie': InfinityFreeChallengeSolver.mergeChallengeCookie(
         existingCookieHeader: existingCookie,
         challengeCookie: challengeCookie,
@@ -301,7 +369,9 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // this request stops returning the challenge page.
     Response<dynamic>? verificationResponse;
     try {
-      final probeResponse = await _dio.fetch<dynamic>(verificationOptions);
+      final probeResponse = await _fetchVerificationResponse(
+        verificationOptions,
+      );
       verificationResponse = probeResponse;
 
       if (InfinityFreeChallengeSolver.isChallengeResponse(probeResponse.data)) {
