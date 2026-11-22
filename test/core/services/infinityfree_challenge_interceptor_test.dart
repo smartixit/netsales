@@ -271,10 +271,18 @@ void main() {
       () async {
         final baseUri = Uri.parse('https://authenticated-rejection.example');
         final meUri = baseUri.resolve('/api/v1/auth/me');
+        var originalGetCount = 0;
         final adapter = _ScriptedAdapter((request, body) async {
           if (request.uri.path == meUri.path &&
               request.uri.queryParameters.isEmpty) {
-            return _html(_challenge(meUri));
+            originalGetCount++;
+            if (originalGetCount == 1) {
+              return _html(_challenge(meUri));
+            }
+            return _json(
+              '{"success":false,"message":"الجلسة غير صالحة","data":{},"errors":[]}',
+              401,
+            );
           }
           if (request.uri.path == meUri.path &&
               request.uri.queryParameters['i'] == '1') {
@@ -310,8 +318,12 @@ void main() {
           failure.requestOptions.extra[infinityFreeVerificationProbeFlagKey],
           isNot(true),
         );
-        expect(adapter.requests, hasLength(2));
+        expect(adapter.requests, hasLength(3));
+        expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
         expect(adapter.requests[1].header('X-Session-Id'), 'session-test-value');
+        expect(adapter.requests[2].uri.queryParameters, isEmpty);
+        expect(adapter.requests[2].header('X-Session-Id'), 'session-test-value');
+        expect(adapter.requests[2].header('X-Device-Uuid'), 'device-test-value');
         dio.close(force: true);
       },
     );
