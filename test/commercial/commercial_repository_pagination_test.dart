@@ -3,12 +3,15 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_linkable_pos_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 
 class _MockCommercialRemoteDataSource implements CommercialRemoteDataSource {
   final Map<String?, PaginatedList<NetworkPosLinkModel>> pages = {};
   final List<String?> requestedCursors = [];
+  final Map<String?, PaginatedList<NetworkLinkablePosModel>> linkablePages = {};
+  final List<String?> requestedLinkableCursors = [];
 
   @override
   Future<List<NetworkModel>> getMyNetworks() async {
@@ -60,6 +63,17 @@ class _MockCommercialRemoteDataSource implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<PaginatedList<NetworkLinkablePosModel>> searchNetworkLinkablePos({
+    required int networkId,
+    required String search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    requestedLinkableCursors.add(cursor);
+    return linkablePages[cursor] ?? const PaginatedList(items: []);
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -104,6 +118,44 @@ void main() {
       expect(secondPage.hasMore, isFalse);
 
       expect(remote.requestedCursors, equals([null, 'cursor_page_2']));
+    });
+
+    test('searchNetworkLinkablePos forwards cursor and preserves candidate pages', () async {
+      remote.linkablePages[null] = PaginatedList(
+        items: [
+          const NetworkLinkablePosModel(
+            posId: 31,
+            posUuid: 'POS-2611-00031-A1B2',
+            posName: 'نقطة البحث الأولى',
+          ),
+        ],
+        nextCursor: 'linkable_page_2',
+      );
+      remote.linkablePages['linkable_page_2'] = PaginatedList(
+        items: [
+          const NetworkLinkablePosModel(
+            posId: 32,
+            posUuid: 'POS-2611-00032-A1B2',
+            posName: 'نقطة البحث الثانية',
+          ),
+        ],
+      );
+
+      final first = await repository.searchNetworkLinkablePos(
+        networkId: 7,
+        search: 'نقطة البحث',
+      );
+      final second = await repository.searchNetworkLinkablePos(
+        networkId: 7,
+        search: 'نقطة البحث',
+        cursor: first.nextCursor,
+      );
+
+      expect(first.items.single.posId, 31);
+      expect(first.nextCursor, 'linkable_page_2');
+      expect(second.items.single.posId, 32);
+      expect(second.nextCursor, isNull);
+      expect(remote.requestedLinkableCursors, [null, 'linkable_page_2']);
     });
 
     test('getPosNetworksList forwards cursor and pagination parameters correctly', () async {
