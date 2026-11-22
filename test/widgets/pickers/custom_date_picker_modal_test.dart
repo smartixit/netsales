@@ -168,9 +168,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.byKey(
-          const ValueKey<String>('custom-date-picker-sheet-content'),
-        ),
+        find.byKey(const ValueKey<String>('custom-date-picker-sheet-content')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

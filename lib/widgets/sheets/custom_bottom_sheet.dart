@@ -49,6 +49,7 @@ class CustomBottomSheet extends StatelessWidget {
   final bool scrollable;
   final EdgeInsetsGeometry? padding;
   final double? maxHeightFactor;
+
   /// Optional maximum surface width for centered desktop/tablet sheets.
   final double? maxWidth;
 

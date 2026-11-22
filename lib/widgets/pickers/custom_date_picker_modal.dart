@@ -37,7 +37,9 @@ class CustomDatePickerModal extends StatelessWidget {
     required this.onConfirm,
     required this.onCancel,
   }) : assert(
-         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
+         firstDate == null ||
+             lastDate == null ||
+             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
@@ -171,7 +173,9 @@ class CustomDatePickerBottomSheetContent extends StatelessWidget {
     this.selectableDayPredicate,
     required this.title,
   }) : assert(
-         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
+         firstDate == null ||
+             lastDate == null ||
+             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
@@ -220,7 +224,9 @@ class CustomDatePickerDialogContent extends StatelessWidget {
     this.selectableDayPredicate,
     required this.title,
   }) : assert(
-         firstDate == null || lastDate == null || !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
+         firstDate == null ||
+             lastDate == null ||
+             !_dateOnly(firstDate).isAfter(_dateOnly(lastDate)),
          'firstDate must be on or before lastDate.',
        );
 
@@ -238,11 +244,12 @@ class CustomDatePickerDialogContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final mediaQuery = MediaQuery.of(context);
-    final availableHeight = (mediaQuery.size.height -
-            mediaQuery.viewInsets.vertical -
-            AppSpacing.xxl)
-        .clamp(0.0, mediaQuery.size.height)
-        .toDouble();
+    final availableHeight =
+        (mediaQuery.size.height -
+                mediaQuery.viewInsets.vertical -
+                AppSpacing.xxl)
+            .clamp(0.0, mediaQuery.size.height)
+            .toDouble();
 
     return SafeArea(
       child: Center(
@@ -529,13 +536,10 @@ class _DatePickerModalController extends GetxController {
         if (dates.isEmpty) return <DateTime?>[];
         final start = dates.first;
         final end = dates.length > 1 ? dates[1] : null;
-        return _normalizeDates(
-          <DateTime?>[
-            start != null && !isSelectable(start) ? null : start,
-            end != null && !isSelectable(end) ? null : end,
-          ],
-          mode,
-        );
+        return _normalizeDates(<DateTime?>[
+          start != null && !isSelectable(start) ? null : start,
+          end != null && !isSelectable(end) ? null : end,
+        ], mode);
       case DatePickerSelectionMode.multi:
         return dates.whereType<DateTime>().where(isSelectable).toList();
     }
@@ -751,8 +755,16 @@ class _QuickPresetsBar extends StatelessWidget {
     return [
       _DateRangePreset('اليوم', now, now),
       _DateRangePreset('أمس', yesterday, yesterday),
-      _DateRangePreset('آخر 7 أيام', now.subtract(const Duration(days: 6)), now),
-      _DateRangePreset('آخر 30 يوماً', now.subtract(const Duration(days: 29)), now),
+      _DateRangePreset(
+        'آخر 7 أيام',
+        now.subtract(const Duration(days: 6)),
+        now,
+      ),
+      _DateRangePreset(
+        'آخر 30 يوماً',
+        now.subtract(const Duration(days: 29)),
+        now,
+      ),
       _DateRangePreset('هذا الشهر', monthStart, monthEnd),
       _DateRangePreset('الشهر الماضي', lastMonthStart, lastMonthEnd),
     ];
@@ -773,11 +785,12 @@ class _QuickPresetsBar extends StatelessWidget {
           for (var index = 0; index < presets.length; index++) ...[
             _PresetChip(
               label: presets[index].label,
-              enabled: isPresetSelectable(presets[index].start, presets[index].end),
-              onTap: () => onPresetSelected([
+              enabled: isPresetSelectable(
                 presets[index].start,
                 presets[index].end,
-              ]),
+              ),
+              onTap: () =>
+                  onPresetSelected([presets[index].start, presets[index].end]),
             ),
             if (index != presets.length - 1) AppSpacing.hXs,
           ],

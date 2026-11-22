@@ -81,27 +81,28 @@ void main() {
       expect(find.text('يوم 5'), findsNothing);
     });
 
-    testWidgets('clears a selected date and emits null from the single factory', (
-      tester,
-    ) async {
-      DateTime? changedValue = DateTime(2026, 11, 5);
+    testWidgets(
+      'clears a selected date and emits null from the single factory',
+      (tester) async {
+        DateTime? changedValue = DateTime(2026, 11, 5);
 
-      await tester.pumpWidget(
-        _harness(
-          CustomDatePickerField.single(
-            label: 'التاريخ',
-            value: changedValue,
-            onChanged: (value) => changedValue = value,
+        await tester.pumpWidget(
+          _harness(
+            CustomDatePickerField.single(
+              label: 'التاريخ',
+              value: changedValue,
+              onChanged: (value) => changedValue = value,
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.byTooltip('مسح التاريخ المحدد'));
-      await tester.pump();
+        await tester.tap(find.byTooltip('مسح التاريخ المحدد'));
+        await tester.pump();
 
-      expect(changedValue, isNull);
-      expect(find.byTooltip('مسح التاريخ المحدد'), findsNothing);
-    });
+        expect(changedValue, isNull);
+        expect(find.byTooltip('مسح التاريخ المحدد'), findsNothing);
+      },
+    );
 
     testWidgets('rejects an incomplete range through Form validation', (
       tester,
@@ -123,10 +124,7 @@ void main() {
 
       expect(formKey.currentState!.validate(), isFalse);
       await tester.pump();
-      expect(
-        find.text('يرجى تحديد تاريخ البداية والنهاية'),
-        findsOneWidget,
-      );
+      expect(find.text('يرجى تحديد تاريخ البداية والنهاية'), findsOneWidget);
     });
 
     testWidgets('preserves a range whose end date was selected first', (
@@ -140,8 +138,8 @@ void main() {
             value: [null, DateTime(2026, 11, 18)],
             displayFormatter: (dates) =>
                 dates.length == 2 && dates.first == null && dates.last != null
-                    ? 'إلى ${dates.last!.day}'
-                    : 'نطاق غير صحيح',
+                ? 'إلى ${dates.last!.day}'
+                : 'نطاق غير صحيح',
           ),
         ),
       );
@@ -223,7 +221,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('normalizes duplicate dates in multi selection', (tester) async {
+    testWidgets('normalizes duplicate dates in multi selection', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _harness(
           CustomDatePickerField.multi(

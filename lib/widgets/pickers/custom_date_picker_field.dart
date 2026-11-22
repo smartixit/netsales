@@ -74,9 +74,8 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
          ),
          onSaved: onSaved == null
              ? null
-             : (candidate) => onSaved(
-                   _normalizeDatePickerValue(candidate, pickerType),
-                 ),
+             : (candidate) =>
+                   onSaved(_normalizeDatePickerValue(candidate, pickerType)),
          builder: _buildCustomDatePickerField,
        );
 
@@ -121,9 +120,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
       onChanged: onChanged == null
           ? null
           : (dates) => onChanged(extractDate(dates)),
-      onSaved: onSaved == null
-          ? null
-          : (dates) => onSaved(extractDate(dates)),
+      onSaved: onSaved == null ? null : (dates) => onSaved(extractDate(dates)),
       label: label,
       hint: hint ?? 'اختر التاريخ...',
       pickerType: DatePickerSelectionMode.single,
@@ -193,10 +190,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
         return null;
       }
 
-      return DateTimeRange(
-        start: normalized[0]!,
-        end: normalized[1]!,
-      );
+      return DateTimeRange(start: normalized[0]!, end: normalized[1]!);
     }
 
     return CustomDatePickerField(
@@ -205,9 +199,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
       onChanged: onChanged == null
           ? null
           : (dates) => onChanged(extractRange(dates)),
-      onSaved: onSaved == null
-          ? null
-          : (dates) => onSaved(extractRange(dates)),
+      onSaved: onSaved == null ? null : (dates) => onSaved(extractRange(dates)),
       label: label,
       hint: hint ?? 'اختر النطاق الزمني...',
       pickerType: DatePickerSelectionMode.range,
@@ -276,9 +268,7 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
       onChanged: onChanged == null
           ? null
           : (dates) => onChanged(extractDates(dates)),
-      onSaved: onSaved == null
-          ? null
-          : (dates) => onSaved(extractDates(dates)),
+      onSaved: onSaved == null ? null : (dates) => onSaved(extractDates(dates)),
       label: label,
       hint: hint ?? 'اختر التواريخ...',
       pickerType: DatePickerSelectionMode.multi,
@@ -343,10 +333,8 @@ class CustomDatePickerField extends FormField<List<DateTime?>> {
       _CustomDatePickerFieldState();
 }
 
-class _CustomDatePickerFieldState
-    extends FormFieldState<List<DateTime?>> {
-  CustomDatePickerField get _fieldWidget =>
-      widget as CustomDatePickerField;
+class _CustomDatePickerFieldState extends FormFieldState<List<DateTime?>> {
+  CustomDatePickerField get _fieldWidget => widget as CustomDatePickerField;
 
   @override
   void didUpdateWidget(covariant FormField<List<DateTime?>> oldWidget) {
@@ -369,9 +357,7 @@ class _CustomDatePickerFieldState
         previous.autovalidateMode != current.autovalidateMode;
 
     if (valueChanged || selectionModeChanged) {
-      setValue(
-        _normalizeDatePickerValue(current.value, current.pickerType),
-      );
+      setValue(_normalizeDatePickerValue(current.value, current.pickerType));
     }
 
     // Re-evaluate an existing or previously interacted field after an
@@ -465,10 +451,7 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
 
     if (actions.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: actions,
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: actions);
   }
 
   final decoration = InputDecoration(
@@ -494,7 +477,8 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
     ),
     hintText: field.hint ?? _defaultDatePickerHint(field.pickerType),
     hintMaxLines: 2,
-    prefixIcon: field.prefixIcon ??
+    prefixIcon:
+        field.prefixIcon ??
         Icon(
           field.enableTime
               ? Icons.event_available_rounded
@@ -503,14 +487,8 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
           color: hasError ? colors.error : colors.onSurfaceVariant,
         ),
     suffixIcon: buildSuffix(),
-    prefixIconConstraints: BoxConstraints(
-      minWidth: 48.r,
-      minHeight: 48.r,
-    ),
-    suffixIconConstraints: BoxConstraints(
-      minWidth: 48.r,
-      minHeight: 48.r,
-    ),
+    prefixIconConstraints: BoxConstraints(minWidth: 48.r, minHeight: 48.r),
+    suffixIconConstraints: BoxConstraints(minWidth: 48.r, minHeight: 48.r),
     errorText: fieldState.errorText,
     errorMaxLines: 3,
     enabled: field.enabled,
@@ -575,9 +553,7 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.inputText.copyWith(
-                    color: field.enabled
-                        ? colors.onSurface
-                        : colors.onDisabled,
+                    color: field.enabled ? colors.onSurface : colors.onDisabled,
                   ),
                 ),
               ),
@@ -716,19 +692,11 @@ String _formatDatePickerValue(
       final end = dates.length > 1 ? dates[1] : null;
 
       if (start != null && end == null) {
-        return 'من ${DatePickerService.instance.formatArabicDate(
-          start,
-          includeDayName: false,
-          includeTime: field.enableTime,
-        )}';
+        return 'من ${DatePickerService.instance.formatArabicDate(start, includeDayName: false, includeTime: field.enableTime)}';
       }
 
       if (start == null && end != null) {
-        return 'إلى ${DatePickerService.instance.formatArabicDate(
-          end,
-          includeDayName: false,
-          includeTime: field.enableTime,
-        )}';
+        return 'إلى ${DatePickerService.instance.formatArabicDate(end, includeDayName: false, includeTime: field.enableTime)}';
       }
 
       return DatePickerService.instance.formatArabicRange(
