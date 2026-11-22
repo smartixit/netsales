@@ -10,6 +10,7 @@ import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/enums/user_device_status.dart';
 import 'package:netsales/core/enums/user_status.dart';
+import 'package:netsales/core/enums/accounting_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
@@ -381,6 +382,42 @@ class EnumPresentationRegistry {
         icon: Icons.arrow_upward_rounded,
       ),
       WalletOperationType.unknown => EnumPresentation.unknown(
+        fallbackLabel: label,
+      ),
+    };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 9.1. المركز المحاسبي للمحفظة (AccountingStatus)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolveAccountingStatus(
+    AccountingStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      AccountingStatus.credit => 'دائن (له رصيد متاح)',
+      AccountingStatus.debit => 'مدين (عليه مديونية للشبكة)',
+      AccountingStatus.zero => 'متزن (لا يوجد رصيد أو مديونية)',
+      AccountingStatus.unknown => 'حالة محاسبية غير محددة',
+    });
+
+    return switch (status) {
+      AccountingStatus.credit => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+      ),
+      AccountingStatus.debit => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.warning_amber_rounded,
+      ),
+      AccountingStatus.zero => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.horizontal_rule_rounded,
+      ),
+      AccountingStatus.unknown => EnumPresentation.unknown(
         fallbackLabel: label,
       ),
     };

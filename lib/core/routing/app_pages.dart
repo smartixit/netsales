@@ -59,6 +59,8 @@ import 'package:netsales/features/workspace/presentation/bindings/network_worksp
 import 'package:netsales/features/workspace/presentation/bindings/pos_workspace_binding.dart';
 import 'package:netsales/features/workspace/presentation/screens/network_workspace_shell_screen.dart';
 import 'package:netsales/features/workspace/presentation/screens/pos_workspace_shell_screen.dart';
+import 'package:netsales/features/wallet/presentation/bindings/pos_wallet_statement_binding.dart';
+import 'package:netsales/features/wallet/presentation/screens/pos_wallet_statement_screen.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_binding.dart';
 import 'package:netsales/widgets/charts/showcase/charts_showcase_screen.dart';
 import 'package:netsales/widgets/dashboard_metrics/showcase/dashboard_metrics_showcase_binding.dart';
@@ -417,6 +419,19 @@ abstract final class AppPages {
           anyPermissions: [AppPermissions.expensesCreate],
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+
+    // ==========================================
+    // 10. محفظة نقطة البيع ودفتر الأستاذ (POS Wallet & Ledger)
+    // ==========================================
+    GetPage(
+      name: AppRoutes.posWalletStatement,
+      page: () => const PosWalletStatementScreen(),
+      binding: PosWalletStatementBinding(),
+      middlewares: [
+        AuthGuard(),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
 
