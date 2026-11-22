@@ -27,6 +27,9 @@ Only the POS new-procurement package cards and cart summary may calculate a **no
 
 This exception is not an accounting calculation and must never be submitted, persisted, or used for financial authorization. New request creation sends only package IDs, quantities, and each item's signed snapshot token. Laravel validates each snapshot against the current POS/network/package tariff and discount, then computes authoritative totals. Missing or expired snapshots block submission and require catalogue refresh. No other financial feature receives this exception.
 
-## 5. POS Sales Scope
-- POS invoices are cash-settled only. Credit sales, POS debt ledgers, debt aging, repayment collection, reversal, and FIFO allocation are not supported.
-- Flutter must not expose navigation, screens, forms, report types, or API clients for the removed POS debt/repayment domain.
+## 5. POS CASH/CREDIT and Repayment Scope
+- POS invoices and procurement requests support CASH and CREDIT according to the API contract.
+- Flutter may collect an optional initial payment amount where the API contract permits it; it must pass the amount unchanged and must never derive paid_amount, remaining_amount, payment_status, or credit capacity.
+- Invoice details and reports display the payment fields returned by Laravel. No local financial balance calculation is permitted.
+- POS Repayment collection, reversal, invoice allocation/FIFO, and repayment-specific screens, navigation, reports, and documents are removed.
+- Receivables aging and invoice-level outstanding balances remain distinct from repayment collection and must not be removed merely because Repayment is removed.
