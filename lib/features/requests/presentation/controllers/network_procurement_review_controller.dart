@@ -55,7 +55,7 @@ class NetworkProcurementReviewController
   final GetRequestDetailsUseCase getRequestDetailsUseCase;
   final GetRequestStatusSummaryUseCase? getRequestStatusSummaryUseCase;
   final GetEffectivePackageDiscountsForPosUseCase?
-      getEffectivePackageDiscountsForPosUseCase;
+  getEffectivePackageDiscountsForPosUseCase;
   int _modificationRevision = 0;
   int _editorLoadRevision = 0;
   int _packageLoadRevision = 0;
@@ -357,7 +357,8 @@ class NetworkProcurementReviewController
     );
     final customDiscount = discountForPackage(packageId);
     final hasCustom =
-        customDiscount?.isCustom == true || fromRequest?.isCustomDiscount == true;
+        customDiscount?.isCustom == true ||
+        fromRequest?.isCustomDiscount == true;
 
     if (fromCatalog != null) {
       if (hasCustom && !fromCatalog.procurementIsCustomDiscount) {
@@ -416,10 +417,8 @@ class NetworkProcurementReviewController
           packageValidity: reqPackage.packageValidity,
           packageVoucherCount: reqPackage.packageVoucherCount,
           packageVoucherPrice: reqPackage.packageVoucherPrice,
-          packageDefaultCashDiscount:
-              reqPackage.packageDefaultCashDiscount,
-          packageDefaultCreditDiscount:
-              reqPackage.packageDefaultCreditDiscount,
+          packageDefaultCashDiscount: reqPackage.packageDefaultCashDiscount,
+          packageDefaultCreditDiscount: reqPackage.packageDefaultCreditDiscount,
           cashDiscountAmount: reqPackage.cashDiscountAmount,
           creditDiscountAmount: reqPackage.creditDiscountAmount,
           effectiveCashPrice: reqPackage.effectiveCashPrice,
