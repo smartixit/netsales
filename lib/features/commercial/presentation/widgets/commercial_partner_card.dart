@@ -112,7 +112,7 @@ class CommercialPartnerCard extends StatelessWidget {
       onTap: onTap ??
           (isNetworkView
               ? () {
-                  Get.toNamed(
+                  Get.toNamed<void>(
                     AppRoutes.posWalletStatement,
                     arguments: {
                       'network_id': link.networkId,

@@ -47,7 +47,7 @@ class CommercialPartnerCardActions extends StatelessWidget {
           subtitle: 'عرض الحركات المالية والعمليات لنقطة البيع',
           icon: Icons.account_balance_wallet_outlined,
           onTap: () {
-            Get.toNamed(
+            Get.toNamed<void>(
               AppRoutes.posWalletStatement,
               arguments: {
                 'network_id': link.networkId,

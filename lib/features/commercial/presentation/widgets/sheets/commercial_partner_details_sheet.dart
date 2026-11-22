@@ -210,7 +210,7 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
                     borderColor: colors.primary.withValues(alpha: .5),
                     onPressed: () {
                       Get.back<void>();
-                      Get.toNamed(
+                      Get.toNamed<void>(
                         AppRoutes.posWalletStatement,
                         arguments: {
                           'network_id': link.networkId,

@@ -366,7 +366,7 @@ class NetworkCommercialDirectoryController
 
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
   void openPosWalletStatement(NetworkPosLinkEntity link) {
-    Get.toNamed(
+    Get.toNamed<void>(
       AppRoutes.posWalletStatement,
       arguments: {
         'network_id': link.networkId,
