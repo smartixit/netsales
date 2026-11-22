@@ -121,7 +121,7 @@ class NetworkDirectInvoiceScreen
                         const CustomSectionHeading(
                           title: 'التسوية النقدية',
                           subtitle:
-                              'اختر طريقة التحصيل المالي المقررة للفاتورة',
+                              'يتم إصدار الفواتير المباشرة وفق التسوية النقدية فقط',
                           icon: Icons.payments_rounded,
                         ),
                         AppSpacing.vXs,
