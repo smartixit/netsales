@@ -83,10 +83,7 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       orElse: () => null,
     );
     if (pkg == null) {
-      throw const AppException(
-        'الباقة غير موجودة',
-        code: '404',
-      );
+      throw const AppException('الباقة غير موجودة', code: '404');
     }
     return pkg;
   }
@@ -114,7 +111,9 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
 
   @override
   Future<PackageEntity> updatePackage(
-      int packageId, UpdatePackageInput input) async {
+    int packageId,
+    UpdatePackageInput input,
+  ) async {
     final index = _packages.indexWhere((p) => p.packageId == packageId);
     if (index >= 0) {
       final existing = _packages[index];
@@ -138,10 +137,7 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       _packages[index] = updated;
       return updated;
     }
-    throw const AppException(
-      'الباقة غير موجودة',
-      code: '404',
-    );
+    throw const AppException('الباقة غير موجودة', code: '404');
   }
 
   @override
@@ -174,77 +170,83 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
       _packages[index] = updated;
       return updated;
     }
-    throw const AppException(
-      'الباقة غير موجودة',
-      code: '404',
-    );
+    throw const AppException('الباقة غير موجودة', code: '404');
   }
 
   @override
-  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({required int networkId, required int posId}) async => const [];
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  }) async => const [];
 
   @override
-  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {
+  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
+    required int networkId,
+    required int posId,
+    required int packageId,
+  }) {
     throw UnimplementedError();
   }
 }
 
 void main() {
   group('Voucher Package Models and Serialization Tests', () {
-    test('PackageModel fromJson deserializes full backend resource correctly',
-        () {
-      final json = {
-        'package_id': 101,
-        'network_id': 5,
-        'package_name': 'باقة النجوم 10 جيجا',
-        'package_color': '#10B981',
-        'package_balance': 10737418240,
-        'package_uptime': 30,
-        'package_validity': 30,
-        'package_voucher_count': 500,
-        'package_voucher_price': 1500.0,
-        'package_default_cash_discount': 10.0,
-        'package_default_credit_discount': 5.0,
-        'cash_discount_amount': 150.0,
-        'credit_discount_amount': 75.0,
-        'effective_cash_price': 1350.0,
-        'effective_credit_price': 1425.0,
-        'status': true,
-        'created_by': 1,
-        'created_at': '2026-11-01 10:00:00',
-        'updated_at': '2026-11-02 12:00:00',
-        'procurement_pricing': {
-          'base_unit_price_minor': 150000,
-          'cash_discount_basis_points': 1000,
-          'credit_discount_basis_points': 500,
-          'cash_effective_unit_price_minor': 135000,
-          'credit_effective_unit_price_minor': 142500,
-          'is_custom': true,
-          'pricing_snapshot_token': 'snapshot-token',
-          'pricing_snapshot_expires_at': '2026-11-02 12:30:00',
-        },
-      };
+    test(
+      'PackageModel fromJson deserializes full backend resource correctly',
+      () {
+        final json = {
+          'package_id': 101,
+          'network_id': 5,
+          'package_name': 'باقة النجوم 10 جيجا',
+          'package_color': '#10B981',
+          'package_balance': 10737418240,
+          'package_uptime': 30,
+          'package_validity': 30,
+          'package_voucher_count': 500,
+          'package_voucher_price': 1500.0,
+          'package_default_cash_discount': 10.0,
+          'package_default_credit_discount': 5.0,
+          'cash_discount_amount': 150.0,
+          'credit_discount_amount': 75.0,
+          'effective_cash_price': 1350.0,
+          'effective_credit_price': 1425.0,
+          'status': true,
+          'created_by': 1,
+          'created_at': '2026-11-01 10:00:00',
+          'updated_at': '2026-11-02 12:00:00',
+          'procurement_pricing': {
+            'base_unit_price_minor': 150000,
+            'cash_discount_basis_points': 1000,
+            'credit_discount_basis_points': 500,
+            'cash_effective_unit_price_minor': 135000,
+            'credit_effective_unit_price_minor': 142500,
+            'is_custom': true,
+            'pricing_snapshot_token': 'snapshot-token',
+            'pricing_snapshot_expires_at': '2026-11-02 12:30:00',
+          },
+        };
 
-      final model = PackageModel.fromJson(json);
+        final model = PackageModel.fromJson(json);
 
-      expect(model.packageId, 101);
-      expect(model.networkId, 5);
-      expect(model.packageName, 'باقة النجوم 10 جيجا');
-      expect(model.packageColor, '#10B981');
-      expect(model.packageBalance, 10737418240);
-      expect(model.packageUptime, 30);
-      expect(model.packageValidity, 30);
-      expect(model.packageVoucherCount, 500);
-      expect(model.packageVoucherPrice, 1500.0);
-      expect(model.packageDefaultCashDiscount, 10.0);
-      expect(model.packageDefaultCreditDiscount, 5.0);
-      expect(model.cashDiscountAmount, 150.0);
-      expect(model.creditDiscountAmount, 75.0);
-      expect(model.effectiveCashPrice, 1350.0);
-      expect(model.effectiveCreditPrice, 1425.0);
-      expect(model.status, true);
-      expect(model.procurementIsCustomDiscount, isTrue);
-    });
+        expect(model.packageId, 101);
+        expect(model.networkId, 5);
+        expect(model.packageName, 'باقة النجوم 10 جيجا');
+        expect(model.packageColor, '#10B981');
+        expect(model.packageBalance, 10737418240);
+        expect(model.packageUptime, 30);
+        expect(model.packageValidity, 30);
+        expect(model.packageVoucherCount, 500);
+        expect(model.packageVoucherPrice, 1500.0);
+        expect(model.packageDefaultCashDiscount, 10.0);
+        expect(model.packageDefaultCreditDiscount, 5.0);
+        expect(model.cashDiscountAmount, 150.0);
+        expect(model.creditDiscountAmount, 75.0);
+        expect(model.effectiveCashPrice, 1350.0);
+        expect(model.effectiveCreditPrice, 1425.0);
+        expect(model.status, true);
+        expect(model.procurementIsCustomDiscount, isTrue);
+      },
+    );
 
     test('PackageModel defaults POS custom-discount metadata to false', () {
       final model = PackageModel.fromJson({
@@ -263,9 +265,7 @@ void main() {
       expect(model.packageBalance, 10737418240);
     });
 
-    test(
-        'PackageModel toJson serializes request payload accurately without currency',
-        () {
+    test('PackageModel toJson serializes request payload accurately without currency', () {
       final model = PackageModel(
         packageId: 101,
         networkId: 5,
@@ -343,25 +343,27 @@ void main() {
       expect(result.packageVoucherPrice, 1000.0);
     });
 
-    test('CreatePackageUseCase appends and returns newly created package',
-        () async {
-      const input = CreatePackageInput(
-        networkId: 10,
-        packageName: 'باقة المساء 20 جيجا',
-        packageBalance: 20480,
-        packageVoucherCount: 200,
-        packageVoucherPrice: 2500.0,
-        packageDefaultCashDiscount: 12.0,
-        packageDefaultCreditDiscount: 6.0,
-        status: true,
-      );
+    test(
+      'CreatePackageUseCase appends and returns newly created package',
+      () async {
+        const input = CreatePackageInput(
+          networkId: 10,
+          packageName: 'باقة المساء 20 جيجا',
+          packageBalance: 20480,
+          packageVoucherCount: 200,
+          packageVoucherPrice: 2500.0,
+          packageDefaultCashDiscount: 12.0,
+          packageDefaultCreditDiscount: 6.0,
+          status: true,
+        );
 
-      final result = await createPackageUseCase(input);
-      expect(result.packageId, 2);
+        final result = await createPackageUseCase(input);
+        expect(result.packageId, 2);
 
-      final list = await getPackagesUseCase(networkId: 10);
-      expect(list.items.length, 2);
-    });
+        final list = await getPackagesUseCase(networkId: 10);
+        expect(list.items.length, 2);
+      },
+    );
 
     test('UpdatePackageUseCase updates package entity in repository', () async {
       const input = UpdatePackageInput(

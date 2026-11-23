@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// محلل الألوان لهوية كروت وباقات الإنترنت (Package Color Resolver)
-class PackageColorResolver {
-  const PackageColorResolver._();
+class ColorResolver {
+  const ColorResolver._();
 
   /// تحليل اللون من كود الـ Hex النصي بأمان مع توفير لون احتياطي
   static Color resolve(String? hexCode, Color fallback) {

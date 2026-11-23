@@ -24,16 +24,16 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
         ),
         AppSpacing.vSm,
 
-        // عدد الكروت في الحزمة
+        // عدد الكروت في الورقة
         CustomTextField(
           controller: controller.voucherCountController,
-          label: 'عدد الكروت في الحزمة',
+          label: 'عدد الكروت في الورقة',
           hint: 'مثال: 51',
           prefixIcon: const Icon(Icons.style_outlined),
           keyboardType: TextInputType.number,
           isRequired: true,
           validator: FormValidators.positiveIntegerValidator(
-            fieldName: 'عدد الكروت في الحزمة',
+            fieldName: 'عدد الكروت في الورقة',
           ),
         ),
 
@@ -81,7 +81,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                     }).toList(),
                 onChanged: (val) {
                   if (val != null) {
-                    controller.selectedBalanceUnit.value = val;
+                    controller.setBalanceUnit(val);
                   }
                 },
               ),
@@ -100,7 +100,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
               child: CustomTextField(
                 controller: controller.uptimeController,
                 label: 'وقت الاستخدام (اختياري)',
-                hint: 'بلا تحديد',
+                hint: 'مفتوح',
                 prefixIcon: const Icon(Icons.timer_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -129,7 +129,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                     }).toList(),
                 onChanged: (val) {
                   if (val != null) {
-                    controller.selectedUptimeUnit.value = val;
+                    controller.setUptimeUnit(val);
                   }
                 },
               ),
@@ -148,7 +148,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
               child: CustomTextField(
                 controller: controller.validityController,
                 label: 'فترة الصلاحية (اختياري)',
-                hint: 'بلا تحديد',
+                hint: 'مفتوح',
                 prefixIcon: const Icon(Icons.event_available_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -178,7 +178,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                     }).toList(),
                 onChanged: (val) {
                   if (val != null) {
-                    controller.selectedValidityUnit.value = val;
+                    controller.setValidityUnit(val);
                   }
                 },
               ),

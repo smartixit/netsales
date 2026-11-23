@@ -109,7 +109,9 @@ void main() {
     final controller = PosNewProcurementOrderController(
       createRequestUseCase: CreateRequestUseCase(_RequestRepository()),
       getMyPosUseCase: GetMyPosUseCase(_CommercialRepository()),
-      getPosNetworksListUseCase: GetPosNetworksListUseCase(_CommercialRepository()),
+      getPosNetworksListUseCase: GetPosNetworksListUseCase(
+        _CommercialRepository(),
+      ),
       getEffectivePackageDiscountsForPosUseCase:
           GetEffectivePackageDiscountsForPosUseCase(repository),
     );

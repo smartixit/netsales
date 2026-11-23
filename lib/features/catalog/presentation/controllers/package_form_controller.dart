@@ -301,6 +301,51 @@ class PackageFormController extends GetxController {
         double.infinity,
       );
 
+  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً
+  void setBalanceUnit(DataSizeUnit newUnit) {
+    if (selectedBalanceUnit.value == newUnit) return;
+    final currentVal = double.tryParse(balanceController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final bytes = selectedBalanceUnit.value.toCanonicalBytes(currentVal);
+      final inNewUnit = newUnit.fromCanonicalBytes(bytes);
+      final formatted = inNewUnit == inNewUnit.roundToDouble()
+          ? inNewUnit.toInt().toString()
+          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
+      balanceController.text = formatted;
+    }
+    selectedBalanceUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً
+  void setUptimeUnit(TimeDurationUnit newUnit) {
+    if (selectedUptimeUnit.value == newUnit) return;
+    final currentVal = double.tryParse(uptimeController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final minutes = selectedUptimeUnit.value.toCanonicalMinutes(currentVal);
+      final inNewUnit = newUnit.fromCanonicalMinutes(minutes);
+      final formatted = inNewUnit == inNewUnit.roundToDouble()
+          ? inNewUnit.toInt().toString()
+          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
+      uptimeController.text = formatted;
+    }
+    selectedUptimeUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً
+  void setValidityUnit(TimeDurationUnit newUnit) {
+    if (selectedValidityUnit.value == newUnit) return;
+    final currentVal = double.tryParse(validityController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final minutes = selectedValidityUnit.value.toCanonicalMinutes(currentVal);
+      final inNewUnit = newUnit.fromCanonicalMinutes(minutes);
+      final formatted = inNewUnit == inNewUnit.roundToDouble()
+          ? inNewUnit.toInt().toString()
+          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
+      validityController.text = formatted;
+    }
+    selectedValidityUnit.value = newUnit;
+  }
+
   /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
   Future<void> submitForm() async {
     if (!formKey.currentState!.validate()) {

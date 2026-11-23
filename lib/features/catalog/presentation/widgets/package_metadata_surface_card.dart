@@ -52,7 +52,11 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
             color: colors.outlineVariant.withValues(alpha: 0.4),
           ),
           CustomInfoListTile(
-            leading: Icon(Icons.hub_outlined, size: 20.r, color: colors.primary),
+            leading: Icon(
+              Icons.hub_outlined,
+              size: 20.r,
+              color: colors.primary,
+            ),
             title: Text(
               'شبكة الكروت التابعة',
               style: AppTypography.bodySmall.copyWith(

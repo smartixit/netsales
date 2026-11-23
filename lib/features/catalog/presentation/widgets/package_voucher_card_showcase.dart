@@ -8,7 +8,7 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/catalog/presentation/utils/package_color_resolver.dart';
+import 'package:netsales/core/utils/color_resolver.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_voucher_badge_divider.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_voucher_mini_badge.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
@@ -27,7 +27,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final baseColor = PackageColorResolver.resolve(
+    final baseColor = ColorResolver.resolve(
       package.packageColor,
       colors.primary,
     );

@@ -5,7 +5,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
-import 'package:netsales/features/catalog/presentation/utils/package_color_resolver.dart';
+import 'package:netsales/core/utils/color_resolver.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_actions.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_header.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_micro_pod.dart';
@@ -49,7 +49,7 @@ class PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final accentColor = PackageColorResolver.resolve(
+    final accentColor = ColorResolver.resolve(
       package.packageColor,
       colors.primary,
     );

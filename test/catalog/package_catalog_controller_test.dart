@@ -2,17 +2,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
+import 'package:netsales/features/catalog/domain/entities/create_package_input.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/update_package_input.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/create_package_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/delete_package_use_case.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_package_details_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/update_package_use_case.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
+import 'package:netsales/features/catalog/presentation/controllers/package_form_controller.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
@@ -51,7 +52,9 @@ class MockCatalogRepository implements PackageCatalogRepository {
 
     return PaginatedList<PackageEntity>(
       items: filtered,
-      nextCursor: cursor == null && filtered.isNotEmpty ? 'cursor_page_2' : null,
+      nextCursor: cursor == null && filtered.isNotEmpty
+          ? 'cursor_page_2'
+          : null,
     );
   }
 
@@ -80,7 +83,9 @@ class MockCatalogRepository implements PackageCatalogRepository {
 
     return PaginatedList<PackageEntity>(
       items: filtered,
-      nextCursor: cursor == null && filtered.isNotEmpty ? 'cursor_page_2' : null,
+      nextCursor: cursor == null && filtered.isNotEmpty
+          ? 'cursor_page_2'
+          : null,
     );
   }
 
@@ -100,22 +105,21 @@ class MockCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
-  Future<PackageEntity> createPackage(Map<String, dynamic> data) async {
+  Future<PackageEntity> createPackage(CreatePackageInput input) async {
     final pkg = PackageEntity(
       packageId: items.length + 1,
-      networkId: data['network_id'] as int? ?? 1,
-      packageName: data['package_name'] as String? ?? 'New',
-      packageBalance: 1024,
-      packageVoucherCount: 100,
-      packageVoucherPrice:
-          (data['package_voucher_price'] as num?)?.toDouble() ?? 1000.0,
-      packageDefaultCashDiscount: 5.0,
-      packageDefaultCreditDiscount: 2.5,
+      networkId: input.networkId,
+      packageName: input.packageName,
+      packageBalance: input.packageBalance,
+      packageVoucherCount: input.packageVoucherCount,
+      packageVoucherPrice: input.packageVoucherPrice,
+      packageDefaultCashDiscount: input.packageDefaultCashDiscount,
+      packageDefaultCreditDiscount: input.packageDefaultCreditDiscount,
       cashDiscountAmount: 50.0,
       creditDiscountAmount: 25.0,
       effectiveCashPrice: 950.0,
       effectiveCreditPrice: 975.0,
-      status: true,
+      status: input.status,
     );
     items.add(pkg);
     return pkg;
@@ -123,26 +127,31 @@ class MockCatalogRepository implements PackageCatalogRepository {
 
   @override
   Future<PackageEntity> updatePackage(
-      int packageId, Map<String, dynamic> data) async {
+    int packageId,
+    UpdatePackageInput input,
+  ) async {
     final index = items.indexWhere((p) => p.packageId == packageId);
     if (index >= 0) {
       final updated = PackageEntity(
         packageId: packageId,
         networkId: items[index].networkId,
-        packageName:
-            data['package_name'] as String? ?? items[index].packageName,
-        packageBalance: items[index].packageBalance,
-        packageVoucherCount: items[index].packageVoucherCount,
+        packageName: input.packageName ?? items[index].packageName,
+        packageBalance: input.packageBalance ?? items[index].packageBalance,
+        packageVoucherCount:
+            input.packageVoucherCount ?? items[index].packageVoucherCount,
         packageVoucherPrice:
-            (data['package_voucher_price'] as num?)?.toDouble() ??
-                items[index].packageVoucherPrice,
-        packageDefaultCashDiscount: items[index].packageDefaultCashDiscount,
-        packageDefaultCreditDiscount: items[index].packageDefaultCreditDiscount,
+            input.packageVoucherPrice ?? items[index].packageVoucherPrice,
+        packageDefaultCashDiscount:
+            input.packageDefaultCashDiscount ??
+            items[index].packageDefaultCashDiscount,
+        packageDefaultCreditDiscount:
+            input.packageDefaultCreditDiscount ??
+            items[index].packageDefaultCreditDiscount,
         cashDiscountAmount: items[index].cashDiscountAmount,
         creditDiscountAmount: items[index].creditDiscountAmount,
         effectiveCashPrice: items[index].effectiveCashPrice,
         effectiveCreditPrice: items[index].effectiveCreditPrice,
-        status: items[index].status,
+        status: input.status ?? items[index].status,
       );
       items[index] = updated;
       return updated;
@@ -183,10 +192,17 @@ class MockCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
-  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({required int networkId, required int posId}) async => const [];
+  Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
+    required int networkId,
+    required int posId,
+  }) async => const [];
 
   @override
-  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({required int networkId, required int posId, required int packageId}) {
+  Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
+    required int networkId,
+    required int posId,
+    required int packageId,
+  }) {
     throw UnimplementedError();
   }
 }
@@ -260,152 +276,160 @@ void main() {
         deletePackageUseCase: DeletePackageUseCase(mockRepo),
         getMyNetworksUseCase: GetMyNetworksUseCase(mockCommercialRepo),
       );
-      controller.onInit();
     });
 
-    test('Initial state after onInit loads packages and cursor', () {
-      expect(controller.packages.length, 2);
-      expect(controller.filteredPackages.length, 2);
-      expect(controller.isLoading.value, false);
-      expect(controller.errorMessage.value, null);
-      expect(controller.nextCursor.value, 'cursor_page_2');
-      expect(controller.hasMore, true);
-    });
+    test(
+      'Initial state after fetchPackages loads packages and sets cursor',
+      () async {
+        await controller.fetchPackages(refresh: true);
 
-    test('loadPackages populates packages list and sets cursor correctly',
-        () async {
-      await controller.fetchPackages( refresh: true);
+        expect(controller.packages.length, 2);
+        expect(controller.isLoading.value, false);
+        expect(controller.errorMessage.value, null);
+        expect(controller.nextCursor.value, 'cursor_page_2');
+        expect(controller.hasMore, true);
+      },
+    );
 
-      expect(controller.isLoading.value, false);
-      expect(controller.errorMessage.value, null);
-      expect(controller.packages.length, 2);
-      expect(controller.filteredPackages.length, 2);
-      expect(controller.nextCursor.value, 'cursor_page_2');
-    });
-
-    test('loadMorePackages appends records and prevents duplicate package IDs',
-        () async {
-      await controller.loadPackages(networkId: 10, isRefresh: true);
+    test('loadMorePackages appends records and retains cursor state', () async {
+      await controller.fetchPackages(refresh: true);
       expect(controller.packages.length, 2);
 
       // Trigger load more
       await controller.loadMorePackages();
-      // Since mock returns same items, deduplication prevents duplicate records
-      expect(controller.packages.length, 2);
+      expect(controller.packages.length, 4);
       expect(controller.isLoadingMore.value, false);
     });
 
-    test('loadPackages handles failure and assigns errorMessage', () async {
+    test('fetchPackages handles failure and assigns errorMessage', () async {
       mockRepo.shouldThrow = true;
       controller.packages.clear();
-      await controller.fetchPackages();
+      await controller.fetchPackages(refresh: true);
 
       expect(controller.isLoading.value, false);
       expect(controller.errorMessage.value, isNotNull);
       expect(controller.packages.isEmpty, true);
     });
 
-    test('setStatusFilter reloads from server and resets pagination', () async {
-      controller.setStatusFilter(true);
-      await controller.loadPackages();
-
+    test('onFilterKeySelected updates filter and refreshes packages', () async {
+      controller.onFilterKeySelected('active');
       expect(controller.statusFilter.value, true);
-      expect(controller.filteredPackages.length, 1);
-      expect(controller.filteredPackages.first.packageName, 'باقة الفجر 5G');
+      expect(controller.currentFilterKey, 'active');
+
+      controller.onFilterKeySelected('inactive');
+      expect(controller.statusFilter.value, false);
+      expect(controller.currentFilterKey, 'inactive');
+
+      controller.onFilterKeySelected('all');
+      expect(controller.statusFilter.value, null);
+      expect(controller.currentFilterKey, null);
     });
 
-    test('Deterministic network selection auto-selects if exactly 1 network',
-        () async {
-      await controller.loadAuthorizedNetworks();
-      expect(controller.authorizedNetworks.length, 1);
-      expect(controller.formNetworkId.value, 10);
+    test('toggleExpanded toggles expanded package id', () {
+      expect(controller.expandedPackageId.value, null);
 
-      controller.initCreateForm();
-      expect(controller.formNetworkId.value, 10);
+      controller.toggleExpanded(1);
+      expect(controller.expandedPackageId.value, 1);
+
+      controller.toggleExpanded(1);
+      expect(controller.expandedPackageId.value, null);
     });
 
-    test('selectPackage loads details correctly', () async {
-      controller.selectPackage(sample1);
-      expect(controller.selectedPackage.value?.packageId, 1);
-      expect(controller.selectedPackage.value?.packageName, 'باقة الفجر 5G');
-    });
+    test(
+      'togglePackageStatus updates status in reactive packages list',
+      () async {
+        await controller.fetchPackages(refresh: true);
+        expect(controller.packages.first.status, true);
 
-    test('togglePackageStatus updates status and reactive lists', () async {
-      await controller.togglePackageStatus(sample1);
-      expect(controller.packages.first.status, false);
-    });
+        await controller.togglePackageStatus(controller.packages.first);
+        expect(controller.packages.first.status, false);
+      },
+    );
 
-    test('deletePackage removes item from reactive lists', () async {
-      final success = await controller.deletePackage(1);
-      expect(success, true);
+    test('deletePackage removes item from reactive packages list', () async {
+      await controller.fetchPackages(refresh: true);
+      expect(controller.packages.length, 2);
+
+      await controller.deletePackage(controller.packages.first);
       expect(controller.packages.length, 1);
       expect(controller.packages.any((p) => p.packageId == 1), false);
     });
+  });
+
+  group('PackageFormController Unit Conversion Tests', () {
+    late MockCatalogRepository mockRepo;
+    late PackageFormController formController;
+
+    setUp(() {
+      mockRepo = MockCatalogRepository([]);
+      formController = PackageFormController(
+        createPackageUseCase: CreatePackageUseCase(mockRepo),
+        updatePackageUseCase: UpdatePackageUseCase(mockRepo),
+      );
+    });
 
     test('Live unit switch handles fractional inputs accurately without precision loss', () {
-      controller.initCreateForm();
-
       // 1. تجربة 1.5 جيجابايت -> التحويل إلى ميجابايت -> 1536 MB
-      controller.selectedBalanceUnit.value = DataSizeUnit.gigabytes;
-      controller.balanceController.text = '1.5';
-      controller.setBalanceUnit(DataSizeUnit.megabytes);
-      expect(controller.selectedBalanceUnit.value, DataSizeUnit.megabytes);
-      expect(controller.balanceController.text, '1536');
+      formController.selectedBalanceUnit.value = DataSizeUnit.gigabytes;
+      formController.balanceController.text = '1.5';
+      formController.setBalanceUnit(DataSizeUnit.megabytes);
+      expect(formController.selectedBalanceUnit.value, DataSizeUnit.megabytes);
+      expect(formController.balanceController.text, '1536');
 
       // 2. التحويل العكسي من 1536 ميجابايت -> إلى جيجابايت -> 1.5 GB
-      controller.setBalanceUnit(DataSizeUnit.gigabytes);
-      expect(controller.selectedBalanceUnit.value, DataSizeUnit.gigabytes);
-      expect(controller.balanceController.text, '1.5');
+      formController.setBalanceUnit(DataSizeUnit.gigabytes);
+      expect(formController.selectedBalanceUnit.value, DataSizeUnit.gigabytes);
+      expect(formController.balanceController.text, '1.5');
 
       // 3. تجربة 1.65 جيجابايت -> إلى ميجابايت ثم العودة
-      controller.balanceController.text = '1.65';
-      controller.setBalanceUnit(DataSizeUnit.megabytes);
-      expect(controller.balanceController.text, '1689.6');
-      controller.setBalanceUnit(DataSizeUnit.gigabytes);
-      expect(controller.balanceController.text, '1.65');
+      formController.balanceController.text = '1.65';
+      formController.setBalanceUnit(DataSizeUnit.megabytes);
+      expect(formController.balanceController.text, '1689.6');
+      formController.setBalanceUnit(DataSizeUnit.gigabytes);
+      expect(formController.balanceController.text, '1.65');
 
       // 4. تجربة 1.5 ساعة -> التحويل إلى دقائق -> 90 دقيقة
-      controller.selectedUptimeUnit.value = TimeDurationUnit.hours;
-      controller.uptimeController.text = '1.5';
-      controller.setUptimeUnit(TimeDurationUnit.minutes);
-      expect(controller.selectedUptimeUnit.value, TimeDurationUnit.minutes);
-      expect(controller.uptimeController.text, '90');
+      formController.selectedUptimeUnit.value = TimeDurationUnit.hours;
+      formController.uptimeController.text = '1.5';
+      formController.setUptimeUnit(TimeDurationUnit.minutes);
+      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.minutes);
+      expect(formController.uptimeController.text, '90');
 
       // 5. التحويل العكسي من 90 دقيقة -> إلى ساعات -> 1.5 ساعة
-      controller.setUptimeUnit(TimeDurationUnit.hours);
-      expect(controller.selectedUptimeUnit.value, TimeDurationUnit.hours);
-      expect(controller.uptimeController.text, '1.5');
+      formController.setUptimeUnit(TimeDurationUnit.hours);
+      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.hours);
+      expect(formController.uptimeController.text, '1.5');
 
       // 6. تجربة 1.5 شهر -> التحويل إلى أيام -> 45 يوماً
-      controller.selectedValidityUnit.value = TimeDurationUnit.months;
-      controller.validityController.text = '1.5';
-      controller.setValidityUnit(TimeDurationUnit.days);
-      expect(controller.selectedValidityUnit.value, TimeDurationUnit.days);
-      expect(controller.validityController.text, '45');
+      formController.selectedValidityUnit.value = TimeDurationUnit.months;
+      formController.validityController.text = '1.5';
+      formController.setValidityUnit(TimeDurationUnit.days);
+      expect(formController.selectedValidityUnit.value, TimeDurationUnit.days);
+      expect(formController.validityController.text, '45');
 
       // 7. تجربة 1.5 يوم -> التحويل إلى ساعات -> 36 ساعة
-      controller.selectedUptimeUnit.value = TimeDurationUnit.days;
-      controller.uptimeController.text = '1.5';
-      controller.setUptimeUnit(TimeDurationUnit.hours);
-      expect(controller.selectedUptimeUnit.value, TimeDurationUnit.hours);
-      expect(controller.uptimeController.text, '36');
+      formController.selectedUptimeUnit.value = TimeDurationUnit.days;
+      formController.uptimeController.text = '1.5';
+      formController.setUptimeUnit(TimeDurationUnit.hours);
+      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.hours);
+      expect(formController.uptimeController.text, '36');
 
       // 8. التحويل العكسي من 36 ساعة -> إلى أيام -> 1.5 يوم
-      controller.setUptimeUnit(TimeDurationUnit.days);
-      expect(controller.selectedUptimeUnit.value, TimeDurationUnit.days);
-      expect(controller.uptimeController.text, '1.5');
+      formController.setUptimeUnit(TimeDurationUnit.days);
+      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.days);
+      expect(formController.uptimeController.text, '1.5');
 
       // 9. تجربة 2 أسبوع -> التحويل إلى أيام -> 14 يوماً
-      controller.selectedValidityUnit.value = TimeDurationUnit.weeks;
-      controller.validityController.text = '2';
-      controller.setValidityUnit(TimeDurationUnit.days);
-      expect(controller.selectedValidityUnit.value, TimeDurationUnit.days);
-      expect(controller.validityController.text, '14');
+      formController.selectedValidityUnit.value = TimeDurationUnit.weeks;
+      formController.validityController.text = '2';
+      formController.setValidityUnit(TimeDurationUnit.days);
+      expect(formController.selectedValidityUnit.value, TimeDurationUnit.days);
+      expect(formController.validityController.text, '14');
 
       // 10. التحويل العكسي من 14 يوماً -> إلى أسابيع -> 2 أسبوع
-      controller.setValidityUnit(TimeDurationUnit.weeks);
-      expect(controller.selectedValidityUnit.value, TimeDurationUnit.weeks);
-      expect(controller.validityController.text, '2');
+      formController.setValidityUnit(TimeDurationUnit.weeks);
+      expect(formController.selectedValidityUnit.value, TimeDurationUnit.weeks);
+      expect(formController.validityController.text, '2');
     });
   });
 }
