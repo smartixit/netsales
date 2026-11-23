@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -17,9 +18,8 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم إدارة نموذج إنشاء وتعديل باقة كروت الإنترنت (PackageFormController)
 ///
-/// تجسد المعمارية المؤسسية النظيفة (Enterprise Clean Architecture):
-/// - لا يتعامل إطلاقاً مع قواميس Map مجهولة النوع ولا يرسل payloads مباشرة من طبقة العرض.
-/// - يقوم بتجميع المدخلات في كائنات نطاق محددة النوع [CreatePackageInput] أو [UpdatePackageInput].
+/// يدعم استوديو المحاكاة التفاعلية الحية (Live Voucher Studio):
+/// - يراقب كل مدخل لحظياً ويوفر كيان [livePreviewPackage] يتفاعل فوراً مع شاشة المعاينة.
 /// - يخزن البيانات بوحداتها المعيارية الدقيقة (البايت للسعة، والدقائق للمدد والزمن) عبر [PackageSpecFormatter].
 /// - يقوم بحسابات المعاينة التقديرية الحية للشاشة فقط بدون ادعاء أي سلطة محاسبية نهائية.
 class PackageFormController extends GetxController {
@@ -62,7 +62,12 @@ class PackageFormController extends GetxController {
   final isLoadingNetworks = false.obs;
   final authorizedNetworks = <NetworkEntity>[].obs;
 
-  // المراقبة الحية للحسابات التقديرية في المعاينة
+  // المراقبة الحية للحسابات والمعاينة التفاعلية في الاستوديو
+  final livePackageName = ''.obs;
+  final liveVoucherCount = 51.obs;
+  final liveBalanceInBytes = 0.obs;
+  final liveUptimeInMinutes = Rxn<int>();
+  final liveValidityInMinutes = Rxn<int>();
   final liveBasePrice = 0.0.obs;
   final liveCashDiscount = 0.0.obs;
   final liveCreditDiscount = 0.0.obs;
@@ -87,8 +92,54 @@ class PackageFormController extends GetxController {
     super.onClose();
   }
 
-  /// إعداد مستمعين لتحديث المعاينة التقديرية للأسعار بشكل حي وتفاعلي
+  /// إعداد مستمعين لتحديث كرت المعاينة ثلاثي الأبعاد ورادار الأرباح بشكل حي وفوري
   void _setupLiveCalculations() {
+    nameController.addListener(() {
+      livePackageName.value = nameController.text;
+    });
+
+    voucherCountController.addListener(() {
+      liveVoucherCount.value =
+          int.tryParse(voucherCountController.text.trim()) ?? 1;
+    });
+
+    void updateBalance() {
+      final raw = double.tryParse(balanceController.text.trim()) ?? 0.0;
+      liveBalanceInBytes.value = PackageSpecFormatter.toCanonicalBytes(
+        raw,
+        selectedBalanceUnit.value,
+      );
+    }
+
+    balanceController.addListener(updateBalance);
+    ever(selectedBalanceUnit, (_) => updateBalance());
+
+    void updateUptime() {
+      final raw = double.tryParse(uptimeController.text.trim());
+      liveUptimeInMinutes.value = raw != null && raw > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              raw,
+              selectedUptimeUnit.value,
+            )
+          : null;
+    }
+
+    uptimeController.addListener(updateUptime);
+    ever(selectedUptimeUnit, (_) => updateUptime());
+
+    void updateValidity() {
+      final raw = double.tryParse(validityController.text.trim());
+      liveValidityInMinutes.value = raw != null && raw > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              raw,
+              selectedValidityUnit.value,
+            )
+          : null;
+    }
+
+    validityController.addListener(updateValidity);
+    ever(selectedValidityUnit, (_) => updateValidity());
+
     priceController.addListener(() {
       liveBasePrice.value = double.tryParse(priceController.text) ?? 0.0;
     });
@@ -100,6 +151,40 @@ class PackageFormController extends GetxController {
       liveCreditDiscount.value =
           double.tryParse(creditDiscountController.text) ?? 0.0;
     });
+  }
+
+  /// كيان الباقة الحي المخصص للمعاينة التفاعلية المباشرة (Live Simulator Entity)
+  PackageEntity get livePreviewPackage {
+    final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
+    final basePrice = liveBasePrice.value;
+    final cashPrice = estimatedCashPrice;
+    final creditPrice = estimatedCreditPrice;
+    final cashSavings = estimatedCashDiscountAmount;
+    final creditSavings = estimatedCreditDiscountAmount;
+
+    return PackageEntity(
+      packageId: packageId.value ?? 0,
+      networkId: selectedNetworkId.value ?? 0,
+      packageName: livePackageName.value.trim().isNotEmpty
+          ? livePackageName.value.trim()
+          : 'اسم الباقة الجديدة',
+      packageColor: selectedColor.value,
+      packageBalance: liveBalanceInBytes.value,
+      packageUptime: liveUptimeInMinutes.value,
+      packageValidity: liveValidityInMinutes.value,
+      packageVoucherCount: count,
+      packageVoucherPrice: basePrice,
+      packageDefaultCashDiscount: liveCashDiscount.value,
+      packageDefaultCreditDiscount: liveCreditDiscount.value,
+      cashDiscountAmount: cashSavings,
+      creditDiscountAmount: creditSavings,
+      effectiveCashPrice: cashPrice,
+      effectiveCreditPrice: creditPrice,
+      status: status.value,
+      networkName: authorizedNetworks
+          .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
+          ?.networkName,
+    );
   }
 
   /// تهيئة النموذج واكتشاف حالة التعديل أو الإنشاء
@@ -140,23 +225,21 @@ class PackageFormController extends GetxController {
     packageId.value = package.packageId;
     selectedNetworkId.value = package.networkId;
     nameController.text = package.packageName;
+    livePackageName.value = package.packageName;
     selectedColor.value = package.packageColor;
 
     // استخراج أفضل وحدة لعرض الرصيد بالاعتماد على الحجم الفعلي
     if (package.packageBalance > 0) {
-      final bestUnit = DataSizeUnit.resolveBestUnit(
-        package.packageBalance,
-      );
+      final bestUnit = DataSizeUnit.resolveBestUnit(package.packageBalance);
       selectedBalanceUnit.value = bestUnit;
-      final valueInUnit = bestUnit.fromCanonicalBytes(
-        package.packageBalance,
-      );
-      balanceController.text =
-          valueInUnit == valueInUnit.roundToDouble()
-              ? valueInUnit.toInt().toString()
-              : valueInUnit.toString();
+      final valueInUnit = bestUnit.fromCanonicalBytes(package.packageBalance);
+      balanceController.text = valueInUnit == valueInUnit.roundToDouble()
+          ? valueInUnit.toInt().toString()
+          : valueInUnit.toString();
+      liveBalanceInBytes.value = package.packageBalance;
     } else {
       balanceController.text = '0';
+      liveBalanceInBytes.value = 0;
     }
 
     // استخراج وقت الاستخدام بوحدته المناسبة
@@ -166,13 +249,11 @@ class PackageFormController extends GetxController {
         defaultUnit: TimeDurationUnit.hours,
       );
       selectedUptimeUnit.value = bestUnit;
-      final valInUnit = bestUnit.fromCanonicalMinutes(
-        package.packageUptime!,
-      );
-      uptimeController.text =
-          valInUnit == valInUnit.roundToDouble()
-              ? valInUnit.toInt().toString()
-              : valInUnit.toString();
+      final valInUnit = bestUnit.fromCanonicalMinutes(package.packageUptime!);
+      uptimeController.text = valInUnit == valInUnit.roundToDouble()
+          ? valInUnit.toInt().toString()
+          : valInUnit.toString();
+      liveUptimeInMinutes.value = package.packageUptime;
     }
 
     // استخراج فترة الصلاحية بوحدتها المناسبة
@@ -182,21 +263,22 @@ class PackageFormController extends GetxController {
         defaultUnit: TimeDurationUnit.days,
       );
       selectedValidityUnit.value = bestUnit;
-      final valInUnit = bestUnit.fromCanonicalMinutes(
-        package.packageValidity!,
-      );
-      validityController.text =
-          valInUnit == valInUnit.roundToDouble()
-              ? valInUnit.toInt().toString()
-              : valInUnit.toString();
+      final valInUnit = bestUnit.fromCanonicalMinutes(package.packageValidity!);
+      validityController.text = valInUnit == valInUnit.roundToDouble()
+          ? valInUnit.toInt().toString()
+          : valInUnit.toString();
+      liveValidityInMinutes.value = package.packageValidity;
     }
 
     voucherCountController.text = package.packageVoucherCount.toString();
+    liveVoucherCount.value = package.packageVoucherCount;
     priceController.text = package.packageVoucherPrice.toString();
-    cashDiscountController.text =
-        package.packageDefaultCashDiscount.toString();
-    creditDiscountController.text =
-        package.packageDefaultCreditDiscount.toString();
+    liveBasePrice.value = package.packageVoucherPrice;
+    cashDiscountController.text = package.packageDefaultCashDiscount.toString();
+    liveCashDiscount.value = package.packageDefaultCashDiscount;
+    creditDiscountController.text = package.packageDefaultCreditDiscount
+        .toString();
+    liveCreditDiscount.value = package.packageDefaultCreditDiscount;
     status.value = package.isActive;
   }
 
@@ -250,22 +332,20 @@ class PackageFormController extends GetxController {
       );
 
       final rawUptime = double.tryParse(uptimeController.text.trim());
-      final uptimeInMinutes =
-          rawUptime != null && rawUptime > 0
-              ? PackageSpecFormatter.toCanonicalMinutes(
-                rawUptime,
-                selectedUptimeUnit.value,
-              )
-              : null;
+      final uptimeInMinutes = rawUptime != null && rawUptime > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawUptime,
+              selectedUptimeUnit.value,
+            )
+          : null;
 
       final rawValidity = double.tryParse(validityController.text.trim());
-      final validityInMinutes =
-          rawValidity != null && rawValidity > 0
-              ? PackageSpecFormatter.toCanonicalMinutes(
-                rawValidity,
-                selectedValidityUnit.value,
-              )
-              : null;
+      final validityInMinutes = rawValidity != null && rawValidity > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawValidity,
+              selectedValidityUnit.value,
+            )
+          : null;
 
       final voucherCount =
           int.tryParse(voucherCountController.text.trim()) ?? 1;
@@ -276,7 +356,6 @@ class PackageFormController extends GetxController {
           double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
 
       if (isEditing.value) {
-        // إنشاء كائن التحديث النقي
         final updateInput = UpdatePackageInput(
           packageName: nameController.text.trim(),
           packageColor: selectedColor.value,
@@ -292,7 +371,6 @@ class PackageFormController extends GetxController {
 
         await updatePackageUseCase(packageId.value!, updateInput);
       } else {
-        // إنشاء كائن الإنشاء النقي
         final createInput = CreatePackageInput(
           networkId: selectedNetworkId.value!,
           packageName: nameController.text.trim(),
@@ -310,7 +388,6 @@ class PackageFormController extends GetxController {
         await createPackageUseCase(createInput);
       }
 
-      // تحديث قائمة الباقات إذا كان المتحكم مسجلاً
       if (Get.isRegistered<PackageCatalogController>()) {
         unawaited(Get.find<PackageCatalogController>().refreshCatalog());
       }

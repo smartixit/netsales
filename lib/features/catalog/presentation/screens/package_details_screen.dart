@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_details_controller.dart';
@@ -35,12 +36,12 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
           appBarTitle: 'تفاصيل باقة الكروت',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: const CustomStateView.loading(
+            child: CustomStateView.loading(
               presentation: CustomStatePresentation.skeletonOnly,
               skeleton: CustomStateSkeleton(
                 layout: CustomStateSkeletonLayout.list,
                 itemCount: 4,
-                cardHeight: 160,
+                cardHeight: 160.h,
               ),
             ),
           ),
@@ -86,7 +87,7 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
             alignment: Alignment.center,
             heightFactor: 1.0,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: BoxConstraints(maxWidth: 760.w),
               child: Row(
                 children: [
                   Expanded(

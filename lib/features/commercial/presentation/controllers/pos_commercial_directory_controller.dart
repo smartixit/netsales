@@ -483,7 +483,7 @@ class PosCommercialDirectoryController
             );
             await CustomAnimationOverlay.showSuccess(
               message:
-                  'تم ربط نقطة البيع بنجاح مع شبكة ${preview.displayNetworkName}',
+                  'تم ربط نقطة البيع بنجاح مع ${preview.displayNetworkName}',
             );
             return true;
           } catch (error) {

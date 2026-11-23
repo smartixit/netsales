@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -34,7 +35,7 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.verified_user_outlined,
-                size: 20,
+                size: 20.r,
                 color: colors.primary,
               ),
               SizedBox(width: AppSpacing.xs),
@@ -51,11 +52,7 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
             color: colors.outlineVariant.withValues(alpha: 0.4),
           ),
           CustomInfoListTile(
-            leading: Icon(
-              Icons.hub_outlined,
-              size: 20,
-              color: colors.primary,
-            ),
+            leading: Icon(Icons.hub_outlined, size: 20.r, color: colors.primary),
             title: Text(
               'شبكة الكروت التابعة',
               style: AppTypography.bodySmall.copyWith(
@@ -64,7 +61,7 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
             ),
             subtitle: Text(
               package.networkName != null
-                  ? 'شبكة ${package.networkName}'
+                  ? '${package.networkName}'
                   : 'الشبكة الافتراضية',
               style: AppTypography.titleSmall.copyWith(
                 fontWeight: FontWeight.bold,
@@ -75,7 +72,7 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
           CustomInfoListTile(
             leading: Icon(
               Icons.calendar_today_outlined,
-              size: 20,
+              size: 20.r,
               color: colors.primary,
             ),
             title: Text(
@@ -95,7 +92,7 @@ class PackageMetadataSurfaceCard extends StatelessWidget {
           CustomInfoListTile(
             leading: Icon(
               Icons.update_rounded,
-              size: 20,
+              size: 20.r,
               color: colors.primary,
             ),
             title: Text(

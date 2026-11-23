@@ -277,7 +277,7 @@ class ProcurementRequestDetailsScreen
                       DocumentTimelineNodeData(
                         title: 'المراجعة والتدقيق الفني',
                         subtitle: request.isPending
-                            ? 'جاري التدقيق من قبل إدارة شبكة ${request.displayNetworkName}'
+                            ? 'جاري التدقيق من قبل إدارة ${request.displayNetworkName}'
                             : (request.reviewedByName != null &&
                                       request.reviewedByName!.isNotEmpty
                                   ? 'تم التدقيق بواسطة: ${request.reviewedByName}'

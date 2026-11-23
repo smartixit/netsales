@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -64,7 +65,7 @@ class PackageCommercialDealCard extends StatelessWidget {
                       color: themeColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
-                    child: Icon(icon, size: 16, color: themeColor),
+                    child: Icon(icon, size: 16.r, color: themeColor),
                   ),
                   SizedBox(width: AppSpacing.xs),
                   Text(

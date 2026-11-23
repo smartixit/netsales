@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
@@ -52,8 +53,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
           context,
           baseColor,
           alpha: 0.35,
-          blur: 28,
-          dy: 14,
+          blur: 28.r,
+          dy: 14.h,
         ),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.2),
@@ -64,25 +65,25 @@ class PackageVoucherCardShowcase extends StatelessWidget {
         children: [
           // 1. زخرفة خلفية هندسية شبكية
           Positioned(
-            right: -30,
-            top: -30,
+            right: -30.w,
+            top: -30.h,
             child: Opacity(
               opacity: 0.08,
-              child: const Icon(
+              child: Icon(
                 Icons.wifi_tethering_rounded,
-                size: 220,
+                size: 220.r,
                 color: Colors.white,
               ),
             ),
           ),
           Positioned(
-            left: -20,
-            bottom: -20,
+            left: -20.w,
+            bottom: -20.h,
             child: Opacity(
               opacity: 0.06,
-              child: const Icon(
+              child: Icon(
                 Icons.sim_card_rounded,
-                size: 160,
+                size: 160.r,
                 color: Colors.white,
               ),
             ),
@@ -102,8 +103,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                       children: [
                         // شريحة الكرت الذكية (Microchip Motif) بألوان التوكن المركزية
                         Container(
-                          width: 44,
-                          height: 32,
+                          width: 44.w,
+                          height: 32.h,
                           decoration: BoxDecoration(
                             color: colors.executiveGoldAccent.withValues(
                               alpha: 0.85,
@@ -116,8 +117,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                           ),
                           child: Center(
                             child: Container(
-                              width: 24,
-                              height: 18,
+                              width: 24.w,
+                              height: 18.h,
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: colors.amberAccent.withValues(
@@ -126,7 +127,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                                   width: 0.8,
                                 ),
                                 borderRadius: BorderRadius.circular(
-                                  AppRadius.xxs,
+                                  AppRadius.xs,
                                 ),
                               ),
                             ),
@@ -138,12 +139,11 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                           children: [
                             Text(
                               package.networkName != null
-                                  ? 'شبكة ${package.networkName}'
+                                  ? '${package.networkName}'
                                   : 'NETSALES TELECOM',
                               style: AppTypography.titleSmall.copyWith(
                                 color: Colors.white.withValues(alpha: 0.9),
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
                               ),
                             ),
                             Text(
@@ -190,8 +190,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                         shadows: [
                           Shadow(
                             color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
+                            blurRadius: 8.r,
+                            offset: Offset(0, 3.h),
                           ),
                         ],
                       ),

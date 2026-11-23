@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/presentation/utils/package_color_resolver.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_actions.dart';
-import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_header.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_micro_pod.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_quota_section.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_spine.dart';
+import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// بطاقة باقة كروت الإنترنت القيادية بنظام الأكورديون (Executive Package Card)
+/// بطاقة باقة كروت الإنترنت الرقمية الفاخرة المخصصة للكتالوج (PackageCard)
 ///
-/// تلتزم بالمعايير المؤسسية للمنصة:
-/// - استهلاك المكون القيادي الموحد [CustomExecutiveTransactionCard] بحواف 24.r وظلال مزدوجة.
-/// - تفويض حالة الباقة حصرياً للسجل المركزي [EnumPresentationRegistry].
-/// - تفويض تنسيق المبالغ المالية حصرياً لـ [AmountFormatter.formatValue].
-/// - أكورديون تفاعلي يعرض بنود التعرفة والمواصفات الفنية للباقة.
+/// تجسد تجربة بصرية مخصصة لمنتجات الاتصالات (Bespoke Product Identity):
+/// - شريط جانبي متدرج بهوية لون الباقة [PackageCardSpine].
+/// - ترويسة الباقة وشارة الحالة المركزية [PackageCardHeader].
+/// - إبراز سعة البيانات الرقمية بخط عملاق [PackageCardQuotaSection].
+/// - شبكة مكعبات بينتو المصغرة للمواصفات والربحية [PackageCardMicroPod].
+/// - شريط الإجراءات والتحكم السريع [PackageCardActions].
+/// - دعم التغذية اللمسية والانضغاط التفاعلي [CustomInteractiveBounce].
 class PackageCard extends StatelessWidget {
   const PackageCard({
     super.key,
@@ -39,81 +48,127 @@ class PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusPresentation = EnumPresentationRegistry.resolvePackageStatus(
-      package.packageStatus,
+    final colors = context.colors;
+    final accentColor = PackageColorResolver.resolve(
+      package.packageColor,
+      colors.primary,
     );
 
-    final dateLabel = package.createdAt != null
-        ? DateFormatter.fullDate(package.createdAt!)
-        : '';
-
-    // بنود التعرفة والخصومات المدمجة داخل أكورديون البطاقة
-    final items = <ExecutiveCardItemData>[
-      ExecutiveCardItemData(
-        title: 'السعر الفعلي نقداً',
-        subtitle:
-            'بعد الخصم النقدي (${package.packageDefaultCashDiscount.toStringAsFixed(0)}%) - ${package.packageVoucherCount} كرت',
-        colorHex: package.packageColor,
-        totalAmount: package.effectiveCashPrice,
-        discountAmount: package.cashDiscountAmount,
-        badgeText: 'نقداً',
-      ),
-      ExecutiveCardItemData(
-        title: 'السعر الفعلي آجلاً',
-        subtitle:
-            'بعد الخصم الآجل (${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%) - ${package.packageVoucherCount} كرت',
-        colorHex: package.packageColor,
-        totalAmount: package.effectiveCreditPrice,
-        discountAmount: package.creditDiscountAmount,
-        badgeText: 'آجلاً',
-      ),
-    ];
-
-    final specTags = <String>[
-      '${package.packageVoucherCount} كرت',
-      if (package.packageBalance > 0) package.balanceDisplay,
-      if (package.packageUptime != null && package.packageUptime! > 0)
-        package.uptimeDisplay,
-      if (package.packageValidity != null && package.packageValidity! > 0)
-        package.validityDisplay,
-    ];
-
-    return CustomExecutiveTransactionCard(
-      reference: 'باقة #${package.packageId}',
-      dateLabel: dateLabel,
-      partyName: package.packageName,
-      statusPresentation: statusPresentation,
-      secondaryReference: package.networkName != null
-          ? 'شبكة ${package.networkName}'
-          : null,
-      items: items,
-      itemsHeaderTitle: 'التعرفة والخصومات التعاقدية',
-      visibleItemNames: specTags,
-      metrics: [
-        ExecutiveCardMetricData(
-          label: 'السعر الأساسي',
-          value: AmountFormatter.formatValue(package.packageVoucherPrice),
-        ),
-        ExecutiveCardMetricData(
-          label: 'الخصم النقدي',
-          value: '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%',
-        ),
-        ExecutiveCardMetricData(
-          label: 'الخصم الآجل',
-          value: '${package.packageDefaultCreditDiscount.toStringAsFixed(0)}%',
-        ),
-      ],
-      isExpanded: isExpanded,
-      onToggleExpand: onToggleExpand,
+    return CustomInteractiveBounce(
       onTap: onDetails,
-      actions: PackageCardActions(
-        package: package,
-        onDetails: onDetails,
-        onEdit: onEdit,
-        onToggleStatus: onToggleStatus,
-        onDelete: onDelete,
-        canEdit: canEdit,
-        canDelete: canDelete,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: 0.5),
+          ),
+          boxShadow: AppElevation.level1(context),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. شريط الهوية اللوني للباقة (Color Spine)
+              PackageCardSpine(color: accentColor),
+
+              // 2. المحتوى التفاعلي للبطاقة
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.cardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // رأس البطاقة: الاسم، المزود، وشارة الحالة
+                      PackageCardHeader(package: package),
+
+                      SizedBox(height: AppSpacing.sm),
+
+                      // سعة البيانات والشارة الرقمية
+                      PackageCardQuotaSection(
+                        package: package,
+                        accentColor: accentColor,
+                      ),
+
+                      SizedBox(height: AppSpacing.sm),
+
+                      // شبكة مكعبات بينتو المصغرة للمواصفات والربحية
+                      Row(
+                        children: [
+                          Expanded(
+                            child: PackageCardMicroPod(
+                              icon: Icons.payments_outlined,
+                              title: 'تكلفة الكرت',
+                              value: AmountFormatter.formatValue(
+                                package.unitVoucherPrice,
+                              ),
+                              accentColor: colors.primary,
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: PackageCardMicroPod(
+                              icon: Icons.savings_outlined,
+                              title: 'وفر الكرت نقداً',
+                              value: AmountFormatter.formatValue(
+                                package.unitCashPrice,
+                              ),
+                              badgeText:
+                                  '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%',
+                              accentColor: colors.success,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.xs),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: PackageCardMicroPod(
+                              icon: Icons.event_available_outlined,
+                              title: 'فترة الصلاحية',
+                              value: package.validityDisplay,
+                              accentColor: colors.purpleAccent,
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: PackageCardMicroPod(
+                              icon: Icons.timer_outlined,
+                              title: 'وقت الاستخدام',
+                              value: package.uptimeDisplay,
+                              accentColor: colors.amberAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: AppSpacing.sm),
+
+                      Divider(
+                        height: 1,
+                        color: colors.outlineVariant.withValues(alpha: 0.35),
+                      ),
+
+                      SizedBox(height: AppSpacing.xs),
+
+                      // شريط الإجراءات والتحكم
+                      PackageCardActions(
+                        package: package,
+                        onDetails: onDetails,
+                        onEdit: onEdit,
+                        onToggleStatus: onToggleStatus,
+                        onDelete: onDelete,
+                        canEdit: canEdit,
+                        canDelete: canDelete,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

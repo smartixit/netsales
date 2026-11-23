@@ -67,10 +67,7 @@ class PackageSavingsProgressBar extends StatelessWidget {
                 SizedBox(width: AppSpacing.xxs),
                 Expanded(
                   flex: creditFlex,
-                  child: Container(
-                    height: AppSpacing.sm,
-                    color: colors.info,
-                  ),
+                  child: Container(height: AppSpacing.sm, color: colors.info),
                 ),
               ],
             ),

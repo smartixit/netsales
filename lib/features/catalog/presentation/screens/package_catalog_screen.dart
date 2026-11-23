@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
@@ -93,13 +94,13 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
               controller.searchQuery.value.trim().isNotEmpty;
 
           if (isLoading && isEmpty) {
-            return const SliverToBoxAdapter(
+            return SliverToBoxAdapter(
               child: CustomStateView.loading(
                 presentation: CustomStatePresentation.skeletonOnly,
                 skeleton: CustomStateSkeleton(
                   layout: CustomStateSkeletonLayout.list,
                   itemCount: 4,
-                  cardHeight: 180,
+                  cardHeight: 180.h,
                 ),
               ),
             );

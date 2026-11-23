@@ -102,7 +102,9 @@ class PackageModel extends PackageEntity {
       ),
       procurementIsCustomDiscount: procurement['is_custom_discount'] is bool
           ? procurement['is_custom_discount'] as bool
-          : false,
+          : (procurement['is_custom'] is bool
+              ? procurement['is_custom'] as bool
+              : false),
     );
   }
 

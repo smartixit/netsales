@@ -61,7 +61,7 @@ class PosNetworkLinkingFlow {
             if (linked) {
               await CustomAnimationOverlay.showSuccess(
                 message:
-                    'تم ربط نقطة البيع بنجاح مع شبكة ${preview.displayNetworkName}',
+                    'تم ربط نقطة البيع بنجاح مع ${preview.displayNetworkName}',
               );
             }
             return linked;

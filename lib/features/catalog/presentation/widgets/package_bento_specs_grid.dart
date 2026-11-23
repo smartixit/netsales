@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -23,7 +24,7 @@ class PackageBentoSpecsGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.widgets_outlined, size: 20, color: colors.primary),
+            Icon(Icons.widgets_outlined, size: 20.r, color: colors.primary),
             SizedBox(width: AppSpacing.xs),
             Text(
               'المواصفات الفنية المعتمدة للباقة',

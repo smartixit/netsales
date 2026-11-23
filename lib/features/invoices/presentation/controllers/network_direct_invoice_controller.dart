@@ -192,7 +192,7 @@ class NetworkDirectInvoiceController extends GetxController {
       directInvoiceCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
 
   /// عملة التسعير المعتمدة سيادياً من الخادم
-  String get checkoutCurrency => serverQuote.value?.currency ?? 'ر.ي';
+  String get checkoutCurrency => serverQuote.value?.currency ?? 'YER';
 
   /// إجمالي الفاتورة قبل الخصم (يعتمد الخادم سيادياً عند توفره)
   double get checkoutGrossAmount {

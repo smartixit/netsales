@@ -229,7 +229,7 @@ class PosNewProcurementOrderController extends GetxController {
       procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
 
   /// عملة تسعير الطلب المعتمدة
-  String get checkoutCurrency => serverQuote.value?.currency ?? 'ر.ي';
+  String get checkoutCurrency => serverQuote.value?.currency ?? 'YER';
 
   /// هل يتوفر عرض تسعير معتمد وخادم جاهز؟
   bool get isQuoteReady => hasCurrentServerQuote && serverQuote.value != null;

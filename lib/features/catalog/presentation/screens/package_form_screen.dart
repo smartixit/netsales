@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_form_controller.dart';
+import 'package:netsales/features/catalog/presentation/widgets/forms/package_form_preview_hero.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_general_info_section.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_pricing_form_section.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_specs_form_section.dart';
@@ -11,10 +13,10 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// شاشة إنشاء وتعديل باقة كروت الإنترنت (PackageFormScreen)
 ///
-/// تجسد المعمارية المؤسسية النظيفة:
-/// - شاشة تركيبية بحتة خالية تماماً من منطق الأعمال وحسابات الـ Map.
+/// تجسد استوديو تصميم ومحاكاة كروت الإنترنت التفاعلي (Interactive Voucher Studio):
+/// - هيرو تفاعلي حي يعكس كرت الشحن الرقمي ثلاثي الأبعاد [PackageFormPreviewHero].
 /// - تفويض كامل لحقول الإدخال إلى ودجات الأقسام المنفصلة في `widgets/forms/`.
-/// - شريط أزرار ثابت للحفظ والإلغاء.
+/// - شريط أزرار ثابت للحفظ والإلغاء مع تغذية لمسية.
 class PackageFormScreen extends GetView<PackageFormController> {
   const PackageFormScreen({super.key});
 
@@ -25,7 +27,9 @@ class PackageFormScreen extends GetView<PackageFormController> {
       final isSaving = controller.isSaving.value;
 
       return CustomAppScaffold(
-        appBarTitle: isEditing ? 'تعديل باقة الكروت' : 'إنشاء باقة كروت جديدة',
+        appBarTitle: isEditing
+            ? 'تعديل باقة الكروت'
+            : 'استوديو إنشاء باقة كروت',
         body: SingleChildScrollView(
           padding: EdgeInsets.all(AppSpacing.cardPadding),
           child: Form(
@@ -33,11 +37,20 @@ class PackageFormScreen extends GetView<PackageFormController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PackageGeneralInfoSection(),
+                // 1. هيرو المعاينة الحية الفورية للكرت الرقمي
+                const PackageFormPreviewHero(),
                 AppSpacing.vLg,
-                PackageSpecsFormSection(),
+
+                // 2. كبسولة الهوية البصرية واسم الباقة
+                const PackageGeneralInfoSection(),
                 AppSpacing.vLg,
-                PackagePricingFormSection(),
+
+                // 3. كبسولة المواصفات الفنية وحجم الحزمة
+                const PackageSpecsFormSection(),
+                AppSpacing.vLg,
+
+                // 4. كبسولة التسعير ورادار الأرباح وهوامش الجملة
+                const PackagePricingFormSection(),
                 AppSpacing.vXl,
               ],
             ),
@@ -48,7 +61,7 @@ class PackageFormScreen extends GetView<PackageFormController> {
             alignment: Alignment.center,
             heightFactor: 1.0,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: BoxConstraints(maxWidth: 760.w),
               child: Row(
                 children: [
                   Expanded(

@@ -2,8 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
+import 'package:netsales/features/catalog/domain/entities/create_package_input.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/update_package_input.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/create_package_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/delete_package_use_case.dart';
@@ -90,24 +92,21 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
   }
 
   @override
-  Future<PackageEntity> createPackage(Map<String, dynamic> data) async {
+  Future<PackageEntity> createPackage(CreatePackageInput input) async {
     final pkg = PackageEntity(
       packageId: _packages.length + 1,
-      networkId: data['network_id'] as int? ?? 1,
-      packageName: data['package_name'] as String? ?? 'New Package',
-      packageBalance: (data['package_balance'] as num).toInt(),
-      packageVoucherCount: data['package_voucher_count'] as int? ?? 100,
-      packageVoucherPrice:
-          (data['package_voucher_price'] as num?)?.toDouble() ?? 1000.0,
-      packageDefaultCashDiscount:
-          (data['package_default_cash_discount'] as num?)?.toDouble() ?? 5.0,
-      packageDefaultCreditDiscount:
-          (data['package_default_credit_discount'] as num?)?.toDouble() ?? 2.5,
+      networkId: input.networkId,
+      packageName: input.packageName,
+      packageBalance: input.packageBalance,
+      packageVoucherCount: input.packageVoucherCount,
+      packageVoucherPrice: input.packageVoucherPrice,
+      packageDefaultCashDiscount: input.packageDefaultCashDiscount,
+      packageDefaultCreditDiscount: input.packageDefaultCreditDiscount,
       cashDiscountAmount: 50.0,
       creditDiscountAmount: 25.0,
       effectiveCashPrice: 950.0,
       effectiveCreditPrice: 975.0,
-      status: data['status'] as bool? ?? true,
+      status: input.status,
     );
     _packages.add(pkg);
     return pkg;
@@ -115,18 +114,18 @@ class MockPackageCatalogRepository implements PackageCatalogRepository {
 
   @override
   Future<PackageEntity> updatePackage(
-      int packageId, Map<String, dynamic> data) async {
+      int packageId, UpdatePackageInput input) async {
     final index = _packages.indexWhere((p) => p.packageId == packageId);
     if (index >= 0) {
       final existing = _packages[index];
-      final price = (data['package_voucher_price'] as num?)?.toDouble() ??
-          existing.packageVoucherPrice;
+      final price = input.packageVoucherPrice ?? existing.packageVoucherPrice;
       final updated = PackageEntity(
         packageId: existing.packageId,
         networkId: existing.networkId,
-        packageName: data['package_name'] as String? ?? existing.packageName,
-        packageBalance: existing.packageBalance,
-        packageVoucherCount: existing.packageVoucherCount,
+        packageName: input.packageName ?? existing.packageName,
+        packageBalance: input.packageBalance ?? existing.packageBalance,
+        packageVoucherCount:
+            input.packageVoucherCount ?? existing.packageVoucherCount,
         packageVoucherPrice: price,
         packageDefaultCashDiscount: existing.packageDefaultCashDiscount,
         packageDefaultCreditDiscount: existing.packageDefaultCreditDiscount,
@@ -346,18 +345,18 @@ void main() {
 
     test('CreatePackageUseCase appends and returns newly created package',
         () async {
-      final data = {
-        'network_id': 10,
-        'package_name': 'باقة المساء 20 جيجا',
-        'package_balance': 20.0,
-        'package_voucher_count': 200,
-        'package_voucher_price': 2500.0,
-        'package_default_cash_discount': 12.0,
-        'package_default_credit_discount': 6.0,
-        'status': true,
-      };
+      const input = CreatePackageInput(
+        networkId: 10,
+        packageName: 'باقة المساء 20 جيجا',
+        packageBalance: 20480,
+        packageVoucherCount: 200,
+        packageVoucherPrice: 2500.0,
+        packageDefaultCashDiscount: 12.0,
+        packageDefaultCreditDiscount: 6.0,
+        status: true,
+      );
 
-      final result = await createPackageUseCase(data);
+      final result = await createPackageUseCase(input);
       expect(result.packageId, 2);
 
       final list = await getPackagesUseCase(networkId: 10);
@@ -365,12 +364,12 @@ void main() {
     });
 
     test('UpdatePackageUseCase updates package entity in repository', () async {
-      final data = {
-        'package_name': 'باقة الفجر المطورة',
-        'package_voucher_price': 1200.0,
-      };
+      const input = UpdatePackageInput(
+        packageName: 'باقة الفجر المطورة',
+        packageVoucherPrice: 1200.0,
+      );
 
-      final result = await updatePackageUseCase(1, data);
+      final result = await updatePackageUseCase(1, input);
       expect(result.packageName, 'باقة الفجر المطورة');
       expect(result.packageVoucherPrice, 1200.0);
     });
