@@ -44,9 +44,9 @@ class ProcurementActionDialogs {
               if (isCredit) ...[
                 CustomTextField(
                   controller: paidAmountController,
-                  label: 'الدفعة النقدية المقبوضة كاش (اختياري)',
+                  label: 'الدفعة النقدية (اختياري)',
                   hint:
-                      'أدخل المبلغ المسلَّم نقداً يداً بيد (0 إن لم يُدفع شيء)',
+                      'أدخل المبلغ المسلَّم نقداً',
                   isRequired: false,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -56,7 +56,7 @@ class ProcurementActionDialogs {
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                   ],
                   validator: FormValidators.amountValidator(
-                    fieldName: 'المبلغ المقبوض كاش',
+                    fieldName: 'المبلغ المقبوض',
                     isRequired: false,
                     minValue: 0,
                     maxValue: maxAmount,
