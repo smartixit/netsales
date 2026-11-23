@@ -1,16 +1,11 @@
 import 'package:get/get.dart';
-import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
-import 'package:netsales/features/catalog/domain/usecases/create_package_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/delete_package_use_case.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_package_details_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
-import 'package:netsales/features/catalog/domain/usecases/update_package_use_case.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source.dart';
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
@@ -18,70 +13,57 @@ import 'package:netsales/features/commercial/data/repositories/commercial_reposi
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 
-/// ربط التبعيات لميزة كتالوج الباقات والأسعار التعاقدية
+/// مصفوفة حقن التبعيات لقائمة كتالوج الباقات (Package Catalog Binding)
 class PackageCatalogBinding extends Bindings {
   @override
   void dependencies() {
-    // 1. Data Source
-    registerLazyIfAbsent<PackageCatalogRemoteDataSource>(
-      () => const PackageCatalogRemoteDataSourceImpl(),
-    );
+    // 1. Data Source & Repository
+    if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
+      Get.lazyPut<PackageCatalogRemoteDataSource>(
+        () => const PackageCatalogRemoteDataSourceImpl(),
+      );
+    }
 
-    // 2. Repository
-    registerLazyIfAbsent<PackageCatalogRepository>(
-      () => PackageCatalogRepositoryImpl(
-        Get.find<PackageCatalogRemoteDataSource>(),
-      ),
-    );
+    if (!Get.isRegistered<PackageCatalogRepository>()) {
+      Get.lazyPut<PackageCatalogRepository>(
+        () => PackageCatalogRepositoryImpl(
+          Get.find<PackageCatalogRemoteDataSource>(),
+        ),
+      );
+    }
 
-    // 3. Commercial Dependencies for Network Selection
+    // Commercial dependency for networks
     if (!Get.isRegistered<CommercialRemoteDataSource>()) {
-      registerLazyIfAbsent<CommercialRemoteDataSource>(
+      Get.lazyPut<CommercialRemoteDataSource>(
         () => const CommercialRemoteDataSourceImpl(),
       );
     }
     if (!Get.isRegistered<CommercialRepository>()) {
-      registerLazyIfAbsent<CommercialRepository>(
+      Get.lazyPut<CommercialRepository>(
         () => CommercialRepositoryImpl(Get.find<CommercialRemoteDataSource>()),
       );
     }
     if (!Get.isRegistered<GetMyNetworksUseCase>()) {
-      registerLazyIfAbsent<GetMyNetworksUseCase>(
+      Get.lazyPut<GetMyNetworksUseCase>(
         () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
       );
     }
 
-    // 4. Use Cases
-    registerLazyIfAbsent<GetPackagesUseCase>(
+    // 2. Use Cases
+    Get.lazyPut<GetPackagesUseCase>(
       () => GetPackagesUseCase(Get.find<PackageCatalogRepository>()),
     );
-    registerLazyIfAbsent<GetNetworkPackagesUseCase>(
-      () => GetNetworkPackagesUseCase(Get.find<PackageCatalogRepository>()),
-    );
-    registerLazyIfAbsent<GetPackageDetailsUseCase>(
-      () => GetPackageDetailsUseCase(Get.find<PackageCatalogRepository>()),
-    );
-    registerLazyIfAbsent<CreatePackageUseCase>(
-      () => CreatePackageUseCase(Get.find<PackageCatalogRepository>()),
-    );
-    registerLazyIfAbsent<UpdatePackageUseCase>(
-      () => UpdatePackageUseCase(Get.find<PackageCatalogRepository>()),
-    );
-    registerLazyIfAbsent<TogglePackageStatusUseCase>(
+    Get.lazyPut<TogglePackageStatusUseCase>(
       () => TogglePackageStatusUseCase(Get.find<PackageCatalogRepository>()),
     );
-    registerLazyIfAbsent<DeletePackageUseCase>(
+    Get.lazyPut<DeletePackageUseCase>(
       () => DeletePackageUseCase(Get.find<PackageCatalogRepository>()),
     );
 
-    // 5. Controller
-    registerLazyIfAbsent<PackageCatalogController>(
+    // 3. Controller
+    Get.lazyPut<PackageCatalogController>(
       () => PackageCatalogController(
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
-        getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),
-        getPackageDetailsUseCase: Get.find<GetPackageDetailsUseCase>(),
-        createPackageUseCase: Get.find<CreatePackageUseCase>(),
-        updatePackageUseCase: Get.find<UpdatePackageUseCase>(),
         togglePackageStatusUseCase: Get.find<TogglePackageStatusUseCase>(),
         deletePackageUseCase: Get.find<DeletePackageUseCase>(),
         getMyNetworksUseCase: Get.find<GetMyNetworksUseCase>(),

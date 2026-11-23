@@ -2,7 +2,7 @@ import 'package:netsales/core/models/api_response.dart';
 import 'package:netsales/features/catalog/data/models/effective_package_discount_model.dart';
 import 'package:netsales/features/catalog/data/models/package_model.dart';
 
-/// واجهة مصدر البيانات البعيد لكتالوج الباقات
+/// عقد مصدر البيانات البعيد لكتالوج الباقات (Remote Data Source Interface)
 abstract class PackageCatalogRemoteDataSource {
   Future<ApiResponse<List<PackageModel>>> getPackages({
     Map<String, dynamic>? query,
@@ -33,5 +33,5 @@ abstract class PackageCatalogRemoteDataSource {
 
   Future<ApiResponse<PackageModel>> togglePackageStatus(int packageId);
 
-  Future<ApiResponse<void>> deletePackage(int packageId);
+  Future<ApiResponse<dynamic>> deletePackage(int packageId);
 }

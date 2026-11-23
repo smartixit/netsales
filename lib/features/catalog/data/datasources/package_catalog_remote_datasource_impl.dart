@@ -108,8 +108,7 @@ class PackageCatalogRemoteDataSourceImpl
     return ApiService.instance.post<PackageModel>(
       ApiConstants.voucherPackages,
       data: data,
-      fromJson: (resData) =>
-          PackageModel.fromJson(resData as Map<String, dynamic>),
+      fromJson: (data) => PackageModel.fromJson(data as Map<String, dynamic>),
     );
   }
 
@@ -121,8 +120,7 @@ class PackageCatalogRemoteDataSourceImpl
     return ApiService.instance.put<PackageModel>(
       ApiConstants.voucherPackage(packageId),
       data: data,
-      fromJson: (resData) =>
-          PackageModel.fromJson(resData as Map<String, dynamic>),
+      fromJson: (data) => PackageModel.fromJson(data as Map<String, dynamic>),
     );
   }
 
@@ -130,14 +128,13 @@ class PackageCatalogRemoteDataSourceImpl
   Future<ApiResponse<PackageModel>> togglePackageStatus(int packageId) {
     return ApiService.instance.post<PackageModel>(
       ApiConstants.voucherPackageToggleStatus(packageId),
-      fromJson: (resData) =>
-          PackageModel.fromJson(resData as Map<String, dynamic>),
+      fromJson: (data) => PackageModel.fromJson(data as Map<String, dynamic>),
     );
   }
 
   @override
-  Future<ApiResponse<void>> deletePackage(int packageId) {
-    return ApiService.instance.delete<void>(
+  Future<ApiResponse<dynamic>> deletePackage(int packageId) {
+    return ApiService.instance.delete<dynamic>(
       ApiConstants.voucherPackage(packageId),
     );
   }

@@ -256,10 +256,6 @@ void main() {
 
       controller = PackageCatalogController(
         getPackagesUseCase: GetPackagesUseCase(mockRepo),
-        getNetworkPackagesUseCase: GetNetworkPackagesUseCase(mockRepo),
-        getPackageDetailsUseCase: GetPackageDetailsUseCase(mockRepo),
-        createPackageUseCase: CreatePackageUseCase(mockRepo),
-        updatePackageUseCase: UpdatePackageUseCase(mockRepo),
         togglePackageStatusUseCase: TogglePackageStatusUseCase(mockRepo),
         deletePackageUseCase: DeletePackageUseCase(mockRepo),
         getMyNetworksUseCase: GetMyNetworksUseCase(mockCommercialRepo),
@@ -278,7 +274,7 @@ void main() {
 
     test('loadPackages populates packages list and sets cursor correctly',
         () async {
-      await controller.loadPackages(networkId: 10, isRefresh: true);
+      await controller.fetchPackages( refresh: true);
 
       expect(controller.isLoading.value, false);
       expect(controller.errorMessage.value, null);
@@ -302,7 +298,7 @@ void main() {
     test('loadPackages handles failure and assigns errorMessage', () async {
       mockRepo.shouldThrow = true;
       controller.packages.clear();
-      await controller.loadPackages(networkId: 10);
+      await controller.fetchPackages();
 
       expect(controller.isLoading.value, false);
       expect(controller.errorMessage.value, isNotNull);

@@ -1,6 +1,6 @@
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 
-/// نموذج بيانات باقة الكروت والتحويل من وإلى JSON
+/// نموذج بيانات باقة الكروت والتحويل الدقيق من وإلى JSON (Package Data Model)
 class PackageModel extends PackageEntity {
   const PackageModel({
     required super.packageId,
@@ -48,7 +48,7 @@ class PackageModel extends PackageEntity {
     final creditDiscount =
         (json['package_default_credit_discount'] as num?)?.toDouble() ?? 0.0;
 
-    // قراءة القيم المالية المعتمدة سيادياً والمحسوبة على الخادم حصراً دون أي عمليات حسابية محلية احتياطية
+    // قراءة القيم المالية المعتمدة سيادياً والمحسوبة على الخادم حصراً
     final cashDiscountAmt =
         (json['cash_discount_amount'] as num?)?.toDouble() ?? 0.0;
     final creditDiscountAmt =
@@ -56,6 +56,7 @@ class PackageModel extends PackageEntity {
     final effCash = (json['effective_cash_price'] as num?)?.toDouble() ?? price;
     final effCredit =
         (json['effective_credit_price'] as num?)?.toDouble() ?? price;
+
     final procurement = json['procurement_pricing'] is Map<String, dynamic>
         ? json['procurement_pricing'] as Map<String, dynamic>
         : const <String, dynamic>{};
@@ -99,15 +100,10 @@ class PackageModel extends PackageEntity {
       procurementPricingSnapshotExpiresAt: DateTime.tryParse(
         procurement['pricing_snapshot_expires_at']?.toString() ?? '',
       ),
-      procurementIsCustomDiscount: _parseBoolean(procurement['is_custom']),
+      procurementIsCustomDiscount: procurement['is_custom_discount'] is bool
+          ? procurement['is_custom_discount'] as bool
+          : false,
     );
-  }
-
-  static bool _parseBoolean(dynamic value) {
-    if (value is bool) return value;
-    if (value is num) return value == 1;
-    final normalized = value?.toString().toLowerCase();
-    return normalized == 'true' || normalized == '1';
   }
 
   Map<String, dynamic> toJson() {

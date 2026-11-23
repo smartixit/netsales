@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
+import 'package:netsales/features/catalog/presentation/widgets/dialogs/package_action_dialogs.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
@@ -18,9 +18,9 @@ import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 /// واجهة استعراض وإدارة كتالوج الباقات للشبكة (PackageCatalogScreen)
 ///
 /// تجسد المعمارية المؤسسية النظيفة (Enterprise Clean Architecture):
-/// - كلاس واحد في ملف واحد بمسؤولية واحدة واضحة (One Public Class Per File).
-/// - واجهة تصريحية بحتة (Pure Declarative UI) خالية تماماً من منطق الأعمال والشروط المتفرعة.
-/// - مطابقة تامة للمعمارية الموحدة المنفذة في شاشات الطلبات، الفواتير، والعضويات.
+/// - كلاس واحد في ملف واحد بمسؤولية تركيبية بحتة (Pure Declarative Page Composition).
+/// - خالية تماماً من منطق الأعمال والشروط المتفرعة.
+/// - استهلاك مباشر للمكونات العامة الموحدة وشريط المؤشرات والترقيم بالمؤشر.
 class PackageCatalogScreen extends GetView<PackageCatalogController> {
   const PackageCatalogScreen({super.key, this.embedded = false});
 
@@ -36,7 +36,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
       hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('package-catalog-scroll'),
       slivers: [
-        // 1. ترويسة الصفحة وبطاقات المؤشرات والبحث والتصفية
+        // 1. ترويسة الصفحة وبطاقات المؤشرات وشريط البحث
         SliverToBoxAdapter(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,8 +51,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                         icon: Icons.add_rounded,
                         shape: AppButtonShape.rounded,
                         size: AppButtonSize.small,
-                        onPressed: () =>
-                            Get.toNamed<void>(AppRoutes.packageForm),
+                        onPressed: controller.navigateToCreate,
                       )
                     : null,
               ),
@@ -71,7 +70,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                 () => CustomSearchFilterBar<String?>(
                   searchController: controller.searchController,
                   searchQuery: controller.searchQuery.value,
-                  searchHint: 'بحث باسم الباقة، المعرف، أو الرصيد...',
+                  searchHint: 'بحث باسم الباقة أو معرفها...',
                   selectedFilter: controller.currentFilterKey,
                   filterOptions: controller.buildFilterOptions(context),
                   onFilterChanged: controller.onFilterKeySelected,
@@ -100,9 +99,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                 skeleton: CustomStateSkeleton(
                   layout: CustomStateSkeletonLayout.list,
                   itemCount: 4,
-                  cardHeight: 156,
-                  maxColumns: 1,
-                  hasLeading: true,
+                  cardHeight: 180,
                 ),
               ),
             );
@@ -111,7 +108,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
           if (error != null && isEmpty) {
             return SliverToBoxAdapter(
               child: CustomErrorState(
-                title: 'تعذر جلب كتالوج الباقات',
+                title: 'تعذر تحميل كتالوج الباقات',
                 subtitle: error,
                 onRetry: controller.refreshCatalog,
               ),
@@ -121,61 +118,65 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
           if (isEmpty) {
             return SliverToBoxAdapter(
               child: CustomEmptyState(
-                icon: hasFilter
-                    ? Icons.search_off_rounded
-                    : Icons.wifi_tethering_off_rounded,
+                icon: Icons.inventory_2_outlined,
                 title: hasFilter
-                    ? 'لا توجد باقات مطابقة'
-                    : 'لا توجد باقات كروت مسجلة حالياً',
+                    ? 'لا توجد باقات مطابقة للبحث'
+                    : 'كتالوج الباقات فارغ',
                 subtitle: hasFilter
-                    ? 'جرّب تغيير كلمات البحث أو تصفية الحالات.'
-                    : 'يمكنك البدء بإنشاء باقات كروت الإنترنت وتحديد أسعارها ونسب خصمها.',
-                actionLabel: hasFilter ? 'مسح عوامل التصفية' : null,
-                onAction: hasFilter ? controller.resetFilters : null,
+                    ? 'جرّب تغيير كلمات البحث أو إلغاء التصفية لإظهار كافة الباقات.'
+                    : 'لم تقم الشبكة بإضافة أي باقات كروت بعد. يمكنك البدء بإنشاء أول باقة الآن.',
+                actionLabel: controller.canCreatePackage && !hasFilter
+                    ? 'إنشاء أول باقة كروت'
+                    : null,
+                onAction: controller.canCreatePackage && !hasFilter
+                    ? controller.navigateToCreate
+                    : null,
               ),
             );
           }
 
-          final packageCount = controller.packages.length;
           return SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              if (index.isOdd) return AppSpacing.vSm;
-              final packageIndex = index ~/ 2;
-              final package = controller.packages[packageIndex];
+              final package = controller.packages[index];
+              final isExpanded =
+                  controller.expandedPackageId.value == package.packageId;
 
-              return Obx(() {
-                final isExpanded =
-                    controller.expandedPackageId.value == package.packageId;
-
-                return PackageCard(
-                  key: ValueKey<String>('voucher-package-${package.packageId}'),
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                child: PackageCard(
                   package: package,
                   isExpanded: isExpanded,
                   onToggleExpand: () =>
-                      controller.toggleAccordion(package.packageId),
-                  onDetails: () => controller.openPackageDetails(package),
-                  onEdit: controller.canEditPackage
-                      ? () => controller.initEditForm(package)
-                      : null,
-                  onToggleStatus: () => controller.promptToggleStatus(package),
-                  onDelete: controller.canDeletePackage
-                      ? () => controller.promptDeletePackage(package)
-                      : null,
-                );
-              });
-            }, childCount: packageCount == 0 ? 0 : packageCount * 2 - 1),
+                      controller.toggleExpanded(package.packageId),
+                  onDetails: () => controller.navigateToDetails(package),
+                  onEdit: () => controller.navigateToEdit(package),
+                  onToggleStatus: () =>
+                      PackageActionDialogs.showToggleStatusConfirmation(
+                        context,
+                        package: package,
+                        onConfirm: () =>
+                            controller.togglePackageStatus(package),
+                      ),
+                  onDelete: () => PackageActionDialogs.showDeleteConfirmation(
+                    context,
+                    package: package,
+                    onConfirm: () => controller.deletePackage(package),
+                  ),
+                  canEdit: controller.canEditPackage,
+                  canDelete: controller.canDeletePackage,
+                ),
+              );
+            }, childCount: controller.packages.length),
           );
         }),
 
-        // 3. ذيل التحميل الإضافي الموحد (CustomCursorLoadMore)
-        SliverToBoxAdapter(
-          child: Obx(
-            () => CustomCursorLoadMore(
-              hasMore: controller.hasMore,
-              isLoading: controller.isLoadingMore.value,
-              error: controller.loadMoreError.value,
-              onPressed: controller.loadMorePackages,
-            ),
+        // 3. مؤشر تحميل المزيد بالمؤشر
+        Obx(
+          () => CustomCursorLoadMore(
+            isLoading: controller.isLoadingMore.value,
+            hasMore: controller.hasMore,
+            error: controller.loadMoreError.value,
+            onPressed: controller.loadMorePackages,
           ),
         ),
       ],

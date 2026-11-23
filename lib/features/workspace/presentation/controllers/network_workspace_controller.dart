@@ -170,12 +170,12 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   void openProfile() => onNavItemSelected(3);
-  void openWholesaleInvoices() => onNavItemSelected(4);
-  void openOperatingExpenses() => onNavItemSelected(5);
+  void openWholesaleInvoices() => Get.toNamed<void>(AppRoutes.wholesaleInvoices);
+  void openOperatingExpenses() => Get.toNamed<void>(AppRoutes.operatingExpenses);
   void openPlatformBilling() => onNavItemSelected(6);
-  void openBillingReports() => onNavItemSelected(7);
-  void openTeamManagement() => onNavItemSelected(8);
-  void openOperationalReports() => onNavItemSelected(9);
+  void openBillingReports() => Get.toNamed<void>(AppRoutes.operatingExpenses);
+  void openTeamManagement() => Get.toNamed<void>(AppRoutes.networkTeamManagement);
+  void openOperationalReports() => Get.toNamed<void>(AppRoutes.operatingExpenses);
 
   Future<void> loadWorkspace() async {
     final revision = ++_revision;

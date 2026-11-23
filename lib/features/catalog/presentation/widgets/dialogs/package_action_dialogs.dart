@@ -1,44 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 
-/// حوارات التأكيد المركزية لإجراءات باقات الكروت (Package Action Dialogs)
+/// مربعات حوار تأكيد إجراءات باقات الكروت (Package Action Dialogs)
 class PackageActionDialogs {
-  PackageActionDialogs._();
+  const PackageActionDialogs._();
 
-  /// حوار تأكيد تبديل حالة تفعيل الباقة (تفعيل / تعطيل)
-  static Future<void> showToggleStatusDialog({
-    required String packageName,
-    required bool willDeactivate,
+  /// إظهار مربع حوار تأكيد تبديل حالة التفعيل
+  static Future<void> showToggleStatusConfirmation(
+    BuildContext context, {
+    required PackageEntity package,
     required Future<void> Function() onConfirm,
   }) async {
-    await CustomDialog.show(
-      type: willDeactivate ? DialogType.warning : DialogType.confirmation,
-      title: willDeactivate ? 'تعطيل باقة الكروت' : 'تفعيل باقة الكروت',
-      message: willDeactivate
-          ? 'هل أنت متأكد من رغبتك في تعطيل الباقة "$packageName"؟ لن يتمكن الوكلاء من شراء كروت جديدة منها حتى إعادة التفعيل.'
-          : 'هل أنت متأكد من رغبتك في إعادة تفعيل الباقة "$packageName"؟ ستصبح متاحة لنقاط البيع المعتمدة فوراً.',
-      confirmLabel: willDeactivate ? 'تعطيل الباقة' : 'تفعيل الباقة',
+    final willActivate = !package.isActive;
+    await CustomDialog.confirmation(
+      title: willActivate ? 'تفعيل باقة الكروت' : 'تعطيل باقة الكروت',
+      message: willActivate
+          ? 'هل أنت متأكد من رغبتك في تفعيل باقة "${package.packageName}"؟ ستصبح متاحة لطلبات الشراء لنقاط البيع المرتبطة.'
+          : 'هل أنت متأكد من رغبتك في تعطيل باقة "${package.packageName}"؟ لن تتمكن نقاط البيع من تقديم طلبات شراء جديدة عليها.',
+      confirmLabel: willActivate ? 'تأكيد التفعيل' : 'تأكيد التعطيل',
       cancelLabel: 'تراجع',
-      onConfirm: () async {
-        await onConfirm();
-      },
-    );
+      onConfirm: onConfirm,
+    ).showDialog(context);
   }
 
-  /// حوار تأكيد حذف باقة الكروت نهائياً أو مؤقتاً
-  static Future<void> showDeletePackageDialog({
-    required String packageName,
+  /// إظهار مربع حوار تأكيد حذف الباقة
+  static Future<void> showDeleteConfirmation(
+    BuildContext context, {
+    required PackageEntity package,
     required Future<void> Function() onConfirm,
   }) async {
-    await CustomDialog.show(
-      type: DialogType.error,
+    await CustomDialog.danger(
       title: 'حذف باقة الكروت',
       message:
-          'هل أنت متأكد من رغبتك في نقل الباقة "$packageName" إلى سلة المحذوفات؟ يمكنك استعادتها لاحقاً طالما لم يتم حذفها نهائياً.',
-      confirmLabel: 'حذف الباقة',
+          'هل أنت متأكد من رغبتك في حذف باقة "${package.packageName}"؟ سيتم نقل الباقة إلى سلة المحذوفات ولن تظهر في الكتالوج النشط.',
+      confirmLabel: 'تأكيد الحذف',
       cancelLabel: 'إلغاء',
-      onConfirm: () async {
-        await onConfirm();
-      },
-    );
+      onConfirm: onConfirm,
+    ).showDialog(context);
   }
 }

@@ -2,6 +2,7 @@ import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 
+/// حالة استخدام جلب قائمة الباقات المفلترة مع الترقيم بالمؤشر
 class GetPackagesUseCase {
   final PackageCatalogRepository _repository;
 

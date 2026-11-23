@@ -1,6 +1,7 @@
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 
+/// حالة استخدام استرجاع تفاصيل باقة كروت محددة
 class GetPackageDetailsUseCase {
   final PackageCatalogRepository _repository;
 

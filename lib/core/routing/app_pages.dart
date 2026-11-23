@@ -28,6 +28,8 @@ import 'package:netsales/features/auth/presentation/screens/security_settings_sc
 import 'package:netsales/features/auth/presentation/screens/two_factor_auth_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:netsales/features/catalog/presentation/bindings/package_catalog_binding.dart';
+import 'package:netsales/features/catalog/presentation/bindings/package_details_binding.dart';
+import 'package:netsales/features/catalog/presentation/bindings/package_form_binding.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_catalog_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_details_screen.dart';
 import 'package:netsales/features/catalog/presentation/screens/package_form_screen.dart';
@@ -264,7 +266,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.packageDetails,
       page: () => const PackageDetailsScreen(),
-      binding: PackageCatalogBinding(),
+      binding: PackageDetailsBinding(),
       middlewares: [
         AuthGuard(),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
@@ -273,7 +275,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.packageForm,
       page: () => const PackageFormScreen(),
-      binding: PackageCatalogBinding(),
+      binding: PackageFormBinding(),
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(

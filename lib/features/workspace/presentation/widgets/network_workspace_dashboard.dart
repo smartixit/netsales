@@ -138,6 +138,16 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   onTap: controller.openOperatingExpenses,
                 ),
+                WorkspaceFunctionAccessItem(
+                  title: 'كتالوج الباقات',
+                  icon: Icons.inventory_2_rounded,
+                  onTap: controller.openPackagesCatalog,
+                ),
+                WorkspaceFunctionAccessItem(
+                  title: 'فريق العمل',
+                  icon: Icons.groups_outlined,
+                  onTap: controller.openTeamManagement,
+                ),
               ],
             ),
             AppSpacing.vLg,
@@ -145,11 +155,6 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
               title: 'الإدارة والمتابعة',
               subtitle: 'الفريق واشتراك المنصة وتقارير الأداء.',
               items: [
-                WorkspaceFunctionAccessItem(
-                  title: 'فريق العمل',
-                  icon: Icons.groups_outlined,
-                  onTap: controller.openTeamManagement,
-                ),
                 WorkspaceFunctionAccessItem(
                   title: 'اشتراك المنصة',
                   icon: Icons.workspace_premium_outlined,

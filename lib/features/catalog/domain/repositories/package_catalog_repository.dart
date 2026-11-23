@@ -1,8 +1,10 @@
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/features/catalog/domain/entities/create_package_input.dart';
 import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/update_package_input.dart';
 
-/// واجهة مستودع كتالوج الباقات (Clean Architecture Domain Contract)
+/// واجهة مستودع كتالوج الباقات النظيفة (Package Catalog Repository Contract)
 abstract class PackageCatalogRepository {
   /// استرجاع قائمة الباقات مع الفلترة والبحث وترقيم المؤشر
   Future<PaginatedList<PackageEntity>> getPackages({
@@ -15,7 +17,7 @@ abstract class PackageCatalogRepository {
     List<int>? packageIds,
   });
 
-  /// استرجاع باقات شبكة معينة مع ترقيم المؤشر
+  /// استرجاع باقات شبكة معينة
   Future<PaginatedList<PackageEntity>> getNetworkPackages(
     int networkId, {
     bool? status,
@@ -27,28 +29,28 @@ abstract class PackageCatalogRepository {
   /// استرجاع تفاصيل باقة محددة
   Future<PackageEntity> getPackageDetails(int packageId);
 
-  /// استرجاع جميع الخصومات المخصصة الفعالة لنقطة بيع وشبكة في طلب واحد.
+  /// استرجاع الخصومات التعاقدية المخصصة لنقطة بيع وشبكة
   Future<List<EffectivePackageDiscountEntity>> getEffectiveDiscountsForPos({
     required int networkId,
     required int posId,
   });
 
-  /// استرجاع الخصم الفعلي المعتمد لنقطة بيع على باقة معينة من الخادم
+  /// استرجاع الخصم الفعلي المعتمد لنقطة بيع على باقة معينة
   Future<EffectivePackageDiscountEntity> getEffectiveDiscount({
     required int networkId,
     required int posId,
     required int packageId,
   });
 
-  /// إنشاء باقة كروت جديدة
-  Future<PackageEntity> createPackage(Map<String, dynamic> data);
+  /// إنشاء باقة كروت جديدة عبر كائن النطاق الصارم
+  Future<PackageEntity> createPackage(CreatePackageInput input);
 
-  /// تحديث بيانات باقة كروت
-  Future<PackageEntity> updatePackage(int packageId, Map<String, dynamic> data);
+  /// تحديث بيانات باقة كروت قائمة عبر كائن النطاق الصارم
+  Future<PackageEntity> updatePackage(int packageId, UpdatePackageInput input);
 
-  /// تبديل حالة تفعيل الباقة
+  /// تبديل حالة تفعيل الباقة ذرياً
   Future<PackageEntity> togglePackageStatus(int packageId);
 
-  /// حذف باقة كروت من النظام
+  /// حذف باقة كروت ناعماً من النظام
   Future<bool> deletePackage(int packageId);
 }

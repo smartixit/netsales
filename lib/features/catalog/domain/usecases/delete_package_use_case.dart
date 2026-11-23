@@ -1,5 +1,6 @@
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 
+/// حالة استخدام حذف باقة كروت من النظام
 class DeletePackageUseCase {
   final PackageCatalogRepository _repository;
 
