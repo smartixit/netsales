@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
-import 'package:netsales/core/utils/amount_formatter.dart';
-import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/core/utils/color_resolver.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_actions.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_header.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_card_micro_pod.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_card_pricing_section.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_card_quota_section.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_card_spine.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_ticket_notch_divider.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
-/// بطاقة باقة كروت الإنترنت الرقمية الفاخرة المخصصة للكتالوج (PackageCard)
+/// بطاقة باقة كروت الإنترنت التنفيذية الفاخرة (Executive Voucher Package Pass)
 ///
-/// تجسد تجربة بصرية مخصصة لمنتجات الاتصالات (Bespoke Product Identity):
-/// - شريط جانبي متدرج بهوية لون الباقة [PackageCardSpine].
-/// - ترويسة الباقة وشارة الحالة المركزية [PackageCardHeader].
-/// - إبراز سعة البيانات الرقمية بخط عملاق [PackageCardQuotaSection].
-/// - شبكة مكعبات بينتو المصغرة للمواصفات والربحية [PackageCardMicroPod].
-/// - شريط الإجراءات والتحكم السريع [PackageCardActions].
-/// - دعم التغذية اللمسية والانضغاط التفاعلي [CustomInteractiveBounce].
+/// تجسد هوية القسيمة الشبكية الرقمية المشرقة (Light Mode Digital Telecom Pass):
+/// - هيكل تذكرة ناصع متماسك بدون رص صناديق عشوائية.
+/// - ترويسة شبكية رشيقة مع قائمة خيارات إدارية مدمجة.
+/// - سعة رصيد بطلة تبرز هوية الباقة الأساسية.
+/// - خط تخريم تذكرة (Ticket Notch Perforation) فاصل.
+/// - لوحة تسعير وهوامش ناصعة ومقروءة للمقارنة بين الشراء النقدي والآجل.
+/// - زر تفاعلي ناعم وتجربة لمسية مرنة.
 class PackageCard extends StatelessWidget {
   const PackageCard({
     super.key,
@@ -34,6 +34,7 @@ class PackageCard extends StatelessWidget {
     this.onDelete,
     this.canEdit = true,
     this.canDelete = true,
+    this.actions,
   });
 
   final PackageEntity package;
@@ -45,6 +46,7 @@ class PackageCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final bool canEdit;
   final bool canDelete;
+  final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -57,116 +59,87 @@ class PackageCard extends StatelessWidget {
     return CustomInteractiveBounce(
       onTap: onDetails,
       child: Container(
+        margin: EdgeInsets.only(bottom: AppSpacing.sm),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: 0.5),
+            color: colors.outlineVariant.withValues(alpha: 0.4),
+            width: 1.2,
           ),
-          boxShadow: AppElevation.level1(context),
+          boxShadow: [
+            ...AppElevation.level1(context),
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.05),
+              blurRadius: 16.r,
+              offset: Offset(0, 4.h),
+            ),
+          ],
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1. شريط الهوية اللوني للباقة (Color Spine)
-              PackageCardSpine(color: accentColor),
-
-              // 2. المحتوى التفاعلي للبطاقة
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.cardPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // رأس البطاقة: الاسم، المزود، وشارة الحالة
-                      PackageCardHeader(package: package),
-
-                      SizedBox(height: AppSpacing.sm),
-
-                      // سعة البيانات والشارة الرقمية
-                      PackageCardQuotaSection(
-                        package: package,
-                        accentColor: accentColor,
-                      ),
-
-                      SizedBox(height: AppSpacing.sm),
-
-                      // شبكة مكعبات بينتو المصغرة للمواصفات والربحية
-                      Row(
-                        children: [
-                          Expanded(
-                            child: PackageCardMicroPod(
-                              icon: Icons.payments_outlined,
-                              title: 'تكلفة الكرت',
-                              value: AmountFormatter.formatValue(
-                                package.unitVoucherPrice,
-                              ),
-                              accentColor: colors.primary,
-                            ),
-                          ),
-                          SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: PackageCardMicroPod(
-                              icon: Icons.savings_outlined,
-                              title: 'وفر الكرت نقداً',
-                              value: AmountFormatter.formatValue(
-                                package.unitCashPrice,
-                              ),
-                              badgeText:
-                                  '${package.packageDefaultCashDiscount.toStringAsFixed(0)}%',
-                              accentColor: colors.success,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: AppSpacing.xs),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: PackageCardMicroPod(
-                              icon: Icons.event_available_outlined,
-                              title: 'فترة الصلاحية',
-                              value: package.validityDisplay,
-                              accentColor: colors.purpleAccent,
-                            ),
-                          ),
-                          SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: PackageCardMicroPod(
-                              icon: Icons.timer_outlined,
-                              title: 'وقت الاستخدام',
-                              value: package.uptimeDisplay,
-                              accentColor: colors.amberAccent,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: AppSpacing.sm),
-
-                      Divider(
-                        height: 1,
-                        color: colors.outlineVariant.withValues(alpha: 0.35),
-                      ),
-
-                      SizedBox(height: AppSpacing.xs),
-
-                      // شريط الإجراءات والتحكم
-                      PackageCardActions(
-                        package: package,
-                        onDetails: onDetails,
-                        onEdit: onEdit,
-                        onToggleStatus: onToggleStatus,
-                        onDelete: onDelete,
-                        canEdit: canEdit,
-                        canDelete: canDelete,
-                      ),
-                    ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // الشريحة اللونية الجانبية الفاخرة (Color Spine)
+                Container(
+                  width: 5.w,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(AppRadius.card),
+                      bottomRight: Radius.circular(AppRadius.card),
+                    ),
                   ),
                 ),
-              ),
-            ],
+
+                // المحتوى الداخلي لقسيمة الباقة
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.cardPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. الترويسة وهوية الباقة وخيارات الإدارة
+                        PackageCardHeader(
+                          package: package,
+                          accentColor: accentColor,
+                          onEdit: onEdit,
+                          onToggleStatus: onToggleStatus,
+                          onDelete: onDelete,
+                          canEdit: canEdit,
+                          canDelete: canDelete,
+                        ),
+
+                        SizedBox(height: AppSpacing.xs),
+
+                        // 2. سعة رصيد البيانات ومواصفات الحزمة
+                        PackageCardQuotaSection(
+                          package: package,
+                          accentColor: accentColor,
+                        ),
+
+                        // 3. خط التخريم الفاصل للقسيمة الرقمية
+                        const PackageTicketNotchDivider(),
+
+                        // 4. لوحة التسعير وهوامش الربح
+                        PackageCardPricingSection(package: package),
+
+                        SizedBox(height: AppSpacing.sm),
+
+                        // 5. زر تفاصيل الباقة
+                        actions ??
+                            PackageCardActions(
+                              package: package,
+                              onDetails: onDetails,
+                            ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

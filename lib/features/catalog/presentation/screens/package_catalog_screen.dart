@@ -66,6 +66,7 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
                   onSelectKey: controller.onFilterKeySelected,
                 ),
               ),
+              AppSpacing.vSm,
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
@@ -172,12 +173,14 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
         }),
 
         // 3. مؤشر تحميل المزيد بالمؤشر
-        Obx(
-          () => CustomCursorLoadMore(
-            isLoading: controller.isLoadingMore.value,
-            hasMore: controller.hasMore,
-            error: controller.loadMoreError.value,
-            onPressed: controller.loadMorePackages,
+        SliverToBoxAdapter(
+          child: Obx(
+            () => CustomCursorLoadMore(
+              isLoading: controller.isLoadingMore.value,
+              hasMore: controller.hasMore,
+              error: controller.loadMoreError.value,
+              onPressed: controller.loadMorePackages,
+            ),
           ),
         ),
       ],

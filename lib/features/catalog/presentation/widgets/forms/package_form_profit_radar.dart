@@ -47,23 +47,30 @@ class PackageFormProfitRadar extends GetView<PackageFormController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calculate_outlined,
-                      size: 20.r,
-                      color: colors.primary,
-                    ),
-                    SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'رادار التسعير وهوامش الربح الحية للكرت',
-                      style: AppTypography.titleSmall.copyWith(
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calculate_outlined,
+                        size: 20.r,
                         color: colors.primary,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          'رادار التسعير وهوامش الربح',
+                          style: AppTypography.titleSmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                SizedBox(width: AppSpacing.xs),
                 Text(
                   '$count كرت بالحزمة',
                   style: AppTypography.badgeText.copyWith(

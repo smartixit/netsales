@@ -37,7 +37,7 @@ class PackageCatalogController extends GetxController {
 
   // ── الحالة التفاعلية للقائمة ──
   final packages = <PackageEntity>[].obs;
-  final isLoading = false.obs;
+  final isLoading = true.obs;
   final isLoadingMore = false.obs;
   final isTogglingStatus = false.obs;
   final isDeleting = false.obs;
@@ -98,10 +98,10 @@ class PackageCatalogController extends GetxController {
     }
 
     if (getMyNetworksUseCase != null) {
-      await _loadAuthorizedNetworks();
+      unawaited(_loadAuthorizedNetworks());
     }
 
-    await fetchPackages(refresh: true);
+    await fetchPackages(refresh: true, clearOnStart: true);
   }
 
   /// جلب الشبكات المصرح للمستخدم إدارتها
@@ -129,14 +129,21 @@ class PackageCatalogController extends GetxController {
       final query = searchController.text.trim();
       if (searchQuery.value != query) {
         searchQuery.value = query;
-        fetchPackages(refresh: true);
+        fetchPackages(refresh: true, clearOnStart: true);
       }
     });
   }
 
   /// جلب باقات الكروت من الخادم مع دعم الترقيم بالمؤشر
-  Future<void> fetchPackages({bool refresh = false}) async {
+  Future<void> fetchPackages({
+    bool refresh = false,
+    bool clearOnStart = false,
+  }) async {
     final currentRev = ++_catalogRevision;
+
+    if (clearOnStart || (refresh && packages.isEmpty)) {
+      packages.clear();
+    }
 
     if (refresh) {
       isLoading.value = true;
@@ -202,7 +209,7 @@ class PackageCatalogController extends GetxController {
 
   /// تحديث القائمة بالكامل
   Future<void> refreshCatalog() async {
-    await fetchPackages(refresh: true);
+    await fetchPackages(refresh: true, clearOnStart: true);
   }
 
   /// اختيار مفتاح الفلترة من شريط المؤشرات أو قائمة البحث
@@ -214,14 +221,22 @@ class PackageCatalogController extends GetxController {
     } else if (key == 'inactive') {
       statusFilter.value = false;
     }
-    fetchPackages(refresh: true);
+    fetchPackages(refresh: true, clearOnStart: true);
+  }
+
+  /// مسح كافة عوامل التصفية والبحث
+  void resetFilters() {
+    searchController.clear();
+    searchQuery.value = '';
+    statusFilter.value = null;
+    fetchPackages(refresh: true, clearOnStart: true);
   }
 
   /// تغيير الشبكة المحددة للفلترة
   void selectNetwork(int? networkId) {
     if (selectedNetworkId.value == networkId) return;
     selectedNetworkId.value = networkId;
-    fetchPackages(refresh: true);
+    fetchPackages(refresh: true, clearOnStart: true);
   }
 
   /// تبديل توسيع بطاقة الباقة في الأكورديون

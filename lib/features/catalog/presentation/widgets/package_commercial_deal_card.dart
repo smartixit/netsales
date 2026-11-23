@@ -57,26 +57,33 @@ class PackageCommercialDealCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(AppSpacing.xs + AppSpacing.xxs),
-                    decoration: BoxDecoration(
-                      color: themeColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(AppSpacing.xs + AppSpacing.xxs),
+                      decoration: BoxDecoration(
+                        color: themeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      child: Icon(icon, size: 16.r, color: themeColor),
                     ),
-                    child: Icon(icon, size: 16.r, color: themeColor),
-                  ),
-                  SizedBox(width: AppSpacing.xs),
-                  Text(
-                    title,
-                    style: AppTypography.titleSmall.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: themeColor,
+                    SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTypography.titleSmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: themeColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              SizedBox(width: AppSpacing.xs),
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,

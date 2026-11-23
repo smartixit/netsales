@@ -99,64 +99,72 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        // شريحة الكرت الذكية (Microchip Motif) بألوان التوكن المركزية
-                        Container(
-                          width: 44.w,
-                          height: 32.h,
-                          decoration: BoxDecoration(
-                            color: colors.executiveGoldAccent.withValues(
-                              alpha: 0.85,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // شريحة الكرت الذكية (Microchip Motif) بألوان التوكن المركزية
+                          Container(
+                            width: 44.w,
+                            height: 32.h,
+                            decoration: BoxDecoration(
+                              color: colors.executiveGoldAccent.withValues(
+                                alpha: 0.85,
+                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                              border: Border.all(
+                                color: colors.executiveGoldIcon,
+                                width: 1.2,
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                            border: Border.all(
-                              color: colors.executiveGoldIcon,
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 24.w,
-                              height: 18.h,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: colors.amberAccent.withValues(
-                                    alpha: 0.6,
+                            child: Center(
+                              child: Container(
+                                width: 24.w,
+                                height: 18.h,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: colors.amberAccent.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                    width: 0.8,
                                   ),
-                                  width: 0.8,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.xs,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.xs,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: AppSpacing.sm),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              package.networkName != null
-                                  ? '${package.networkName}'
-                                  : 'NETSALES TELECOM',
-                              style: AppTypography.titleSmall.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontWeight: FontWeight.bold,
-                              ),
+                          SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  package.networkName != null
+                                      ? '${package.networkName}'
+                                      : 'NETSALES TELECOM',
+                                  style: AppTypography.titleSmall.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'باقة كروت رقمية #${package.packageId}',
+                                  style: AppTypography.badgeText.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.65),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            Text(
-                              'باقة كروت رقمية #${package.packageId}',
-                              style: AppTypography.badgeText.copyWith(
-                                color: Colors.white.withValues(alpha: 0.65),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-
+                    SizedBox(width: AppSpacing.xs),
                     CustomStatusBadge(
                       label: statusPres.label,
                       icon: statusPres.icon,
@@ -165,7 +173,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                   ],
                 ),
 
-                SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.md),
 
                 Text(
                   package.packageName,
@@ -174,6 +182,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
 
                 SizedBox(height: AppSpacing.xs),
@@ -182,18 +192,25 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      package.balanceDisplay,
-                      style: AppTypography.displayMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 8.r,
-                            offset: Offset(0, 3.h),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          package.balanceDisplay,
+                          style: AppTypography.headlineMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                blurRadius: 8.r,
+                                offset: Offset(0, 3.h),
+                              ),
+                            ],
                           ),
-                        ],
+                          maxLines: 1,
+                        ),
                       ),
                     ),
                     SizedBox(width: AppSpacing.xs),
@@ -210,7 +227,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
+                    horizontal: AppSpacing.sm,
                     vertical: AppSpacing.sm,
                   ),
                   decoration: BoxDecoration(
@@ -221,21 +238,35 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      PackageVoucherMiniBadge(
-                        icon: Icons.style_outlined,
-                        label: '${package.packageVoucherCount} كرت',
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: PackageVoucherMiniBadge(
+                            icon: Icons.style_outlined,
+                            label: '${package.packageVoucherCount} كرت',
+                          ),
+                        ),
                       ),
                       const PackageVoucherBadgeDivider(),
-                      PackageVoucherMiniBadge(
-                        icon: Icons.timer_outlined,
-                        label: package.uptimeDisplay,
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: PackageVoucherMiniBadge(
+                            icon: Icons.timer_outlined,
+                            label: package.uptimeDisplay,
+                          ),
+                        ),
                       ),
                       const PackageVoucherBadgeDivider(),
-                      PackageVoucherMiniBadge(
-                        icon: Icons.event_available_outlined,
-                        label: package.validityDisplay,
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: PackageVoucherMiniBadge(
+                            icon: Icons.event_available_outlined,
+                            label: package.validityDisplay,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -246,20 +277,26 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'السعر الأساسي للحزمة: ${AmountFormatter.formatValue(package.packageVoucherPrice)}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        'السعر الأساسي: ${AmountFormatter.formatValue(package.packageVoucherPrice)}',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (package.packageVoucherCount > 0)
+                    if (package.packageVoucherCount > 0) ...[
+                      SizedBox(width: AppSpacing.xs),
                       Text(
                         '(${AmountFormatter.formatValue(package.unitVoucherPrice)} للكرت)',
                         style: AppTypography.badgeText.copyWith(
                           color: Colors.white.withValues(alpha: 0.65),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ],

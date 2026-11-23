@@ -27,22 +27,29 @@ class PackageCommercialPricingRadar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.price_change_outlined,
-                  size: 20.r,
-                  color: colors.primary,
-                ),
-                SizedBox(width: AppSpacing.xs),
-                Text(
-                  'التعرفة والخصومات التعاقدية المعتمدة',
-                  style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.price_change_outlined,
+                    size: 20.r,
+                    color: colors.primary,
                   ),
-                ),
-              ],
+                  SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      'التعرفة والخصومات التعاقدية',
+                      style: AppTypography.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            SizedBox(width: AppSpacing.xs),
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.sm + AppSpacing.xxs,

@@ -12,6 +12,7 @@ import 'package:netsales/features/wallet/presentation/controllers/network_wallet
 class NetworkWalletStatementBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<ApiService>(()=>ApiService());
     // 1. Data Source
     Get.lazyPut<NetworkWalletRemoteDataSource>(
       () => NetworkWalletRemoteDataSourceImpl(Get.find<ApiService>()),

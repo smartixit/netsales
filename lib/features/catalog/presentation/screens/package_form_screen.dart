@@ -66,7 +66,7 @@ class PackageFormScreen extends GetView<PackageFormController> {
                 children: [
                   Expanded(
                     child: CustomButton.outline(
-                      text: 'إلغاء وتراجع',
+                      text: 'إلغاء',
                       icon: Icons.close_rounded,
                       shape: AppButtonShape.rounded,
                       size: AppButtonSize.medium,
@@ -75,8 +75,9 @@ class PackageFormScreen extends GetView<PackageFormController> {
                   ),
                   SizedBox(width: AppSpacing.sm),
                   Expanded(
+                    flex: 2,
                     child: CustomButton.primary(
-                      text: isEditing ? 'حفظ التعديلات' : 'إنشاء وتثبيت الباقة',
+                      text: isEditing ? 'حفظ التعديلات' : 'تثبيت الباقة',
                       icon: isEditing
                           ? Icons.check_rounded
                           : Icons.add_task_rounded,

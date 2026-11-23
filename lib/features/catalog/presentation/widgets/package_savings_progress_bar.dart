@@ -38,16 +38,22 @@ class PackageSavingsProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'مؤشر التوفير لنقطة البيع عند الشراء بالحزمة',
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'مؤشر التوفير لنقطة البيع',
+                  style: AppTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              SizedBox(width: AppSpacing.xs),
               Text(
-                'خصم نقدي ${cashDiscountPercent.toStringAsFixed(0)}% مقابل آجل ${creditDiscountPercent.toStringAsFixed(0)}%',
+                'نقدي ${cashDiscountPercent.toStringAsFixed(0)}% • آجل ${creditDiscountPercent.toStringAsFixed(0)}%',
                 style: AppTypography.badgeText.copyWith(
                   color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
