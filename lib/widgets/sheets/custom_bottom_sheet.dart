@@ -50,6 +50,9 @@ class CustomBottomSheet extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? maxHeightFactor;
 
+  /// Optional maximum surface width for centered desktop/tablet sheets.
+  final double? maxWidth;
+
   const CustomBottomSheet({
     super.key,
     this.title,
@@ -63,7 +66,8 @@ class CustomBottomSheet extends StatelessWidget {
     this.scrollable = false,
     this.padding,
     this.maxHeightFactor,
-  });
+    this.maxWidth,
+  }) : assert(maxWidth == null || (maxWidth > 0 && maxWidth < double.infinity));
 
   /// 1. مصنع النوافذ السفلية لقائمة الإجراءات والخيارات (Actions List)
   factory CustomBottomSheet.actions({
@@ -269,6 +273,7 @@ class CustomBottomSheet extends StatelessWidget {
     bool scrollable = false,
     EdgeInsetsGeometry? padding,
     double? maxHeightFactor,
+    double? maxWidth,
     bool isScrollControlled = true,
     bool isDismissible = true,
     bool enableDrag = true,
@@ -286,6 +291,7 @@ class CustomBottomSheet extends StatelessWidget {
         scrollable: scrollable,
         padding: padding,
         maxHeightFactor: maxHeightFactor,
+        maxWidth: maxWidth,
         child: child,
       ),
       isScrollControlled: isScrollControlled,
@@ -355,7 +361,7 @@ class CustomBottomSheet extends StatelessWidget {
     final effectiveMaxHeight =
         mediaQuery.size.height * (maxHeightFactor ?? 0.88);
 
-    return Container(
+    final sheet = Container(
       constraints: BoxConstraints(maxHeight: effectiveMaxHeight),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -517,6 +523,17 @@ class CustomBottomSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    if (maxWidth == null) return sheet;
+
+    final effectiveWidth = mediaQuery.size.width < maxWidth!
+        ? mediaQuery.size.width
+        : maxWidth!;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(width: effectiveWidth, child: sheet),
     );
   }
 }
