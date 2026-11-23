@@ -707,6 +707,36 @@ class NetworkProcurementReviewController
     currentPreview.value = null;
   }
 
+  /// إعادة مسودة التعديل إلى بنود وكميات الطلب الأصلي
+  void resetModificationToOriginal() {
+    final original = editingRequest.value;
+    if (original == null) return;
+    _modificationRevision++;
+    modificationLines.assignAll(
+      original.items.map(
+        (item) => RequestModificationLineEntity(
+          packageId: item.packageId,
+          voucherCount: item.voucherCount,
+        ),
+      ),
+    );
+    for (final item in original.items) {
+      final ctrl = _modificationQuantityControllers[item.packageId];
+      if (ctrl != null) {
+        ctrl.text = item.voucherCount.toString();
+      }
+    }
+    final originalIds = original.items.map((i) => i.packageId).toSet();
+    final toRemove = _modificationQuantityControllers.keys
+        .where((id) => !originalIds.contains(id))
+        .toList(growable: false);
+    for (final id in toRemove) {
+      _modificationQuantityControllers[id]?.dispose();
+      _modificationQuantityControllers.remove(id);
+    }
+    currentPreview.value = null;
+  }
+
   Future<bool> previewModification() async {
     final requestId = editingRequestId.value;
     if (requestId == null ||

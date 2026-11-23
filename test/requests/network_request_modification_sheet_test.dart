@@ -326,4 +326,58 @@ void main() {
       expect(find.text('باقة #10'), findsNothing);
     },
   );
+
+  testWidgets(
+    'NetworkRequestModificationFooter transitions progressively through states',
+    (tester) async {
+      await controller.beginModification(mockRequest);
+
+      await tester.pumpWidget(
+        _wrapWithScreenUtil(
+          const Scaffold(
+            bottomNavigationBar: NetworkRequestModificationFooter(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // الحالة 1: لا توجد تعديلات بعد -> يظهر فقط زر 'إغلاق'
+      expect(find.text('إغلاق'), findsOneWidget);
+      expect(find.text('معاينة التعديلات'), findsNothing);
+      expect(find.text('اعتماد الطلب المعدل'), findsNothing);
+
+      // الحالة 2: إجراء تعديل بالكمية -> يظهر 'تراجع' و 'معاينة التعديلات'
+      controller.setModificationQuantity(10, 150);
+      await tester.pumpAndSettle();
+
+      expect(find.text('إغلاق'), findsNothing);
+      expect(find.text('تراجع'), findsOneWidget);
+      expect(find.text('معاينة التعديلات'), findsOneWidget);
+      expect(find.text('اعتماد الطلب المعدل'), findsNothing);
+
+      // الحالة 3: تنفيذ المعاينة -> يظهر 'اعتماد الطلب المعدل' وتختفي المعاينة
+      await controller.previewModification();
+      await tester.pumpAndSettle();
+
+      expect(find.text('معاينة التعديلات'), findsNothing);
+      expect(find.text('اعتماد الطلب المعدل'), findsOneWidget);
+      expect(find.text('تراجع'), findsOneWidget);
+
+      // تعديل إضافي بعد المعاينة -> تسقط المعاينة وتعود 'معاينة التعديلات'
+      controller.setModificationQuantity(10, 200);
+      await tester.pumpAndSettle();
+
+      expect(find.text('معاينة التعديلات'), findsOneWidget);
+      expect(find.text('اعتماد الطلب المعدل'), findsNothing);
+
+      // النقر على 'تراجع' -> تعود الكميات للأصل ويعود زر 'إغلاق'
+      await tester.tap(find.text('تراجع'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('إغلاق'), findsOneWidget);
+      expect(find.text('معاينة التعديلات'), findsNothing);
+      expect(find.text('اعتماد الطلب المعدل'), findsNothing);
+      expect(controller.modificationLines.first.voucherCount, 100);
+    },
+  );
 }

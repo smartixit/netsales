@@ -86,6 +86,74 @@ class NetworkRequestModificationFooter
       final isBusy = isLoadingEditor || isPreviewing || isProcessing;
       final canSubmit = hasLines && hasChanges && !isBusy;
 
+      Widget content;
+      if (!hasChanges) {
+        // الحالة الأولى: لا توجد أي تعديلات مقارنة بالطلب الأصلي
+        content = CustomButton.outline(
+          text: 'إغلاق',
+          icon: Icons.close_rounded,
+          size: AppButtonSize.medium,
+          width: double.infinity,
+          onPressed: isBusy ? null : () => Get.back<void>(),
+        );
+      } else if (preview == null) {
+        // الحالة الثانية: تم إجراء تعديلات وبانتظار المعاينة المالية الإلزامية
+        content = Row(
+          children: [
+            Expanded(
+              child: CustomButton.outline(
+                text: 'تراجع',
+                icon: Icons.undo_rounded,
+                size: AppButtonSize.medium,
+                onPressed:
+                    isBusy ? null : controller.resetModificationToOriginal,
+              ),
+            ),
+            AppSpacing.hSm,
+            Expanded(
+              flex: 2,
+              child: CustomButton.primary(
+                text: 'معاينة التعديلات',
+                icon: Icons.calculate_outlined,
+                size: AppButtonSize.medium,
+                loading: isPreviewing,
+                onPressed: canSubmit
+                    ? () => controller.previewModification()
+                    : null,
+              ),
+            ),
+          ],
+        );
+      } else {
+        // الحالة الثالثة: تمت المعاينة بنجاح والأثر المالي معروض ومحدّث
+        content = Row(
+          children: [
+            Expanded(
+              child: CustomButton.outline(
+                text: 'تراجع',
+                icon: Icons.undo_rounded,
+                size: AppButtonSize.medium,
+                onPressed:
+                    isBusy ? null : controller.resetModificationToOriginal,
+              ),
+            ),
+            AppSpacing.hSm,
+            Expanded(
+              flex: 2,
+              child: CustomButton.primary(
+                text: 'اعتماد الطلب المعدل',
+                icon: Icons.check_circle_rounded,
+                size: AppButtonSize.medium,
+                loading: isProcessing,
+                onPressed: canSubmit
+                    ? () => controller.confirmAndApproveModification()
+                    : null,
+              ),
+            ),
+          ],
+        );
+      }
+
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
@@ -96,36 +164,7 @@ class NetworkRequestModificationFooter
         ),
         child: SafeArea(
           top: false,
-          child: Row(
-            children: [
-              Expanded(
-                child: CustomButton.outline(
-                  text: 'معاينة',
-                  icon: Icons.calculate_outlined,
-                  size: AppButtonSize.medium,
-                  loading: isPreviewing,
-                  onPressed: canSubmit
-                      ? () => controller.previewModification()
-                      : null,
-                ),
-              ),
-              AppSpacing.hSm,
-              Expanded(
-                flex: 2,
-                child: CustomButton.primary(
-                  text: preview != null
-                      ? 'اعتماد الطلب المعدل'
-                      : 'اعتماد بالتعديل',
-                  icon: Icons.check_circle_rounded,
-                  size: AppButtonSize.medium,
-                  loading: isProcessing,
-                  onPressed: canSubmit
-                      ? () => controller.confirmAndApproveModification()
-                      : null,
-                ),
-              ),
-            ],
-          ),
+          child: content,
         ),
       );
     });
