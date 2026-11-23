@@ -17,6 +17,7 @@ class DialogActionBar extends StatelessWidget {
   final String? secondaryActionLabel;
   final VoidCallback? onSecondaryAction;
   final dynamic secondaryActionIcon;
+  final bool autoCloseOnConfirm;
 
   const DialogActionBar({
     super.key,
@@ -28,6 +29,7 @@ class DialogActionBar extends StatelessWidget {
     this.secondaryActionLabel,
     this.onSecondaryAction,
     this.secondaryActionIcon,
+    this.autoCloseOnConfirm = true,
   });
 
   @override
@@ -57,7 +59,9 @@ class DialogActionBar extends StatelessWidget {
                     text: confirmLabel,
                     width: double.infinity,
                     onPressed: () {
-                      Get.back(result: true);
+                      if (autoCloseOnConfirm) {
+                        Get.back(result: true);
+                      }
                       onConfirm?.call();
                     },
                   )
@@ -65,7 +69,9 @@ class DialogActionBar extends StatelessWidget {
                     text: confirmLabel,
                     width: double.infinity,
                     onPressed: () {
-                      Get.back(result: true);
+                      if (autoCloseOnConfirm) {
+                        Get.back(result: true);
+                      }
                       onConfirm?.call();
                     },
                   ),

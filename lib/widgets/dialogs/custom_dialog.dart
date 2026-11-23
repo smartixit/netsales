@@ -30,6 +30,7 @@ class CustomDialog extends StatelessWidget {
   final VoidCallback? onSecondaryAction;
   final dynamic secondaryActionIcon;
   final bool canPop;
+  final bool autoCloseOnConfirm;
   final double? maxWidth;
   final Widget? customHeader;
   final String? customAnimationPath;
@@ -48,6 +49,7 @@ class CustomDialog extends StatelessWidget {
     this.onSecondaryAction,
     this.secondaryActionIcon,
     this.canPop = true,
+    this.autoCloseOnConfirm = true,
     this.maxWidth,
     this.customHeader,
     this.customAnimationPath,
@@ -264,6 +266,7 @@ class CustomDialog extends StatelessWidget {
     VoidCallback? onSecondaryAction,
     dynamic secondaryActionIcon,
     bool canPop = true,
+    bool autoCloseOnConfirm = true,
     double? maxWidth,
     Widget? customHeader,
     String? customAnimationPath,
@@ -288,6 +291,7 @@ class CustomDialog extends StatelessWidget {
             onSecondaryAction: onSecondaryAction,
             secondaryActionIcon: secondaryActionIcon,
             canPop: canPop,
+            autoCloseOnConfirm: autoCloseOnConfirm,
             maxWidth: maxWidth,
             customHeader: customHeader,
             customAnimationPath: customAnimationPath,
@@ -455,6 +459,7 @@ class CustomDialog extends StatelessWidget {
                     secondaryActionLabel: secondaryActionLabel,
                     onSecondaryAction: onSecondaryAction,
                     secondaryActionIcon: secondaryActionIcon,
+                    autoCloseOnConfirm: autoCloseOnConfirm,
                   ),
                 ],
               ),

@@ -41,7 +41,6 @@ class NetworkRequestModificationSheet
       final request = controller.editingRequest.value;
       final lines = controller.modificationLines.toList(growable: false);
       final preview = controller.currentPreview.value;
-      final isLoadingEditor = controller.isLoadingEditor.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -50,31 +49,17 @@ class NetworkRequestModificationSheet
             _NetworkRequestCommercialPartiesCard(request: request),
             AppSpacing.vMd,
           ],
-          if (isLoadingEditor && lines.isEmpty) ...[
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-              child: CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: const CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.cards,
-                  itemCount: 2,
-                  showCardSurface: true,
-                ),
-              ),
-            ),
-          ] else ...[
-            _NetworkRequestProposedItemsSection(request: request, lines: lines),
-            AppSpacing.vLg,
-            const _NetworkRequestCatalogSection(),
-            AppSpacing.vLg,
-            const _NetworkRequestApprovalNotesSection(),
-            AppSpacing.vLg,
-            _NetworkRequestQuotationPreviewSection(
-              request: request,
-              preview: preview,
-              lines: lines,
-            ),
-          ],
+          _NetworkRequestProposedItemsSection(request: request, lines: lines),
+          AppSpacing.vLg,
+          const _NetworkRequestCatalogSection(),
+          AppSpacing.vLg,
+          const _NetworkRequestApprovalNotesSection(),
+          AppSpacing.vLg,
+          _NetworkRequestQuotationPreviewSection(
+            request: request,
+            preview: preview,
+            lines: lines,
+          ),
           AppSpacing.vXl,
         ],
       );
@@ -425,85 +410,103 @@ class _NetworkRequestProposedItemsSection
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(AppSpacing.xs),
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Icon(
-                Icons.inventory_2_rounded,
-                size: 16.r,
-                color: colors.primary,
-              ),
-            ),
-            AppSpacing.hXs,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'الباقات المطلوبة والمعدلة (${lines.length})',
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'عدّل كمية الكروت عبر الأزرار أو الإدخال المباشر، أو احذف الباقة إذا لزم.',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        AppSpacing.vSm,
-        if (lines.isEmpty)
-          CustomStateView.empty(
-            title: 'قائمة الباقات فارغة',
-            subtitle: 'يمكنك إضافة باقات جديدة من كتالوج الشبكة أدناه.',
-          )
-        else
-          ...lines.map((line) {
-            final pkg = controller.resolvePackageForModification(
-              line.packageId,
-            );
-            // final isAdded = controller.isItemNewlyAdded(line.packageId);
-            final authoritativeTotal = controller
-                .authoritativeTotalForModificationLine(line);
+    return Obx(() {
+      final isLoading = controller.isLoadingEditor.value;
 
-            return Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.sm),
-              child: ProcurementPackageOptionCard(
-                package: pkg,
-                quantity: line.voucherCount,
-                customDiscount: controller.discountForPackage(line.packageId),
-                isDiscountLoading: controller.isLoadingPackageDiscounts.value,
-                estimatedLineTotal: authoritativeTotal,
-                onSetQuantity: (qty) =>
-                    controller.setModificationQuantity(line.packageId, qty),
-                isCashSale: request?.saleType == SaleType.cash,
-                quantityController: controller.modificationQuantityController(
-                  line.packageId,
-                  line.voucherCount,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(AppSpacing.xs),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                onDelete: () =>
-                    controller.removeModificationPackage(line.packageId),
-                //   customHeaderTag: isAdded ? 'باقة مضافة' : null,
-                //   customHeaderTagColor: isAdded ? colors.tertiary : null,
+                child: Icon(
+                  Icons.inventory_2_rounded,
+                  size: 16.r,
+                  color: colors.primary,
+                ),
               ),
-            );
-          }),
-      ],
-    );
+              AppSpacing.hXs,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isLoading
+                          ? 'الباقات المطلوبة والمعدلة'
+                          : 'الباقات المطلوبة والمعدلة (${lines.length})',
+                      style: AppTypography.titleSmall.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      'عدّل كمية الكروت عبر الأزرار أو الإدخال المباشر، أو احذف الباقة إذا لزم.',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.vSm,
+          if (isLoading)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: CustomStateView.loading(
+                presentation: CustomStatePresentation.skeletonOnly,
+                skeleton: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.cards,
+                  itemCount: lines.isNotEmpty ? lines.length : 2,
+                  showCardSurface: true,
+                ),
+              ),
+            )
+          else if (lines.isEmpty)
+            CustomStateView.empty(
+              title: 'قائمة الباقات فارغة',
+              subtitle: 'يمكنك إضافة باقات جديدة من كتالوج الشبكة أدناه.',
+            )
+          else
+            ...lines.map((line) {
+              final pkg = controller.resolvePackageForModification(
+                line.packageId,
+              );
+              // final isAdded = controller.isItemNewlyAdded(line.packageId);
+              final authoritativeTotal = controller
+                  .authoritativeTotalForModificationLine(line);
+
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ProcurementPackageOptionCard(
+                  package: pkg,
+                  quantity: line.voucherCount,
+                  customDiscount: controller.discountForPackage(line.packageId),
+                  isDiscountLoading: controller.isLoadingPackageDiscounts.value,
+                  estimatedLineTotal: authoritativeTotal,
+                  onSetQuantity: (qty) =>
+                      controller.setModificationQuantity(line.packageId, qty),
+                  isCashSale: request?.saleType == SaleType.cash,
+                  quantityController: controller.modificationQuantityController(
+                    line.packageId,
+                    line.voucherCount,
+                  ),
+                  onDelete: () =>
+                      controller.removeModificationPackage(line.packageId),
+                  //   customHeaderTag: isAdded ? 'باقة مضافة' : null,
+                  //   customHeaderTagColor: isAdded ? colors.tertiary : null,
+                ),
+              );
+            }),
+        ],
+      );
+    });
   }
 }
 

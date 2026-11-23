@@ -18,6 +18,7 @@ import 'package:netsales/features/requests/domain/usecases/preview_request_modif
 import 'package:netsales/features/requests/domain/usecases/reject_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/network_procurement_review_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/network_request_modification_sheet.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 
 class _FakeGetRequestsUseCase implements GetRequestsUseCase {
   @override
@@ -298,6 +299,31 @@ void main() {
 
       // التحقق من شارة البند المضاف
       expect(find.text('باقة مضافة'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'NetworkRequestModificationSheet renders skeleton loading without dummy data when isLoadingEditor is true',
+    (tester) async {
+      controller.editingRequest.value = mockRequest;
+      controller.modificationLines.assignAll([
+        const RequestModificationLineEntity(packageId: 10, voucherCount: 100),
+      ]);
+      controller.isLoadingEditor.value = true;
+
+      await tester.pumpWidget(
+        _wrapWithScreenUtil(
+          const SingleChildScrollView(child: NetworkRequestModificationSheet()),
+        ),
+      );
+      await tester.pump();
+
+      // التحقق من ظهور بطاقة أطراف العملية بهويتها الحقيقية
+      expect(find.textContaining('REQ-2026-TEST'), findsOneWidget);
+      // التحقق من ظهور هيكل التحميل Skeleton الموحد للباقات
+      expect(find.byType(CustomStateView), findsWidgets);
+      // التأكد من عدم ظهور نصوص أو بيانات وهمية أثناء التحميل
+      expect(find.text('باقة #10'), findsNothing);
     },
   );
 }

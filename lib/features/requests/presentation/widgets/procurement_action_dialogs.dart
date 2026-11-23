@@ -32,6 +32,7 @@ class ProcurementActionDialogs {
       message: 'سيتم احتساب وتوليد فاتورة المبيعات آلياً عبر الخادم وتسوية الرصيد المالي.',
       confirmLabel: 'تأكيد الاعتماد',
       cancelLabel: 'تراجع',
+      autoCloseOnConfirm: false,
       content: Form(
         key: formKey,
         child: Padding(
@@ -78,6 +79,7 @@ class ProcurementActionDialogs {
       ),
       onConfirm: () async {
         if (!formKey.currentState!.validate()) return;
+        Get.back(result: true);
         final note = noteController.text.trim().isEmpty
             ? null
             : noteController.text.trim();
@@ -102,6 +104,7 @@ class ProcurementActionDialogs {
       message: 'يرجى كتابة سبب الرفض المعتمد لتوثيقه في السجل وإشعار الوكيل.',
       confirmLabel: 'تأكيد الرفض',
       cancelLabel: 'إلغاء',
+      autoCloseOnConfirm: false,
       content: Form(
         key: formKey,
         child: Padding(
@@ -120,6 +123,7 @@ class ProcurementActionDialogs {
       ),
       onConfirm: () async {
         if (!formKey.currentState!.validate()) return;
+        Get.back(result: true);
         await onConfirm(reasonController.text.trim());
       },
     );
