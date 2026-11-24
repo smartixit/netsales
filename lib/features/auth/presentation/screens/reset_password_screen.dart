@@ -48,7 +48,6 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
         appBarTitle: controller.isDirectReset
             ? 'تعيين كلمة المرور'
             : (controller.isForced ? 'تأمين الحساب' : 'تغيير كلمة المرور'),
-        centerTitle: true,
         maxWidth: AppBreakpoints.maxFormWidth,
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
