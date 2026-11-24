@@ -416,25 +416,25 @@ void main() {
     test(
       'Checkout values are calculated locally and use the fixed Yemeni rial label',
       () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
+        controller.selectedNetworkId.value = 10;
+        controller.selectedPosId.value = 20;
 
-      controller.setPackageVoucherCount(testPackage, 500);
-      await Future<void>.delayed(Duration.zero);
+        controller.setPackageVoucherCount(testPackage, 500);
+        await Future<void>.delayed(Duration.zero);
 
-      expect(controller.checkoutCurrency, 'ر.ي');
-      expect(controller.checkoutGrossAmount, 50000.0);
-      expect(controller.checkoutDiscountAmount, 5000.0);
-      expect(controller.checkoutNetAmount, 45000.0);
-      expect(mockRepo.lastQuotePayload, isNull);
+        expect(controller.checkoutCurrency, 'ر.ي');
+        expect(controller.checkoutGrossAmount, 50000.0);
+        expect(controller.checkoutDiscountAmount, 5000.0);
+        expect(controller.checkoutNetAmount, 45000.0);
+        expect(mockRepo.lastQuotePayload, isNull);
 
-      controller.selectedSaleType.value = SaleType.credit;
-      await Future<void>.delayed(Duration.zero);
+        controller.selectedSaleType.value = SaleType.credit;
+        await Future<void>.delayed(Duration.zero);
 
-      expect(controller.checkoutCurrency, 'ر.ي');
-      expect(controller.checkoutGrossAmount, 50000.0);
-      expect(controller.checkoutDiscountAmount, 2500.0);
-      expect(controller.checkoutNetAmount, 47500.0);
+        expect(controller.checkoutCurrency, 'ر.ي');
+        expect(controller.checkoutGrossAmount, 50000.0);
+        expect(controller.checkoutDiscountAmount, 2500.0);
+        expect(controller.checkoutNetAmount, 47500.0);
         expect(mockRepo.lastQuotePayload, isNull);
       },
     );
