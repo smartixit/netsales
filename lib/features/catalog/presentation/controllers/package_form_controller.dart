@@ -70,6 +70,8 @@ class PackageFormController extends GetxController {
   final liveUptimeInMinutes = Rxn<int>();
   final liveValidityInMinutes = Rxn<int>();
   final liveBasePrice = 0.0.obs;
+  final liveCashDiscountRate = 0.0.obs;
+  final liveCreditDiscountRate = 0.0.obs;
 
   @override
   void onInit() {
@@ -141,6 +143,16 @@ class PackageFormController extends GetxController {
 
     priceController.addListener(() {
       liveBasePrice.value = double.tryParse(priceController.text.trim()) ?? 0;
+    });
+
+    cashDiscountController.addListener(() {
+      liveCashDiscountRate.value =
+          double.tryParse(cashDiscountController.text.trim()) ?? 0;
+    });
+
+    creditDiscountController.addListener(() {
+      liveCreditDiscountRate.value =
+          double.tryParse(creditDiscountController.text.trim()) ?? 0;
     });
   }
 
@@ -264,8 +276,10 @@ class PackageFormController extends GetxController {
     priceController.text = package.packageVoucherPrice.toString();
     liveBasePrice.value = package.packageVoucherPrice;
     cashDiscountController.text = package.packageDefaultCashDiscount.toString();
+    liveCashDiscountRate.value = package.packageDefaultCashDiscount;
     creditDiscountController.text = package.packageDefaultCreditDiscount
         .toString();
+    liveCreditDiscountRate.value = package.packageDefaultCreditDiscount;
     status.value = package.isActive;
   }
 
