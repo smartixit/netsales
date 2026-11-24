@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_form_controller.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/forms/custom_section_heading.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -44,6 +45,79 @@ class PackageGeneralInfoSection extends GetView<PackageFormController> {
           }
 
           if (!controller.isEditing.value &&
+              controller.networkLoadError.value != null) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'تعذر تحميل الشبكات: ${controller.networkLoadError.value}',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  CustomButton.outline(
+                    text: 'إعادة المحاولة',
+                    icon: Icons.refresh_rounded,
+                    shape: AppButtonShape.rounded,
+                    size: AppButtonSize.small,
+                    onPressed: controller.retryLoadNetworks,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (!controller.isEditing.value &&
+              controller.authorizedNetworks.length == 1) {
+            final network = controller.authorizedNetworks.single;
+            return Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.hub_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'شبكة الباقة',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                          Text(
+                            network.networkName,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.verified_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          if (!controller.isEditing.value &&
               controller.authorizedNetworks.length > 1) {
             return Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
@@ -62,6 +136,19 @@ class PackageGeneralInfoSection extends GetView<PackageFormController> {
                     controller.selectedNetworkId.value = val;
                   }
                 },
+              ),
+            );
+          }
+
+          if (!controller.isEditing.value &&
+              !controller.isLoadingNetworks.value) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: Text(
+                'لا توجد شبكة متاحة لإنشاء الباقة. تحقق من صلاحياتك أو أعد تحميل الصفحة.',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             );
           }
