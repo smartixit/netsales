@@ -254,7 +254,9 @@ void main() {
     Get.reset();
   });
 
-  test('Refreshing expired cart pricing replaces snapshots and preserves quantities', () async {
+  test(
+    'Refreshing expired cart pricing replaces snapshots and preserves quantities',
+    () async {
     controller.selectedNetworkId.value = 10;
     controller.selectedPosId.value = 20;
     controller.myPosList.assignAll([testPos]);
@@ -353,7 +355,9 @@ void main() {
     },
   );
 
-  test('Direct invoice checkout calculates discounts locally and keeps the fixed currency', () {
+  test(
+    'Direct invoice checkout calculates discounts locally and keeps the fixed currency',
+    () {
     final invoiceController = NetworkDirectInvoiceController(
       createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
         FakeInvoiceRepository(),
@@ -391,7 +395,9 @@ void main() {
   });
 
   group('Local checkout calculation', () {
-    test('Checkout values are calculated locally and use the fixed Yemeni rial label', () async {
+    test(
+      'Checkout values are calculated locally and use the fixed Yemeni rial label',
+      () async {
       controller.selectedNetworkId.value = 10;
       controller.selectedPosId.value = 20;
 
