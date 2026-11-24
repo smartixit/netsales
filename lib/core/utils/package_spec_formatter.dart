@@ -91,6 +91,21 @@ enum TimeDurationUnit {
   }
 }
 
+/// نتيجة تنسيق حجم البيانات، مع الاحتفاظ بالقيمة والوحدة منفصلتين للعرض.
+class FormattedDataSize {
+  final String value;
+  final String unit;
+
+  const FormattedDataSize({
+    required this.value,
+    required this.unit,
+  });
+
+  bool get hasUnit => unit.isNotEmpty;
+
+  String get displayText => hasUnit ? '$value $unit' : value;
+}
+
 /// ============================================================================
 /// مساعد تنسيق وتحويل المواصفات الفنية للباقات (PackageSpecFormatter)
 /// ============================================================================
@@ -122,35 +137,56 @@ class PackageSpecFormatter {
     return bytes / targetUnit.byteFactor;
   }
 
-  /// تنسيق ذكي شامل لحجم البيانات (يبدأ من البايت حتى التيرابايت)
-  static String formatData(
+  /// تنسيق ذكي لحجم البيانات مع فصل القيمة عن الوحدة لدعم اختلاف أسلوب العرض.
+  static FormattedDataSize formatDataParts(
     dynamic rawBytes, {
     String fallback = 'بلا رصيد محدد',
   }) {
-    if (rawBytes == null) return fallback;
+    if (rawBytes == null) {
+      return FormattedDataSize(value: fallback, unit: '');
+    }
+
     final bytes = (rawBytes is num)
         ? rawBytes.toDouble()
         : (double.tryParse(rawBytes.toString()) ?? 0.0);
 
-    if (bytes <= 0) return fallback;
+    if (bytes <= 0) {
+      return FormattedDataSize(value: fallback, unit: '');
+    }
 
     if (bytes >= DataSizeUnit.terabytes.byteFactor) {
       final tb = bytes / DataSizeUnit.terabytes.byteFactor;
-      return '${_formatNumber(tb)} تيرابايت';
+      return FormattedDataSize(
+        value: _formatNumber(tb),
+        unit: 'تيرابايت',
+      );
     }
     if (bytes >= DataSizeUnit.gigabytes.byteFactor) {
       final gb = bytes / DataSizeUnit.gigabytes.byteFactor;
-      return '${_formatNumber(gb)} جيجابايت';
+      return FormattedDataSize(
+        value: _formatNumber(gb),
+        unit: 'جيجابايت',
+      );
     }
     if (bytes >= DataSizeUnit.megabytes.byteFactor) {
       final mb = bytes / DataSizeUnit.megabytes.byteFactor;
-      return '${_formatNumber(mb)} ميجابايت';
+      return FormattedDataSize(
+        value: _formatNumber(mb),
+        unit: 'ميجابايت',
+      );
     }
     if (bytes >= DataSizeUnit.kilobytes.byteFactor) {
       final kb = bytes / DataSizeUnit.kilobytes.byteFactor;
-      return '${_formatNumber(kb)} كيلوبايت';
+      return FormattedDataSize(
+        value: _formatNumber(kb),
+        unit: 'كيلوبايت',
+      );
     }
-    return '${bytes.toInt()} بايت';
+
+    return FormattedDataSize(
+      value: bytes.toInt().toString(),
+      unit: 'بايت',
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────

@@ -110,7 +110,7 @@ class ProcurementPackageOptionCard extends StatelessWidget {
       PackageTariffSpecificationItem(
         icon: Icons.data_usage_rounded,
         label: 'الرصيد',
-        value: package.balanceDisplay,
+        value: package.balanceParts.displayText,
       ),
       PackageTariffSpecificationItem(
         icon: Icons.access_time_rounded,

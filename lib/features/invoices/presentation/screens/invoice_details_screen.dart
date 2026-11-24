@@ -285,7 +285,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         hasDiscount: invoice.items[i].hasDiscount,
                         itemDiscount: invoice.items[i].itemDiscount,
                         balanceDisplay:
-                            invoice.items[i].voucherPackage?.balanceDisplay,
+                            invoice.items[i].voucherPackage?.balanceParts.displayText,
                         validityDisplay:
                             invoice.items[i].voucherPackage?.validityDisplay,
                         uptimeDisplay:
