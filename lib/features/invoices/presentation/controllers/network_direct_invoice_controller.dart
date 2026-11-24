@@ -154,7 +154,7 @@ class NetworkDirectInvoiceController extends GetxController {
   /// رمز العملة الثابت المعروض في Checkout
   String get checkoutCurrency => 'ر.ي';
 
-  /// إجمالي الفاتورة قبل الخصم (يعتمد الخادم سيادياً عند توفره)
+  /// إجمالي الفاتورة قبل الخصم وفق بيانات الباقات المحلية
   double get checkoutGrossAmount {
     return directInvoiceCart.fold<double>(
       0.0,
