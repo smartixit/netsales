@@ -34,6 +34,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
     final statusPres = EnumPresentationRegistry.resolvePackageStatus(
       package.packageStatus,
     );
+    final balanceParts = package.balanceParts;
 
     return Container(
       width: double.infinity,
@@ -115,8 +116,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 // ═══ سعة البيانات واسم الباقة بأسلوب الكتالوج ═══
                 _ShowcaseHeroQuota(
-                  balanceValue: package.balanceValue,
-                  balanceUnit: package.balanceUnit,
+                  balanceValue: balanceParts.value,
+                  balanceUnit: balanceParts.unit,
                   packageName: package.packageName,
                 ),
 

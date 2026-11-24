@@ -71,8 +71,12 @@ class PackageEntity {
   PackageStatus get packageStatus => PackageStatus.fromWire(status);
   bool get isActive => packageStatus.isActive;
 
-  /// تنسيق الرصيد عبر محول السعات المعتمد مباشرة بالبايت
-  String get balanceDisplay => PackageSpecFormatter.formatData(packageBalance);
+  /// أجزاء الرصيد المنسقة عبر محول السعات المعتمد مباشرة بالبايت.
+  FormattedDataSize get balanceParts =>
+      PackageSpecFormatter.formatDataParts(packageBalance);
+
+  /// التمثيل النصي الكامل للتوافق مع مواضع العرض ذات النمط الواحد.
+  String get balanceDisplay => balanceParts.displayText;
 
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);
