@@ -447,6 +447,8 @@ class PackageFormController extends GetxController {
           packageBalance: balanceInBytes,
           packageUptime: uptimeInMinutes,
           packageValidity: validityInMinutes,
+          clearPackageUptime: rawUptime == null,
+          clearPackageValidity: rawValidity == null,
           packageVoucherCount: voucherCount,
           packageVoucherPrice: voucherPrice,
           packageDefaultCashDiscount: cashDiscount,
