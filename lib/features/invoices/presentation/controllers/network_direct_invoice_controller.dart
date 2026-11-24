@@ -162,7 +162,7 @@ class NetworkDirectInvoiceController extends GetxController {
     );
   }
 
-  /// إجمالي الخصم بحسب نوع البيع المحدد (يعتمد الخادم سيادياً عند توفره)
+  /// إجمالي الخصم المحلي بحسب نوع البيع المحدد
   double get checkoutDiscountAmount {
     final isCash = selectedSaleType.value == SaleType.cash;
     return directInvoiceCart.fold<double>(
