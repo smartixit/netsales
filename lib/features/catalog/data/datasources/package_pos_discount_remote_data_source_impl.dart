@@ -8,13 +8,15 @@ class PackagePosDiscountRemoteDataSourceImpl implements PackagePosDiscountRemote
   const PackagePosDiscountRemoteDataSourceImpl();
   @override
   Future<ApiResponse<List<PackagePosDiscountModel>>> getForPackage({
-    required int networkId, required int packageId, String? search, String? cursor,
+    required int networkId, required int packageId, String? search, String? cursor, String? status, String? validityState,
   }) => ApiService.instance.getList<PackagePosDiscountModel>(
     ApiConstants.voucherPackageDiscounts,
     fromJson: (json) => PackagePosDiscountModel.fromJson(Map<String,dynamic>.from(json as Map)),
     queryParameters: {
       'network_id': networkId, 'package_id': packageId,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      if (status != null) 'status': status,
+      if (validityState != null) 'validity_state': validityState,
     },
     cursor: cursor, perPage: 15,
   );
