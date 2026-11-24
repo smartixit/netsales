@@ -106,95 +106,32 @@ class PackageEntity {
   String get validityDisplay =>
       PackageSpecFormatter.formatDuration(packageValidity);
 
-  /// تكلفة الكرت الواحد الأساسية
-  double get unitVoucherPrice => packageVoucherCount > 0
-      ? packageVoucherPrice / packageVoucherCount
-      : packageVoucherPrice;
+  /// فئة الكرت / سعر الكرت الواحد الأساسي
+  double get unitVoucherPrice => resolvedBasePrice;
 
-  /// تكلفة الكرت الواحد الفعلية نقداً
-  double get unitCashPrice => packageVoucherCount > 0
-      ? effectiveCashPrice / packageVoucherCount
-      : effectiveCashPrice;
+  /// سعر الكرت الواحد الفعلي نقداً بعد الخصم
+  double get unitCashPrice => resolvedCashPrice;
 
-  /// تكلفة الكرت الواحد الفعلية آجلاً
-  double get unitCreditPrice => packageVoucherCount > 0
-      ? effectiveCreditPrice / packageVoucherCount
-      : effectiveCreditPrice;
+  /// سعر الكرت الواحد الفعلي آجلاً بعد الخصم
+  double get unitCreditPrice => resolvedCreditPrice;
 
-  PackageEntity copyWith({
-    int? packageId,
-    int? networkId,
-    String? packageName,
-    String? packageColor,
-    int? packageBalance,
-    int? packageUptime,
-    int? packageValidity,
-    int? packageVoucherCount,
-    double? packageVoucherPrice,
-    double? packageDefaultCashDiscount,
-    double? packageDefaultCreditDiscount,
-    double? cashDiscountAmount,
-    double? creditDiscountAmount,
-    double? effectiveCashPrice,
-    double? effectiveCreditPrice,
-    bool? status,
-    int? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    String? networkName,
-    int? procurementBaseUnitPriceMinor,
-    int? procurementCashUnitPriceMinor,
-    int? procurementCreditUnitPriceMinor,
-    int? procurementCashDiscountBasisPoints,
-    int? procurementCreditDiscountBasisPoints,
-    String? procurementPricingSnapshotToken,
-    DateTime? procurementPricingSnapshotExpiresAt,
-    bool? procurementIsCustomDiscount,
-  }) {
-    return PackageEntity(
-      packageId: packageId ?? this.packageId,
-      networkId: networkId ?? this.networkId,
-      packageName: packageName ?? this.packageName,
-      packageColor: packageColor ?? this.packageColor,
-      packageBalance: packageBalance ?? this.packageBalance,
-      packageUptime: packageUptime ?? this.packageUptime,
-      packageValidity: packageValidity ?? this.packageValidity,
-      packageVoucherCount: packageVoucherCount ?? this.packageVoucherCount,
-      packageVoucherPrice: packageVoucherPrice ?? this.packageVoucherPrice,
-      packageDefaultCashDiscount:
-          packageDefaultCashDiscount ?? this.packageDefaultCashDiscount,
-      packageDefaultCreditDiscount:
-          packageDefaultCreditDiscount ?? this.packageDefaultCreditDiscount,
-      cashDiscountAmount: cashDiscountAmount ?? this.cashDiscountAmount,
-      creditDiscountAmount: creditDiscountAmount ?? this.creditDiscountAmount,
-      effectiveCashPrice: effectiveCashPrice ?? this.effectiveCashPrice,
-      effectiveCreditPrice: effectiveCreditPrice ?? this.effectiveCreditPrice,
-      status: status ?? this.status,
-      createdBy: createdBy ?? this.createdBy,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      networkName: networkName ?? this.networkName,
-      procurementBaseUnitPriceMinor:
-          procurementBaseUnitPriceMinor ?? this.procurementBaseUnitPriceMinor,
-      procurementCashUnitPriceMinor:
-          procurementCashUnitPriceMinor ?? this.procurementCashUnitPriceMinor,
-      procurementCreditUnitPriceMinor:
-          procurementCreditUnitPriceMinor ??
-          this.procurementCreditUnitPriceMinor,
-      procurementCashDiscountBasisPoints:
-          procurementCashDiscountBasisPoints ??
-          this.procurementCashDiscountBasisPoints,
-      procurementCreditDiscountBasisPoints:
-          procurementCreditDiscountBasisPoints ??
-          this.procurementCreditDiscountBasisPoints,
-      procurementPricingSnapshotToken:
-          procurementPricingSnapshotToken ??
-          this.procurementPricingSnapshotToken,
-      procurementPricingSnapshotExpiresAt:
-          procurementPricingSnapshotExpiresAt ??
-          this.procurementPricingSnapshotExpiresAt,
-      procurementIsCustomDiscount:
-          procurementIsCustomDiscount ?? this.procurementIsCustomDiscount,
-    );
-  }
+  /// إجمالي قيمة الحزمة الأساسية قبل الخصم (سعر الكرت * عدد الكروت)
+  double get totalPackageBasePrice =>
+      resolvedBasePrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+
+  /// إجمالي قيمة الحزمة نقداً بعد الخصم
+  double get totalCashPrice =>
+      resolvedCashPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+
+  /// إجمالي قيمة الحزمة آجلاً بعد الخصم
+  double get totalCreditPrice =>
+      resolvedCreditPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+
+  /// إجمالي مبلغ التوفير للحزمة نقداً
+  double get totalCashSavings =>
+      cashDiscountAmount * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+
+  /// إجمالي مبلغ التوفير للحزمة آجلاً
+  double get totalCreditSavings =>
+      creditDiscountAmount * (packageVoucherCount > 0 ? packageVoucherCount : 1);
 }

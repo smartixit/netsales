@@ -86,7 +86,7 @@ class PackageBentoSpecsGrid extends StatelessWidget {
                 title: 'الحزمة والكرت',
                 value: '${package.packageVoucherCount} كرت',
                 subtitle:
-                    'نصيب الكرت: ${AmountFormatter.formatValue(package.unitVoucherPrice)}',
+                    'فئة الكرت: ${AmountFormatter.formatValue(package.unitVoucherPrice)} ر.ي',
               ),
             ),
           ],

@@ -22,20 +22,20 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
         const CustomSectionHeading(
           icon: Icons.payments_outlined,
           title: 'التسعير والخصومات الافتراضية',
-          subtitle: 'تحديد سعر الحزمة الأساسي ونسب الخصم الافتراضي للشراء النقدي والآجل.',
+          subtitle: 'تحديد سعر الكرت الأساسي (فئة الكرت) ونسب الخصم الافتراضي للشراء النقدي والآجل.',
         ),
         AppSpacing.vSm,
 
-        // سعر الحزمة
+        // سعر الكرت الأساسي
         CustomTextField(
           controller: controller.priceController,
-          label: 'سعر الحزمة الأساسي',
-          hint: 'مثال: 5000',
+          label: 'سعر الكرت الأساسي (فئة الكرت)',
+          hint: 'مثال: 500',
           prefixIcon: const Icon(Icons.attach_money_rounded),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           isRequired: true,
           validator: FormValidators.doubleValidator(
-            fieldName: 'سعر الحزمة الأساسي',
+            fieldName: 'سعر الكرت الأساسي',
           ),
         ),
 

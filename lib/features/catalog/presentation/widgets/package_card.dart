@@ -13,16 +13,17 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/menus/custom_popup_menu.dart';
 
-/// بطاقة باقة كروت الإنترنت — تصميم واجهة العرض المميزة (Showcase Data Plan Card)
+/// بطاقة باقة كروت الإنترنت — تصميم الكبسولات المخملية الفاخرة (Velvet Pods Concept)
 ///
-/// تم بناء التصميم ليعكس هوية الباقات الرقمية الحديثة مع وضوح مالي تام:
-/// 1. مساحة علوية هادئة بتدرج لوني خافت مشتق من لون الباقة مع هالة بصرية ناعمة.
-/// 2. إبراز سعة البيانات برقم عملاق واضح ووحدة ملوّنة مع وسم السعر الرسمي للكرت.
-/// 3. وسوم مواصفات خفيفة ومستديرة (عدد الكروت، الصلاحية، وقت الاستخدام، السعر الرسمي).
-/// 4. قسم مالي وتجاري فائق الوضوح:
-///    - إبراز السعر الرسمي الأساسي للحزمة والكرت بصراحة.
-///    - بطاقتان مقارنتان صريحتان للشراء النقدي والآجل (سعر الكرت الصافي، إجمالي الحزمة، نسبة الخصم ومبلغ التوفير).
-/// 5. قائمة إجراءات موحدة عبر [CustomPopupMenu].
+/// تم بناء الهيكل المعماري وفق أعلى معايير واجهات FinTech الفاخرة:
+/// 1. الهيدر الاستعراضي:
+///    - علامة مائية رقيقة وخافتة لفئة الكرت في الخلفية (`Watermark Face Value`).
+///    - ختم الفئة الرسمي وشارة الحالة في صف تفاعلي منظم مع القائمة الموحدة [CustomPopupMenu].
+///    - سعة البيانات الضخمة واسم الباقة ووسوم المواصفات المقتضبة.
+/// 2. القاعدة التجارية الفاخرة (Velvet Pods):
+///    - كبسولتان مخمليتان مستقلتان للشراء النقدي والآجل.
+///    - شريط لوني علوي مميز (زمردي للنقدي وملكي للآجل) بسماكة `3.w`.
+///    - خطوط عريضة ومريحة لسعر الكرت، نسبة الخصم، مبلغ الوفر، وإجمالي الحزمة.
 class PackageCard extends StatelessWidget {
   const PackageCard({
     super.key,
@@ -69,16 +70,20 @@ class PackageCard extends StatelessWidget {
     final cardContent = Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(18.r),
         boxShadow: AppElevation.level2(context),
+        border: Border.all(
+          color: colors.outline.withValues(alpha: 0.1),
+          width: 1.w,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── القسم العلوي: اللوحة الملونة الاستعراضية ──
-          _CardShowcase(
+          // ── 1. اللوحة الاستعراضية العلوية ──
+          _VelvetHeaderShowcase(
             package: package,
             accentColor: accentColor,
             statusLabel: statusPres.label,
@@ -92,8 +97,12 @@ class PackageCard extends StatelessWidget {
             onDelete: onDelete,
           ),
 
-          // ── القسم السفلي: شبكة التسعير الشفافة والزر التفاعلي ──
-          _CardCommercial(package: package, onDetails: onDetails),
+          // ── 2. مقصورة الكبسولتين المخمليتين للتسعير (النموذج 2) ──
+          _VelvetCommercialSection(
+            package: package,
+            accentColor: accentColor,
+            onDetails: onDetails,
+          ),
         ],
       ),
     );
@@ -102,11 +111,11 @@ class PackageCard extends StatelessWidget {
       onTap: onDetails,
       child: package.isActive
           ? cardContent
-          : Opacity(opacity: 0.75, child: cardContent),
+          : Opacity(opacity: 0.72, child: cardContent),
     );
   }
 
-  /// يفصل نص الرصيد مثل "3 جيجابايت" إلى رقم ووحدة
+  /// يفصل نص الرصيد مثل "3 جيجابايت" إلى رقم ووحدة بدقة
   static _BalanceParts _splitBalance(String display) {
     final trimmed = display.trim();
     final match = RegExp(r'^([\d.,]+)\s*(.*)$').firstMatch(trimmed);
@@ -126,9 +135,9 @@ class _BalanceParts {
   final String unit;
 }
 
-/// القسم العلوي الاستعراضي للبطاقة (Showcase Zone)
-class _CardShowcase extends StatelessWidget {
-  const _CardShowcase({
+/// رأس البطاقة الاستعراضي مع العلامة المائية الفاخرة
+class _VelvetHeaderShowcase extends StatelessWidget {
+  const _VelvetHeaderShowcase({
     required this.package,
     required this.accentColor,
     required this.statusLabel,
@@ -158,38 +167,48 @@ class _CardShowcase extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final rawPrice = package.packageVoucherPrice;
+    final priceWatermark = rawPrice == rawPrice.roundToDouble()
+        ? rawPrice.toInt().toString()
+        : rawPrice.toStringAsFixed(2);
+
     return Stack(
-      clipBehavior: Clip.none,
       children: [
-        // الخلفية الملونة الناعمة
+        // الخلفية اللونية الشفافة للباقة
         Positioned.fill(
-          child: Container(color: accentColor.withValues(alpha: 0.07)),
+          child: Container(
+            color: accentColor.withValues(alpha: 0.06),
+          ),
         ),
 
-        // الهالة الدائرية الزخرفية في الزاوية
+        // العلامة المائية الرقيقة في رأس الكرت
         Positioned(
-          top: -40.r,
-          left: -30.r,
-          child: Container(
-            width: 140.r,
-            height: 140.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: accentColor.withValues(alpha: 0.05),
+          top: -10.h,
+          left: 12.w,
+          child: IgnorePointer(
+            child: Text(
+              priceWatermark,
+              style: TextStyle(
+                fontSize: 64.sp,
+                fontWeight: FontWeight.w900,
+                color: accentColor.withValues(alpha: 0.08),
+                letterSpacing: -2,
+                height: 0.9,
+              ),
             ),
           ),
         ),
 
         // المحتوى الرئيسي
         Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 14.h),
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ═══ الصف العلوي: الحالة + القائمة المنسدلة الموحدة ═══
+              // ── الصف الأول: شارة الحالة + ختم فئة الكرت + القائمة الموحدة ──
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CustomStatusBadge(
                     label: statusLabel,
@@ -197,14 +216,50 @@ class _CardShowcase extends StatelessWidget {
                     isCompact: true,
                     showDot: true,
                   ),
-                  if (hasAdminActions)
+                  const Spacer(),
+
+                  // ختم فئة الكرت الرسمي
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    decoration: BoxDecoration(
+                      color: colors.surface.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.25),
+                        width: 1.w,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'فئة ',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '${AmountFormatter.formatValue(package.packageVoucherPrice)} ر.ي',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w800,
+                            color: accentColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (hasAdminActions) ...[
+                    SizedBox(width: 8.w),
                     CustomPopupMenu<String>(
                       triggerDimension: 28.r,
                       triggerIconSize: 16.r,
                       triggerIcon: Icons.more_vert_rounded,
-                      triggerBackgroundColor: colors.surface.withValues(
-                        alpha: 0.85,
-                      ),
+                      triggerBackgroundColor:
+                          colors.surface.withValues(alpha: 0.85),
                       triggerIconColor: colors.onSurfaceVariant,
                       items: [
                         if (canEdit && onEdit != null)
@@ -240,12 +295,13 @@ class _CardShowcase extends StatelessWidget {
                         if (val == 'delete') onDelete?.call();
                       },
                     ),
+                  ],
                 ],
               ),
 
               SizedBox(height: 10.h),
 
-              // ═══ بطل البطاقة: سعة البيانات الضخمة ═══
+              // ── الصف الثاني: سعة البيانات البارزة ──
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -253,29 +309,24 @@ class _CardShowcase extends StatelessWidget {
                   Text(
                     balanceParts.number,
                     style: AppTypography.displayMedium.copyWith(
-                      fontSize: 38.sp,
+                      fontSize: 34.sp,
                       fontWeight: FontWeight.w800,
                       color: package.isActive
                           ? colors.onSurface
                           : colors.onSurfaceVariant,
                       height: 1.0,
-                      letterSpacing: -0.5,
                     ),
                   ),
                   if (balanceParts.unit.isNotEmpty) ...[
                     SizedBox(width: 6.w),
-                    Flexible(
-                      child: Text(
-                        balanceParts.unit,
-                        style: AppTypography.titleMedium.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: package.isActive
-                              ? accentColor
-                              : colors.onSurfaceVariant,
-                          height: 1.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      balanceParts.unit,
+                      style: AppTypography.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: package.isActive
+                            ? accentColor
+                            : colors.onSurfaceVariant,
+                        height: 1.0,
                       ),
                     ),
                   ],
@@ -284,7 +335,7 @@ class _CardShowcase extends StatelessWidget {
 
               SizedBox(height: 6.h),
 
-              // ═══ اسم الباقة ═══
+              // ── الصف الثالث: اسم الباقة ──
               Text(
                 package.packageName,
                 style: AppTypography.titleMedium.copyWith(
@@ -295,30 +346,24 @@ class _CardShowcase extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
 
-              SizedBox(height: 10.h),
+              SizedBox(height: 8.h),
 
-              // ═══ وسوم المواصفات المدمجة (Specs Tags) ═══
+              // ── الصف الرابع: وسوم المواصفات المقتضبة ──
               Wrap(
                 spacing: 6.w,
-                runSpacing: 6.h,
+                runSpacing: 4.h,
                 children: [
-                  _SpecTag(
+                  _VelvetSpecPill(
                     icon: Icons.layers_outlined,
-                    label: '${package.packageVoucherCount} كرت',
+                    label: '${package.packageVoucherCount} كرت بالحزمة',
                   ),
-                  _SpecTag(
+                  _VelvetSpecPill(
                     icon: Icons.calendar_today_outlined,
                     label: package.validityDisplay,
                   ),
-                  if (package.packageUptime != null &&
-                      package.packageUptime! > 0)
-                    _SpecTag(
-                      icon: Icons.timer_outlined,
-                      label: package.uptimeDisplay,
-                    ),
                   if (package.networkName != null &&
                       package.networkName!.isNotEmpty)
-                    _SpecTag(
+                    _VelvetSpecPill(
                       icon: Icons.hub_outlined,
                       label: package.networkName!,
                     ),
@@ -332,9 +377,9 @@ class _CardShowcase extends StatelessWidget {
   }
 }
 
-/// وسم المواصفة البيضاوي الأنيق
-class _SpecTag extends StatelessWidget {
-  const _SpecTag({required this.icon, required this.label});
+/// وسم مقتضب للمواصفات
+class _VelvetSpecPill extends StatelessWidget {
+  const _VelvetSpecPill({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -344,12 +389,12 @@ class _SpecTag extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.5.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.9),
+        color: colors.surface.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(
-          color: colors.outline.withValues(alpha: 0.12),
+          color: colors.outline.withValues(alpha: 0.1),
           width: 0.8.w,
         ),
       ),
@@ -358,7 +403,7 @@ class _SpecTag extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 12.r,
+            size: 11.r,
             color: colors.onSurfaceVariant.withValues(alpha: 0.8),
           ),
           SizedBox(width: 4.w),
@@ -367,7 +412,7 @@ class _SpecTag extends StatelessWidget {
             style: AppTypography.badgeText.copyWith(
               color: colors.onSurfaceVariant,
               fontWeight: FontWeight.w600,
-              fontSize: 11.sp,
+              fontSize: 10.5.sp,
             ),
           ),
         ],
@@ -376,23 +421,29 @@ class _SpecTag extends StatelessWidget {
   }
 }
 
-/// القسم التجاري والتسعيري الشفاف للبطاقة (Commercial & Pricing Zone)
-class _CardCommercial extends StatelessWidget {
-  const _CardCommercial({required this.package, required this.onDetails});
+/// قسم الكبسولتين المخمليتين (Velvet Commercial Section — النموذج 2)
+class _VelvetCommercialSection extends StatelessWidget {
+  const _VelvetCommercialSection({
+    required this.package,
+    required this.accentColor,
+    required this.onDetails,
+  });
 
   final PackageEntity package;
+  final Color accentColor;
   final VoidCallback onDetails;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final cashDiscountPct = package.packageDefaultCashDiscount;
-    final creditDiscountPct = package.packageDefaultCreditDiscount;
+
+    final cashDiscount = package.packageDefaultCashDiscount;
+    final creditDiscount = package.packageDefaultCreditDiscount;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.surfaceContainerLow.withValues(alpha: 0.5),
         border: Border(
           top: BorderSide(
             color: colors.outline.withValues(alpha: 0.08),
@@ -404,110 +455,48 @@ class _CardCommercial extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ═══ السعر الرسمي الأساسي المعلن للباقة ═══
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-              border: Border.all(
-                color: colors.outline.withValues(alpha: 0.12),
-                width: 0.8.w,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.sell_outlined,
-                      size: 14.r,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    SizedBox(width: 5.w),
-                    Text(
-                      'السعر الرسمي الأساسي:',
-                      style: AppTypography.badgeText.copyWith(
-                        color: colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text:
-                            '${AmountFormatter.formatValue(package.packageVoucherPrice)} ر.ي',
-                        style: AppTypography.badgeText.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ' (${AmountFormatter.formatValue(package.unitVoucherPrice)} للكرت)',
-                        style: AppTypography.badgeText.copyWith(
-                          color: colors.onSurfaceVariant,
-                          fontSize: 10.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 10.h),
-
-          // ═══ بطاقتا المقارنة الصريحة (شراء نقدي vs شراء آجل) ═══
+          // ═══ الكبسولتان المخمليتان جنباً إلى جنب بتوزيع رأسي داخلي نقي ═══
           Row(
             children: [
-              // مسار الشراء النقدي
+              // كبسولة الشراء النقدي
               Expanded(
-                child: _DealPathCard(
-                  title: 'شراء نقدي',
-                  icon: Icons.payments_rounded,
+                child: _VelvetDealPod(
+                  title: '🟢 نقدي',
                   themeColor: colors.success,
-                  discountPercent: cashDiscountPct,
-                  effectiveTotalPrice: package.effectiveCashPrice,
-                  unitPrice: package.unitCashPrice,
-                  savingsAmount: package.cashDiscountAmount,
+                  discountPercent: cashDiscount,
+                  voucherPrice: package.effectiveCashPrice,
+                  voucherSavings: package.cashDiscountAmount,
+                  totalPrice: package.totalCashPrice,
                 ),
               ),
 
-              SizedBox(width: 8.w),
+              SizedBox(width: 10.w),
 
-              // مسار الشراء الآجل
+              // كبسولة الشراء الآجل
               Expanded(
-                child: _DealPathCard(
-                  title: 'شراء آجل',
-                  icon: Icons.credit_score_rounded,
+                child: _VelvetDealPod(
+                  title: '🔵 آجل',
                   themeColor: colors.info,
-                  discountPercent: creditDiscountPct,
-                  effectiveTotalPrice: package.effectiveCreditPrice,
-                  unitPrice: package.unitCreditPrice,
-                  savingsAmount: package.creditDiscountAmount,
+                  discountPercent: creditDiscount,
+                  voucherPrice: package.effectiveCreditPrice,
+                  voucherSavings: package.creditDiscountAmount,
+                  totalPrice: package.totalCreditPrice,
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
 
           // ═══ زر استعراض التفاصيل ═══
           CustomInteractiveBounce(
             onTap: onDetails,
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 9.h),
+              padding: EdgeInsets.symmetric(vertical: 8.h),
               decoration: BoxDecoration(
-                color: colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(10.r),
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(
                   color: colors.outline.withValues(alpha: 0.12),
                   width: 0.8.w,
@@ -517,7 +506,7 @@ class _CardCommercial extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'عرض تفاصيل الباقة الكاملة',
+                    'عرض تفاصيل الباقة والخصومات',
                     style: AppTypography.labelMedium.copyWith(
                       fontWeight: FontWeight.w700,
                       color: colors.onSurface,
@@ -526,7 +515,7 @@ class _CardCommercial extends StatelessWidget {
                   SizedBox(width: 6.w),
                   Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    size: 12.r,
+                    size: 11.r,
                     color: colors.onSurfaceVariant,
                   ),
                 ],
@@ -539,165 +528,158 @@ class _CardCommercial extends StatelessWidget {
   }
 }
 
-/// بطاقة مقارنة مسار الشراء (نقدي أو آجل)
-class _DealPathCard extends StatelessWidget {
-  const _DealPathCard({
+/// الكبسولة المخملية المستقلة (Velvet Deal Pod)
+class _VelvetDealPod extends StatelessWidget {
+  const _VelvetDealPod({
     required this.title,
-    required this.icon,
     required this.themeColor,
     required this.discountPercent,
-    required this.effectiveTotalPrice,
-    required this.unitPrice,
-    required this.savingsAmount,
+    required this.voucherPrice,
+    required this.voucherSavings,
+    required this.totalPrice,
   });
 
   final String title;
-  final IconData icon;
   final Color themeColor;
   final double discountPercent;
-  final double effectiveTotalPrice;
-  final double unitPrice;
-  final double savingsAmount;
+  final double voucherPrice;
+  final double voucherSavings;
+  final double totalPrice;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.all(9.r),
       decoration: BoxDecoration(
-        color: themeColor.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12.r),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
-          color: themeColor.withValues(alpha: 0.22),
-          width: 1.w,
+          color: colors.outline.withValues(alpha: 0.1),
+          width: 0.8.w,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow.withValues(alpha: 0.03),
+            blurRadius: 6.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── العنوان وشارة الخصم ──
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 13.r, color: themeColor),
-                  SizedBox(width: 4.w),
-                  Text(
-                    title,
-                    style: AppTypography.badgeText.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: themeColor,
-                    ),
-                  ),
-                ],
-              ),
-              if (discountPercent > 0)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 5.w,
-                    vertical: 1.5.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: themeColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                  ),
-                  child: Text(
-                    'خصم ${discountPercent.toStringAsFixed(0)}%',
-                    style: AppTypography.badgeText.copyWith(
-                      color: themeColor,
-                      fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-            ],
+          // ── الشريط اللوني العلوي المميز للكبسولة ──
+          Container(
+            height: 3.h,
+            width: double.infinity,
+            color: themeColor,
           ),
 
-          SizedBox(height: 6.h),
-
-          // ── سعر الكرت الصافي ──
-          Text(
-            'سعر الكرت:',
-            style: AppTypography.badgeText.copyWith(
-              color: colors.onSurfaceVariant,
-              fontSize: 10.sp,
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                AmountFormatter.formatValue(unitPrice),
-                style: AppTypography.titleMedium.copyWith(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w800,
-                  color: colors.onSurface,
-                  height: 1.1,
-                ),
-              ),
-              SizedBox(width: 3.w),
-              Text(
-                'ر.ي',
-                style: AppTypography.badgeText.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontSize: 10.sp,
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 5.h),
-          Divider(
-            height: 1.h,
-            color: themeColor.withValues(alpha: 0.15),
-            thickness: 0.8.w,
-          ),
-          SizedBox(height: 5.h),
-
-          // ── إجمالي الحزمة ومبلغ التوفير ──
-          Text.rich(
-            TextSpan(
+          Padding(
+            padding: EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 9.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextSpan(
-                  text: 'إجمالي: ',
+                // ── السطر 1: عنوان المسار + شارة الخصم ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w800,
+                        color: themeColor,
+                      ),
+                    ),
+                    if (discountPercent > 0)
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                        decoration: BoxDecoration(
+                          color: themeColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Text(
+                          'خصم ${discountPercent.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            color: themeColor,
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                SizedBox(height: 4.h),
+
+                // ── السطر 2: سعر الكرت الصافي ──
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        AmountFormatter.formatValue(voucherPrice),
+                        style: TextStyle(
+                          fontSize: 17.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: colors.onSurface,
+                          height: 1.1,
+                        ),
+                      ),
+                      SizedBox(width: 3.w),
+                      Text(
+                        'ر.ي',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 2.h),
+
+                // ── السطر 3: مقدار الوفر بالكرت ──
+                Text(
+                  voucherSavings > 0
+                      ? 'وفر ${AmountFormatter.formatValue(voucherSavings)} بالكرت'
+                      : 'السعر الصافي',
+                  style: TextStyle(
+                    fontSize: 9.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: voucherSavings > 0 ? themeColor : colors.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                SizedBox(height: 3.h),
+
+                // ── السطر 4: إجمالي الحزمة ──
+                Text(
+                  'حزمة: ${AmountFormatter.formatValue(totalPrice)} ر.ي',
                   style: TextStyle(
                     fontSize: 10.sp,
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-                TextSpan(
-                  text:
-                      '${AmountFormatter.formatValue(effectiveTotalPrice)} ر.ي',
-                  style: TextStyle(
-                    fontSize: 10.5.sp,
                     fontWeight: FontWeight.w700,
                     color: colors.onSurface,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
-
-          if (savingsAmount > 0) ...[
-            SizedBox(height: 2.h),
-            Text(
-              'وفر ${AmountFormatter.formatValue(savingsAmount)} ر.ي',
-              style: AppTypography.badgeText.copyWith(
-                color: themeColor,
-                fontWeight: FontWeight.w700,
-                fontSize: 10.sp,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
         ],
       ),
     );

@@ -19,7 +19,8 @@ class PackageCommercialDealCard extends StatelessWidget {
     required this.effectivePrice,
     required this.discountPercent,
     required this.savingsAmount,
-    required this.unitCardPrice,
+    this.unitCardPrice,
+    this.totalPackagePrice,
   });
 
   final String title;
@@ -28,7 +29,8 @@ class PackageCommercialDealCard extends StatelessWidget {
   final double effectivePrice;
   final double discountPercent;
   final double savingsAmount;
-  final double unitCardPrice;
+  final double? unitCardPrice;
+  final double? totalPackagePrice;
 
   @override
   Widget build(BuildContext context) {
@@ -106,12 +108,25 @@ class PackageCommercialDealCard extends StatelessWidget {
 
           SizedBox(height: AppSpacing.sm),
 
-          Text(
-            AmountFormatter.formatValue(effectivePrice),
-            style: AppTypography.titleLarge.copyWith(
-              fontWeight: FontWeight.w900,
-              color: colors.onSurface,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                AmountFormatter.formatValue(effectivePrice),
+                style: AppTypography.titleLarge.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: colors.onSurface,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                'ر.ي / كرت',
+                style: AppTypography.badgeText.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
 
           SizedBox(height: AppSpacing.xs),
@@ -120,18 +135,20 @@ class PackageCommercialDealCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'توفير: ${AmountFormatter.formatValue(savingsAmount)}',
+                'وفر: ${AmountFormatter.formatValue(savingsAmount)} بالكرت',
                 style: AppTypography.badgeText.copyWith(
                   color: themeColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
-                '(${AmountFormatter.formatValue(unitCardPrice)} للكرت)',
-                style: AppTypography.badgeText.copyWith(
-                  color: colors.onSurfaceVariant,
+              if (totalPackagePrice != null)
+                Text(
+                  'إجمالي: ${AmountFormatter.formatValue(totalPackagePrice!)}',
+                  style: AppTypography.badgeText.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
             ],
           ),
         ],

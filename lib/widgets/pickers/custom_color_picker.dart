@@ -260,6 +260,7 @@ class CustomColorPicker extends StatelessWidget {
           AppSpacing.vXs,
         ],
         SingleChildScrollView(
+          clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           child: Row(
