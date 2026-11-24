@@ -312,9 +312,8 @@ class PackageFormController extends GetxController {
   String _formatConvertedUnitValue(double value) {
     if (!value.isFinite) return '';
     if (value == value.roundToDouble()) return value.toInt().toString();
-    return value
-        .toStringAsFixed(12)
-        .replaceFirst(RegExp(r'0+
+    return value.toString();
+  }
 
   /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
   void setBalanceUnit(DataSizeUnit newUnit) {
