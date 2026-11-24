@@ -254,43 +254,46 @@ void main() {
     Get.reset();
   });
 
-  test('Refreshing expired cart pricing replaces snapshots and preserves quantities', () async {
-    controller.selectedNetworkId.value = 10;
-    controller.selectedPosId.value = 20;
-    controller.myPosList.assignAll([testPos]);
-    controller.linkedNetworks.assignAll([testLink]);
-
-    final expiredPackage = _expiredTestPackage();
-    packageRepo.refreshedPackages = [testPackage];
-    controller.procurementCart.add(
-      ProcurementCartLineEntity(
-        package: expiredPackage,
-        sheets: 2.5,
-        voucherCount: 250,
-      ),
-    );
-
-    expect(controller.hasCurrentProcurementSnapshots, isFalse);
-    expect(controller.needsPricingRefresh, isTrue);
-    expect(controller.estimatedLineTotalMinor(expiredPackage, 250), 2250000);
-    expect(controller.checkoutGrossAmount, 25000.0);
-    expect(controller.checkoutDiscountAmount, 2500.0);
-    expect(controller.checkoutNetAmount, 22500.0);
-
-    await controller.refreshNetworkPackages();
-
-    expect(packageRepo.lastRequestedPackageIds, [testPackage.packageId]);
-    expect(controller.procurementCart, hasLength(1));
-    expect(
-      controller.procurementCart.single.package.procurementPricingSnapshotToken,
-      testPackage.procurementPricingSnapshotToken,
-    );
-    expect(controller.procurementCart.single.voucherCount, 250);
-    expect(controller.procurementCart.single.sheets, 2.5);
-    expect(controller.hasCurrentProcurementSnapshots, isTrue);
-    expect(controller.estimatedProcurementTotalsMinor, isNotNull);
-    expect(controller.isRefreshingCartPricing.value, isFalse);
-  });
+  test(
+    'Refreshing expired cart pricing replaces snapshots and preserves quantities',
+    () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.myPosList.assignAll([testPos]);
+      controller.linkedNetworks.assignAll([testLink]);
+  
+      final expiredPackage = _expiredTestPackage();
+      packageRepo.refreshedPackages = [testPackage];
+      controller.procurementCart.add(
+        ProcurementCartLineEntity(
+          package: expiredPackage,
+          sheets: 2.5,
+          voucherCount: 250,
+        ),
+      );
+  
+      expect(controller.hasCurrentProcurementSnapshots, isFalse);
+      expect(controller.needsPricingRefresh, isTrue);
+      expect(controller.estimatedLineTotalMinor(expiredPackage, 250), 2250000);
+      expect(controller.checkoutGrossAmount, 25000.0);
+      expect(controller.checkoutDiscountAmount, 2500.0);
+      expect(controller.checkoutNetAmount, 22500.0);
+  
+      await controller.refreshNetworkPackages();
+  
+      expect(packageRepo.lastRequestedPackageIds, [testPackage.packageId]);
+      expect(controller.procurementCart, hasLength(1));
+      expect(
+        controller.procurementCart.single.package.procurementPricingSnapshotToken,
+        testPackage.procurementPricingSnapshotToken,
+      );
+      expect(controller.procurementCart.single.voucherCount, 250);
+      expect(controller.procurementCart.single.sheets, 2.5);
+      expect(controller.hasCurrentProcurementSnapshots, isTrue);
+      expect(controller.estimatedProcurementTotalsMinor, isNotNull);
+      expect(controller.isRefreshingCartPricing.value, isFalse);
+    },
+  );
 
   test(
     'Continuing to review does not refresh or replace the local estimate',
@@ -353,73 +356,79 @@ void main() {
     },
   );
 
-  test('Direct invoice checkout calculates discounts locally and keeps the fixed currency', () {
-    final invoiceController = NetworkDirectInvoiceController(
-      createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
-        FakeInvoiceRepository(),
-      ),
-    );
-
-    invoiceController.setPackageVoucherCount(testPackage, 500);
-
-    expect(invoiceController.checkoutCurrency, 'ر.ي');
-    expect(invoiceController.checkoutGrossAmount, 50000.0);
-    expect(invoiceController.checkoutDiscountAmount, 5000.0);
-    expect(invoiceController.checkoutNetAmount, 45000.0);
-
-    invoiceController.selectedSaleType.value = SaleType.credit;
-
-    expect(invoiceController.checkoutCurrency, 'ر.ي');
-    expect(invoiceController.checkoutGrossAmount, 50000.0);
-    expect(invoiceController.checkoutDiscountAmount, 2500.0);
-    expect(invoiceController.checkoutNetAmount, 47500.0);
-
-    invoiceController.setPackageVoucherCount(testPackage, 250);
-    expect(invoiceController.checkoutGrossAmount, 25000.0);
-    expect(invoiceController.checkoutDiscountAmount, 1250.0);
-    expect(invoiceController.checkoutNetAmount, 23750.0);
-
-    invoiceController.paidAmount.value = 10000.0;
-    expect(invoiceController.checkoutPaidAmount, 10000.0);
-    expect(invoiceController.checkoutRemainingCreditAmount, 13750.0);
-
-    invoiceController.setPackageVoucherCount(testPackage, 0);
-    expect(invoiceController.directInvoiceCart, isEmpty);
-    expect(invoiceController.checkoutNetAmount, 0.0);
-
-    invoiceController.onClose();
-  });
+  test(
+    'Direct invoice checkout calculates discounts locally and keeps the fixed currency',
+    () {
+      final invoiceController = NetworkDirectInvoiceController(
+        createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
+          FakeInvoiceRepository(),
+        ),
+      );
+  
+      invoiceController.setPackageVoucherCount(testPackage, 500);
+  
+      expect(invoiceController.checkoutCurrency, 'ر.ي');
+      expect(invoiceController.checkoutGrossAmount, 50000.0);
+      expect(invoiceController.checkoutDiscountAmount, 5000.0);
+      expect(invoiceController.checkoutNetAmount, 45000.0);
+  
+      invoiceController.selectedSaleType.value = SaleType.credit;
+  
+      expect(invoiceController.checkoutCurrency, 'ر.ي');
+      expect(invoiceController.checkoutGrossAmount, 50000.0);
+      expect(invoiceController.checkoutDiscountAmount, 2500.0);
+      expect(invoiceController.checkoutNetAmount, 47500.0);
+  
+      invoiceController.setPackageVoucherCount(testPackage, 250);
+      expect(invoiceController.checkoutGrossAmount, 25000.0);
+      expect(invoiceController.checkoutDiscountAmount, 1250.0);
+      expect(invoiceController.checkoutNetAmount, 23750.0);
+  
+      invoiceController.paidAmount.value = 10000.0;
+      expect(invoiceController.checkoutPaidAmount, 10000.0);
+      expect(invoiceController.checkoutRemainingCreditAmount, 13750.0);
+  
+      invoiceController.setPackageVoucherCount(testPackage, 0);
+      expect(invoiceController.directInvoiceCart, isEmpty);
+      expect(invoiceController.checkoutNetAmount, 0.0);
+  
+      invoiceController.onClose();
+    },
+  );
 
   group('Local checkout calculation', () {
-    test('Checkout values are calculated locally and use the fixed Yemeni rial label', () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-
-      controller.setPackageVoucherCount(testPackage, 500);
-      expect(packageRepo.lastRequestedPackageIds, isNull);
-
-      expect(controller.checkoutCurrency, 'ر.ي');
-      expect(controller.checkoutGrossAmount, 50000.0);
-      expect(controller.checkoutDiscountAmount, 5000.0);
-      expect(controller.checkoutNetAmount, 45000.0);
-
-      controller.setPackageVoucherCount(testPackage, 250);
-      expect(controller.checkoutGrossAmount, 25000.0);
-      expect(controller.checkoutDiscountAmount, 2500.0);
-      expect(controller.checkoutNetAmount, 22500.0);
-
-      controller.selectedSaleType.value = SaleType.credit;
-
-      expect(controller.checkoutCurrency, 'ر.ي');
-      expect(controller.checkoutGrossAmount, 25000.0);
-      expect(controller.checkoutDiscountAmount, 1250.0);
-      expect(controller.checkoutNetAmount, 23750.0);
-
-      controller.setPackageVoucherCount(testPackage, 0);
-      expect(controller.procurementCart, isEmpty);
-      expect(controller.checkoutGrossAmount, 0.0);
-      expect(controller.checkoutDiscountAmount, 0.0);
-      expect(controller.checkoutNetAmount, 0.0);
-    });
+    test(
+      'Checkout values are calculated locally and use the fixed Yemeni rial label',
+      () async {
+        controller.selectedNetworkId.value = 10;
+        controller.selectedPosId.value = 20;
+  
+        controller.setPackageVoucherCount(testPackage, 500);
+        expect(packageRepo.lastRequestedPackageIds, isNull);
+  
+        expect(controller.checkoutCurrency, 'ر.ي');
+        expect(controller.checkoutGrossAmount, 50000.0);
+        expect(controller.checkoutDiscountAmount, 5000.0);
+        expect(controller.checkoutNetAmount, 45000.0);
+  
+        controller.setPackageVoucherCount(testPackage, 250);
+        expect(controller.checkoutGrossAmount, 25000.0);
+        expect(controller.checkoutDiscountAmount, 2500.0);
+        expect(controller.checkoutNetAmount, 22500.0);
+  
+        controller.selectedSaleType.value = SaleType.credit;
+  
+        expect(controller.checkoutCurrency, 'ر.ي');
+        expect(controller.checkoutGrossAmount, 25000.0);
+        expect(controller.checkoutDiscountAmount, 1250.0);
+        expect(controller.checkoutNetAmount, 23750.0);
+  
+        controller.setPackageVoucherCount(testPackage, 0);
+        expect(controller.procurementCart, isEmpty);
+        expect(controller.checkoutGrossAmount, 0.0);
+        expect(controller.checkoutDiscountAmount, 0.0);
+        expect(controller.checkoutNetAmount, 0.0);
+      },
+    );
   });
 }
