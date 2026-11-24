@@ -30,8 +30,7 @@ class FakeInvoiceRepository implements InvoiceRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class FakeQuoteRequestRepository implements RequestRepository {
-  bool throwPricingOnCreate = false;
+class FakeRequestRepository implements RequestRepository {
   bool throwOnceOnCreate = false;
   Map<String, dynamic>? lastCreatePayload;
   final List<String?> createIdempotencyKeys = [];
@@ -54,12 +53,6 @@ class FakeQuoteRequestRepository implements RequestRepository {
     if (throwOnceOnCreate) {
       throwOnceOnCreate = false;
       throw const AppException('تعذر الاتصال بالخادم', code: '500');
-    }
-    if (throwPricingOnCreate) {
-      throw const AppException(
-        'تم تحديث أسعار الباقات أو شروط الخصم المعتمدة لدى الشبكة. يرجى مراجعة وتحديث عرض الأسعار قبل الإرسال.',
-        code: '422',
-      );
     }
     return const RequestEntity(
       requestId: 55,
@@ -247,14 +240,14 @@ class FakePackageCatalogRepository implements PackageCatalogRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late FakeQuoteRequestRepository mockRepo;
+  late FakeRequestRepository mockRepo;
   late FakeCommercialRepository commercialRepo;
   late FakePackageCatalogRepository packageRepo;
   late PosNewProcurementOrderController controller;
 
   setUp(() {
     Get.reset();
-    mockRepo = FakeQuoteRequestRepository();
+    mockRepo = FakeRequestRepository();
     commercialRepo = FakeCommercialRepository();
     packageRepo = FakePackageCatalogRepository();
 
@@ -288,6 +281,7 @@ void main() {
     );
 
     expect(controller.hasCurrentProcurementSnapshots, isFalse);
+    expect(controller.checkoutNetAmount, 22500.0);
 
     await controller.refreshNetworkPackages();
 
@@ -331,7 +325,10 @@ void main() {
       );
       expect(controller.procurementCart.single.voucherCount, 250);
       expect(controller.hasCurrentProcurementSnapshots, isFalse);
-      expect(controller.estimatedProcurementTotalsMinor, isNull);
+      expect(controller.estimatedProcurementTotalsMinor, (2500000, 250000, 2250000));
+      expect(controller.checkoutGrossAmount, 25000.0);
+      expect(controller.checkoutDiscountAmount, 2500.0);
+      expect(controller.checkoutNetAmount, 22500.0);
       expect(controller.cartPricingRefreshError.value, isNotNull);
       expect(controller.isRefreshingCartPricing.value, isFalse);
     },
