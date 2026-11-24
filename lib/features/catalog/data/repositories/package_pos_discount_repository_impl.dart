@@ -9,10 +9,11 @@ class PackagePosDiscountRepositoryImpl implements PackagePosDiscountRepository {
   final PackagePosDiscountRemoteDataSource remote;
   @override
   Future<PaginatedList<PackagePosDiscountEntity>> getForPackage({
-    required int networkId, required int packageId, String? search, String? cursor,
+    required int networkId, required int packageId, String? search, String? cursor, String? status, String? validityState,
   }) async {
     final response=await remote.getForPackage(
       networkId: networkId, packageId: packageId, search: search, cursor: cursor,
+      status: status, validityState: validityState,
     );
     if (!response.success || response.data == null) throw AppException(response.message);
     return PaginatedList<PackagePosDiscountEntity>(
