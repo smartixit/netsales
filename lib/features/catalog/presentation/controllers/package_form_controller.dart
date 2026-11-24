@@ -191,8 +191,8 @@ class PackageFormController extends GetxController {
       packageValidity: liveValidityInMinutes.value,
       packageVoucherCount: count,
       packageVoucherPrice: basePrice,
-      packageDefaultCashDiscount: liveCashDiscountRate.value,
-      packageDefaultCreditDiscount: liveCreditDiscountRate.value,
+      packageDefaultCashDiscount: cashRate,
+      packageDefaultCreditDiscount: creditRate,
       cashDiscountAmount: cashSavings,
       creditDiscountAmount: creditSavings,
       effectiveCashPrice: roundMoney(
