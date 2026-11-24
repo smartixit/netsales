@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/enums/package_discount_validity_state.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -10,7 +9,8 @@ import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/enums/package_discount_activation_status.dart';
 
 class PackagePosDiscountCard extends StatelessWidget {
   const PackagePosDiscountCard({super.key,required this.agreement});
@@ -19,22 +19,16 @@ class PackagePosDiscountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors=context.colors;
-    final state=agreement.validityState;
-    final label=switch(state){
-      PackageDiscountValidityState.effective=>'سارية الآن',
-      PackageDiscountValidityState.scheduled=>'مجدولة',
-      PackageDiscountValidityState.expired=>'منتهية',
-      PackageDiscountValidityState.disabled=>'معطّلة',
-      PackageDiscountValidityState.unknown=>'حالة غير معروفة',
-    };
-    final tone=switch(state){
-      PackageDiscountValidityState.effective=>SemanticTone.success,
-      PackageDiscountValidityState.scheduled=>SemanticTone.warning,
-      PackageDiscountValidityState.expired=>SemanticTone.neutral,
-      PackageDiscountValidityState.disabled=>SemanticTone.neutral,
-      PackageDiscountValidityState.unknown=>SemanticTone.danger,
-    };
-    final presentation=EnumPresentation(label:label,tone:tone,icon:Icons.circle_outlined);
+    final validityPresentation =
+        EnumPresentationRegistry.resolvePackageDiscountValidityState(
+      agreement.validityState,
+    );
+    final activationPresentation =
+        EnumPresentationRegistry.resolvePackageDiscountActivationStatus(
+      agreement.isEnabled
+          ? PackageDiscountActivationStatus.enabled
+          : PackageDiscountActivationStatus.disabled,
+    );
     return Container(
       padding:EdgeInsets.all(AppSpacing.md),
       decoration:BoxDecoration(
@@ -54,14 +48,10 @@ class PackagePosDiscountCard extends StatelessWidget {
             Text('معرّف نقطة البيع: ${agreement.posId}',style:AppTypography.labelSmall.copyWith(color:colors.onSurfaceVariant)),
           ])),
           Column(crossAxisAlignment:CrossAxisAlignment.end,children:[
-            CustomStatusBadge.fromPresentation(presentation,isCompact:true),
+            CustomStatusBadge.fromPresentation(validityPresentation,isCompact:true),
             AppSpacing.vXxs,
             CustomStatusBadge.fromPresentation(
-              EnumPresentation(
-                label:agreement.isEnabled?'مفعّلة':'غير مفعّلة',
-                tone:agreement.isEnabled?SemanticTone.success:SemanticTone.neutral,
-                icon:agreement.isEnabled?Icons.toggle_on_outlined:Icons.toggle_off_outlined,
-              ),isCompact:true,
+              activationPresentation,isCompact:true,
             ),
           ]),
         ]),
