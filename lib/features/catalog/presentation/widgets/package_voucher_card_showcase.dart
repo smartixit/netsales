@@ -24,11 +24,13 @@ class PackageVoucherCardShowcase extends StatelessWidget {
     super.key,
     required this.package,
     this.showPricingSummary = true,
+    this.showEstimatedPricingLabel = false,
     this.previewPricing,
   });
 
   final PackageEntity package;
   final bool showPricingSummary;
+  final bool showEstimatedPricingLabel;
   final PackageVoucherPreviewPricing? previewPricing;
 
   @override
@@ -142,6 +144,10 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 if (showPricingSummary) ...[
                   AppSpacing.vMd,
+                  if (showEstimatedPricingLabel) ...[
+                    const _EstimatedPricingNotice(),
+                    AppSpacing.vXs,
+                  ],
                   _ShowcaseRoyalPricingBar(
                     accentColor: accentColor,
                     cashDiscount: package.packageDefaultCashDiscount,
@@ -710,110 +716,23 @@ class _RoyalPriceTrack extends StatelessWidget {
 }
 
 
-/// مدخلات التسعير الخام للمعاينة فقط؛ لا تحتوي على أي أسعار مشتقة.
-class PackageVoucherPreviewPricing {
-  const PackageVoucherPreviewPricing({
-    required this.basePrice,
-    required this.cashDiscountRate,
-    required this.creditDiscountRate,
-  });
-
-  final double basePrice;
-  final double cashDiscountRate;
-  final double creditDiscountRate;
-}
-
-/// يعرض ما أدخله المستخدم كما هو، دون حساب سعر صافٍ أو وفورات أو إجماليات.
-class _ShowcaseRawPricingPreview extends StatelessWidget {
-  const _ShowcaseRawPricingPreview({required this.pricing});
-
-  final PackageVoucherPreviewPricing pricing;
+/// تنبيه يميز الأسعار المحسوبة محلياً عن القيم المعتمدة من الخادم.
+class _EstimatedPricingNotice extends StatelessWidget {
+  const _EstimatedPricingNotice();
 
   @override
   Widget build(BuildContext context) {
-    final cashRate = pricing.cashDiscountRate;
-    final creditRate = pricing.creditDiscountRate;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _RawPricingValue(
-              label: 'السعر الأساسي',
-              value: '${AmountFormatter.formatValue(pricing.basePrice)} ر.ي',
-            ),
-          ),
-          Container(
-            width: 1.w,
-            height: 38.h,
-            color: Colors.white.withValues(alpha: 0.16),
-            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          ),
-          Expanded(
-            child: _RawPricingValue(
-              label: 'خصم نقدي',
-              value: '${cashRate == cashRate.roundToDouble() ? cashRate.toInt() : cashRate}%',
-            ),
-          ),
-          Container(
-            width: 1.w,
-            height: 38.h,
-            color: Colors.white.withValues(alpha: 0.16),
-            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          ),
-          Expanded(
-            child: _RawPricingValue(
-              label: 'خصم آجل',
-              value: '${creditRate == creditRate.roundToDouble() ? creditRate.toInt() : creditRate}%',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-}
-
-/// خلية قيمة خام داخل معاينة التسعير.
-class _RawPricingValue extends StatelessWidget {
-  const _RawPricingValue({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        Icon(Icons.auto_awesome_rounded, size: 11.sp, color: Colors.white70),
+        AppSpacing.hXxs,
         Text(
-          label,
+          'معاينة تقديرية — الأسعار المعتمدة بعد الحفظ من الخادم',
           style: TextStyle(
             fontSize: 9.sp,
-            color: Colors.white.withValues(alpha: 0.72),
+            color: Colors.white70,
             fontWeight: FontWeight.w600,
-          ),
-        ),
-        AppSpacing.vXxs,
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
           ),
         ),
       ],
