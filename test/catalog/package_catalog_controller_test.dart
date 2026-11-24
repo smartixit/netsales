@@ -459,6 +459,20 @@ void main() {
       expect(formController.validityController.text, '0');
     });
 
+    test('live pricing preview follows server two-decimal rounding', () {
+      formController.liveBasePrice.value = 100.555;
+      formController.liveCashDiscountRate.value = 12.345;
+      formController.liveCreditDiscountRate.value = 5.0;
+
+      final preview = formController.livePreviewPackage;
+
+      expect(preview.packageVoucherPrice, 100.56);
+      expect(preview.cashDiscountAmount, 12.42);
+      expect(preview.effectiveCashPrice, 88.14);
+      expect(preview.creditDiscountAmount, 5.03);
+      expect(preview.effectiveCreditPrice, 95.53);
+    });
+
     test('invalid negative values are not converted or overwritten', () {
       formController.balanceController.text = '-2';
       formController.uptimeController.text = '-3';
