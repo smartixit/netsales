@@ -1,3 +1,4 @@
+import 'package:netsales/core/enums/package_discount_activation_status.dart';
 import 'package:netsales/core/enums/package_discount_validity_state.dart';
 
 class PackagePosDiscountEntity {
@@ -11,6 +12,8 @@ class PackagePosDiscountEntity {
   final String? posName, displayEndDate;
   final double discountCash, discountCredit;
   final bool isEnabled;
+  PackageDiscountActivationStatus get activationStatus =>
+      PackageDiscountActivationStatus.fromValue(isEnabled);
   final PackageDiscountValidityState validityState;
   final DateTime? startDate, endDate;
   /// Final prices are supplied by Laravel; Flutter must never recalculate them.
