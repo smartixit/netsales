@@ -188,10 +188,6 @@ class PackageCatalogScreen extends GetView<PackageCatalogController> {
 
     if (embedded) return content;
 
-    return CustomAppScaffold(
-      showBackButton: true,
-      appBarTitle: 'كتالوج الباقات',
-      body: content,
-    );
+    return CustomAppScaffold(appBarTitle: 'كتالوج الباقات', body: content);
   }
 }

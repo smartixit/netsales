@@ -31,17 +31,13 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
       // 1. حالة التحميل الهيكلي الأنيق
       if (controller.isLoading.value && controller.package.value == null) {
         return CustomAppScaffold(
-          showBackButton: true,
           appBarTitle: 'تفاصيل باقة الكروت',
-          body: Padding(
-            padding: EdgeInsets.all(AppSpacing.cardPadding),
-            child: CustomStateView.loading(
-              presentation: CustomStatePresentation.skeletonOnly,
-              skeleton: CustomStateSkeleton(
-                layout: CustomStateSkeletonLayout.list,
-                itemCount: 4,
-                cardHeight: 160.h,
-              ),
+          body: CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 4,
+              cardHeight: 160.h,
             ),
           ),
         );
@@ -80,7 +76,6 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
       }
 
       return CustomAppScaffold(
-        showBackButton: true,
         appBarTitle: package.packageName,
         bottomNavigationBar: CustomDocumentActionBar(
           child: Align(

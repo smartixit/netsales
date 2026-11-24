@@ -125,22 +125,20 @@ class ExpensesScreen extends GetView<NetworkExpensesController> {
               final expenseIndex = index ~/ 2;
               final expense = controller.expenses[expenseIndex];
 
-              return Obx(() {
-                final isExpanded =
-                    controller.expandedExpenseId.value == expense.expenseId;
+              final isExpanded =
+                  controller.expandedExpenseId.value == expense.expenseId;
 
-                return ExpenseCard(
-                  key: ValueKey<String>('expense-${expense.expenseId}'),
-                  expense: expense,
-                  isExpanded: isExpanded,
-                  onToggleExpand: () =>
-                      controller.toggleExpenseExpansion(expense.expenseId),
-                  onDetails: () => controller.openExpenseDetails(expense),
-                  onPrint: () => controller.printExpense(expense),
-                  onShare: () => controller.shareExpense(expense),
-                  actions: controller.buildCardActions(context, expense),
-                );
-              });
+              return ExpenseCard(
+                key: ValueKey<String>('expense-${expense.expenseId}'),
+                expense: expense,
+                isExpanded: isExpanded,
+                onToggleExpand: () =>
+                    controller.toggleExpenseExpansion(expense.expenseId),
+                onDetails: () => controller.openExpenseDetails(expense),
+                onPrint: () => controller.printExpense(expense),
+                onShare: () => controller.shareExpense(expense),
+                actions: controller.buildCardActions(context, expense),
+              );
             }, childCount: expenseCount == 0 ? 0 : expenseCount * 2 - 1),
           );
         }),
@@ -161,8 +159,6 @@ class ExpensesScreen extends GetView<NetworkExpensesController> {
 
     if (embedded) return content;
 
-    return Obx(
-      () => CustomAppScaffold(appBarTitle: controller.pageTitle, body: content),
-    );
+    return CustomAppScaffold(appBarTitle: controller.pageTitle, body: content);
   }
 }
