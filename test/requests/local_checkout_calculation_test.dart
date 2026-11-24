@@ -31,7 +31,6 @@ class FakeInvoiceRepository implements InvoiceRepository {
 }
 
 class FakeRequestRepository implements RequestRepository {
-
   @override
   Future<RequestStatusSummaryEntity> getRequestStatusSummary({
     int? networkId,
@@ -293,23 +292,26 @@ void main() {
     expect(controller.isRefreshingCartPricing.value, isFalse);
   });
 
-  test('Continuing to review does not refresh or replace the local estimate', () {
-    controller.selectedNetworkId.value = 10;
-    controller.selectedPosId.value = 20;
-    controller.procurementCart.add(
-      ProcurementCartLineEntity(
-        package: _expiredTestPackage(),
-        sheets: 2.5,
-        voucherCount: 250,
-      ),
-    );
+  test(
+    'Continuing to review does not refresh or replace the local estimate',
+    () {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+      controller.procurementCart.add(
+        ProcurementCartLineEntity(
+          package: _expiredTestPackage(),
+          sheets: 2.5,
+          voucherCount: 250,
+        ),
+      );
 
-    controller.continueToOrderReview();
+      controller.continueToOrderReview();
 
-    expect(controller.currentOrderStep.value, 1);
-    expect(packageRepo.lastRequestedPackageIds, isNull);
-    expect(controller.checkoutNetAmount, 22500.0);
-  });
+      expect(controller.currentOrderStep.value, 1);
+      expect(packageRepo.lastRequestedPackageIds, isNull);
+      expect(controller.checkoutNetAmount, 22500.0);
+    },
+  );
 
   test(
     'Incomplete cart tariff refresh keeps expired snapshots and quantities',
@@ -338,7 +340,11 @@ void main() {
       );
       expect(controller.procurementCart.single.voucherCount, 250);
       expect(controller.hasCurrentProcurementSnapshots, isFalse);
-      expect(controller.estimatedProcurementTotalsMinor, (2500000, 250000, 2250000));
+      expect(controller.estimatedProcurementTotalsMinor, (
+        2500000,
+        250000,
+        2250000,
+      ));
       expect(controller.checkoutGrossAmount, 25000.0);
       expect(controller.checkoutDiscountAmount, 2500.0);
       expect(controller.checkoutNetAmount, 22500.0);
@@ -416,6 +422,4 @@ void main() {
       expect(controller.checkoutNetAmount, 0.0);
     });
   });
-
-
 }
