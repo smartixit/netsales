@@ -242,7 +242,6 @@ abstract final class ApiConstants {
   // ==========================================================================
   static const String voucherRequests = '/requests';
   static const String voucherRequestsSummary = '/requests/summary';
-  static const String voucherRequestsQuote = '/requests/quote';
   static const String voucherRequestsTrashed = '/requests/trashed';
   static String voucherRequest(int id) => '/requests/$id';
   static String voucherRequestPreviewModification(int id) =>

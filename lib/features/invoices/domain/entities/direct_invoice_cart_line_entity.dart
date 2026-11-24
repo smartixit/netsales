@@ -27,9 +27,10 @@ class DirectInvoiceCartLineEntity extends Equatable {
   /// إجمالي الخصم للسطر حسب نوع البيع (نقدي أو آجل)
   double lineDiscountTotal(bool isCash) {
     final unitDiscount = isCash
-        ? package.effectiveCashPrice
-        : package.effectiveCreditPrice;
-    return unitDiscount * voucherCount;
+        ? package.cashDiscountAmount
+        : package.creditDiscountAmount;
+    final discount = unitDiscount * voucherCount;
+    return discount > 0 ? discount : 0.0;
   }
 
   /// صافي السطر بعد الخصم

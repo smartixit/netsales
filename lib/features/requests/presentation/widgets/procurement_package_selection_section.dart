@@ -149,10 +149,6 @@ class ProcurementPackageSelectionSection
                                   final isCashSale =
                                       controller.selectedSaleType.value ==
                                       SaleType.cash;
-                                  final quote = controller.serverQuote.value;
-                                  final hasCurrentQuote =
-                                      controller.hasCurrentServerQuote;
-
                                   return ProcurementPackageOptionCard(
                                     package: package,
                                     quantity: quantity,
@@ -163,9 +159,6 @@ class ProcurementPackageSelectionSection
                                         ),
                                     isDiscountLoading: isDiscountLoading,
                                     isCashSale: isCashSale,
-                                    quoteLine: hasCurrentQuote
-                                        ? quote?.findLine(package.packageId)
-                                        : null,
                                     estimatedLineTotalMinor: controller
                                         .estimatedLineTotalMinor(
                                           package,

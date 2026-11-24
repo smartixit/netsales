@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -12,7 +11,6 @@ import 'package:netsales/features/commercial/domain/repositories/commercial_repo
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
-import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -173,22 +171,6 @@ class MockRequestRepository implements RequestRepository {
         paymentStatusRaw: 'PAID',
         isFullyPaid: true,
       ),
-    );
-  }
-
-  @override
-  Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {
-    return const ProcurementQuoteEntity(
-      networkId: 1,
-      posId: 1,
-      saleType: SaleType.cash,
-      saleTypeLabel: 'نقدي',
-      grossTotal: 1000.0,
-      discountTotal: 100.0,
-      netTotal: 900.0,
-      currency: 'YER',
-      pricingToken: 'mock_quote_token_123',
-      items: [],
     );
   }
 

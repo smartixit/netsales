@@ -21,11 +21,9 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/package_price_change_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
-import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/services/procurement_estimate_calculator.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_action_dialogs.dart';
@@ -42,7 +40,6 @@ class PosNewProcurementOrderController extends GetxController {
   final GetPackagesUseCase? getPackagesUseCase;
   final GetEffectivePackageDiscountsForPosUseCase?
   getEffectivePackageDiscountsForPosUseCase;
-  final GetProcurementQuoteUseCase? getProcurementQuoteUseCase;
   final ProcurementEstimateCalculator procurementEstimateCalculator;
 
   PosNewProcurementOrderController({
@@ -53,7 +50,6 @@ class PosNewProcurementOrderController extends GetxController {
     this.getPosNetworksListUseCase,
     this.getPackagesUseCase,
     this.getEffectivePackageDiscountsForPosUseCase,
-    this.getProcurementQuoteUseCase,
     this.procurementEstimateCalculator = const ProcurementEstimateCalculator(),
   });
 
@@ -72,10 +68,6 @@ class PosNewProcurementOrderController extends GetxController {
         type: SnackType.warning,
       );
       return;
-    }
-    // تحديث استباقي صامت في الخلفية إذا كانت التعرفة بحاجة للتحديث
-    if (needsPricingRefresh && !isRefreshingCartPricing.value) {
-      unawaited(refreshNetworkPackages());
     }
     currentOrderStep.value = 1;
     FocusManager.instance.primaryFocus?.unfocus();
@@ -153,12 +145,6 @@ class PosNewProcurementOrderController extends GetxController {
   EffectivePackageDiscountEntity? discountForPackage(int packageId) =>
       effectiveDiscountsByPackageId[packageId];
 
-  // عرض الأسعار الرسمي المعتمد سيادياً من الخادم لكامل سلة التوريد (Phase 3.1 Quote)
-  final serverQuote = Rxn<ProcurementQuoteEntity>();
-  final isLoadingQuote = false.obs;
-  final quoteError = RxnString();
-  int _quoteRevision = 0;
-
   final procurementCart = <ProcurementCartLineEntity>[].obs;
   final Map<int, TextEditingController> _packageQuantityControllers = {};
 
@@ -169,35 +155,6 @@ class PosNewProcurementOrderController extends GetxController {
       );
 
   bool get hasCartItems => procurementCart.isNotEmpty;
-
-  /// يمنع إرسال الطلب بعرض سعر قديم أثناء تقارب نقرات الكمية.
-  final isQuotePending = false.obs;
-
-  /// هل يملك الطلب عرض سعر حديثاً يطابق سياق الإرسال الحالي؟
-  bool get hasCurrentServerQuote {
-    if (getProcurementQuoteUseCase == null) return true;
-
-    final quote = serverQuote.value;
-    if (isQuotePending.value || isLoadingQuote.value || quote == null) {
-      return false;
-    }
-
-    final matchesContext =
-        quote.networkId == selectedNetworkId.value &&
-        quote.posId == selectedPosId.value &&
-        quote.saleType == selectedSaleType.value;
-    if (!matchesContext || quote.items.length != procurementCart.length) {
-      return false;
-    }
-    final matchesCart = procurementCart.every((line) {
-      final quotedLine = quote.findLine(line.package.packageId);
-      return quotedLine != null && quotedLine.voucherCount == line.voucherCount;
-    });
-    if (!matchesCart) return false;
-
-    final expiresAt = quote.expiresAt;
-    return expiresAt == null || DateTime.now().isBefore(expiresAt);
-  }
 
   bool get hasCurrentProcurementSnapshots => procurementEstimateCalculator
       .hasCurrentSnapshots(procurementCart.map((line) => line.package));
@@ -219,7 +176,8 @@ class PosNewProcurementOrderController extends GetxController {
   bool get hasEstimate => estimatedProcurementTotalsMinor != null;
 
   /// هل تحتاج أسعار السلة إلى تحديث التعرفة؟
-  bool get needsPricingRefresh => !hasEstimate && hasCartItems;
+  bool get needsPricingRefresh =>
+      hasCartItems && !hasCurrentProcurementSnapshots;
 
   /// عدد الباقات المختلفة المختارة في السلة
   int get cartPackagesCount => procurementCart.length;
@@ -228,29 +186,23 @@ class PosNewProcurementOrderController extends GetxController {
   int get checkoutTotalVouchers =>
       procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
 
-  /// عملة تسعير الطلب المعتمدة
-  String get checkoutCurrency => serverQuote.value?.currency ?? 'YER';
-
-  /// هل يتوفر عرض تسعير معتمد وخادم جاهز؟
-  bool get isQuoteReady => hasCurrentServerQuote && serverQuote.value != null;
+  /// رمز العملة الثابت المعروض في Checkout
+  String get checkoutCurrency => 'ر.ي';
 
   /// إجمالي الطلب الإجمالي قبل الخصم لشريط إتمام الطلب
   double get checkoutGrossAmount {
-    if (isQuoteReady) return serverQuote.value!.grossTotal;
     final estimate = estimatedProcurementTotalsMinor;
     return estimate != null ? estimate.$1 / 100.0 : 0.0;
   }
 
   /// إجمالي خصم الطلب لشريط إتمام الطلب
   double get checkoutDiscountAmount {
-    if (isQuoteReady) return serverQuote.value!.discountTotal;
     final estimate = estimatedProcurementTotalsMinor;
     return estimate != null ? estimate.$2 / 100.0 : 0.0;
   }
 
   /// صافي الطلب التقديري لشريط إتمام الطلب
   double get checkoutNetAmount {
-    if (isQuoteReady) return serverQuote.value!.netTotal;
     final estimate = estimatedProcurementTotalsMinor;
     return estimate != null ? estimate.$3 / 100.0 : 0.0;
   }
@@ -420,7 +372,7 @@ class PosNewProcurementOrderController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    // POS procurement estimates are derived locally from the current signed catalogue snapshot.
+    // POS checkout estimates use cached tariff values; snapshot expiry only gates submission.
     ever(selectedSaleType, (_) => _refreshProcurementPresentation());
 
     _initializeForm();
@@ -438,13 +390,10 @@ class PosNewProcurementOrderController extends GetxController {
     _packageRevision++;
     _packageDiscountRevision++;
     _cartPricingRefreshRevision++;
-    _quoteRevision++;
     isRefreshingCartPricing.value = false;
     isLoadingPackages.value = false;
     isLoadingMorePackages.value = false;
     isLoadingPackageDiscounts.value = false;
-    isLoadingQuote.value = false;
-    isQuotePending.value = false;
     super.onClose();
   }
 
@@ -744,13 +693,6 @@ class PosNewProcurementOrderController extends GetxController {
       }
       effectiveDiscountsByPackageId.clear();
 
-      // A previous server quote is no longer relevant after the signed
-      // package snapshots have been replaced.
-      _quoteRevision++;
-      serverQuote.value = null;
-      quoteError.value = null;
-      isLoadingQuote.value = false;
-      isQuotePending.value = false;
       _refreshProcurementPresentation();
 
       unawaited(loadEffectivePackageDiscounts());
@@ -1045,74 +987,7 @@ class PosNewProcurementOrderController extends GetxController {
     for (final controller in _packageQuantityControllers.values) {
       controller.clear();
     }
-    _quoteRevision++;
-    isLoadingQuote.value = false;
-    isQuotePending.value = false;
-    serverQuote.value = null;
-    quoteError.value = null;
     _clearPendingCreateIdempotencyKey();
-  }
-
-  /// جلب واحتساب عرض الأسعار الرسمي المعتمد سيادياً من الخادم لبنود السلة وطريقة الدفع المختارة
-  Future<void> fetchServerQuote() async {
-    final revision = ++_quoteRevision;
-    isQuotePending.value = false;
-    final networkId = selectedNetworkId.value;
-    final posId = selectedPosId.value;
-    final items = procurementCart.toList(growable: false);
-
-    if (networkId == null ||
-        posId == null ||
-        items.isEmpty ||
-        getProcurementQuoteUseCase == null) {
-      isLoadingQuote.value = false;
-      isQuotePending.value = false;
-      serverQuote.value = null;
-      quoteError.value = null;
-      return;
-    }
-
-    serverQuote.value = null;
-    isLoadingQuote.value = true;
-    quoteError.value = null;
-
-    try {
-      final payload = <String, dynamic>{
-        'network_id': networkId,
-        'pos_id': posId,
-        'sale_type': selectedSaleType.value.wireValue,
-        'items': items
-            .map(
-              (line) => {
-                'package_id': line.package.packageId,
-                'voucher_count': line.voucherCount,
-              },
-            )
-            .toList(growable: false),
-      };
-
-      final quote = await getProcurementQuoteUseCase!(payload);
-
-      if (revision != _quoteRevision ||
-          selectedNetworkId.value != networkId ||
-          selectedPosId.value != posId) {
-        return;
-      }
-
-      serverQuote.value = quote;
-    } on AppException catch (e) {
-      if (revision != _quoteRevision) return;
-      quoteError.value = e.message;
-      serverQuote.value = null;
-    } catch (e) {
-      if (revision != _quoteRevision) return;
-      quoteError.value = 'تعذر جلب عرض الأسعار المعتمد: $e';
-      serverQuote.value = null;
-    } finally {
-      if (revision == _quoteRevision) {
-        isLoadingQuote.value = false;
-      }
-    }
   }
 
   /// تعديل كمية بند موجود في السلة مباشرة دون فتح محرر منفصل.
@@ -1289,7 +1164,6 @@ class PosNewProcurementOrderController extends GetxController {
     }
 
     _refreshProcurementPresentation();
-    unawaited(fetchServerQuote());
   }
 
   /// إرسال تحديثات الطلب المعلق إلى الخادم

@@ -7,7 +7,6 @@ import 'package:netsales/features/requests/data/models/request_item_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
 import 'package:netsales/features/requests/data/models/request_modification_summary_model.dart';
 import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
-import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_entity.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
 import 'package:netsales/features/invoices/domain/entities/invoice_entity.dart';
@@ -81,22 +80,6 @@ class MockRequestRepository implements RequestRepository {
       items: filtered,
       nextCursor: filtered.length > 5 ? 'cursor_token_next' : null,
       prevCursor: cursor != null ? 'cursor_token_prev' : null,
-    );
-  }
-
-  @override
-  Future<ProcurementQuoteEntity> getQuote(Map<String, dynamic> payload) async {
-    return const ProcurementQuoteEntity(
-      networkId: 1,
-      posId: 1,
-      saleType: SaleType.cash,
-      saleTypeLabel: 'نقدي',
-      grossTotal: 5000.0,
-      discountTotal: 500.0,
-      netTotal: 4500.0,
-      currency: 'YER',
-      pricingToken: 'quote_mock_token_test',
-      items: [],
     );
   }
 
