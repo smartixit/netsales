@@ -431,5 +431,46 @@ void main() {
       expect(formController.selectedValidityUnit.value, TimeDurationUnit.weeks);
       expect(formController.validityController.text, '2');
     });
+
+    test('empty optional durations remain empty when their units change', () {
+      formController.uptimeController.clear();
+      formController.validityController.clear();
+
+      formController.setUptimeUnit(TimeDurationUnit.days);
+      formController.setValidityUnit(TimeDurationUnit.years);
+
+      expect(formController.uptimeController.text, isEmpty);
+      expect(formController.validityController.text, isEmpty);
+      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.days);
+      expect(formController.selectedValidityUnit.value, TimeDurationUnit.years);
+    });
+
+    test('zero values remain zero when units change', () {
+      formController.balanceController.text = '0';
+      formController.uptimeController.text = '0';
+      formController.validityController.text = '0';
+
+      formController.setBalanceUnit(DataSizeUnit.bytes);
+      formController.setUptimeUnit(TimeDurationUnit.minutes);
+      formController.setValidityUnit(TimeDurationUnit.months);
+
+      expect(formController.balanceController.text, '0');
+      expect(formController.uptimeController.text, '0');
+      expect(formController.validityController.text, '0');
+    });
+
+    test('invalid negative values are not converted or overwritten', () {
+      formController.balanceController.text = '-2';
+      formController.uptimeController.text = '-3';
+      formController.validityController.text = '-4';
+
+      formController.setBalanceUnit(DataSizeUnit.megabytes);
+      formController.setUptimeUnit(TimeDurationUnit.days);
+      formController.setValidityUnit(TimeDurationUnit.weeks);
+
+      expect(formController.balanceController.text, '-2');
+      expect(formController.uptimeController.text, '-3');
+      expect(formController.validityController.text, '-4');
+    });
   });
 }
