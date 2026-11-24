@@ -20,9 +20,14 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 /// - خلو كامل من الدوال المساعدة `_build...` ومنطق المعالجة غير الضروري.
 /// - ويدجتس مستقلة ذات مسؤولية أحادية واضحة (Clean Code).
 class PackageVoucherCardShowcase extends StatelessWidget {
-  const PackageVoucherCardShowcase({super.key, required this.package});
+  const PackageVoucherCardShowcase({
+    super.key,
+    required this.package,
+    this.showPricingSummary = true,
+  });
 
   final PackageEntity package;
+  final bool showPricingSummary;
 
   @override
   Widget build(BuildContext context) {
@@ -133,10 +138,10 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                       : 'مفتوح',
                 ),
 
-                AppSpacing.vMd,
-
-                // ═══ شريط التسعير الزجاجي الملكي المدمج ═══
-                _ShowcaseRoyalPricingBar(
+                if (showPricingSummary) ...[
+                  AppSpacing.vMd,
+                  // ═══ شريط التسعير الزجاجي الملكي المدمج ═══
+                  _ShowcaseRoyalPricingBar(
                   accentColor: accentColor,
                   cashDiscount: package.packageDefaultCashDiscount,
                   cashVoucherPrice: package.effectiveCashPrice,
@@ -146,7 +151,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                   creditVoucherPrice: package.effectiveCreditPrice,
                   creditSavings: package.creditDiscountAmount,
                   creditTotalPrice: package.totalCreditPrice,
-                ),
+                  ),
+                ],
               ],
             ),
           ),
