@@ -19,9 +19,8 @@ class ProcurementEstimateCalculator {
   int? calculateLineTotalMinor(
     PackageEntity package,
     int quantity,
-    SaleType saleType, {
-    DateTime? now,
-  }) {
+    SaleType saleType,
+  ) {
     if (quantity <= 0 || !_hasPriceData(package)) {
       return null;
     }
@@ -36,9 +35,8 @@ class ProcurementEstimateCalculator {
 
   (int, int, int)? calculateCartTotalsMinor(
     Iterable<ProcurementCartLineEntity> lines,
-    SaleType saleType, {
-    DateTime? now,
-  }) {
+    SaleType saleType,
+  ) {
     final cartLines = lines.toList(growable: false);
     if (cartLines.isEmpty ||
         !cartLines.every((line) => _hasPriceData(line.package))) {
@@ -73,9 +71,7 @@ class ProcurementEstimateCalculator {
   bool _hasCurrentSnapshot(PackageEntity package, DateTime now) {
     final token = package.procurementPricingSnapshotToken;
     final expiresAt = package.procurementPricingSnapshotExpiresAt;
-    return package.procurementBaseUnitPriceMinor != null &&
-        package.procurementCashDiscountBasisPoints != null &&
-        package.procurementCreditDiscountBasisPoints != null &&
+    return _hasPriceData(package) &&
         token != null &&
         token.isNotEmpty &&
         expiresAt != null &&
