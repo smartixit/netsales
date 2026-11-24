@@ -33,66 +33,65 @@ class NotificationCenterScreen extends GetView<NotificationController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      appBarTitleWidget: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'مركز الإشعارات',
-              style: AppTypography.titleMedium.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.onSurface,
-              ),
+      appBarTitleWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'مركز الإشعارات',
+            style: AppTypography.titleMedium.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colors.onSurface,
             ),
-            Obx(() {
-              final unread = controller.unreadCount.value;
-              if (unread <= 0) return const SizedBox.shrink();
-              return Container(
-                margin: EdgeInsetsDirectional.only(start: 8.w),
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: colors.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  border: Border.all(
-                    color: colors.primary.withValues(alpha: 0.4),
-                    width: 1.0,
-                  ),
-                ),
-                child: Text(
-                  unread > 99 ? '99+' : unread.toString(),
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10.sp,
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
-        actions: [
+          ),
           Obx(() {
-            final hasUnread =
-                controller.unreadCount.value > 0 ||
-                controller.notifications.any((n) => !n.isRead);
-
-            if (!hasUnread) return const SizedBox.shrink();
-
-            return Padding(
-              padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: CustomButton.icon(
-                icon: Icons.done_all_rounded,
-                tooltip: 'تعليم الكل كمقروء',
-                size: AppButtonSize.small,
-                foregroundColor: colors.primary,
-                backgroundColor: colors.primary.withValues(alpha: 0.1),
-                loading: controller.isMarkingAllRead.value,
-                onPressed: controller.markAllAsRead,
+            final unread = controller.unreadCount.value;
+            if (unread <= 0) return const SizedBox.shrink();
+            return Container(
+              margin: EdgeInsetsDirectional.only(start: 8.w),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.4),
+                  width: 1.0,
+                ),
+              ),
+              child: Text(
+                unread > 99 ? '99+' : unread.toString(),
+                style: AppTypography.labelSmall.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10.sp,
+                ),
               ),
             );
           }),
         ],
       ),
+      actions: [
+        Obx(() {
+          final hasUnread =
+              controller.unreadCount.value > 0 ||
+              controller.notifications.any((n) => !n.isRead);
+
+          if (!hasUnread) return const SizedBox.shrink();
+
+          return Padding(
+            padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
+            child: CustomButton.icon(
+              icon: Icons.done_all_rounded,
+              tooltip: 'تعليم الكل كمقروء',
+              size: AppButtonSize.small,
+              foregroundColor: colors.primary,
+              backgroundColor: colors.primary.withValues(alpha: 0.1),
+              loading: controller.isMarkingAllRead.value,
+              onPressed: controller.markAllAsRead,
+            ),
+          );
+        }),
+      ],
+
       body: CustomRefreshablePage.slivers(
         onRefresh: () => controller.loadInitialData(),
         onLoadMore: controller.loadMoreNotifications,
