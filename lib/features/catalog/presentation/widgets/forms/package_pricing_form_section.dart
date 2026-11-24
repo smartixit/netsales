@@ -3,14 +3,13 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_form_controller.dart';
-import 'package:netsales/features/catalog/presentation/widgets/forms/package_form_profit_radar.dart';
 import 'package:netsales/widgets/forms/custom_section_heading.dart';
 import 'package:netsales/widgets/inputs/custom_switch_list_tile.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// قسم التسعير والخصومات الافتراضية وحالة التفعيل (Pricing Form Section)
 ///
-/// يعتمد 100% على توكنز النظام المركزية ويفوض الرادار الحسابي لـ [PackageFormProfitRadar]
+/// يعرض مدخلات التسعير فقط؛ الأسعار النهائية والوفورات مرجعها الخادم.
 class PackagePricingFormSection extends GetView<PackageFormController> {
   const PackagePricingFormSection({super.key});
 
@@ -80,8 +79,39 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
 
         AppSpacing.vMd,
 
-        // رادار الأرباح وهوامش الجملة التفاعلي الحي
-        const PackageFormProfitRadar(),
+        // لا تُشتق الأسعار النهائية أو الوفورات داخل تطبيق العميل.
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'هذه قيم التسعير الافتراضي التي أدخلتها. تُعتمد الأسعار النهائية '
+                  'وقيم الخصم والوفورات من الخادم بعد الحفظ.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
 
         AppSpacing.vMd,
 
