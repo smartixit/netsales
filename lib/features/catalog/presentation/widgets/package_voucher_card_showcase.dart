@@ -643,7 +643,7 @@ class _RoyalPriceTrack extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
-                  'خصم ${discountPercent.toStringAsFixed(0)}%',
+                  'خصم ${discountPercent == discountPercent.roundToDouble() ? discountPercent.toInt() : discountPercent}%',
                   style: TextStyle(
                     color: themeColor,
                     fontSize: 8.5.sp,
