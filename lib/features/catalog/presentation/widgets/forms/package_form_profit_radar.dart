@@ -25,9 +25,7 @@ class PackageFormProfitRadar extends GetView<PackageFormController> {
       final preview = controller.livePreviewPackage;
       final count = preview.packageVoucherCount;
       final base = preview.totalPackageBasePrice;
-      final cashP = preview.totalCashPrice;
       final creditP = preview.totalCreditPrice;
-      final cashD = preview.totalCashSavings;
       final unitBase = preview.packageVoucherPrice;
       final unitCash = preview.effectiveCashPrice;
       final unitCashSavings = preview.cashDiscountAmount;
