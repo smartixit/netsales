@@ -381,63 +381,57 @@ void main() {
     },
   );
 
-  test(
-    'Direct invoice checkout calculates discounts locally and keeps the fixed currency',
-    () {
-      final invoiceController = NetworkDirectInvoiceController(
-        createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
-          FakeInvoiceRepository(),
-        ),
-      );
+  test('Direct invoice checkout calculates discounts locally and keeps the fixed currency', () {
+    final invoiceController = NetworkDirectInvoiceController(
+      createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
+        FakeInvoiceRepository(),
+      ),
+    );
 
-      invoiceController.setPackageVoucherCount(testPackage, 500);
+    invoiceController.setPackageVoucherCount(testPackage, 500);
 
-      expect(invoiceController.checkoutCurrency, 'ر.ي');
-      expect(invoiceController.checkoutGrossAmount, 50000.0);
-      expect(invoiceController.checkoutDiscountAmount, 5000.0);
-      expect(invoiceController.checkoutNetAmount, 45000.0);
+    expect(invoiceController.checkoutCurrency, 'ر.ي');
+    expect(invoiceController.checkoutGrossAmount, 50000.0);
+    expect(invoiceController.checkoutDiscountAmount, 5000.0);
+    expect(invoiceController.checkoutNetAmount, 45000.0);
 
-      invoiceController.selectedSaleType.value = SaleType.credit;
+    invoiceController.selectedSaleType.value = SaleType.credit;
 
-      expect(invoiceController.checkoutCurrency, 'ر.ي');
-      expect(invoiceController.checkoutGrossAmount, 50000.0);
-      expect(invoiceController.checkoutDiscountAmount, 2500.0);
-      expect(invoiceController.checkoutNetAmount, 47500.0);
+    expect(invoiceController.checkoutCurrency, 'ر.ي');
+    expect(invoiceController.checkoutGrossAmount, 50000.0);
+    expect(invoiceController.checkoutDiscountAmount, 2500.0);
+    expect(invoiceController.checkoutNetAmount, 47500.0);
 
-      invoiceController.paidAmount.value = 10000.0;
-      expect(invoiceController.checkoutPaidAmount, 10000.0);
-      expect(invoiceController.checkoutRemainingCreditAmount, 37500.0);
+    invoiceController.paidAmount.value = 10000.0;
+    expect(invoiceController.checkoutPaidAmount, 10000.0);
+    expect(invoiceController.checkoutRemainingCreditAmount, 37500.0);
 
-      invoiceController.onClose();
-    },
-  );
+    invoiceController.onClose();
+  });
 
   group('Local checkout calculation', () {
-    test(
-      'Checkout values are calculated locally and use the fixed Yemeni rial label',
-      () async {
-        controller.selectedNetworkId.value = 10;
-        controller.selectedPosId.value = 20;
+    test('Checkout values are calculated locally and use the fixed Yemeni rial label', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
 
-        controller.setPackageVoucherCount(testPackage, 500);
-        await Future<void>.delayed(Duration.zero);
+      controller.setPackageVoucherCount(testPackage, 500);
+      await Future<void>.delayed(Duration.zero);
 
-        expect(controller.checkoutCurrency, 'ر.ي');
-        expect(controller.checkoutGrossAmount, 50000.0);
-        expect(controller.checkoutDiscountAmount, 5000.0);
-        expect(controller.checkoutNetAmount, 45000.0);
-        expect(mockRepo.lastQuotePayload, isNull);
+      expect(controller.checkoutCurrency, 'ر.ي');
+      expect(controller.checkoutGrossAmount, 50000.0);
+      expect(controller.checkoutDiscountAmount, 5000.0);
+      expect(controller.checkoutNetAmount, 45000.0);
+      expect(mockRepo.lastQuotePayload, isNull);
 
-        controller.selectedSaleType.value = SaleType.credit;
-        await Future<void>.delayed(Duration.zero);
+      controller.selectedSaleType.value = SaleType.credit;
+      await Future<void>.delayed(Duration.zero);
 
-        expect(controller.checkoutCurrency, 'ر.ي');
-        expect(controller.checkoutGrossAmount, 50000.0);
-        expect(controller.checkoutDiscountAmount, 2500.0);
-        expect(controller.checkoutNetAmount, 47500.0);
-        expect(mockRepo.lastQuotePayload, isNull);
-      },
-    );
+      expect(controller.checkoutCurrency, 'ر.ي');
+      expect(controller.checkoutGrossAmount, 50000.0);
+      expect(controller.checkoutDiscountAmount, 2500.0);
+      expect(controller.checkoutNetAmount, 47500.0);
+      expect(mockRepo.lastQuotePayload, isNull);
+    });
   });
 
   group('Phase 3.1: Procurement Quote Entity & Model Serialization', () {
