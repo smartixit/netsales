@@ -189,7 +189,7 @@ class PosNewProcurementOrderController extends GetxController {
   int get checkoutTotalVouchers =>
       procurementCart.fold<int>(0, (sum, line) => sum + line.voucherCount);
 
-  /// عملة تسعير الطلب المعتمدة
+  /// رمز العملة الثابت المعروض في Checkout
   String get checkoutCurrency => 'ر.ي';
 
   /// إجمالي الطلب الإجمالي قبل الخصم لشريط إتمام الطلب
