@@ -413,13 +413,16 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   /// يضمن التزام الزر بالقيمة حتى لو نسي المستدعي تحديث القناة: يكتب القيمة
   /// مباشرة في ValueNotifier إن وُجد، ثم يمرر الحدث للمسمى دائماً.
   void _handleChange(T? value) {
+    // أبلغ المستهلك أولاً ليتمكن من قراءة القيمة السابقة (مثل وحدة القياس)
+    // وتحويل قيمة الحقل قبل تحديث الـ listenable بالقيمة الجديدة.
+    widget.onChanged?.call(value);
+
     final listenable = _resolvedValueListenable;
     if (listenable is ValueNotifier<T?>) {
       listenable.value = value;
     } else if (listenable is WritableValueListenable<T?>) {
       listenable.value = value;
     }
-    widget.onChanged?.call(value);
   }
 
   void _shake() {
