@@ -45,7 +45,7 @@ class PackageBentoSpecsGrid extends StatelessWidget {
                 icon: Icons.data_usage_rounded,
                 iconColor: colors.skyAccent,
                 title: 'سعة البيانات',
-                value: package.balanceDisplay,
+                value: package.balanceParts.displayText,
                 subtitle: 'رصيد الحزمة الرقمي',
               ),
             ),

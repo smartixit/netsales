@@ -384,7 +384,7 @@ class ProcurementRequestDetailsScreen
                         itemDiscount: request.items[i].itemDiscount,
                         isCustomDiscount: request.items[i].isCustomDiscount,
                         balanceDisplay:
-                            request.items[i].voucherPackage?.balanceDisplay,
+                            request.items[i].voucherPackage?.balanceParts.displayText,
                         validityDisplay:
                             request.items[i].voucherPackage?.validityDisplay,
                         uptimeDisplay:

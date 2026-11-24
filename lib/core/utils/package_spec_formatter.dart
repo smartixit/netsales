@@ -189,14 +189,6 @@ class PackageSpecFormatter {
     );
   }
 
-  /// تنسيق نصي متوافق مع الاستخدامات الحالية التي تحتاج قيمة واحدة جاهزة للعرض.
-  static String formatData(
-    dynamic rawBytes, {
-    String fallback = 'بلا رصيد محدد',
-  }) {
-    return formatDataParts(rawBytes, fallback: fallback).displayText;
-  }
-
   // ──────────────────────────────────────────────────────────────────────────
   // 2. عمليات وتحويلات الفترات الزمنية الموحدة (Duration)
   // ──────────────────────────────────────────────────────────────────────────

@@ -11,12 +11,6 @@ void main() {
       expect(parts.value, '1.5');
       expect(parts.unit, 'جيجابايت');
       expect(parts.displayText, '1.5 جيجابايت');
-      expect(
-        PackageSpecFormatter.formatData(
-          1.5 * DataSizeUnit.gigabytes.byteFactor,
-        ),
-        parts.displayText,
-      );
     });
 
     test('preserves the existing kilobyte formatting', () {
@@ -41,7 +35,6 @@ void main() {
       expect(parts.value, 'بلا رصيد محدد');
       expect(parts.unit, isEmpty);
       expect(parts.displayText, 'بلا رصيد محدد');
-      expect(PackageSpecFormatter.formatData(0), 'بلا رصيد محدد');
     });
   });
 }

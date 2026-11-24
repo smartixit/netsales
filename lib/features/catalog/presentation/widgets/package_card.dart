@@ -9,7 +9,6 @@ import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/color_resolver.dart';
-import 'package:netsales/core/utils/package_spec_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
@@ -67,7 +66,7 @@ class PackageCard extends StatelessWidget {
         (canEdit && (onEdit != null || onToggleStatus != null)) ||
         (canDelete && onDelete != null);
 
-    final balanceParts = package.balanceParts;
+    final balanceParts = _ShowcaseHeroQuota(balanceValue: package.packageBalance, balanceUnit: '', packageName: '',);
 
     final cardContent = Container(
       decoration: BoxDecoration(
@@ -118,6 +117,74 @@ class PackageCard extends StatelessWidget {
   }
 }
 
+/// سعة البيانات الكبرى واسم الباقة بنفس أسلوب وهوية الكتالوج
+class _ShowcaseHeroQuota extends StatelessWidget {
+  const _ShowcaseHeroQuota({
+    required this.balanceValue,
+    required this.balanceUnit,
+    required this.packageName,
+  });
+
+  final String balanceValue;
+  final String balanceUnit;
+  final String packageName;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              balanceValue,
+              style: AppTypography.displayMedium.copyWith(
+                fontSize: 38.sp,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                height: 1.0,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: AppRadius.sm,
+                    offset: Offset(0, AppSpacing.xxs),
+                  ),
+                ],
+              ),
+            ),
+            if (balanceUnit.isNotEmpty) ...[
+              AppSpacing.hXs,
+              Text(
+                balanceUnit,
+                style: AppTypography.titleMedium.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colors.executiveGoldAccent,
+                  height: 1.0,
+                ),
+              ),
+            ],
+          ],
+        ),
+        AppSpacing.vXs,
+        Text(
+          packageName,
+          style: AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
 /// رأس البطاقة الاستعراضي مع العلامة المائية الفاخرة
 class _VelvetHeaderShowcase extends StatelessWidget {
   const _VelvetHeaderShowcase({
@@ -138,7 +205,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
   final Color accentColor;
   final String statusLabel;
   final SemanticTone statusTone;
-  final FormattedDataSize balance;
+  final _ShowcaseHeroQuota balance;
   final bool hasAdminActions;
   final bool canEdit;
   final bool canDelete;
@@ -304,7 +371,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    balance.value,
+                    balance.balanceValue,
                     style: AppTypography.displayMedium.copyWith(
                       fontSize: 34.sp,
                       fontWeight: FontWeight.w800,
@@ -314,10 +381,10 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                       height: 1.0,
                     ),
                   ),
-                  if (balance.hasUnit) ...[
+                  if (balance.balanceUnit.isNotEmpty) ...[
                     SizedBox(width: 6.w),
                     Text(
-                      balance.unit,
+                      balance.balanceUnit,
                       style: AppTypography.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: package.isActive

@@ -75,9 +75,6 @@ class PackageEntity {
   FormattedDataSize get balanceParts =>
       PackageSpecFormatter.formatDataParts(packageBalance);
 
-  /// التمثيل النصي الكامل للتوافق مع مواضع العرض ذات النمط الواحد.
-  String get balanceDisplay => balanceParts.displayText;
-
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);
 
