@@ -114,6 +114,7 @@ class CustomDropdown<T> extends StatefulWidget {
     this.valueListenable,
     this.rxValue,
     required this.onChanged,
+    this.onValueChanging,
     this.hint,
     this.label,
     this.prefixIcon,
@@ -138,6 +139,11 @@ class CustomDropdown<T> extends StatefulWidget {
   final ValueListenable<T?>? valueListenable;
   final Rx<T?>? rxValue;
 
+  /// يُستدعى قبل تغيير القيمة المرتبطة، للحالات التي تحتاج القيمة السابقة
+  /// مثل تحويل قيمة حقل عند تغيير وحدة القياس.
+  final ValueChanged<T?>? onValueChanging;
+
+  /// يُستدعى بعد تحديث القيمة المرتبطة، ويحافظ على سلوك onChanged المعتاد.
   final ValueChanged<T?>? onChanged;
 
   final String? hint;
@@ -413,9 +419,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   /// يضمن التزام الزر بالقيمة حتى لو نسي المستدعي تحديث القناة: يكتب القيمة
   /// مباشرة في ValueNotifier إن وُجد، ثم يمرر الحدث للمسمى دائماً.
   void _handleChange(T? value) {
-    // أبلغ المستهلك أولاً ليتمكن من قراءة القيمة السابقة (مثل وحدة القياس)
-    // وتحويل قيمة الحقل قبل تحديث الـ listenable بالقيمة الجديدة.
-    widget.onChanged?.call(value);
+    // بعض الحقول تحتاج الوحدة السابقة لتحويل القيمة قبل اعتماد الاختيار الجديد.
+    widget.onValueChanging?.call(value);
 
     final listenable = _resolvedValueListenable;
     if (listenable is ValueNotifier<T?>) {
@@ -423,6 +428,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     } else if (listenable is WritableValueListenable<T?>) {
       listenable.value = value;
     }
+
+    widget.onChanged?.call(value);
   }
 
   void _shake() {
