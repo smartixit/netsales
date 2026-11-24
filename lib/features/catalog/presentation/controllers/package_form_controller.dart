@@ -117,7 +117,7 @@ class PackageFormController extends GetxController {
 
     void updateUptime() {
       final raw = double.tryParse(uptimeController.text.trim());
-      liveUptimeInMinutes.value = raw != null && raw > 0
+      liveUptimeInMinutes.value = raw != null && raw >= 0
           ? PackageSpecFormatter.toCanonicalMinutes(
               raw,
               selectedUptimeUnit.value,
@@ -268,7 +268,7 @@ class PackageFormController extends GetxController {
     }
 
     // استخراج وقت الاستخدام بوحدته المناسبة
-    if (package.packageUptime != null && package.packageUptime! > 0) {
+    if (package.packageUptime != null) {
       final bestUnit = TimeDurationUnit.resolveBestUnit(
         package.packageUptime!,
         defaultUnit: TimeDurationUnit.hours,
@@ -282,7 +282,7 @@ class PackageFormController extends GetxController {
     }
 
     // استخراج فترة الصلاحية بوحدتها المناسبة
-    if (package.packageValidity != null && package.packageValidity! > 0) {
+    if (package.packageValidity != null) {
       final bestUnit = TimeDurationUnit.resolveBestUnit(
         package.packageValidity!,
         defaultUnit: TimeDurationUnit.days,
@@ -417,7 +417,7 @@ class PackageFormController extends GetxController {
       );
 
       final rawUptime = double.tryParse(uptimeController.text.trim());
-      final uptimeInMinutes = rawUptime != null && rawUptime > 0
+      final uptimeInMinutes = rawUptime != null && rawUptime >= 0
           ? PackageSpecFormatter.toCanonicalMinutes(
               rawUptime,
               selectedUptimeUnit.value,
@@ -425,7 +425,7 @@ class PackageFormController extends GetxController {
           : null;
 
       final rawValidity = double.tryParse(validityController.text.trim());
-      final validityInMinutes = rawValidity != null && rawValidity > 0
+      final validityInMinutes = rawValidity != null && rawValidity >= 0
           ? PackageSpecFormatter.toCanonicalMinutes(
               rawValidity,
               selectedValidityUnit.value,
