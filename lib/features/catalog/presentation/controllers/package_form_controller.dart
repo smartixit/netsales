@@ -156,9 +156,16 @@ class PackageFormController extends GetxController {
     });
   }
 
-  /// كيان عرض مؤقت للمعاينة؛ لا يمثل نتيجة تسعير معتمدة.
+  /// كيان عرض مؤقت للمعاينة؛ الحسابات هنا تقديرية للعرض فقط،
+  /// ولا تُستخدم في الحفظ أو في أي قرار محاسبي.
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
+    final basePrice = liveBasePrice.value;
+    final cashRate = liveCashDiscountRate.value.clamp(0.0, 100.0);
+    final creditRate = liveCreditDiscountRate.value.clamp(0.0, 100.0);
+    final cashSavings = basePrice * cashRate / 100;
+    final creditSavings = basePrice * creditRate / 100;
+
     return PackageEntity(
       packageId: packageId.value ?? 0,
       networkId: selectedNetworkId.value ?? 0,
@@ -170,13 +177,13 @@ class PackageFormController extends GetxController {
       packageUptime: liveUptimeInMinutes.value,
       packageValidity: liveValidityInMinutes.value,
       packageVoucherCount: count,
-      packageVoucherPrice: liveBasePrice.value,
-      packageDefaultCashDiscount: 0,
-      packageDefaultCreditDiscount: 0,
-      cashDiscountAmount: 0,
-      creditDiscountAmount: 0,
-      effectiveCashPrice: 0,
-      effectiveCreditPrice: 0,
+      packageVoucherPrice: basePrice,
+      packageDefaultCashDiscount: liveCashDiscountRate.value,
+      packageDefaultCreditDiscount: liveCreditDiscountRate.value,
+      cashDiscountAmount: cashSavings,
+      creditDiscountAmount: creditSavings,
+      effectiveCashPrice: basePrice - cashSavings,
+      effectiveCreditPrice: basePrice - creditSavings,
       status: status.value,
       networkName: authorizedNetworks
           .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
