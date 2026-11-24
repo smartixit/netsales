@@ -167,11 +167,6 @@ class _VelvetHeaderShowcase extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final rawPrice = package.packageVoucherPrice;
-    final priceWatermark = rawPrice == rawPrice.roundToDouble()
-        ? rawPrice.toInt().toString()
-        : rawPrice.toStringAsFixed(2);
-
     return Stack(
       children: [
         // الخلفية اللونية الشفافة للباقة
@@ -202,7 +197,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
           left: 12.w,
           child: IgnorePointer(
             child: Text(
-              AmountFormatter.format(priceWatermark),
+              AmountFormatter.formatValue(package.packageVoucherPrice, decimalPlaces: 0),
               style: TextStyle(
                 fontSize: 64.sp,
                 fontWeight: FontWeight.w900,

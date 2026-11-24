@@ -100,6 +100,18 @@ class PackageEntity {
   /// تنسيق الرصيد عبر محول السعات المعتمد مباشرة بالبايت
   String get balanceDisplay => PackageSpecFormatter.formatData(packageBalance);
 
+  /// القيمة الرقمية المجردة للرصيد للعرض البارز
+  String get balanceValue {
+    final parts = balanceDisplay.trim().split(' ');
+    return parts.isNotEmpty ? parts.first : '';
+  }
+
+  /// وحدة القياس المنسقة للرصيد للعرض البارز
+  String get balanceUnit {
+    final parts = balanceDisplay.trim().split(' ');
+    return parts.length > 1 ? parts.sublist(1).join(' ') : '';
+  }
+
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);
 

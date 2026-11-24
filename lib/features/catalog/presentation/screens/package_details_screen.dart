@@ -33,6 +33,7 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
       // 1. حالة التحميل الهيكلي الأنيق
       if (controller.isLoading.value && controller.package.value == null) {
         return CustomAppScaffold(
+          showBackButton: true,
           appBarTitle: 'تفاصيل باقة الكروت',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -14,14 +15,10 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 /// بطاقة المحاكاة الرقمية الفاخرة لكرت الإنترنت في رأس صفحة تفاصيل الباقة
 /// (The Royal Emerald Metal Voucher Card — Haute FinTech Architecture)
 ///
-/// تم بناء الهيكل المعماري وفق أعلى معايير Clean Code وهندسة الواجهات:
-/// - لا توجد دوال مساعدة `_build...`، بل كائنات مستقلة قابلة لإعادة الاستخدام.
-/// - هوية بصرية ملكية متكاملة موحدة (Bespoke Metal FinTech).
-/// - علامة مائية شفافة نقية بالرقم المجرد في الخلفية.
-/// - شريحة كرت ذكية ذهبية وهوية الشبكة وشارة الحالة في الصف العلوي.
-/// - سعة البيانات البارزة واسم الباقة.
-/// - مصفوفة المواصفات الزجاجية الشفافة (كروت الحزمة، فترة الصلاحية، وقت الاستخدام).
-/// - شريط التسعير الزجاجي الملكي المدمج (The Royal Emerald Pricing Bar) للنقدي والآجل.
+/// معايير هندسية صارمة:
+/// - الالتزام بنظام التصميم الموحد: AppSpacing, AppRadius, AppElevation, AppTypography.
+/// - خلو كامل من الدوال المساعدة `_build...` ومنطق المعالجة غير الضروري.
+/// - ويدجتس مستقلة ذات مسؤولية أحادية واضحة (Clean Code).
 class PackageVoucherCardShowcase extends StatelessWidget {
   const PackageVoucherCardShowcase({super.key, required this.package});
 
@@ -38,17 +35,10 @@ class PackageVoucherCardShowcase extends StatelessWidget {
       package.packageStatus,
     );
 
-    final rawPrice = package.packageVoucherPrice;
-    final priceWatermark = rawPrice == rawPrice.roundToDouble()
-        ? rawPrice.toInt().toString()
-        : rawPrice.toStringAsFixed(0);
-
-    final balanceParts = _splitBalance(package.balanceDisplay);
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22.r),
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -59,13 +49,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
           ],
           stops: const [0.0, 0.55, 1.0],
         ),
-        boxShadow: AppElevation.tinted(
-          context,
-          accentColor,
-          alpha: 0.35,
-          blur: 24.r,
-          dy: 10.h,
-        ),
+        boxShadow: AppElevation.tinted(context, accentColor),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.22),
           width: 1.2.w,
@@ -76,7 +60,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
         children: [
           // ── 1. الهالة الطيفية الزخرفية الدائرية ──
           Positioned(
-            top: -45.r,
+            bottom: -45.r,
             left: -35.r,
             child: IgnorePointer(
               child: Container(
@@ -92,11 +76,14 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
           // ── 2. العلامة المائية الفاخرة لفئة الكرت كرقم نقي ──
           Positioned(
-            top: -10.h,
+            top: 60.h,
             left: 12.w,
             child: IgnorePointer(
               child: Text(
-                priceWatermark,
+                AmountFormatter.formatValue(
+                  package.packageVoucherPrice,
+                  decimalPlaces: 0,
+                ),
                 style: TextStyle(
                   fontSize: 68.sp,
                   fontWeight: FontWeight.w900,
@@ -110,30 +97,30 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
           // ── 3. المحتوى الهرمي الفاخر للكرت ──
           Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
+            padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ═══ الصف العلوي: الشريحة + اسم الشبكة مع شارة الحالة + معرف الباقة ═══
+                // ═══ الصف العلوي: الشريحة + الشبكة والحالة + ختم فئة الكرت ═══
                 _ShowcaseHeaderRow(
                   networkName: package.networkName,
-                  packageId: package.packageId,
+                  voucherPrice: package.packageVoucherPrice,
                   statusLabel: statusPres.label,
                   statusTone: statusPres.tone,
                   statusIcon: statusPres.icon,
                 ),
 
-                SizedBox(height: 12.h),
+                AppSpacing.vMd,
 
-                // ═══ سعة البيانات البارزة واسم الباقة ═══
+                // ═══ سعة البيانات واسم الباقة بأسلوب الكتالوج ═══
                 _ShowcaseHeroQuota(
-                  number: balanceParts.number,
-                  unit: balanceParts.unit,
+                  balanceValue: package.balanceValue,
+                  balanceUnit: package.balanceUnit,
                   packageName: package.packageName,
                 ),
 
-                SizedBox(height: 12.h),
+                AppSpacing.vMd,
 
                 // ═══ مصفوفة المواصفات الزجاجية الشفافة ═══
                 _ShowcaseGlassMatrix(
@@ -146,7 +133,7 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                       : 'مفتوح',
                 ),
 
-                SizedBox(height: 12.h),
+                AppSpacing.vMd,
 
                 // ═══ شريط التسعير الزجاجي الملكي المدمج ═══
                 _ShowcaseRoyalPricingBar(
@@ -167,44 +154,28 @@ class PackageVoucherCardShowcase extends StatelessWidget {
       ),
     );
   }
-
-  static _BalanceParts _splitBalance(String display) {
-    final trimmed = display.trim();
-    final match = RegExp(r'^([\d.,]+)\s*(.*)$').firstMatch(trimmed);
-    if (match != null) {
-      return _BalanceParts(
-        number: match.group(1) ?? trimmed,
-        unit: match.group(2) ?? '',
-      );
-    }
-    return _BalanceParts(number: trimmed, unit: '');
-  }
 }
 
-class _BalanceParts {
-  const _BalanceParts({required this.number, required this.unit});
-  final String number;
-  final String unit;
-}
-
-/// الصف العلوي للكرت: الشريحة الذكية، اسم الشبكة، وشارة الحالة
+/// الصف العلوي للكرت: الشريحة الذكية، اسم الشبكة مع شارة الحالة، وختم فئة الكرت
 class _ShowcaseHeaderRow extends StatelessWidget {
   const _ShowcaseHeaderRow({
     required this.networkName,
-    required this.packageId,
+    required this.voucherPrice,
     required this.statusLabel,
     required this.statusTone,
     this.statusIcon,
   });
 
   final String? networkName;
-  final int packageId;
+  final double voucherPrice;
   final String statusLabel;
   final SemanticTone statusTone;
   final IconData? statusIcon;
 
   @override
   Widget build(BuildContext context) {
+    final isSuccess = statusTone == SemanticTone.success;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -213,10 +184,11 @@ class _ShowcaseHeaderRow extends StatelessWidget {
           child: Row(
             children: [
               const _ShowcaseSmartChip(),
-              SizedBox(width: 10.w),
+              AppSpacing.hSm,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       networkName != null && networkName!.isNotEmpty
@@ -229,15 +201,24 @@ class _ShowcaseHeaderRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 1.h),
-                    Text(
-                      'باقة كروت رقمية #$packageId',
-                      style: AppTypography.badgeText.copyWith(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 10.sp,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    AppSpacing.vXxs,
+
+                    // شارة الحالة عالية التباين كبديل لنص باقة كروت رقمية
+                    CustomStatusBadge(
+                      label: statusLabel,
+                      icon: statusIcon,
+                      tone: statusTone,
+                      isCompact: true,
+                      showDot: true,
+                      backgroundColor: isSuccess
+                          ? const Color(0xFF064E3B).withValues(alpha: 0.85)
+                          : Colors.white.withValues(alpha: 0.15),
+                      foregroundColor: isSuccess
+                          ? const Color(0xFFA7F3D0)
+                          : Colors.white,
+                      borderColor: isSuccess
+                          ? const Color(0xFF34D399).withValues(alpha: 0.6)
+                          : Colors.white.withValues(alpha: 0.3),
                     ),
                   ],
                 ),
@@ -245,15 +226,56 @@ class _ShowcaseHeaderRow extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 8.w),
-        CustomStatusBadge(
-          label: statusLabel,
-          icon: statusIcon,
-          tone: statusTone,
-          isCompact: true,
-          showDot: true,
-        ),
+        AppSpacing.hSm,
+
+        // ختم فئة الكرت الرسمية بدلاً من معرف الباقة
+        _ShowcaseVoucherPriceBadge(voucherPrice: voucherPrice),
       ],
+    );
+  }
+}
+
+/// ختم فئة الكرت الرسمية (Emerald Tier Stamp)
+class _ShowcaseVoucherPriceBadge extends StatelessWidget {
+  const _ShowcaseVoucherPriceBadge({required this.voucherPrice});
+
+  final double voucherPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: colors.surface.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(
+          color: colors.primary.withValues(alpha: 0.25),
+          width: 1.w,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'فئة ',
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            '${AmountFormatter.formatValue(voucherPrice)} ر.ي',
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w800,
+              color: colors.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -276,8 +298,8 @@ class _ShowcaseSmartChip extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 4.r,
-            offset: Offset(0, 2.h),
+            blurRadius: AppRadius.xs,
+            offset: Offset(0, AppSpacing.xxs),
           ),
         ],
       ),
@@ -298,16 +320,16 @@ class _ShowcaseSmartChip extends StatelessWidget {
   }
 }
 
-/// سعة البيانات الكبرى مع اسم الباقة
+/// سعة البيانات الكبرى واسم الباقة بنفس أسلوب وهوية الكتالوج
 class _ShowcaseHeroQuota extends StatelessWidget {
   const _ShowcaseHeroQuota({
-    required this.number,
-    required this.unit,
+    required this.balanceValue,
+    required this.balanceUnit,
     required this.packageName,
   });
 
-  final String number;
-  final String unit;
+  final String balanceValue;
+  final String balanceUnit;
   final String packageName;
 
   @override
@@ -323,7 +345,7 @@ class _ShowcaseHeroQuota extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              number,
+              balanceValue,
               style: AppTypography.displayMedium.copyWith(
                 fontSize: 38.sp,
                 fontWeight: FontWeight.w900,
@@ -332,26 +354,26 @@ class _ShowcaseHeroQuota extends StatelessWidget {
                 shadows: [
                   Shadow(
                     color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 3.h),
+                    blurRadius: AppRadius.sm,
+                    offset: Offset(0, AppSpacing.xxs),
                   ),
                 ],
               ),
             ),
-            if (unit.isNotEmpty) ...[
-              SizedBox(width: 6.w),
+            if (balanceUnit.isNotEmpty) ...[
+              AppSpacing.hXs,
               Text(
-                unit,
+                balanceUnit,
                 style: AppTypography.titleMedium.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: colors.success,
+                  color: colors.executiveGoldAccent,
                   height: 1.0,
                 ),
               ),
             ],
           ],
         ),
-        SizedBox(height: 6.h),
+        AppSpacing.vXs,
         Text(
           packageName,
           style: AppTypography.titleMedium.copyWith(
@@ -381,10 +403,13 @@ class _ShowcaseGlassMatrix extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.12),
           width: 0.8.w,
@@ -453,7 +478,7 @@ class _GlassMatrixCell extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.75),
           ),
         ),
-        SizedBox(height: 2.h),
+        AppSpacing.vXxs,
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
@@ -499,10 +524,13 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
           color: accentColor.withValues(alpha: 0.35),
           width: 1.w,
@@ -527,7 +555,7 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
             width: 1.w,
             height: 44.h,
             color: Colors.white.withValues(alpha: 0.15),
-            margin: EdgeInsets.symmetric(horizontal: 10.w),
+            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           ),
 
           // مسار الشراء الآجل
@@ -585,7 +613,10 @@ class _RoyalPriceTrack extends StatelessWidget {
             ),
             if (discountPercent > 0)
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 1.h,
+                ),
                 decoration: BoxDecoration(
                   color: themeColor.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -602,7 +633,7 @@ class _RoyalPriceTrack extends StatelessWidget {
           ],
         ),
 
-        SizedBox(height: 3.h),
+        AppSpacing.vXxs,
 
         // ── السطر 2: سعر الكرت الصافي ──
         FittedBox(
@@ -621,7 +652,7 @@ class _RoyalPriceTrack extends StatelessWidget {
                   height: 1.1,
                 ),
               ),
-              SizedBox(width: 3.w),
+              AppSpacing.hXxs,
               Text(
                 'ر.ي / كرت',
                 style: TextStyle(
@@ -634,7 +665,7 @@ class _RoyalPriceTrack extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 2.h),
+        AppSpacing.vXxs,
 
         // ── السطر 3: مقدار الوفر بالكرت ──
         Text(
@@ -650,7 +681,7 @@ class _RoyalPriceTrack extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
 
-        SizedBox(height: 2.h),
+        AppSpacing.vXxs,
 
         // ── السطر 4: إجمالي الحزمة ──
         Text(
