@@ -24,10 +24,12 @@ class PackageVoucherCardShowcase extends StatelessWidget {
     super.key,
     required this.package,
     this.showPricingSummary = true,
+    this.previewPricing,
   });
 
   final PackageEntity package;
   final bool showPricingSummary;
+  final PackageVoucherPreviewPricing? previewPricing;
 
   @override
   Widget build(BuildContext context) {
@@ -140,18 +142,20 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 if (showPricingSummary) ...[
                   AppSpacing.vMd,
-                  // ═══ شريط التسعير الزجاجي الملكي المدمج ═══
                   _ShowcaseRoyalPricingBar(
-                  accentColor: accentColor,
-                  cashDiscount: package.packageDefaultCashDiscount,
-                  cashVoucherPrice: package.effectiveCashPrice,
-                  cashSavings: package.cashDiscountAmount,
-                  cashTotalPrice: package.totalCashPrice,
-                  creditDiscount: package.packageDefaultCreditDiscount,
-                  creditVoucherPrice: package.effectiveCreditPrice,
-                  creditSavings: package.creditDiscountAmount,
-                  creditTotalPrice: package.totalCreditPrice,
+                    accentColor: accentColor,
+                    cashDiscount: package.packageDefaultCashDiscount,
+                    cashVoucherPrice: package.effectiveCashPrice,
+                    cashSavings: package.cashDiscountAmount,
+                    cashTotalPrice: package.totalCashPrice,
+                    creditDiscount: package.packageDefaultCreditDiscount,
+                    creditVoucherPrice: package.effectiveCreditPrice,
+                    creditSavings: package.creditDiscountAmount,
+                    creditTotalPrice: package.totalCreditPrice,
                   ),
+                ] else if (previewPricing != null) ...[
+                  AppSpacing.vMd,
+                  _ShowcaseRawPricingPreview(pricing: previewPricing!),
                 ],
               ],
             ),
@@ -699,6 +703,117 @@ class _RoyalPriceTrack extends StatelessWidget {
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+
+/// مدخلات التسعير الخام للمعاينة فقط؛ لا تحتوي على أي أسعار مشتقة.
+class PackageVoucherPreviewPricing {
+  const PackageVoucherPreviewPricing({
+    required this.basePrice,
+    required this.cashDiscountRate,
+    required this.creditDiscountRate,
+  });
+
+  final double basePrice;
+  final double cashDiscountRate;
+  final double creditDiscountRate;
+}
+
+/// يعرض ما أدخله المستخدم كما هو، دون حساب سعر صافٍ أو وفورات أو إجماليات.
+class _ShowcaseRawPricingPreview extends StatelessWidget {
+  const _ShowcaseRawPricingPreview({required this.pricing});
+
+  final PackageVoucherPreviewPricing pricing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _RawPricingValue(
+              label: 'السعر الأساسي',
+              value: '${AmountFormatter.formatValue(pricing.basePrice)} ر.ي',
+            ),
+          ),
+          Container(
+            width: 1.w,
+            height: 38.h,
+            color: Colors.white.withValues(alpha: 0.16),
+            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          ),
+          Expanded(
+            child: _RawPricingValue(
+              label: 'خصم نقدي',
+              value: '${_formatRawRate(pricing.cashDiscountRate)}%',
+            ),
+          ),
+          Container(
+            width: 1.w,
+            height: 38.h,
+            color: Colors.white.withValues(alpha: 0.16),
+            margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          ),
+          Expanded(
+            child: _RawPricingValue(
+              label: 'خصم آجل',
+              value: '${_formatRawRate(pricing.creditDiscountRate)}%',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRawRate(double value) =>
+      value == value.roundToDouble() ? value.toInt().toString() : value.toString();
+}
+
+/// خلية قيمة خام داخل معاينة التسعير.
+class _RawPricingValue extends StatelessWidget {
+  const _RawPricingValue({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9.sp,
+            color: Colors.white.withValues(alpha: 0.72),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        AppSpacing.vXxs,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
       ],
     );
