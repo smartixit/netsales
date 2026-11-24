@@ -312,7 +312,15 @@ class PackageFormController extends GetxController {
   String _formatConvertedUnitValue(double value) {
     if (!value.isFinite) return '';
     if (value == value.roundToDouble()) return value.toInt().toString();
-    return value.toString();
+
+    var formatted = value.toStringAsFixed(12);
+    while (formatted.endsWith('0')) {
+      formatted = formatted.substring(0, formatted.length - 1);
+    }
+    if (formatted.endsWith('.')) {
+      formatted = formatted.substring(0, formatted.length - 1);
+    }
+    return formatted;
   }
 
   /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
