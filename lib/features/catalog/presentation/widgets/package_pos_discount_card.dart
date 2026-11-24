@@ -53,7 +53,17 @@ class PackagePosDiscountCard extends StatelessWidget {
               style:AppTypography.titleSmall.copyWith(fontWeight:FontWeight.bold,color:colors.onSurface)),
             Text('معرّف نقطة البيع: ${agreement.posId}',style:AppTypography.labelSmall.copyWith(color:colors.onSurfaceVariant)),
           ])),
-          CustomStatusBadge.fromPresentation(presentation,isCompact:true),
+          Column(crossAxisAlignment:CrossAxisAlignment.end,children:[
+            CustomStatusBadge.fromPresentation(presentation,isCompact:true),
+            AppSpacing.vXxs,
+            CustomStatusBadge.fromPresentation(
+              EnumPresentation(
+                label:agreement.isEnabled?'مفعّلة':'غير مفعّلة',
+                tone:agreement.isEnabled?SemanticTone.success:SemanticTone.neutral,
+                icon:agreement.isEnabled?Icons.toggle_on_outlined:Icons.toggle_off_outlined,
+              ),isCompact:true,
+            ),
+          ]),
         ]),
         AppSpacing.vMd,
         Row(children:[
