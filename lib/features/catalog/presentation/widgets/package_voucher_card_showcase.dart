@@ -152,10 +152,12 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                     cashVoucherPrice: package.effectiveCashPrice,
                     cashSavings: package.cashDiscountAmount,
                     cashTotalPrice: package.totalCashPrice,
+              cashTotalSavings: package.totalCashSavings,
                     creditDiscount: package.packageDefaultCreditDiscount,
                     creditVoucherPrice: package.effectiveCreditPrice,
                     creditSavings: package.creditDiscountAmount,
                     creditTotalPrice: package.totalCreditPrice,
+              creditTotalSavings: package.totalCreditSavings,
                   ),
                 ],
               ],
@@ -514,10 +516,12 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
     required this.cashVoucherPrice,
     required this.cashSavings,
     required this.cashTotalPrice,
+    required this.cashTotalSavings,
     required this.creditDiscount,
     required this.creditVoucherPrice,
     required this.creditSavings,
     required this.creditTotalPrice,
+    required this.creditTotalSavings,
   });
 
   final Color accentColor;
@@ -525,10 +529,12 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
   final double cashVoucherPrice;
   final double cashSavings;
   final double cashTotalPrice;
+  final double cashTotalSavings;
   final double creditDiscount;
   final double creditVoucherPrice;
   final double creditSavings;
   final double creditTotalPrice;
+  final double creditTotalSavings;
 
   @override
   Widget build(BuildContext context) {
@@ -558,6 +564,7 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
               voucherPrice: cashVoucherPrice,
               voucherSavings: cashSavings,
               totalPrice: cashTotalPrice,
+              totalSavings: cashTotalSavings,
             ),
           ),
 
@@ -578,6 +585,7 @@ class _ShowcaseRoyalPricingBar extends StatelessWidget {
               voucherPrice: creditVoucherPrice,
               voucherSavings: creditSavings,
               totalPrice: creditTotalPrice,
+              totalSavings: creditTotalSavings,
             ),
           ),
         ],
@@ -595,6 +603,7 @@ class _RoyalPriceTrack extends StatelessWidget {
     required this.voucherPrice,
     required this.voucherSavings,
     required this.totalPrice,
+    required this.totalSavings,
   });
 
   final String title;
@@ -603,6 +612,7 @@ class _RoyalPriceTrack extends StatelessWidget {
   final double voucherPrice;
   final double voucherSavings;
   final double totalPrice;
+  final double totalSavings;
 
   @override
   Widget build(BuildContext context) {
@@ -696,11 +706,24 @@ class _RoyalPriceTrack extends StatelessWidget {
 
         // ── السطر 4: إجمالي الحزمة ──
         Text(
-          'حزمة: ${AmountFormatter.formatValue(totalPrice)} ر.ي',
+          'إجمالي الحزمة: ${AmountFormatter.formatValue(totalPrice)} ر.ي',
           style: TextStyle(
             fontSize: 9.5.sp,
             fontWeight: FontWeight.w700,
             color: Colors.white.withValues(alpha: 0.85),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        AppSpacing.vXxs,
+        Text(
+          totalSavings > 0
+              ? 'إجمالي الوفورات: ${AmountFormatter.formatValue(totalSavings)} ر.ي'
+              : 'لا توجد وفورات لهذه الحزمة',
+          style: TextStyle(
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w700,
+            color: totalSavings > 0 ? themeColor : Colors.white60,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
