@@ -61,6 +61,7 @@ class PackageFormController extends GetxController {
   final isSaving = false.obs;
   final isLoadingNetworks = false.obs;
   final authorizedNetworks = <NetworkEntity>[].obs;
+  final networkLoadError = RxnString();
 
   // المراقبة الحية للحسابات والمعاينة التفاعلية في الاستوديو
   final livePackageName = ''.obs;
@@ -68,9 +69,6 @@ class PackageFormController extends GetxController {
   final liveBalanceInBytes = 0.obs;
   final liveUptimeInMinutes = Rxn<int>();
   final liveValidityInMinutes = Rxn<int>();
-  final liveBasePrice = 0.0.obs;
-  final liveCashDiscount = 0.0.obs;
-  final liveCreditDiscount = 0.0.obs;
 
   @override
   void onInit() {
@@ -140,26 +138,11 @@ class PackageFormController extends GetxController {
     validityController.addListener(updateValidity);
     ever(selectedValidityUnit, (_) => updateValidity());
 
-    priceController.addListener(() {
-      liveBasePrice.value = double.tryParse(priceController.text) ?? 0.0;
-    });
-    cashDiscountController.addListener(() {
-      liveCashDiscount.value =
-          double.tryParse(cashDiscountController.text) ?? 0.0;
-    });
-    creditDiscountController.addListener(() {
-      liveCreditDiscount.value =
-          double.tryParse(creditDiscountController.text) ?? 0.0;
-    });
   }
 
   /// كيان الباقة الحي المخصص للمعاينة التفاعلية المباشرة (Live Simulator Entity)
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
-    final basePrice = liveBasePrice.value;
-    final cashPrice = estimatedCashPrice;
-    final creditPrice = estimatedCreditPrice;
-    final cashSavings = estimatedCashDiscountAmount;
     final creditSavings = estimatedCreditDiscountAmount;
 
     return PackageEntity(
@@ -173,13 +156,13 @@ class PackageFormController extends GetxController {
       packageUptime: liveUptimeInMinutes.value,
       packageValidity: liveValidityInMinutes.value,
       packageVoucherCount: count,
-      packageVoucherPrice: basePrice,
-      packageDefaultCashDiscount: liveCashDiscount.value,
-      packageDefaultCreditDiscount: liveCreditDiscount.value,
-      cashDiscountAmount: cashSavings,
-      creditDiscountAmount: creditSavings,
-      effectiveCashPrice: cashPrice,
-      effectiveCreditPrice: creditPrice,
+      packageVoucherPrice: 0,
+      packageDefaultCashDiscount: 0,
+      packageDefaultCreditDiscount: 0,
+      cashDiscountAmount: 0,
+      creditDiscountAmount: 0,
+      effectiveCashPrice: 0,
+      effectiveCreditPrice: 0,
       status: status.value,
       networkName: authorizedNetworks
           .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
@@ -202,18 +185,22 @@ class PackageFormController extends GetxController {
     }
   }
 
+  /// إعادة محاولة جلب الشبكات المصرح للمستخدم إدارتها.
+  Future<void> retryLoadNetworks() => _loadAuthorizedNetworks();
+
   /// جلب الشبكات المصرح للمستخدم إدارتها
   Future<void> _loadAuthorizedNetworks() async {
     try {
       isLoadingNetworks.value = true;
+      networkLoadError.value = null;
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
 
       if (selectedNetworkId.value == null && networks.isNotEmpty) {
         selectedNetworkId.value = networks.first.networkId;
       }
-    } catch (_) {
-      // التعامل الصامت مع أخطاء جلب الشبكات واستخدام المعرف النشط
+    } catch (error) {
+      networkLoadError.value = AppException.sanitizeMessage(error);
     } finally {
       isLoadingNetworks.value = false;
     }
@@ -273,33 +260,11 @@ class PackageFormController extends GetxController {
     voucherCountController.text = package.packageVoucherCount.toString();
     liveVoucherCount.value = package.packageVoucherCount;
     priceController.text = package.packageVoucherPrice.toString();
-    liveBasePrice.value = package.packageVoucherPrice;
     cashDiscountController.text = package.packageDefaultCashDiscount.toString();
-    liveCashDiscount.value = package.packageDefaultCashDiscount;
     creditDiscountController.text = package.packageDefaultCreditDiscount
         .toString();
-    liveCreditDiscount.value = package.packageDefaultCreditDiscount;
     status.value = package.isActive;
   }
-
-  // ── الحسابات التقديرية الحية للشاشة ──
-  double get estimatedCashDiscountAmount =>
-      liveBasePrice.value * (liveCashDiscount.value / 100.0);
-
-  double get estimatedCreditDiscountAmount =>
-      liveBasePrice.value * (liveCreditDiscount.value / 100.0);
-
-  double get estimatedCashPrice =>
-      (liveBasePrice.value - estimatedCashDiscountAmount).clamp(
-        0.0,
-        double.infinity,
-      );
-
-  double get estimatedCreditPrice =>
-      (liveBasePrice.value - estimatedCreditDiscountAmount).clamp(
-        0.0,
-        double.infinity,
-      );
 
   /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً
   void setBalanceUnit(DataSizeUnit newUnit) {
@@ -349,25 +314,21 @@ class PackageFormController extends GetxController {
   /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
   Future<void> submitForm() async {
     try {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+      if (selectedNetworkId.value == null) {
+        CustomSnackbar.show(
+          title: 'تنبيه',
+          message: 'يرجى تحديد شبكة الكروت التابعة للباقة أولاً.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+      if (!formKey.currentState!.validate()) return;
       isSaving.value = true;
       await CustomAnimationOverlay.showLoading(
         message: isEditing.value
             ? 'جاري حفظ تعديلات الباقة...'
             : 'جاري إنشاء باقة الكروت الجديدة...',
       );
-
-    if (selectedNetworkId.value == null) {
-      CustomSnackbar.show(
-        title: 'تنبيه',
-        message: 'يرجى تحديد شبكة الكروت التابعة للباقة أولاً.',
-        type: SnackType.warning,
-      );
-      return;
-    }
-
 
       // تحويل القيم المدخلة للوحدات المعتمدة عبر PackageSpecFormatter
       final rawBalance = double.tryParse(balanceController.text.trim()) ?? 0.0;
