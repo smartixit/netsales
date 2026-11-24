@@ -33,8 +33,9 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
           prefixIcon: const Icon(Icons.attach_money_rounded),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           isRequired: true,
-          validator: FormValidators.doubleValidator(
+          validator: FormValidators.amountValidator(
             fieldName: 'سعر الكرت الأساسي',
+            decimalPlaces: 2,
           ),
         ),
 
