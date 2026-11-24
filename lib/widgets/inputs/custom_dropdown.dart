@@ -416,8 +416,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     super.dispose();
   }
 
-  /// يضمن التزام الزر بالقيمة حتى لو نسي المستدعي تحديث القناة: يكتب القيمة
-  /// مباشرة في ValueNotifier إن وُجد، ثم يمرر الحدث للمسمى دائماً.
+  /// يتيح للمستدعي تنفيذ التحويلات التي تحتاج القيمة القديمة أولاً،
+  /// ثم يحدّث قناة القيمة ويطلق onChanged بعد اعتماد القيمة الجديدة.
   void _handleChange(T? value) {
     // بعض الحقول تحتاج الوحدة السابقة لتحويل القيمة قبل اعتماد الاختيار الجديد.
     widget.onValueChanging?.call(value);
