@@ -1,11 +1,15 @@
+import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/delete_package_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_package_details_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_package_pos_discounts_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_status_use_case.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_catalog_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -14,11 +18,13 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 /// متحكم تفاصيل باقة كروت الإنترنت المستقل (PackageDetailsController)
 class PackageDetailsController extends GetxController {
   final GetPackageDetailsUseCase getPackageDetailsUseCase;
+  final GetPackagePosDiscountsUseCase getPackagePosDiscountsUseCase;
   final TogglePackageStatusUseCase togglePackageStatusUseCase;
   final DeletePackageUseCase deletePackageUseCase;
 
   PackageDetailsController({
     required this.getPackageDetailsUseCase,
+    required this.getPackagePosDiscountsUseCase,
     required this.togglePackageStatusUseCase,
     required this.deletePackageUseCase,
   });
@@ -28,6 +34,16 @@ class PackageDetailsController extends GetxController {
   final isTogglingStatus = false.obs;
   final isDeleting = false.obs;
   final errorMessage = RxnString();
+  final selectedDetailsTab = 0.obs;
+  final posDiscounts = <PackagePosDiscountEntity>[].obs;
+  final isLoadingPosDiscounts = false.obs;
+  final isLoadingMorePosDiscounts = false.obs;
+  final posDiscountsError = RxnString();
+  final posDiscountsNextCursor = RxnString();
+  final posDiscountSearchController = TextEditingController();
+  Timer? _searchTimer;
+  int _requestRevision = 0;
+  bool get hasMorePosDiscounts => posDiscountsNextCursor.value?.isNotEmpty ?? false;
 
   bool get canEditPackage =>
       PermissionService.instance.can(AppPermissions.voucherPackagesEdit);
@@ -63,6 +79,7 @@ class PackageDetailsController extends GetxController {
 
       final result = await getPackageDetailsUseCase(packageId);
       package.value = result;
+      unawaited(fetchPosDiscounts(refresh: true));
     } on AppException catch (e) {
       errorMessage.value = e.message;
     } catch (e) {
@@ -79,6 +96,69 @@ class PackageDetailsController extends GetxController {
       await fetchDetails(pkg.packageId, showSkeleton: false);
     }
   }
+
+  @override
+  void onClose() {
+    _searchTimer?.cancel();
+    posDiscountSearchController.dispose();
+    _requestRevision++;
+    super.onClose();
+  }
+
+  void changeDetailsTab(int index) => selectedDetailsTab.value = index;
+
+  void onPosDiscountSearchChanged(String value) {
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 350),
+        () => unawaited(fetchPosDiscounts(refresh: true)));
+  }
+
+  Future<void> fetchPosDiscounts({bool refresh = false}) async {
+    final current = package.value;
+    if (current == null) return;
+    if (!refresh && (isLoadingPosDiscounts.value ||
+        isLoadingMorePosDiscounts.value || !hasMorePosDiscounts)) return;
+    final revision = refresh ? ++_requestRevision : _requestRevision;
+    if (refresh) {
+      isLoadingPosDiscounts.value = true;
+      posDiscounts.clear();
+      posDiscountsNextCursor.value = null;
+      posDiscountsError.value = null;
+    } else {
+      isLoadingMorePosDiscounts.value = true;
+      posDiscountsError.value = null;
+    }
+    try {
+      final result = await getPackagePosDiscountsUseCase(
+        networkId: current.networkId, packageId: current.packageId,
+        search: posDiscountSearchController.text.trim().isEmpty
+            ? null : posDiscountSearchController.text.trim(),
+        cursor: refresh ? null : posDiscountsNextCursor.value,
+      );
+      if (revision != _requestRevision) return;
+      if (refresh) {
+        posDiscounts.assignAll(result.items);
+      } else {
+        posDiscounts.addAll(result.items);
+      }
+      posDiscountsNextCursor.value = result.nextCursor;
+    } on AppException catch (error) {
+      if (revision == _requestRevision) posDiscountsError.value = error.message;
+    } catch (error) {
+      if (revision == _requestRevision) {
+        posDiscountsError.value = AppException.sanitizeMessage(
+          error, fallback: 'تعذر تحميل اتفاقيات الخصم.',
+        );
+      }
+    } finally {
+      if (revision == _requestRevision) {
+        isLoadingPosDiscounts.value = false;
+        isLoadingMorePosDiscounts.value = false;
+      }
+    }
+  }
+
+  Future<void> loadMorePosDiscounts() => fetchPosDiscounts();
 
   /// تبديل حالة تفعيل الباقة
   Future<void> toggleStatus() async {
