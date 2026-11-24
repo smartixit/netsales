@@ -69,10 +69,6 @@ class PosNewProcurementOrderController extends GetxController {
       );
       return;
     }
-    // تحديث استباقي صامت في الخلفية إذا كانت التعرفة بحاجة للتحديث
-    if (needsPricingRefresh && !isRefreshingCartPricing.value) {
-      unawaited(refreshNetworkPackages());
-    }
     currentOrderStep.value = 1;
     FocusManager.instance.primaryFocus?.unfocus();
   }
@@ -180,7 +176,8 @@ class PosNewProcurementOrderController extends GetxController {
   bool get hasEstimate => estimatedProcurementTotalsMinor != null;
 
   /// هل تحتاج أسعار السلة إلى تحديث التعرفة؟
-  bool get needsPricingRefresh => !hasEstimate && hasCartItems;
+  bool get needsPricingRefresh =>
+      hasCartItems && !hasCurrentProcurementSnapshots;
 
   /// عدد الباقات المختلفة المختارة في السلة
   int get cartPackagesCount => procurementCart.length;
