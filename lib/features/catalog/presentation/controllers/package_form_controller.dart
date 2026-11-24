@@ -91,7 +91,7 @@ class PackageFormController extends GetxController {
     super.onClose();
   }
 
-  /// إعداد مستمعين لتحديث كرت المعاينة ثلاثي الأبعاد ورادار الأرباح بشكل حي وفوري
+  /// إعداد مستمعين لتحديث بيانات البطاقة المعروضة دون اشتقاق قيم مالية.
   void _setupLiveCalculations() {
     nameController.addListener(() {
       livePackageName.value = nameController.text;
@@ -142,14 +142,11 @@ class PackageFormController extends GetxController {
     priceController.addListener(() {
       liveBasePrice.value = double.tryParse(priceController.text.trim()) ?? 0;
     });
-
   }
 
-  /// كيان الباقة الحي المخصص للمعاينة التفاعلية المباشرة (Live Simulator Entity)
+  /// كيان عرض مؤقت للمعاينة؛ لا يمثل نتيجة تسعير معتمدة.
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
-    final creditSavings = estimatedCreditDiscountAmount;
-
     return PackageEntity(
       packageId: packageId.value ?? 0,
       networkId: selectedNetworkId.value ?? 0,
