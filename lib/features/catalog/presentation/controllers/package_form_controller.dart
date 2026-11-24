@@ -130,7 +130,7 @@ class PackageFormController extends GetxController {
 
     void updateValidity() {
       final raw = double.tryParse(validityController.text.trim());
-      liveValidityInMinutes.value = raw != null && raw >= 0
+      liveValidityInMinutes.value = raw != null && raw > 0
           ? PackageSpecFormatter.toCanonicalMinutes(
               raw,
               selectedValidityUnit.value,
@@ -160,8 +160,7 @@ class PackageFormController extends GetxController {
   /// ولا تُستخدم في الحفظ أو في أي قرار محاسبي.
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
-    // يحاكي تقريب المورد VoucherPackageResource (منزلتان عشريتان).
-    // لا نعرض تقديراً مالياً مضللاً أثناء وجود سعر/نسبة غير صالحة.
+    // يطابق تقريب القيم المالية في VoucherPackageResource (منزلتان عشريتان).
     double roundMoney(double value) => (value * 100).roundToDouble() / 100;
     final rawPrice = liveBasePrice.value;
     final basePrice = rawPrice.isFinite && rawPrice >= 0
@@ -195,12 +194,8 @@ class PackageFormController extends GetxController {
       packageDefaultCreditDiscount: creditRate,
       cashDiscountAmount: cashSavings,
       creditDiscountAmount: creditSavings,
-      effectiveCashPrice: roundMoney(
-        basePrice - (basePrice * cashRate / 100),
-      ),
-      effectiveCreditPrice: roundMoney(
-        basePrice - (basePrice * creditRate / 100),
-      ),
+      effectiveCashPrice: roundMoney(basePrice - (basePrice * cashRate / 100)),
+      effectiveCreditPrice: roundMoney(basePrice - (basePrice * creditRate / 100)),
       status: status.value,
       networkName: authorizedNetworks
           .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
@@ -307,8 +302,7 @@ class PackageFormController extends GetxController {
     status.value = package.isActive;
   }
 
-  /// يحول القيمة المعروضة بين الوحدات دون تغيير مقدارها الفعلي.
-  /// يُستخدم التحويل المباشر double لتجنب فقد الكسور قبل الوصول لوحدة التخزين.
+  /// تنسيق القيمة المحولة دون فقد دقة التخزين أو إظهار أصفار عشرية زائدة.
   String _formatConvertedUnitValue(double value) {
     if (!value.isFinite) return '';
     if (value == value.roundToDouble()) return value.toInt().toString();
@@ -323,41 +317,34 @@ class PackageFormController extends GetxController {
     return formatted;
   }
 
-  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
+  /// تغيير وحدة رصيد البيانات مع الحفاظ على القيمة المعيارية بالبايت.
   void setBalanceUnit(DataSizeUnit newUnit) {
     final oldUnit = selectedBalanceUnit.value;
     if (oldUnit == newUnit) return;
 
     final currentValue = double.tryParse(balanceController.text.trim());
     if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertData(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
+      final bytes = oldUnit.toCanonicalBytes(currentValue);
+      final converted = newUnit.fromCanonicalBytes(bytes);
+      final formatted = _formatConvertedUnitValue(converted);
       balanceController.value = balanceController.value.copyWith(
-        text: _formatConvertedUnitValue(converted),
-        selection: TextSelection.collapsed(
-          offset: _formatConvertedUnitValue(converted).length,
-        ),
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
         composing: TextRange.empty,
       );
     }
     selectedBalanceUnit.value = newUnit;
   }
 
-  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً.
+  /// تغيير وحدة وقت الاستخدام مع الحفاظ على القيمة المعيارية بالدقائق.
   void setUptimeUnit(TimeDurationUnit newUnit) {
     final oldUnit = selectedUptimeUnit.value;
     if (oldUnit == newUnit) return;
 
     final currentValue = double.tryParse(uptimeController.text.trim());
     if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertDuration(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
+      final minutes = oldUnit.toCanonicalMinutes(currentValue);
+      final converted = newUnit.fromCanonicalMinutes(minutes);
       final formatted = _formatConvertedUnitValue(converted);
       uptimeController.value = uptimeController.value.copyWith(
         text: formatted,
@@ -368,18 +355,15 @@ class PackageFormController extends GetxController {
     selectedUptimeUnit.value = newUnit;
   }
 
-  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً.
+  /// تغيير وحدة فترة الصلاحية مع الحفاظ على القيمة المعيارية بالدقائق.
   void setValidityUnit(TimeDurationUnit newUnit) {
     final oldUnit = selectedValidityUnit.value;
     if (oldUnit == newUnit) return;
 
     final currentValue = double.tryParse(validityController.text.trim());
     if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertDuration(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
+      final minutes = oldUnit.toCanonicalMinutes(currentValue);
+      final converted = newUnit.fromCanonicalMinutes(minutes);
       final formatted = _formatConvertedUnitValue(converted);
       validityController.value = validityController.value.copyWith(
         text: formatted,
@@ -449,190 +433,6 @@ class PackageFormController extends GetxController {
           packageValidity: validityInMinutes,
           clearPackageUptime: rawUptime == null,
           clearPackageValidity: rawValidity == null,
-          packageVoucherCount: voucherCount,
-          packageVoucherPrice: voucherPrice,
-          packageDefaultCashDiscount: cashDiscount,
-          packageDefaultCreditDiscount: creditDiscount,
-          status: status.value,
-        );
-
-        await updatePackageUseCase(packageId.value!, updateInput);
-      } else {
-        final createInput = CreatePackageInput(
-          networkId: selectedNetworkId.value!,
-          packageName: nameController.text.trim(),
-          packageColor: selectedColor.value,
-          packageBalance: balanceInBytes,
-          packageUptime: uptimeInMinutes,
-          packageValidity: validityInMinutes,
-          clearPackageUptime: rawUptime == null,
-          clearPackageValidity: rawValidity == null,
-          packageVoucherCount: voucherCount,
-          packageVoucherPrice: voucherPrice,
-          packageDefaultCashDiscount: cashDiscount,
-          packageDefaultCreditDiscount: creditDiscount,
-          status: status.value,
-        );
-
-        await createPackageUseCase(createInput);
-      }
-
-      if (Get.isRegistered<PackageCatalogController>()) {
-        unawaited(Get.find<PackageCatalogController>().refreshCatalog());
-      }
-
-      await CustomAnimationOverlay.showSuccess(
-        message: isEditing.value ? 'تم التعديل بنجاح' : 'تم الإنشاء بنجاح',
-      );
-
-      Get.back<void>();
-    } on AppException catch (e) {
-      CustomSnackbar.show(
-        title: 'خطأ',
-        message: e.message,
-        type: SnackType.error,
-      );
-    } catch (e) {
-      CustomSnackbar.show(
-        title: 'خطأ غير متوقع',
-        message: AppException.sanitizeMessage(e),
-        type: SnackType.error,
-      );
-    } finally {
-      isSaving.value = false;
-      if (CustomAnimationOverlay.isShowing) {
-        await CustomAnimationOverlay.hide();
-      }
-    }
-  }
-}
-), '')
-        .replaceFirst(RegExp(r'\\.
-
-  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
-  void setBalanceUnit(DataSizeUnit newUnit) {
-    final oldUnit = selectedBalanceUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(balanceController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertData(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
-      balanceController.value = balanceController.value.copyWith(
-        text: _formatConvertedUnitValue(converted),
-        selection: TextSelection.collapsed(
-          offset: _formatConvertedUnitValue(converted).length,
-        ),
-        composing: TextRange.empty,
-      );
-    }
-    selectedBalanceUnit.value = newUnit;
-  }
-
-  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً.
-  void setUptimeUnit(TimeDurationUnit newUnit) {
-    final oldUnit = selectedUptimeUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(uptimeController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertDuration(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
-      final formatted = _formatConvertedUnitValue(converted);
-      uptimeController.value = uptimeController.value.copyWith(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-        composing: TextRange.empty,
-      );
-    }
-    selectedUptimeUnit.value = newUnit;
-  }
-
-  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً.
-  void setValidityUnit(TimeDurationUnit newUnit) {
-    final oldUnit = selectedValidityUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(validityController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertDuration(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
-      final formatted = _formatConvertedUnitValue(converted);
-      validityController.value = validityController.value.copyWith(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-        composing: TextRange.empty,
-      );
-    }
-    selectedValidityUnit.value = newUnit;
-  }
-
-  /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
-  Future<void> submitForm() async {
-    try {
-      if (selectedNetworkId.value == null) {
-        CustomSnackbar.show(
-          title: 'تنبيه',
-          message: 'يرجى تحديد شبكة الكروت التابعة للباقة أولاً.',
-          type: SnackType.warning,
-        );
-        return;
-      }
-      if (!formKey.currentState!.validate()) return;
-      isSaving.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: isEditing.value
-            ? 'جاري حفظ تعديلات الباقة...'
-            : 'جاري إنشاء باقة الكروت الجديدة...',
-      );
-
-      // تحويل القيم المدخلة للوحدات المعتمدة عبر PackageSpecFormatter
-      final rawBalance = double.tryParse(balanceController.text.trim()) ?? 0.0;
-      final balanceInBytes = PackageSpecFormatter.toCanonicalBytes(
-        rawBalance,
-        selectedBalanceUnit.value,
-      );
-
-      final rawUptime = double.tryParse(uptimeController.text.trim());
-      final uptimeInMinutes = rawUptime != null && rawUptime > 0
-          ? PackageSpecFormatter.toCanonicalMinutes(
-              rawUptime,
-              selectedUptimeUnit.value,
-            )
-          : null;
-
-      final rawValidity = double.tryParse(validityController.text.trim());
-      final validityInMinutes = rawValidity != null && rawValidity > 0
-          ? PackageSpecFormatter.toCanonicalMinutes(
-              rawValidity,
-              selectedValidityUnit.value,
-            )
-          : null;
-
-      final voucherCount =
-          int.tryParse(voucherCountController.text.trim()) ?? 1;
-      final voucherPrice = double.tryParse(priceController.text.trim()) ?? 0.0;
-      final cashDiscount =
-          double.tryParse(cashDiscountController.text.trim()) ?? 0.0;
-      final creditDiscount =
-          double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
-
-      if (isEditing.value) {
-        final updateInput = UpdatePackageInput(
-          packageName: nameController.text.trim(),
-          packageColor: selectedColor.value,
-          packageBalance: balanceInBytes,
-          packageUptime: uptimeInMinutes,
-          packageValidity: validityInMinutes,
           packageVoucherCount: voucherCount,
           packageVoucherPrice: voucherPrice,
           packageDefaultCashDiscount: cashDiscount,
