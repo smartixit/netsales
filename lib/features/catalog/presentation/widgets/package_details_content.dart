@@ -85,9 +85,9 @@ class PackageDetailsContent extends StatelessWidget {
         ]);
       }),
       AppSpacing.vSm,
-      Text('السجلات المعروضة: ' + items.length.toString(), style: AppTypography.labelMedium.copyWith(color: colors.onSurfaceVariant)),
+      Text('السجلات المعروضة: ${items.length}', style: AppTypography.labelMedium.copyWith(color: colors.onSurfaceVariant)),
     ]));
-  }),
+  });
   Widget _agreements() => CustomSectionContainer(
     icon:Icons.handshake_outlined,title:'اتفاقيات الخصم الخاصة بنقاط البيع',
     child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[

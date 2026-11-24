@@ -138,7 +138,9 @@ class PackageDetailsController extends GetxController {
     final current = package.value;
     if (current == null) return;
     if (!refresh && (isLoadingPosDiscounts.value ||
-        isLoadingMorePosDiscounts.value || !hasMorePosDiscounts)) return;
+        isLoadingMorePosDiscounts.value || !hasMorePosDiscounts)) {
+      return;
+    }
     final revision = refresh ? ++_requestRevision : _requestRevision;
     if (refresh) {
       isLoadingPosDiscounts.value = true;

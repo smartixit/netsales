@@ -15,8 +15,8 @@ class PackagePosDiscountRemoteDataSourceImpl implements PackagePosDiscountRemote
     queryParameters: {
       'network_id': networkId, 'package_id': packageId,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-      if (status != null) 'status': status,
-      if (validityState != null) 'validity_state': validityState,
+      'status': ?status,
+      'validity_state': ?validityState,
     },
     cursor: cursor, perPage: 15,
   );

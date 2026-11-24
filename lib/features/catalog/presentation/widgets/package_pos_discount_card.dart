@@ -8,7 +8,6 @@ import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 
 class PackagePosDiscountCard extends StatelessWidget {
