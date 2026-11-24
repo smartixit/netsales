@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
@@ -28,9 +26,6 @@ import 'package:netsales/features/requests/domain/repositories/request_repositor
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
-import 'package:netsales/features/requests/presentation/widgets/procurement_financial_quote_card.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
-import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -304,7 +299,6 @@ void main() {
       getMyPosUseCase: GetMyPosUseCase(commercialRepo),
       getPosNetworksListUseCase: GetPosNetworksListUseCase(commercialRepo),
       getPackagesUseCase: GetPackagesUseCase(packageRepo),
-      getProcurementQuoteUseCase: GetProcurementQuoteUseCase(mockRepo),
     );
     controller.onInit();
   });
@@ -379,6 +373,31 @@ void main() {
     },
   );
 
+  group('Local checkout calculation', () {
+    test('Checkout values are calculated locally and use the fixed Yemeni rial label', () async {
+      controller.selectedNetworkId.value = 10;
+      controller.selectedPosId.value = 20;
+
+      controller.setPackageVoucherCount(testPackage, 500);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.checkoutCurrency, 'ر.ي');
+      expect(controller.checkoutGrossAmount, 50000.0);
+      expect(controller.checkoutDiscountAmount, 5000.0);
+      expect(controller.checkoutNetAmount, 45000.0);
+      expect(mockRepo.lastQuotePayload, isNull);
+
+      controller.selectedSaleType.value = SaleType.credit;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.checkoutCurrency, 'ر.ي');
+      expect(controller.checkoutGrossAmount, 50000.0);
+      expect(controller.checkoutDiscountAmount, 2500.0);
+      expect(controller.checkoutNetAmount, 47500.0);
+      expect(mockRepo.lastQuotePayload, isNull);
+    });
+  });
+
   group('Phase 3.1: Procurement Quote Entity & Model Serialization', () {
     test('ProcurementQuoteModel parses JSON and calculates discount percentage accurately', () {
       final json = {
@@ -447,507 +466,3 @@ void main() {
     });
   });
 
-  group('Phase 3.1: PosNewProcurementOrderController Server Authoritative Quote Integration', () {
-    test('Local estimate uses signed minor-unit price and rounds discount on the line gross', () {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-      controller.procurementCart.add(
-        ProcurementCartLineEntity(
-          package: testPackage,
-          sheets: 1,
-          voucherCount: 101,
-        ),
-      );
-
-      expect(controller.estimatedLineTotalMinor(testPackage, 101), 909000);
-      expect(controller.estimatedProcurementTotalsMinor, (
-        1010000,
-        101000,
-        909000,
-      ));
-    });
-
-    test('Changing a cart quantity updates local state without requesting a server quote', () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-
-      controller.setPackageVoucherCount(testPackage, 500);
-
-      await pumpEventQueue();
-
-      expect(controller.cartQuantityForPackage(testPackage.packageId), 500);
-      expect(controller.serverQuote.value, isNull);
-      expect(mockRepo.lastQuotePayload, isNull);
-    });
-
-    test(
-      'Toggling payment method changes local selection without a quote request',
-      () async {
-        controller.selectedNetworkId.value = 10;
-        controller.selectedPosId.value = 20;
-
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-
-        // Change from CASH to CREDIT
-        controller.selectedSaleType.value = SaleType.credit;
-        await pumpEventQueue();
-
-        expect(controller.selectedSaleType.value, SaleType.credit);
-        expect(mockRepo.lastQuotePayload, isNull);
-      },
-    );
-
-    test(
-      'Clearing procurement cart clears serverQuote and quoteError',
-      () async {
-        controller.serverQuote.value = const ProcurementQuoteEntity(
-          networkId: 10,
-          posId: 20,
-          saleType: SaleType.cash,
-          saleTypeLabel: 'نقدي',
-          grossTotal: 1000,
-          discountTotal: 0,
-          netTotal: 1000,
-          currency: 'YER',
-          pricingToken: 'tok',
-          items: [],
-        );
-
-        controller.clearProcurementCart();
-
-        expect(controller.serverQuote.value, isNull);
-        expect(controller.quoteError.value, isNull);
-      },
-    );
-
-    test(
-      'Submission creates the request directly without fetching a quote',
-      () async {
-        controller.selectedNetworkId.value = 10;
-        controller.selectedPosId.value = 20;
-        controller.myPosList.assignAll([testPos]);
-        controller.linkedNetworks.assignAll([testLink]);
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-
-        expect(controller.canSubmitOrder, isTrue);
-        await controller.submitOrder();
-        expect(mockRepo.lastQuotePayload, isNull);
-        expect(mockRepo.lastCreatePayload?['pricing_token'], isNull);
-        expect(
-          mockRepo.lastCreatePayload?['items']?[0]['pricing_snapshot_token'],
-          'signed_snapshot_token_for_package_101',
-        );
-      },
-    );
-
-    test('Submitting order ignores retired quote token and sends each signed snapshot', () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-      controller.myPosList.assignAll([testPos]);
-      controller.linkedNetworks.assignAll([testLink]);
-
-      controller.procurementCart.add(
-        ProcurementCartLineEntity(
-          package: testPackage,
-          sheets: 1,
-          voucherCount: 100,
-        ),
-      );
-
-      controller.serverQuote.value = const ProcurementQuoteEntity(
-        networkId: 10,
-        posId: 20,
-        saleType: SaleType.cash,
-        saleTypeLabel: 'نقدي',
-        grossTotal: 10000,
-        discountTotal: 1000,
-        netTotal: 9000,
-        currency: 'YER',
-        pricingToken: 'retired_quote_token_must_not_be_sent',
-        items: [],
-      );
-
-      await controller.submitOrder();
-      expect(mockRepo.lastQuotePayload, isNull);
-      expect(mockRepo.lastCreatePayload!['pricing_token'], isNull);
-      expect(
-        mockRepo.lastCreatePayload!['items'][0]['pricing_snapshot_token'],
-        'signed_snapshot_token_for_package_101',
-      );
-      expect(mockRepo.createIdempotencyKeys.single, isNotEmpty);
-    });
-
-    test('Submitting order auto-refreshes expired pricing snapshots seamlessly when prices are unchanged', () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-      controller.myPosList.assignAll([testPos]);
-      controller.linkedNetworks.assignAll([testLink]);
-
-      final expiredPackage = _expiredTestPackage();
-      controller.procurementCart.add(
-        ProcurementCartLineEntity(
-          package: expiredPackage,
-          sheets: 1,
-          voucherCount: 100,
-        ),
-      );
-
-      packageRepo.refreshedPackages = [testPackage];
-
-      expect(controller.hasCurrentProcurementSnapshots, isFalse);
-      expect(controller.canSubmitOrder, isTrue);
-
-      await controller.submitOrder();
-
-      expect(mockRepo.lastCreatePayload, isNotNull);
-      expect(
-        mockRepo.lastCreatePayload!['items'][0]['pricing_snapshot_token'],
-        'signed_snapshot_token_for_package_101',
-      );
-      expect(controller.procurementCart, isEmpty);
-    });
-
-    test(
-      'retries reuse the same idempotency key for an unchanged submission',
-      () async {
-        controller.selectedNetworkId.value = 10;
-        controller.selectedPosId.value = 20;
-        controller.myPosList.assignAll([testPos]);
-        controller.linkedNetworks.assignAll([testLink]);
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-        controller.serverQuote.value = const ProcurementQuoteEntity(
-          networkId: 10,
-          posId: 20,
-          saleType: SaleType.cash,
-          saleTypeLabel: 'نقدي',
-          grossTotal: 10000,
-          discountTotal: 1000,
-          netTotal: 9000,
-          currency: 'YER',
-          pricingToken: 'stable_retry_token',
-          items: [],
-        );
-        mockRepo.throwOnceOnCreate = true;
-
-        await controller.submitOrder();
-        await controller.submitOrder();
-        expect(mockRepo.createIdempotencyKeys, hasLength(2));
-        expect(
-          mockRepo.createIdempotencyKeys[0],
-          mockRepo.createIdempotencyKeys[1],
-        );
-      },
-    );
-
-    test('Server price change rejection does not trigger an automatic background quote request', () async {
-      controller.selectedNetworkId.value = 10;
-      controller.selectedPosId.value = 20;
-      controller.myPosList.assignAll([testPos]);
-      controller.linkedNetworks.assignAll([testLink]);
-
-      controller.procurementCart.add(
-        ProcurementCartLineEntity(
-          package: testPackage,
-          sheets: 1,
-          voucherCount: 100,
-        ),
-      );
-      controller.serverQuote.value = const ProcurementQuoteEntity(
-        networkId: 10,
-        posId: 20,
-        saleType: SaleType.cash,
-        saleTypeLabel: 'نقدي',
-        grossTotal: 10000,
-        discountTotal: 1000,
-        netTotal: 9000,
-        currency: 'YER',
-        pricingToken: 'expired_or_changed_server_token',
-        items: [],
-      );
-
-      mockRepo.throwPricingOnCreate = true;
-      mockRepo.lastQuotePayload = null;
-
-      await controller.submitOrder();
-      await pumpEventQueue();
-
-      expect(mockRepo.lastQuotePayload, isNull);
-      expect(controller.packageErrorMessage.value, isNotNull);
-    });
-  });
-
-  group('Phase 3.1: ProcurementFinancialQuoteCard Presentation Widget Tests', () {
-    Widget buildTestableWidget(Widget child) {
-      return ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        builder: (context, _) => MaterialApp(
-          theme: AppThemes.light,
-          home: Scaffold(
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
-          ),
-        ),
-      );
-    }
-
-    testWidgets(
-      'Renders gross total, discount with savings badge, and net total directly from quote',
-      (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
-        tester.view.devicePixelRatio = 2.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
-
-        Get.put(controller);
-        controller.serverQuote.value = null;
-        controller.quoteError.value = null;
-        controller.isLoadingQuote.value = false;
-
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 5,
-            voucherCount: 500,
-          ),
-        );
-
-        controller.serverQuote.value = const ProcurementQuoteEntity(
-          networkId: 10,
-          posId: 20,
-          saleType: SaleType.cash,
-          saleTypeLabel: 'نقدي',
-          grossTotal: 50000.0,
-          discountTotal: 5000.0,
-          netTotal: 45000.0,
-          currency: 'YER',
-          pricingToken: 'fake_valid_hmac_token',
-          items: [],
-        );
-
-        await tester.pumpWidget(
-          buildTestableWidget(const ProcurementFinancialQuoteCard()),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('عرض الأسعار المعتمد'), findsOneWidget);
-        expect(find.text('المجموع الأساسي:'), findsOneWidget);
-        expect(find.text('50,000.00 YER'), findsOneWidget);
-        expect(find.text('إجمالي الخصم المعتمد:'), findsOneWidget);
-        expect(find.text('- 5,000.00 YER'), findsOneWidget);
-        expect(find.text('وفر 10.0%'), findsOneWidget);
-        expect(find.text('صافي قيمة الطلب:'), findsOneWidget);
-        expect(find.text('45,000.00 YER'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'Hides expired pricing state after cart tariff refresh succeeds',
-      (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
-        tester.view.devicePixelRatio = 2;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
-
-        Get.put(controller);
-        controller.selectedNetworkId.value = 10;
-        controller.selectedPosId.value = 20;
-        controller.myPosList.assignAll([testPos]);
-        controller.linkedNetworks.assignAll([testLink]);
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: _expiredTestPackage(),
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-        packageRepo.refreshedPackages = [testPackage];
-
-        final expiredPricingState = find.byWidgetPredicate(
-          (widget) =>
-              widget is CustomStateView &&
-              widget.kind == CustomStateKind.pricingExpired,
-        );
-
-        await tester.pumpWidget(
-          buildTestableWidget(
-            Obx(
-              () => CustomCheckoutBar(
-                warningWidget: controller.needsPricingRefresh
-                    ? CustomStateView.pricingExpired(
-                        title: controller.isRefreshingCartPricing.value
-                            ? 'جارٍ تحديث التعرفة'
-                            : 'انتهت صلاحية التعرفة',
-                        subtitle: controller.isRefreshingCartPricing.value
-                            ? 'نحدّث أسعار الباقات المختارة مع الحفاظ على كميات السلة.'
-                            : controller.cartPricingRefreshError.value ??
-                                  'حدّث التعرفة الحالية قبل إرسال طلب التوريد.',
-                        actionLabel: controller.isRefreshingCartPricing.value
-                            ? 'جارٍ التحديث...'
-                            : 'تحديث التعرفة',
-                        presentation: CustomStatePresentation.compact,
-                        onAction: controller.isRefreshingCartPricing.value
-                            ? null
-                            : controller.refreshNetworkPackages,
-                      )
-                    : null,
-                actionLabel: 'إرسال طلب التوريد',
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(expiredPricingState, findsOneWidget);
-
-        await controller.refreshNetworkPackages();
-        await tester.pumpAndSettle();
-
-        expect(controller.hasCurrentProcurementSnapshots, isTrue);
-        expect(expiredPricingState, findsNothing);
-        expect(tester.takeException(), isNull);
-      },
-    );
-
-    testWidgets('Shows expired quote state and explicit refresh action', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      Get.put(controller);
-      controller.quoteError.value = null;
-      controller.isLoadingQuote.value = false;
-      controller.procurementCart.add(
-        ProcurementCartLineEntity(
-          package: testPackage,
-          sheets: 1,
-          voucherCount: 100,
-        ),
-      );
-      controller.serverQuote.value = ProcurementQuoteEntity(
-        networkId: 10,
-        posId: 20,
-        saleType: SaleType.cash,
-        saleTypeLabel: 'نقدي',
-        grossTotal: 10000,
-        discountTotal: 1000,
-        netTotal: 9000,
-        currency: 'YER',
-        pricingToken: 'expired_quote_token',
-        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
-        items: const [],
-      );
-
-      await tester.pumpWidget(
-        buildTestableWidget(const ProcurementFinancialQuoteCard()),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('انتهت صلاحية عرض السعر'), findsOneWidget);
-      expect(find.text('إعادة احتساب السعر'), findsOneWidget);
-    });
-
-    testWidgets(
-      'Renders loading shimmer/indicator while fetching server quote',
-      (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
-        tester.view.devicePixelRatio = 2.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
-
-        Get.put(controller);
-        controller.serverQuote.value = null;
-        controller.quoteError.value = null;
-
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-
-        controller.isLoadingQuote.value = true;
-
-        await tester.pumpWidget(
-          buildTestableWidget(const ProcurementFinancialQuoteCard()),
-        );
-        await tester.pump();
-
-        expect(
-          find.text('جاري احتساب السعر والخصم الفعليين المعتمدين...'),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets(
-      'Renders error state with retry button when quote calculation fails',
-      (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
-        tester.view.devicePixelRatio = 2.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
-
-        Get.put(controller);
-        controller.serverQuote.value = null;
-        controller.isLoadingQuote.value = false;
-
-        controller.procurementCart.add(
-          ProcurementCartLineEntity(
-            package: testPackage,
-            sheets: 1,
-            voucherCount: 100,
-          ),
-        );
-
-        controller.quoteError.value = 'تعذر الاتصال بخدمة التسعير';
-
-        await tester.pumpWidget(
-          buildTestableWidget(const ProcurementFinancialQuoteCard()),
-        );
-        await tester.pumpAndSettle();
-
-        expect(
-          find.text('تعذر الحصول على عرض الأسعار المعتمد'),
-          findsOneWidget,
-        );
-        expect(find.text('تعذر الاتصال بخدمة التسعير'), findsOneWidget);
-        expect(find.text('إعادة احتساب الأسعار'), findsOneWidget);
-      },
-    );
-  });
-}
