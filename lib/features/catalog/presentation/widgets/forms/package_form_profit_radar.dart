@@ -22,16 +22,15 @@ class PackageFormProfitRadar extends GetView<PackageFormController> {
     final colors = context.colors;
 
     return Obx(() {
-      final base = controller.liveBasePrice.value;
-      final cashP = controller.estimatedCashPrice;
-      final creditP = controller.estimatedCreditPrice;
-      final cashD = controller.estimatedCashDiscountAmount;
-      final count = controller.liveVoucherCount.value > 0
-          ? controller.liveVoucherCount.value
-          : 1;
-      final unitBase = base / count;
-      final unitCash = cashP / count;
-      final unitCashSavings = cashD / count;
+      final preview = controller.livePreviewPackage;
+      final count = preview.packageVoucherCount;
+      final base = preview.totalPackageBasePrice;
+      final cashP = preview.totalCashPrice;
+      final creditP = preview.totalCreditPrice;
+      final cashD = preview.totalCashSavings;
+      final unitBase = preview.packageVoucherPrice;
+      final unitCash = preview.effectiveCashPrice;
+      final unitCashSavings = preview.cashDiscountAmount;
 
       return Container(
         padding: EdgeInsets.all(AppSpacing.cardPadding),
@@ -93,7 +92,7 @@ class PackageFormProfitRadar extends GetView<PackageFormController> {
             SizedBox(height: AppSpacing.xs),
             PackageEstimateRow(
               label:
-                  'سعر الكرت نقداً (خصم ${controller.liveCashDiscount.value.toStringAsFixed(0)}%):',
+                  'سعر الكرت نقداً (خصم ${preview.packageDefaultCashDiscount.toString()}%):',
               value: AmountFormatter.formatValue(unitCash),
               badgeText:
                   'وفر ${AmountFormatter.formatValue(unitCashSavings)} للكرت',
@@ -102,15 +101,15 @@ class PackageFormProfitRadar extends GetView<PackageFormController> {
             SizedBox(height: AppSpacing.xs),
             PackageEstimateRow(
               label:
-                  'سعر الكرت آجلاً (خصم ${controller.liveCreditDiscount.value.toStringAsFixed(0)}%):',
+                  'سعر الكرت آجلاً (خصم ${preview.packageDefaultCreditDiscount.toString()}%):',
               value: AmountFormatter.formatValue(creditP / count),
               badgeText: 'إجمالي ${AmountFormatter.formatValue(creditP)}',
               color: colors.info,
             ),
             SizedBox(height: AppSpacing.md),
             PackageSavingsProgressBar(
-              cashDiscountPercent: controller.liveCashDiscount.value,
-              creditDiscountPercent: controller.liveCreditDiscount.value,
+              cashDiscountPercent: preview.packageDefaultCashDiscount,
+              creditDiscountPercent: preview.packageDefaultCreditDiscount,
             ),
           ],
         ),
