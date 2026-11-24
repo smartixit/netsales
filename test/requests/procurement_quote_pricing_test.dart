@@ -501,4 +501,4 @@ void main() {
       expect(result.pricingToken, 'fake_valid_hmac_token');
     });
   });
-
+}
