@@ -41,17 +41,8 @@ class PosNewProcurementOrderScreen
       final currency = controller.checkoutCurrency;
 
       return CustomAppScaffold(
-        appBar: AppBar(
-          title: Text(
+      appBarTitle: 
             title,
-            style: AppTypography.titleMedium.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          elevation: 0,
-        ),
         bottomNavigationBar: CustomCheckoutBar(
           warningWidget: controller.needsPricingRefresh
               ? CustomStateView.pricingExpired(
@@ -119,7 +110,7 @@ class PosNewProcurementOrderScreen
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
-                    AppSpacing.md,
+                    AppSpacing.appBarHeight + AppSpacing.md,
                     horizontalPadding,
                     AppSpacing.xl,
                   ),
@@ -150,7 +141,7 @@ class PosNewProcurementOrderScreen
                           title: 'طريقة التسعير',
                           subtitle:
                               'تتغير تعرفة العرض حسب طريقة الدفع المختارة.',
-                              icon: Icons.payments_rounded,
+                          icon: Icons.payments_rounded,
                         ),
                         AppSpacing.vSm,
                         const ProcurementSaleTypeSelector(),

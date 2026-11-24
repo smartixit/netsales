@@ -4,8 +4,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/form_validators.dart';
 import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
@@ -30,7 +28,6 @@ class NetworkDirectInvoiceScreen
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
 
     return Obx(() {
       final gross = controller.checkoutGrossAmount;
@@ -42,17 +39,9 @@ class NetworkDirectInvoiceScreen
       final count = controller.checkoutTotalVouchers;
 
       return CustomAppScaffold(
-        appBar: AppBar(
-          title: Text(
-            'إصدار فاتورة مبيعات مباشرة',
-            style: AppTypography.titleMedium.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          elevation: 0,
-        ),
+        centerTitle: true,
+        appBarTitle: 'إصدار فاتورة مبيعات مباشرة',
+        showBackButton: true,
         bottomNavigationBar: CustomCheckoutBar(
           metrics: [
             CheckoutMetricData(
@@ -116,7 +105,7 @@ class NetworkDirectInvoiceScreen
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
-                    AppSpacing.md,
+                    AppSpacing.appBarHeight + AppSpacing.md,
                     horizontalPadding,
                     AppSpacing.xl,
                   ),

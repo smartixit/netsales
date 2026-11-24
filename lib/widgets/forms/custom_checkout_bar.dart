@@ -70,9 +70,7 @@ class CustomCheckoutBar extends StatelessWidget {
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppRadius.lg),
           ),
-          border: Border(
-            top: BorderSide(color: colors.outlineVariant.withValues(alpha: .4)),
-          ),
+          border: Border(top: BorderSide(color: colors.outlineVariant)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: .10),

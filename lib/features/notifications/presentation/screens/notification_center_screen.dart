@@ -33,7 +33,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      appBar: AppBar(
+      appBarTitleWidget: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

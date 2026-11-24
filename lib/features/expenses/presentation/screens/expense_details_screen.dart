@@ -37,10 +37,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
       // 1. حالة التحميل الهيكلي (Skeleton State)
       if (controller.isLoading.value && controller.expense.value == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل المصروف'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل المصروف',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: const CustomStateView.loading(
@@ -60,10 +57,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
       // 2. حالة عدم العثور على المصروف
       if (expense == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل المصروف'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل المصروف',
           body: Center(
             child: CustomEmptyState(
               icon: Icons.receipt_long_outlined,

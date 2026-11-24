@@ -41,10 +41,7 @@ class ProcurementRequestDetailsScreen
       // 1. حالة التحميل الهيكلي (Skeleton State)
       if (controller.isLoading.value && controller.request.value == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل طلب التوريد'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل طلب التوريد',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: const CustomStateView.loading(
@@ -64,10 +61,7 @@ class ProcurementRequestDetailsScreen
       // 2. حالة عدم العثور على الطلب
       if (request == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل طلب التوريد'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل طلب التوريد',
           body: Center(
             child: CustomEmptyState(
               icon: Icons.receipt_long_outlined,
@@ -383,8 +377,11 @@ class ProcurementRequestDetailsScreen
                         hasDiscount: request.items[i].hasDiscount,
                         itemDiscount: request.items[i].itemDiscount,
                         isCustomDiscount: request.items[i].isCustomDiscount,
-                        balanceDisplay:
-                            request.items[i].voucherPackage?.balanceParts.displayText,
+                        balanceDisplay: request
+                            .items[i]
+                            .voucherPackage
+                            ?.balanceParts
+                            .displayText,
                         validityDisplay:
                             request.items[i].voucherPackage?.validityDisplay,
                         uptimeDisplay:

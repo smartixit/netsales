@@ -27,8 +27,8 @@ class CustomAppScaffold extends StatelessWidget {
     this.appBarSubtitle,
     this.appBarTitleWidget,
     this.appBarBg,
-    this.centerTitle,
-    this.showBackButton = false,
+    this.centerTitle = true,
+    this.showBackButton = true,
     this.onBackPressed,
     this.leading,
     this.actions,
@@ -36,7 +36,7 @@ class CustomAppScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.backgroundColor,
-    this.useSurfaceMesh = false,
+    this.useSurfaceMesh = true,
     this.backgroundGradient,
     this.extendBody = false,
     this.extendBodyBehindAppBar,
@@ -149,7 +149,7 @@ class CustomAppScaffold extends StatelessWidget {
     Widget? leadingWidget = leading;
     if (leadingWidget == null && (showBackButton || onBackPressed != null)) {
       leadingWidget = Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.sm),
         child: CustomButton.icon(
           icon: Icons.arrow_back_ios_new_rounded,
           tooltip: 'رجوع',

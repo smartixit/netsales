@@ -39,13 +39,11 @@ class ExpensesScreen extends GetView<NetworkExpensesController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Obx(
-                () => CustomPageHeroCard(
-                  title: controller.pageTitle,
-                  subtitle: controller.pageSubtitle,
-                  icon: controller.pageIcon,
-                  action: controller.headerAction,
-                ),
+              CustomPageHeroCard(
+                title: controller.pageTitle,
+                subtitle: controller.pageSubtitle,
+                icon: controller.pageIcon,
+                action: controller.headerAction,
               ),
 
               Obx(

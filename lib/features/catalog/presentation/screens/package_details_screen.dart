@@ -80,6 +80,7 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
       }
 
       return CustomAppScaffold(
+        showBackButton: true,
         appBarTitle: package.packageName,
         bottomNavigationBar: CustomDocumentActionBar(
           child: Align(

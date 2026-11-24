@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
-import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_expense_form_controller.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_form_existing_attachments.dart';
@@ -29,26 +27,16 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
 
     return Obx(() {
       final total = controller.totalAmount.value;
       final itemsCount = controller.statementControllers.length;
 
       return CustomAppScaffold(
-        appBar: AppBar(
-          title: Text(
-            controller.isEditMode
-                ? 'تعديل المصروف التشغيلي'
-                : 'تسجيل مصروف تشغيلي جديد',
-            style: AppTypography.titleMedium.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          elevation: 0,
-        ),
+        appBarTitle: controller.isEditMode
+            ? 'تعديل المصروف التشغيلي'
+            : 'تسجيل مصروف تشغيلي جديد',
+
         bottomNavigationBar: CustomCheckoutBar(
           metrics: [
             CheckoutMetricData(
@@ -85,7 +73,7 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
-                    AppSpacing.md,
+                    AppSpacing.appBarHeight + AppSpacing.md,
                     horizontalPadding,
                     AppSpacing.xl,
                   ),

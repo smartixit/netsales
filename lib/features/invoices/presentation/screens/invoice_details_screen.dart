@@ -38,10 +38,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       // 1. حالة التحميل الهيكلي (Skeleton State)
       if (controller.isLoading.value && controller.invoice.value == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل الفاتورة'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل الفاتورة',
           body: Padding(
             padding: EdgeInsets.all(AppSpacing.cardPadding),
             child: const CustomStateView.loading(
@@ -61,10 +58,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       // 2. حالة عدم العثور على الفاتورة
       if (invoice == null) {
         return CustomAppScaffold(
-          appBar: AppBar(
-            title: const Text('تفاصيل الفاتورة'),
-            centerTitle: true,
-          ),
+          appBarTitle: 'تفاصيل الفاتورة',
           body: Center(
             child: CustomEmptyState(
               icon: Icons.receipt_long_outlined,
@@ -284,8 +278,11 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
                         voucherPrice: invoice.items[i].voucherPrice,
                         hasDiscount: invoice.items[i].hasDiscount,
                         itemDiscount: invoice.items[i].itemDiscount,
-                        balanceDisplay:
-                            invoice.items[i].voucherPackage?.balanceParts.displayText,
+                        balanceDisplay: invoice
+                            .items[i]
+                            .voucherPackage
+                            ?.balanceParts
+                            .displayText,
                         validityDisplay:
                             invoice.items[i].voucherPackage?.validityDisplay,
                         uptimeDisplay:
