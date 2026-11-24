@@ -10,7 +10,6 @@ import 'package:netsales/features/catalog/domain/entities/package_pos_discount_e
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/enums/package_discount_activation_status.dart';
 
 class PackagePosDiscountCard extends StatelessWidget {
   const PackagePosDiscountCard({super.key,required this.agreement});
@@ -25,9 +24,7 @@ class PackagePosDiscountCard extends StatelessWidget {
     );
     final activationPresentation =
         EnumPresentationRegistry.resolvePackageDiscountActivationStatus(
-      agreement.isEnabled
-          ? PackageDiscountActivationStatus.enabled
-          : PackageDiscountActivationStatus.disabled,
+      agreement.activationStatus,
     );
     return Container(
       padding:EdgeInsets.all(AppSpacing.md),
