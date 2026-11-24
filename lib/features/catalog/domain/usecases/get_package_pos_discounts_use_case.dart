@@ -6,8 +6,9 @@ class GetPackagePosDiscountsUseCase {
   const GetPackagePosDiscountsUseCase(this.repository);
   final PackagePosDiscountRepository repository;
   Future<PaginatedList<PackagePosDiscountEntity>> call({
-    required int networkId, required int packageId, String? search, String? cursor,
+    required int networkId, required int packageId, String? search, String? cursor, String? status, String? validityState, String? status, String? validityState,
   }) => repository.getForPackage(
     networkId: networkId, packageId: packageId, search: search, cursor: cursor,
+    status: status, validityState: validityState,
   );
 }
