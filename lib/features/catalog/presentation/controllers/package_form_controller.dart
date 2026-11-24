@@ -130,7 +130,7 @@ class PackageFormController extends GetxController {
 
     void updateValidity() {
       final raw = double.tryParse(validityController.text.trim());
-      liveValidityInMinutes.value = raw != null && raw > 0
+      liveValidityInMinutes.value = raw != null && raw >= 0
           ? PackageSpecFormatter.toCanonicalMinutes(
               raw,
               selectedValidityUnit.value,
