@@ -731,6 +731,9 @@ class _ShowcaseRawPricingPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cashRate = pricing.cashDiscountRate;
+    final creditRate = pricing.creditDiscountRate;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -758,7 +761,7 @@ class _ShowcaseRawPricingPreview extends StatelessWidget {
           Expanded(
             child: _RawPricingValue(
               label: 'خصم نقدي',
-              value: '${_formatRawRate(pricing.cashDiscountRate)}%',
+              value: '${cashRate == cashRate.roundToDouble() ? cashRate.toInt() : cashRate}%',
             ),
           ),
           Container(
@@ -770,7 +773,7 @@ class _ShowcaseRawPricingPreview extends StatelessWidget {
           Expanded(
             child: _RawPricingValue(
               label: 'خصم آجل',
-              value: '${_formatRawRate(pricing.creditDiscountRate)}%',
+              value: '${creditRate == creditRate.roundToDouble() ? creditRate.toInt() : creditRate}%',
             ),
           ),
         ],
@@ -778,8 +781,6 @@ class _ShowcaseRawPricingPreview extends StatelessWidget {
     );
   }
 
-  String _formatRawRate(double value) =>
-      value == value.roundToDouble() ? value.toInt().toString() : value.toString();
 }
 
 /// خلية قيمة خام داخل معاينة التسعير.
