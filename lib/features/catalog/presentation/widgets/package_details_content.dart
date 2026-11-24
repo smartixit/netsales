@@ -11,7 +11,9 @@ import 'package:netsales/features/catalog/presentation/controllers/package_detai
 import 'package:netsales/features/catalog/presentation/widgets/package_pos_discount_card.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_voucher_card_showcase.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
 import 'package:netsales/widgets/containers/custom_section_container.dart';
+import 'package:netsales/widgets/document_details/custom_document_metrics_strip.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
@@ -122,30 +124,34 @@ class PackageDetailsContent extends StatelessWidget {
     final items = controller.posDiscounts;
     int count(PackageDiscountValidityState state) =>
         items.where((item) => item.validityState == state).length;
-    final metrics = <(String, int, IconData, Color)>[
+    final metrics = <(String, int, IconData, Color, bool)>[
       (
         'سارية الآن',
         count(PackageDiscountValidityState.effective),
         Icons.check_circle_outline_rounded,
         colors.success,
+        true,
       ),
       (
         'مجدولة',
         count(PackageDiscountValidityState.scheduled),
         Icons.schedule_rounded,
         colors.warning,
+        false,
       ),
       (
         'منتهية',
         count(PackageDiscountValidityState.expired),
         Icons.event_busy_outlined,
         colors.onSurfaceVariant,
+        false,
       ),
       (
         'معطّلة',
         count(PackageDiscountValidityState.disabled),
         Icons.pause_circle_outline_rounded,
         colors.error,
+        false,
       ),
     ];
     return CustomSectionContainer(
@@ -171,45 +177,59 @@ class PackageDetailsContent extends StatelessWidget {
                   for (final metric in metrics)
                     SizedBox(
                       width: width,
-                      child: Container(
-                        padding: EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceContainerHighest.withValues(
-                            alpha: .35,
+                      child: CustomDocumentMetricsStrip(
+                        metrics: [
+                          CustomMetricCardData(
+                            isPrimary: metric.$5,
+                            label: metric.$1,
+                            value: metric.$2.toString(),
+                            icon: metric.$3,
+                            accentColor: metric.$4,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: colors.outlineVariant.withValues(alpha: .4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(metric.$3, color: metric.$4, size: 21.r),
-                            AppSpacing.hSm,
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    metric.$1,
-                                    style: AppTypography.labelSmall.copyWith(
-                                      color: colors.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  Text(
-                                    metric.$2.toString(),
-                                    style: AppTypography.titleLarge.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colors.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
+                  // SizedBox(
+                  //   width: width,
+                  //   child: Container(
+                  //     padding: EdgeInsets.all(AppSpacing.md),
+                  //     decoration: BoxDecoration(
+                  //       color: colors.surfaceContainerHighest.withValues(
+                  //         alpha: .35,
+                  //       ),
+                  //       borderRadius: BorderRadius.circular(12),
+                  //       border: Border.all(
+                  //         color: colors.outlineVariant.withValues(alpha: .4),
+                  //       ),
+                  //     ),
+                  //     child: Row(
+                  //       children: [
+                  //         Icon(metric.$3, color: metric.$4, size: 21.r),
+                  //         AppSpacing.hSm,
+                  //         Expanded(
+                  //           child: Column(
+                  //             crossAxisAlignment: CrossAxisAlignment.start,
+                  //             children: [
+                  //               Text(
+                  //                 metric.$1,
+                  //                 style: AppTypography.labelSmall.copyWith(
+                  //                   color: colors.onSurfaceVariant,
+                  //                 ),
+                  //               ),
+                  //               Text(
+                  //                 metric.$2.toString(),
+                  //                 style: AppTypography.titleLarge.copyWith(
+                  //                   fontWeight: FontWeight.bold,
+                  //                   color: colors.onSurface,
+                  //                 ),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               );
             },

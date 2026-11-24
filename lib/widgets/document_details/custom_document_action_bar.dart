@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 
@@ -30,25 +31,23 @@ class CustomDocumentActionBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        padding:
-            padding ??
-            EdgeInsets.symmetric(
-              horizontal: AppSpacing.cardPadding,
-              vertical: AppSpacing.sm,
-            ),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.cardPadding,
+          AppSpacing.sm,
+          AppSpacing.cardPadding,
+          AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: colors.surface,
-          border: Border(
-            top: BorderSide(
-              color: colors.outlineVariant.withValues(alpha: 0.35),
-              width: 1.0,
-            ),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.lg),
           ),
+          border: Border(top: BorderSide(color: colors.outlineVariant)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
+              color: Colors.black.withValues(alpha: .10),
+              blurRadius: 22,
+              offset: const Offset(0, -7),
             ),
           ],
         ),

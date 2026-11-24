@@ -24,12 +24,10 @@ class PackageVoucherCardShowcase extends StatelessWidget {
     super.key,
     required this.package,
     this.showPricingSummary = true,
-    this.showEstimatedPricingLabel = false,
   });
 
   final PackageEntity package;
   final bool showPricingSummary;
-  final bool showEstimatedPricingLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -142,22 +140,19 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 if (showPricingSummary) ...[
                   AppSpacing.vMd,
-                  if (showEstimatedPricingLabel) ...[
-                    const _EstimatedPricingNotice(),
-                    AppSpacing.vXs,
-                  ],
+
                   _ShowcaseRoyalPricingBar(
                     accentColor: accentColor,
                     cashDiscount: package.packageDefaultCashDiscount,
                     cashVoucherPrice: package.effectiveCashPrice,
                     cashSavings: package.cashDiscountAmount,
                     cashTotalPrice: package.totalCashPrice,
-              cashTotalSavings: package.totalCashSavings,
+                    cashTotalSavings: package.totalCashSavings,
                     creditDiscount: package.packageDefaultCreditDiscount,
                     creditVoucherPrice: package.effectiveCreditPrice,
                     creditSavings: package.creditDiscountAmount,
                     creditTotalPrice: package.totalCreditPrice,
-              creditTotalSavings: package.totalCreditSavings,
+                    creditTotalSavings: package.totalCreditSavings,
                   ),
                 ],
               ],
@@ -705,53 +700,29 @@ class _RoyalPriceTrack extends StatelessWidget {
         AppSpacing.vXxs,
 
         // ── السطر 4: إجمالي الحزمة ──
-        Text(
-          'إجمالي الحزمة: ${AmountFormatter.formatValue(totalPrice)} ر.ي',
-          style: TextStyle(
-            fontSize: 9.5.sp,
-            fontWeight: FontWeight.w700,
-            color: Colors.white.withValues(alpha: 0.85),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        AppSpacing.vXxs,
-        Text(
-          totalSavings > 0
-              ? 'إجمالي الوفورات: ${AmountFormatter.formatValue(totalSavings)} ر.ي'
-              : 'لا توجد وفورات لهذه الحزمة',
-          style: TextStyle(
-            fontSize: 9.sp,
-            fontWeight: FontWeight.w700,
-            color: totalSavings > 0 ? themeColor : Colors.white60,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-}
+        Wrap(
+          children: [
+            Text(
+              'إجمالي الحزمة:\n${AmountFormatter.formatValue(totalPrice)} ر.ي',
+              style: TextStyle(
+                fontSize: 9.5.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
+            ),
 
-
-/// تنبيه يميز الأسعار المحسوبة محلياً عن القيم المعتمدة من الخادم.
-class _EstimatedPricingNotice extends StatelessWidget {
-  const _EstimatedPricingNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Icon(Icons.auto_awesome_rounded, size: 11.sp, color: Colors.white70),
-        AppSpacing.hXxs,
-        Text(
-          'معاينة تقديرية — الأسعار المعتمدة بعد الحفظ من الخادم',
-          style: TextStyle(
-            fontSize: 9.sp,
-            color: Colors.white70,
-            fontWeight: FontWeight.w600,
-          ),
+            AppSpacing.vXxs,
+            Text(
+              totalSavings > 0
+                  ? 'إجمالي التوفير:\n${AmountFormatter.formatValue(totalSavings)} ر.ي'
+                  : 'لا يوجد توفير لهذه الحزمة',
+              style: TextStyle(
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w700,
+                color: totalSavings > 0 ? themeColor : Colors.white60,
+              ),
+            ),
+          ],
         ),
       ],
     );

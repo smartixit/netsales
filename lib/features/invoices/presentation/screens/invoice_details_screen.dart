@@ -84,7 +84,6 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       // 3. عرض صفحة التفاصيل المتكاملة
       return CustomAppScaffold(
         appBarTitle: displayReference,
-        showBackButton: true,
         bottomNavigationBar: CustomDocumentActionBar(
           child: Align(
             alignment: Alignment.center,
@@ -123,7 +122,7 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             AppSpacing.cardPadding,
-            AppSpacing.cardPadding,
+            AppSpacing.appBarHeight + AppSpacing.md,
             AppSpacing.cardPadding,
             AppSpacing.xl,
           ),

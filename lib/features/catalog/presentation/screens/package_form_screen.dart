@@ -55,13 +55,15 @@ class PackageFormScreen extends GetView<PackageFormController> {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsetsDirectional.fromSTEB(
                 AppSpacing.cardPadding,
-                AppSpacing.cardPadding,
+                AppSpacing.appBarHeight + AppSpacing.md,
                 AppSpacing.cardPadding,
                 AppSpacing.xl,
               ),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isWideLayout ? 1440 : 760),
+                  constraints: BoxConstraints(
+                    maxWidth: isWideLayout ? 1440 : 760,
+                  ),
                   child: isWideLayout
                       ? Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,6 +190,7 @@ class _CompactPreviewDisclosure extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18.r),
@@ -196,7 +199,7 @@ class _CompactPreviewDisclosure extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          initiallyExpanded: false,
+          initiallyExpanded: true,
           tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
           childrenPadding: EdgeInsetsDirectional.fromSTEB(
             AppSpacing.sm,

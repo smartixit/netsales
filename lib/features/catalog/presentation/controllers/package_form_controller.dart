@@ -168,7 +168,8 @@ class PackageFormController extends GetxController {
         : 0.0;
     final rawCashRate = liveCashDiscountRate.value;
     final rawCreditRate = liveCreditDiscountRate.value;
-    final cashRate = rawCashRate.isFinite && rawCashRate >= 0 && rawCashRate <= 100
+    final cashRate =
+        rawCashRate.isFinite && rawCashRate >= 0 && rawCashRate <= 100
         ? roundMoney(rawCashRate)
         : 0.0;
     final creditRate =
@@ -195,7 +196,9 @@ class PackageFormController extends GetxController {
       cashDiscountAmount: cashSavings,
       creditDiscountAmount: creditSavings,
       effectiveCashPrice: roundMoney(basePrice - (basePrice * cashRate / 100)),
-      effectiveCreditPrice: roundMoney(basePrice - (basePrice * creditRate / 100)),
+      effectiveCreditPrice: roundMoney(
+        basePrice - (basePrice * creditRate / 100),
+      ),
       status: status.value,
       networkName: authorizedNetworks
           .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
@@ -224,6 +227,7 @@ class PackageFormController extends GetxController {
   /// جلب الشبكات المصرح للمستخدم إدارتها
   Future<void> _loadAuthorizedNetworks() async {
     try {
+      isEditing.value = true;
       isLoadingNetworks.value = true;
       networkLoadError.value = null;
       final networks = await getMyNetworksUseCase!();

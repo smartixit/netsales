@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_details_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/dialogs/package_action_dialogs.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_details_content.dart';
@@ -27,6 +28,8 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Obx(() {
       // 1. حالة التحميل الهيكلي الأنيق
       if (controller.isLoading.value && controller.package.value == null) {
@@ -85,25 +88,7 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
               constraints: BoxConstraints(maxWidth: 760.w),
               child: Row(
                 children: [
-                  Expanded(
-                    child: CustomButton.secondary(
-                      text: package.isActive ? 'تعطيل الباقة' : 'تفعيل الباقة',
-                      icon: package.isActive
-                          ? Icons.pause_circle_outline_rounded
-                          : Icons.check_circle_outline_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.rounded,
-                      loading: controller.isTogglingStatus.value,
-                      onPressed: () =>
-                          PackageActionDialogs.showToggleStatusConfirmation(
-                            context,
-                            package: package,
-                            onConfirm: controller.toggleStatus,
-                          ),
-                    ),
-                  ),
                   if (controller.canEditPackage) ...[
-                    SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: CustomButton.primary(
                         text: 'تعديل الباقة',
@@ -113,13 +98,42 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
                         onPressed: controller.navigateToEdit,
                       ),
                     ),
+                    SizedBox(width: AppSpacing.sm),
                   ],
+                  CustomButton.icon(
+                    tooltip: package.isActive ? 'تعطيل الباقة' : 'تفعيل الباقة',
+                    icon: package.isActive
+                        ? Icons.pause_circle_outline_rounded
+                        : Icons.check_circle_outline_rounded,
+                    size: AppButtonSize.medium,
+                    shape: AppButtonShape.rounded,
+                    backgroundColor: package.isActive
+                        ? colors.warning.withValues(alpha: .08)
+                        : colors.success.withValues(alpha: .08),
+                    foregroundColor: package.isActive
+                        ? colors.warning
+                        : colors.success,
+                    borderColor: package.isActive
+                        ? colors.warning.withValues(alpha: .25)
+                        : colors.success.withValues(alpha: .25),
+                    loading: controller.isTogglingStatus.value,
+                    onPressed: () =>
+                        PackageActionDialogs.showToggleStatusConfirmation(
+                          context,
+                          package: package,
+                          onConfirm: controller.toggleStatus,
+                        ),
+                  ),
                   if (controller.canDeletePackage) ...[
                     SizedBox(width: AppSpacing.sm),
                     CustomButton.icon(
                       icon: Icons.delete_outline_rounded,
                       tooltip: 'حذف الباقة',
                       shape: AppButtonShape.rounded,
+                      size: AppButtonSize.medium,
+                      backgroundColor: colors.error.withValues(alpha: .08),
+                      foregroundColor: colors.error,
+                      borderColor: colors.error.withValues(alpha: .25),
                       onPressed: () =>
                           PackageActionDialogs.showDeleteConfirmation(
                             context,

@@ -151,8 +151,9 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             AppSpacing.cardPadding,
+            AppSpacing.appBarHeight + AppSpacing.md,
             AppSpacing.cardPadding,
-            AppSpacing.cardPadding,
+
             AppSpacing.xl,
           ),
           child: Align(

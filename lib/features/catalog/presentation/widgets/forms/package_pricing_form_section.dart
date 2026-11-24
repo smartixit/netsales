@@ -80,42 +80,6 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
 
         AppSpacing.vMd,
 
-        // المعاينة تحسب تقديرات فورية محلياً؛ القيم المعتمدة لا تصدر إلا من الخادم.
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.verified_user_outlined,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  'هذه قيم التسعير الافتراضي التي أدخلتها. تُعتمد الأسعار النهائية '
-                  'وقيم الخصم والوفورات من الخادم بعد الحفظ.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        AppSpacing.vMd,
-
         // مفتاح تفعيل الباقة
         Obx(
           () => CustomSwitchListTile(
