@@ -5,6 +5,10 @@ class UpdatePackageInput {
   final int? packageBalance;
   final int? packageUptime;
   final int? packageValidity;
+
+  /// يميز طلب مسح المدة من عدم إرسالها في تحديث جزئي.
+  final bool clearPackageUptime;
+  final bool clearPackageValidity;
   final int? packageVoucherCount;
   final double? packageVoucherPrice;
   final double? packageDefaultCashDiscount;
@@ -17,6 +21,8 @@ class UpdatePackageInput {
     this.packageBalance,
     this.packageUptime,
     this.packageValidity,
+    this.clearPackageUptime = false,
+    this.clearPackageValidity = false,
     this.packageVoucherCount,
     this.packageVoucherPrice,
     this.packageDefaultCashDiscount,

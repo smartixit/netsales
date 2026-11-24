@@ -176,8 +176,9 @@ class PackageCatalogRepositoryImpl implements PackageCatalogRepository {
       if (input.packageName != null) 'package_name': input.packageName,
       if (input.packageColor != null) 'package_color': input.packageColor,
       if (input.packageBalance != null) 'package_balance': input.packageBalance,
-      if (input.packageUptime != null) 'package_uptime': input.packageUptime,
-      if (input.packageValidity != null)
+      if (input.packageUptime != null || input.clearPackageUptime)
+        'package_uptime': input.packageUptime,
+      if (input.packageValidity != null || input.clearPackageValidity)
         'package_validity': input.packageValidity,
       if (input.packageVoucherCount != null)
         'package_voucher_count': input.packageVoucherCount,

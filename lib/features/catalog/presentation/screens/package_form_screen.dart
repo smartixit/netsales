@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_form_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_form_preview_hero.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_general_info_section.dart';
@@ -11,12 +13,9 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
-/// شاشة إنشاء وتعديل باقة كروت الإنترنت (PackageFormScreen)
-///
-/// تجسد استوديو تصميم ومحاكاة كروت الإنترنت التفاعلي (Interactive Voucher Studio):
-/// - هيرو تفاعلي حي يعكس كرت الشحن الرقمي ثلاثي الأبعاد [PackageFormPreviewHero].
-/// - تفويض كامل لحقول الإدخال إلى ودجات الأقسام المنفصلة في `widgets/forms/`.
-/// - شريط أزرار ثابت للحفظ والإلغاء مع تغذية لمسية.
+/// مساحة عمل إنشاء وتعديل الباقة.
+/// تحافظ على تسلسل الإدخال، وتعرض المعاينة نفسها على الشاشات الواسعة
+/// وتضعها داخل مساحة قابلة للطي على الهاتف لتبقى الحقول هي الأولوية.
 class PackageFormScreen extends GetView<PackageFormController> {
   const PackageFormScreen({super.key});
 
@@ -27,39 +26,67 @@ class PackageFormScreen extends GetView<PackageFormController> {
       final isSaving = controller.isSaving.value;
 
       return CustomAppScaffold(
-        appBarTitle: isEditing
-            ? 'تعديل باقة الكروت'
-            : 'استوديو إنشاء باقة كروت',
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(AppSpacing.cardPadding),
-          child: Form(
-            key: controller.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. هيرو المعاينة الحية الفورية للكرت الرقمي
-                const PackageFormPreviewHero(),
-                AppSpacing.vLg,
+        appBarTitle: isEditing ? 'تعديل باقة الكروت' : 'إنشاء باقة كروت',
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWideLayout = constraints.maxWidth >= 920;
+            final content = Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _PackageFormIntroduction(isEditing: isEditing),
+                  SizedBox(height: AppSpacing.lg),
+                  if (!isWideLayout) ...[
+                    const _CompactPreviewDisclosure(),
+                    SizedBox(height: AppSpacing.lg),
+                  ],
+                  const PackageGeneralInfoSection(),
+                  SizedBox(height: AppSpacing.xl),
+                  const PackageSpecsFormSection(),
+                  SizedBox(height: AppSpacing.xl),
+                  const PackagePricingFormSection(),
+                  SizedBox(height: AppSpacing.xl),
+                ],
+              ),
+            );
 
-                // 2. كبسولة الهوية البصرية واسم الباقة
-                const PackageGeneralInfoSection(),
-                AppSpacing.vLg,
-
-                // 3. كبسولة المواصفات الفنية وحجم الحزمة
-                const PackageSpecsFormSection(),
-                AppSpacing.vLg,
-
-                // 4. كبسولة التسعير ورادار الأرباح وهوامش الجملة
-                const PackagePricingFormSection(),
-                AppSpacing.vXl,
-              ],
-            ),
-          ),
+            return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.cardPadding,
+                AppSpacing.cardPadding,
+                AppSpacing.cardPadding,
+                AppSpacing.xl,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isWideLayout ? 1440 : 760),
+                  child: isWideLayout
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: content),
+                            SizedBox(width: AppSpacing.xl),
+                            Expanded(
+                              flex: 5,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: AppSpacing.xl),
+                                child: const PackageFormPreviewHero(),
+                              ),
+                            ),
+                          ],
+                        )
+                      : content,
+                ),
+              ),
+            );
+          },
         ),
         bottomNavigationBar: CustomDocumentActionBar(
           child: Align(
             alignment: Alignment.center,
-            heightFactor: 1.0,
+            heightFactor: 1,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 760.w),
               child: Row(
@@ -77,10 +104,8 @@ class PackageFormScreen extends GetView<PackageFormController> {
                   Expanded(
                     flex: 2,
                     child: CustomButton.primary(
-                      text: isEditing ? 'حفظ التعديلات' : 'تثبيت الباقة',
-                      icon: isEditing
-                          ? Icons.check_rounded
-                          : Icons.add_task_rounded,
+                      text: isEditing ? 'حفظ التعديلات' : 'إنشاء الباقة',
+                      icon: isEditing ? Icons.check_rounded : Icons.add_rounded,
                       shape: AppButtonShape.rounded,
                       size: AppButtonSize.medium,
                       loading: isSaving,
@@ -94,5 +119,108 @@ class PackageFormScreen extends GetView<PackageFormController> {
         ),
       );
     });
+  }
+}
+
+class _PackageFormIntroduction extends StatelessWidget {
+  const _PackageFormIntroduction({required this.isEditing});
+
+  final bool isEditing;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46.r,
+            height: 46.r,
+            decoration: BoxDecoration(
+              color: colors.primary.withValues(alpha: .10),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Icon(
+              isEditing ? Icons.edit_note_rounded : Icons.add_card_rounded,
+              color: colors.primary,
+              size: 25.r,
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isEditing ? 'تحديث إعدادات الباقة' : 'إعداد باقة جديدة',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xxs),
+                Text(
+                  'أدخل بيانات الباقة ومواصفاتها ثم راجع إعدادات التسعير قبل الحفظ.',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactPreviewDisclosure extends StatelessWidget {
+  const _CompactPreviewDisclosure();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .6)),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: false,
+          tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          childrenPadding: EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.sm,
+            0,
+            AppSpacing.sm,
+            AppSpacing.md,
+          ),
+          leading: Icon(Icons.visibility_outlined, color: colors.primary),
+          title: Text(
+            'معاينة شكل الباقة',
+            style: AppTypography.titleSmall.copyWith(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          subtitle: Text(
+            'افتح المعاينة عند الحاجة دون مقاطعة إدخال البيانات',
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          children: const [PackageFormPreviewHero()],
+        ),
+      ),
+    );
   }
 }

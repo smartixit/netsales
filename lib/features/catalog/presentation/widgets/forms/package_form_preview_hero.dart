@@ -51,7 +51,11 @@ class PackageFormPreviewHero extends GetView<PackageFormController> {
         SizedBox(height: AppSpacing.sm),
         Obx(() {
           final preview = controller.livePreviewPackage;
-          return PackageVoucherCardShowcase(package: preview);
+          return PackageVoucherCardShowcase(
+            package: preview,
+            showPricingSummary: true,
+            showEstimatedPricingLabel: true,
+          );
         }),
       ],
     );
