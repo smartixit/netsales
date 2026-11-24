@@ -372,7 +372,7 @@ class PosNewProcurementOrderController extends GetxController {
       time: const Duration(milliseconds: 350),
     );
 
-    // POS procurement estimates are derived locally from the current signed catalogue snapshot.
+    // POS checkout estimates use cached tariff values; snapshot expiry only gates submission.
     ever(selectedSaleType, (_) => _refreshProcurementPresentation());
 
     _initializeForm();
