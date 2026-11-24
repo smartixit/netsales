@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/package_discount_validity_state.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -58,6 +59,35 @@ class PackageDetailsContent extends StatelessWidget {
     );
   }
 
+  Widget _statistics() => Obx(() {
+    final colors = Get.context!.colors;
+    final items = controller.posDiscounts;
+    int count(PackageDiscountValidityState state) => items.where((item) => item.validityState == state).length;
+    final metrics = <(String, int, IconData, Color)>[
+      ('سارية الآن', count(PackageDiscountValidityState.effective), Icons.check_circle_outline_rounded, colors.success),
+      ('مجدولة', count(PackageDiscountValidityState.scheduled), Icons.schedule_rounded, colors.warning),
+      ('منتهية', count(PackageDiscountValidityState.expired), Icons.event_busy_outlined, colors.onSurfaceVariant),
+      ('معطّلة', count(PackageDiscountValidityState.disabled), Icons.pause_circle_outline_rounded, colors.error),
+    ];
+    return CustomSectionContainer(icon: Icons.query_stats_rounded, title: 'ملخص حالات الاتفاقيات', child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text('الأرقام التالية تخص الاتفاقيات المحمّلة حالياً فقط، ولا تمثل إجمالي سجلات الخادم.', style: AppTypography.bodySmall.copyWith(color: colors.onSurfaceVariant)),
+      AppSpacing.vMd,
+      LayoutBuilder(builder: (context, constraints) {
+        final width = (constraints.maxWidth - AppSpacing.sm) / 2;
+        return Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
+          for (final metric in metrics) SizedBox(width: width, child: Container(padding: EdgeInsets.all(AppSpacing.md), decoration: BoxDecoration(color: colors.surfaceContainerHighest.withValues(alpha: .35), borderRadius: BorderRadius.circular(12), border: Border.all(color: colors.outlineVariant.withValues(alpha: .4))), child: Row(children: [
+            Icon(metric.$3, color: metric.$4, size: 21.r), AppSpacing.hSm,
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(metric.$1, style: AppTypography.labelSmall.copyWith(color: colors.onSurfaceVariant)),
+              Text(metric.$2.toString(), style: AppTypography.titleLarge.copyWith(fontWeight: FontWeight.bold, color: colors.onSurface)),
+            ])),
+          ]))),
+        ]);
+      }),
+      AppSpacing.vSm,
+      Text('السجلات المعروضة: ' + items.length.toString(), style: AppTypography.labelMedium.copyWith(color: colors.onSurfaceVariant)),
+    ]));
+  }),
   Widget _agreements() => CustomSectionContainer(
     icon:Icons.handshake_outlined,title:'اتفاقيات الخصم الخاصة بنقاط البيع',
     child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
@@ -126,12 +156,16 @@ class PackageDetailsContent extends StatelessWidget {
         onSegmentChanged:controller.changeDetailsTab,
         items:const[
           CustomSegmentItem(label:'المعلومات',icon:Icons.info_outline_rounded),
-          CustomSegmentItem(label:'اتفاقيات نقاط البيع',icon:Icons.handshake_outlined),
+          CustomSegmentItem(label:'الاتفاقيات',icon:Icons.handshake_outlined),
+          CustomSegmentItem(label:'الإحصائيات',icon:Icons.query_stats_rounded),
         ],
       )),
       AppSpacing.vMd,
-      Obx(()=>controller.selectedDetailsTab.value==0
-          ? _information(context) : _agreements()),
+      Obx(() => switch (controller.selectedDetailsTab.value) {
+        0 => _information(context),
+        1 => _agreements(),
+        _ => _statistics(),
+      }),
       AppSpacing.vXl,
     ]),
   );
