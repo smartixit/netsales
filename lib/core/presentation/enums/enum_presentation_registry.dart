@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:netsales/core/enums/package_discount_validity_state.dart';
+import 'package:netsales/core/enums/package_discount_activation_status.dart';
 import 'package:netsales/core/enums/backup_status.dart';
 import 'package:netsales/core/enums/device_type.dart';
 import 'package:netsales/core/enums/invoice_payment_status.dart';
@@ -1005,6 +1007,73 @@ class EnumPresentationRegistry {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // اتفاقيات خصم الباقات (Package POS Discount)
+  // ──────────────────────────────────────────────────────────────────────────
+  static EnumPresentation resolvePackageDiscountValidityState(
+    PackageDiscountValidityState state, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (state) {
+      PackageDiscountValidityState.effective => 'سارية الآن',
+      PackageDiscountValidityState.scheduled => 'مجدولة',
+      PackageDiscountValidityState.expired => 'منتهية',
+      PackageDiscountValidityState.disabled => 'معطّلة',
+      PackageDiscountValidityState.unknown => 'حالة غير معروفة',
+    });
+
+    return switch (state) {
+      PackageDiscountValidityState.effective => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.check_circle_rounded,
+      ),
+      PackageDiscountValidityState.scheduled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.warning,
+        icon: Icons.schedule_rounded,
+      ),
+      PackageDiscountValidityState.expired => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.history_rounded,
+      ),
+      PackageDiscountValidityState.disabled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.pause_circle_outline_rounded,
+      ),
+      PackageDiscountValidityState.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
+  static EnumPresentation resolvePackageDiscountActivationStatus(
+    PackageDiscountActivationStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      PackageDiscountActivationStatus.enabled => 'مفعّلة',
+      PackageDiscountActivationStatus.disabled => 'غير مفعّلة',
+      PackageDiscountActivationStatus.unknown => 'حالة تفعيل غير معروفة',
+    });
+
+    return switch (status) {
+      PackageDiscountActivationStatus.enabled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.toggle_on_rounded,
+      ),
+      PackageDiscountActivationStatus.disabled => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.toggle_off_outlined,
+      ),
+      PackageDiscountActivationStatus.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
   // المساعدات الداخلية
   // ──────────────────────────────────────────────────────────────────────────
   static String _effectiveLabel(String? serverLabel, String fallback) {

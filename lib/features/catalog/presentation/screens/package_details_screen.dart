@@ -4,9 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/catalog/presentation/controllers/package_details_controller.dart';
 import 'package:netsales/features/catalog/presentation/widgets/dialogs/package_action_dialogs.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_bento_specs_grid.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_commercial_pricing_radar.dart';
-import 'package:netsales/features/catalog/presentation/widgets/package_metadata_surface_card.dart';
+import 'package:netsales/features/catalog/presentation/widgets/package_details_content.dart';
 import 'package:netsales/features/catalog/presentation/widgets/package_voucher_card_showcase.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
@@ -139,33 +137,7 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(AppSpacing.cardPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. بطاقة المحاكاة الرقمية الفاخرة للكرت (Hero Digital Voucher Card)
-              PackageVoucherCardShowcase(package: package),
-
-              AppSpacing.vLg,
-
-              // 2. شبكة مكعبات المواصفات الفنية التفاعلية (Bento Specs Grid)
-              PackageBentoSpecsGrid(package: package),
-
-              AppSpacing.vLg,
-
-              // 3. رادار المقارنة المالية والتجارية وهوامش التوفير (Pricing Radar)
-              PackageCommercialPricingRadar(package: package),
-
-              AppSpacing.vLg,
-
-              // 4. بطاقة الاعتماد وتفاصيل الشبكة التابعة والتواريخ (Metadata Card)
-              PackageMetadataSurfaceCard(package: package),
-
-              AppSpacing.vXl,
-            ],
-          ),
-        ),
+        body: PackageDetailsContent(package: package, controller: controller),
       );
     });
   }
