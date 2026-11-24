@@ -11,7 +11,6 @@ on:
       - chore/pub-compatible-updates
       - fix/infinityfree-two-step-verification
       - fix/date-picker-field-modal
-      - fix/local-checkout-currency-riyal
   pull_request:
     branches:
       - main
