@@ -79,7 +79,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                         child: Text('${unit.label} (${unit.symbol})'),
                       );
                     }).toList(),
-                onChanged: (val) {
+                onValueChanging: (val) {
                   if (val != null) {
                     controller.setBalanceUnit(val);
                   }
@@ -127,7 +127,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                         child: Text('${unit.label} (${unit.symbol})'),
                       );
                     }).toList(),
-                onChanged: (val) {
+                onValueChanging: (val) {
                   if (val != null) {
                     controller.setUptimeUnit(val);
                   }
@@ -176,7 +176,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                         child: Text('${unit.label} (${unit.symbol})'),
                       );
                     }).toList(),
-                onChanged: (val) {
+                onValueChanging: (val) {
                   if (val != null) {
                     controller.setValidityUnit(val);
                   }
