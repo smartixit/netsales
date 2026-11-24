@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -65,7 +66,7 @@ class PackageCard extends StatelessWidget {
         (canEdit && (onEdit != null || onToggleStatus != null)) ||
         (canDelete && onDelete != null);
 
-    final balanceParts = _splitBalance(package.balanceDisplay);
+    final balanceParts = _ShowcaseHeroQuota(balanceValue: package.packageBalance, balanceUnit: '', packageName: '',);
 
     final cardContent = Container(
       decoration: BoxDecoration(
@@ -88,7 +89,7 @@ class PackageCard extends StatelessWidget {
             accentColor: accentColor,
             statusLabel: statusPres.label,
             statusTone: statusPres.tone,
-            balanceParts: balanceParts,
+            balance: balanceParts,
             hasAdminActions: hasAdminActions,
             canEdit: canEdit,
             canDelete: canDelete,
@@ -114,25 +115,74 @@ class PackageCard extends StatelessWidget {
           : Opacity(opacity: 0.72, child: cardContent),
     );
   }
-
-  /// يفصل نص الرصيد مثل "3 جيجابايت" إلى رقم ووحدة بدقة
-  static _BalanceParts _splitBalance(String display) {
-    final trimmed = display.trim();
-    final match = RegExp(r'^([\d.,]+)\s*(.*)$').firstMatch(trimmed);
-    if (match != null) {
-      return _BalanceParts(
-        number: match.group(1) ?? trimmed,
-        unit: match.group(2) ?? '',
-      );
-    }
-    return _BalanceParts(number: trimmed, unit: '');
-  }
 }
 
-class _BalanceParts {
-  const _BalanceParts({required this.number, required this.unit});
-  final String number;
-  final String unit;
+/// سعة البيانات الكبرى واسم الباقة بنفس أسلوب وهوية الكتالوج
+class _ShowcaseHeroQuota extends StatelessWidget {
+  const _ShowcaseHeroQuota({
+    required this.balanceValue,
+    required this.balanceUnit,
+    required this.packageName,
+  });
+
+  final String balanceValue;
+  final String balanceUnit;
+  final String packageName;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              balanceValue,
+              style: AppTypography.displayMedium.copyWith(
+                fontSize: 38.sp,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                height: 1.0,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: AppRadius.sm,
+                    offset: Offset(0, AppSpacing.xxs),
+                  ),
+                ],
+              ),
+            ),
+            if (balanceUnit.isNotEmpty) ...[
+              AppSpacing.hXs,
+              Text(
+                balanceUnit,
+                style: AppTypography.titleMedium.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colors.executiveGoldAccent,
+                  height: 1.0,
+                ),
+              ),
+            ],
+          ],
+        ),
+        AppSpacing.vXs,
+        Text(
+          packageName,
+          style: AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
 }
 
 /// رأس البطاقة الاستعراضي مع العلامة المائية الفاخرة
@@ -142,7 +192,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
     required this.accentColor,
     required this.statusLabel,
     required this.statusTone,
-    required this.balanceParts,
+    required this.balance,
     required this.hasAdminActions,
     required this.canEdit,
     required this.canDelete,
@@ -155,7 +205,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
   final Color accentColor;
   final String statusLabel;
   final SemanticTone statusTone;
-  final _BalanceParts balanceParts;
+  final _ShowcaseHeroQuota balance;
   final bool hasAdminActions;
   final bool canEdit;
   final bool canDelete;
@@ -321,7 +371,7 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    balanceParts.number,
+                    balance.balanceValue,
                     style: AppTypography.displayMedium.copyWith(
                       fontSize: 34.sp,
                       fontWeight: FontWeight.w800,
@@ -331,10 +381,10 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                       height: 1.0,
                     ),
                   ),
-                  if (balanceParts.unit.isNotEmpty) ...[
+                  if (balance.balanceUnit.isNotEmpty) ...[
                     SizedBox(width: 6.w),
                     Text(
-                      balanceParts.unit,
+                      balance.balanceUnit,
                       style: AppTypography.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: package.isActive

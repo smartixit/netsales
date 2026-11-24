@@ -71,46 +71,8 @@ class PackageEntity {
   PackageStatus get packageStatus => PackageStatus.fromWire(status);
   bool get isActive => packageStatus.isActive;
 
-  /// السعر الأساسي للباقة محولاً من العملة الصغرى عند توفره
-  double get resolvedBasePrice => procurementBaseUnitPriceMinor != null
-      ? procurementBaseUnitPriceMinor! / 100.0
-      : packageVoucherPrice;
-
-  /// سعر الشراء النقدي الفعلي محولاً من العملة الصغرى
-  double get resolvedCashPrice => procurementCashUnitPriceMinor != null
-      ? procurementCashUnitPriceMinor! / 100.0
-      : effectiveCashPrice;
-
-  /// سعر الشراء الآجل الفعلي محولاً من العملة الصغرى
-  double get resolvedCreditPrice => procurementCreditUnitPriceMinor != null
-      ? procurementCreditUnitPriceMinor! / 100.0
-      : effectiveCreditPrice;
-
-  /// نسبة الخصم النقدي المحولة من نقاط الأساس
-  double get resolvedCashDiscount => procurementCashDiscountBasisPoints != null
-      ? procurementCashDiscountBasisPoints! / 100.0
-      : packageDefaultCashDiscount;
-
-  /// نسبة الخصم الآجل المحولة من نقاط الأساس
-  double get resolvedCreditDiscount =>
-      procurementCreditDiscountBasisPoints != null
-      ? procurementCreditDiscountBasisPoints! / 100.0
-      : packageDefaultCreditDiscount;
-
   /// تنسيق الرصيد عبر محول السعات المعتمد مباشرة بالبايت
   String get balanceDisplay => PackageSpecFormatter.formatData(packageBalance);
-
-  /// القيمة الرقمية المجردة للرصيد للعرض البارز
-  String get balanceValue {
-    final parts = balanceDisplay.trim().split(' ');
-    return parts.isNotEmpty ? parts.first : '';
-  }
-
-  /// وحدة القياس المنسقة للرصيد للعرض البارز
-  String get balanceUnit {
-    final parts = balanceDisplay.trim().split(' ');
-    return parts.length > 1 ? parts.sublist(1).join(' ') : '';
-  }
 
   String get uptimeDisplay =>
       PackageSpecFormatter.formatDuration(packageUptime);
@@ -119,25 +81,25 @@ class PackageEntity {
       PackageSpecFormatter.formatDuration(packageValidity);
 
   /// فئة الكرت / سعر الكرت الواحد الأساسي
-  double get unitVoucherPrice => resolvedBasePrice;
+  double get unitVoucherPrice => packageVoucherPrice;
 
   /// سعر الكرت الواحد الفعلي نقداً بعد الخصم
-  double get unitCashPrice => resolvedCashPrice;
+  double get unitCashPrice => effectiveCashPrice;
 
   /// سعر الكرت الواحد الفعلي آجلاً بعد الخصم
-  double get unitCreditPrice => resolvedCreditPrice;
+  double get unitCreditPrice => effectiveCreditPrice;
 
   /// إجمالي قيمة الحزمة الأساسية قبل الخصم (سعر الكرت * عدد الكروت)
   double get totalPackageBasePrice =>
-      resolvedBasePrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+      packageVoucherPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
 
   /// إجمالي قيمة الحزمة نقداً بعد الخصم
   double get totalCashPrice =>
-      resolvedCashPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+      effectiveCashPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
 
   /// إجمالي قيمة الحزمة آجلاً بعد الخصم
   double get totalCreditPrice =>
-      resolvedCreditPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
+      effectiveCreditPrice * (packageVoucherCount > 0 ? packageVoucherCount : 1);
 
   /// إجمالي مبلغ التوفير للحزمة نقداً
   double get totalCashSavings =>
