@@ -296,7 +296,7 @@ class PackageFormController extends GetxController {
   /// يُستخدم التحويل المباشر double لتجنب فقد الكسور قبل الوصول لوحدة التخزين.
   String _formatConvertedUnitValue(double value) {
     if (value == value.roundToDouble()) return value.toInt().toString();
-    return value.toStringAsFixed(6).replaceAll(RegExp(r'\\.?0+$'), '');
+    return value.toString();
   }
 
   /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
