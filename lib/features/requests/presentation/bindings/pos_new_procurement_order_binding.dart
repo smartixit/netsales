@@ -5,7 +5,6 @@ import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
-import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_request_details_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/update_request_use_case.dart';
 import 'package:netsales/features/requests/presentation/bindings/procurement_request_binding.dart';
@@ -27,7 +26,6 @@ class PosNewProcurementOrderBinding extends Bindings {
         getPackagesUseCase: Get.find<GetPackagesUseCase>(),
         getEffectivePackageDiscountsForPosUseCase:
             Get.find<GetEffectivePackageDiscountsForPosUseCase>(),
-        getProcurementQuoteUseCase: Get.find<GetProcurementQuoteUseCase>(),
       ),
     );
   }
