@@ -9,7 +9,7 @@ import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 /// قسم التسعير والخصومات الافتراضية وحالة التفعيل (Pricing Form Section)
 ///
-/// يعرض مدخلات التسعير فقط؛ الأسعار النهائية والوفورات مرجعها الخادم.
+/// يعرض مدخلات التسعير، بينما تعرض المعاينة تقديرات فورية غير معتمدة؛ الخادم هو المرجع النهائي.
 class PackagePricingFormSection extends GetView<PackageFormController> {
   const PackagePricingFormSection({super.key});
 
@@ -79,7 +79,7 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
 
         AppSpacing.vMd,
 
-        // لا تُشتق الأسعار النهائية أو الوفورات داخل تطبيق العميل.
+        // المعاينة تحسب تقديرات فورية محلياً؛ القيم المعتمدة لا تصدر إلا من الخادم.
         Container(
           width: double.infinity,
           padding: EdgeInsets.all(AppSpacing.md),
