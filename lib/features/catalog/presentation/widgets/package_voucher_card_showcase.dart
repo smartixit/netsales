@@ -25,13 +25,11 @@ class PackageVoucherCardShowcase extends StatelessWidget {
     required this.package,
     this.showPricingSummary = true,
     this.showEstimatedPricingLabel = false,
-    this.previewPricing,
   });
 
   final PackageEntity package;
   final bool showPricingSummary;
   final bool showEstimatedPricingLabel;
-  final PackageVoucherPreviewPricing? previewPricing;
 
   @override
   Widget build(BuildContext context) {
@@ -159,9 +157,6 @@ class PackageVoucherCardShowcase extends StatelessWidget {
                     creditSavings: package.creditDiscountAmount,
                     creditTotalPrice: package.totalCreditPrice,
                   ),
-                ] else if (previewPricing != null) ...[
-                  AppSpacing.vMd,
-                  _ShowcaseRawPricingPreview(pricing: previewPricing!),
                 ],
               ],
             ),
