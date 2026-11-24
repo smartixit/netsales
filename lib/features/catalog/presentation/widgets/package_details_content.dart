@@ -98,6 +98,32 @@ class PackageDetailsContent extends StatelessWidget {
         onChanged:controller.onPosDiscountSearchChanged,
       ),
       AppSpacing.vMd,
+      Text('حالة التفعيل',style:AppTypography.labelMedium.copyWith(fontWeight:FontWeight.w700)),
+      AppSpacing.vXs,
+      Obx(()=>CustomSegmentedBar(
+        selectedIndex:controller.selectedActivationFilter.value,
+        onSegmentChanged:controller.changeActivationFilter,
+        items:const[
+          CustomSegmentItem(label:'الكل'),
+          CustomSegmentItem(label:'مفعّلة'),
+          CustomSegmentItem(label:'معطّلة'),
+        ],
+      )),
+      AppSpacing.vSm,
+      Text('حالة السريان',style:AppTypography.labelMedium.copyWith(fontWeight:FontWeight.w700)),
+      AppSpacing.vXs,
+      Obx(()=>CustomSegmentedBar(
+        selectedIndex:controller.selectedValidityFilter.value,
+        onSegmentChanged:controller.changeValidityFilter,
+        items:const[
+          CustomSegmentItem(label:'الكل'),
+          CustomSegmentItem(label:'سارية'),
+          CustomSegmentItem(label:'مجدولة'),
+          CustomSegmentItem(label:'منتهية'),
+          CustomSegmentItem(label:'معطّلة'),
+        ],
+      )),
+      AppSpacing.vMd,
       Obx(() {
         final items=controller.posDiscounts.toList(growable:false);
         if(controller.isLoadingPosDiscounts.value && items.isEmpty) {
