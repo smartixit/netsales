@@ -160,13 +160,24 @@ class PackageFormController extends GetxController {
   /// ولا تُستخدم في الحفظ أو في أي قرار محاسبي.
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
-    final basePrice = liveBasePrice.value;
-    final cashRate = liveCashDiscountRate.value.clamp(0.0, 100.0).toDouble();
-    final creditRate = liveCreditDiscountRate.value
-        .clamp(0.0, 100.0)
-        .toDouble();
-    final cashSavings = basePrice * cashRate / 100;
-    final creditSavings = basePrice * creditRate / 100;
+    // يحاكي تقريب المورد VoucherPackageResource (منزلتان عشريتان).
+    // لا نعرض تقديراً مالياً مضللاً أثناء وجود سعر/نسبة غير صالحة.
+    double roundMoney(double value) => (value * 100).roundToDouble() / 100;
+    final rawPrice = liveBasePrice.value;
+    final basePrice = rawPrice.isFinite && rawPrice >= 0
+        ? roundMoney(rawPrice)
+        : 0.0;
+    final rawCashRate = liveCashDiscountRate.value;
+    final rawCreditRate = liveCreditDiscountRate.value;
+    final cashRate = rawCashRate.isFinite && rawCashRate >= 0 && rawCashRate <= 100
+        ? roundMoney(rawCashRate)
+        : 0.0;
+    final creditRate =
+        rawCreditRate.isFinite && rawCreditRate >= 0 && rawCreditRate <= 100
+        ? roundMoney(rawCreditRate)
+        : 0.0;
+    final cashSavings = roundMoney(basePrice * cashRate / 100);
+    final creditSavings = roundMoney(basePrice * creditRate / 100);
 
     return PackageEntity(
       packageId: packageId.value ?? 0,
@@ -184,8 +195,12 @@ class PackageFormController extends GetxController {
       packageDefaultCreditDiscount: liveCreditDiscountRate.value,
       cashDiscountAmount: cashSavings,
       creditDiscountAmount: creditSavings,
-      effectiveCashPrice: basePrice - cashSavings,
-      effectiveCreditPrice: basePrice - creditSavings,
+      effectiveCashPrice: roundMoney(
+        basePrice - (basePrice * cashRate / 100),
+      ),
+      effectiveCreditPrice: roundMoney(
+        basePrice - (basePrice * creditRate / 100),
+      ),
       status: status.value,
       networkName: authorizedNetworks
           .firstWhereOrNull((net) => net.networkId == selectedNetworkId.value)
@@ -295,8 +310,374 @@ class PackageFormController extends GetxController {
   /// يحول القيمة المعروضة بين الوحدات دون تغيير مقدارها الفعلي.
   /// يُستخدم التحويل المباشر double لتجنب فقد الكسور قبل الوصول لوحدة التخزين.
   String _formatConvertedUnitValue(double value) {
+    if (!value.isFinite) return '';
     if (value == value.roundToDouble()) return value.toInt().toString();
-    return value.toString();
+    return value
+        .toStringAsFixed(12)
+        .replaceFirst(RegExp(r'0+
+
+  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
+  void setBalanceUnit(DataSizeUnit newUnit) {
+    final oldUnit = selectedBalanceUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(balanceController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertData(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      balanceController.value = balanceController.value.copyWith(
+        text: _formatConvertedUnitValue(converted),
+        selection: TextSelection.collapsed(
+          offset: _formatConvertedUnitValue(converted).length,
+        ),
+        composing: TextRange.empty,
+      );
+    }
+    selectedBalanceUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً.
+  void setUptimeUnit(TimeDurationUnit newUnit) {
+    final oldUnit = selectedUptimeUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(uptimeController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      uptimeController.value = uptimeController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
+    }
+    selectedUptimeUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً.
+  void setValidityUnit(TimeDurationUnit newUnit) {
+    final oldUnit = selectedValidityUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(validityController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      validityController.value = validityController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
+    }
+    selectedValidityUnit.value = newUnit;
+  }
+
+  /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
+  Future<void> submitForm() async {
+    try {
+      if (selectedNetworkId.value == null) {
+        CustomSnackbar.show(
+          title: 'تنبيه',
+          message: 'يرجى تحديد شبكة الكروت التابعة للباقة أولاً.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+      if (!formKey.currentState!.validate()) return;
+      isSaving.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: isEditing.value
+            ? 'جاري حفظ تعديلات الباقة...'
+            : 'جاري إنشاء باقة الكروت الجديدة...',
+      );
+
+      // تحويل القيم المدخلة للوحدات المعتمدة عبر PackageSpecFormatter
+      final rawBalance = double.tryParse(balanceController.text.trim()) ?? 0.0;
+      final balanceInBytes = PackageSpecFormatter.toCanonicalBytes(
+        rawBalance,
+        selectedBalanceUnit.value,
+      );
+
+      final rawUptime = double.tryParse(uptimeController.text.trim());
+      final uptimeInMinutes = rawUptime != null && rawUptime > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawUptime,
+              selectedUptimeUnit.value,
+            )
+          : null;
+
+      final rawValidity = double.tryParse(validityController.text.trim());
+      final validityInMinutes = rawValidity != null && rawValidity > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawValidity,
+              selectedValidityUnit.value,
+            )
+          : null;
+
+      final voucherCount =
+          int.tryParse(voucherCountController.text.trim()) ?? 1;
+      final voucherPrice = double.tryParse(priceController.text.trim()) ?? 0.0;
+      final cashDiscount =
+          double.tryParse(cashDiscountController.text.trim()) ?? 0.0;
+      final creditDiscount =
+          double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
+
+      if (isEditing.value) {
+        final updateInput = UpdatePackageInput(
+          packageName: nameController.text.trim(),
+          packageColor: selectedColor.value,
+          packageBalance: balanceInBytes,
+          packageUptime: uptimeInMinutes,
+          packageValidity: validityInMinutes,
+          packageVoucherCount: voucherCount,
+          packageVoucherPrice: voucherPrice,
+          packageDefaultCashDiscount: cashDiscount,
+          packageDefaultCreditDiscount: creditDiscount,
+          status: status.value,
+        );
+
+        await updatePackageUseCase(packageId.value!, updateInput);
+      } else {
+        final createInput = CreatePackageInput(
+          networkId: selectedNetworkId.value!,
+          packageName: nameController.text.trim(),
+          packageColor: selectedColor.value,
+          packageBalance: balanceInBytes,
+          packageUptime: uptimeInMinutes,
+          packageValidity: validityInMinutes,
+          packageVoucherCount: voucherCount,
+          packageVoucherPrice: voucherPrice,
+          packageDefaultCashDiscount: cashDiscount,
+          packageDefaultCreditDiscount: creditDiscount,
+          status: status.value,
+        );
+
+        await createPackageUseCase(createInput);
+      }
+
+      if (Get.isRegistered<PackageCatalogController>()) {
+        unawaited(Get.find<PackageCatalogController>().refreshCatalog());
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: isEditing.value ? 'تم التعديل بنجاح' : 'تم الإنشاء بنجاح',
+      );
+
+      Get.back<void>();
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    } finally {
+      isSaving.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+}
+), '')
+        .replaceFirst(RegExp(r'\\.
+
+  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
+  void setBalanceUnit(DataSizeUnit newUnit) {
+    final oldUnit = selectedBalanceUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(balanceController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertData(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      balanceController.value = balanceController.value.copyWith(
+        text: _formatConvertedUnitValue(converted),
+        selection: TextSelection.collapsed(
+          offset: _formatConvertedUnitValue(converted).length,
+        ),
+        composing: TextRange.empty,
+      );
+    }
+    selectedBalanceUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً.
+  void setUptimeUnit(TimeDurationUnit newUnit) {
+    final oldUnit = selectedUptimeUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(uptimeController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      uptimeController.value = uptimeController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
+    }
+    selectedUptimeUnit.value = newUnit;
+  }
+
+  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً.
+  void setValidityUnit(TimeDurationUnit newUnit) {
+    final oldUnit = selectedValidityUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(validityController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      validityController.value = validityController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
+    }
+    selectedValidityUnit.value = newUnit;
+  }
+
+  /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
+  Future<void> submitForm() async {
+    try {
+      if (selectedNetworkId.value == null) {
+        CustomSnackbar.show(
+          title: 'تنبيه',
+          message: 'يرجى تحديد شبكة الكروت التابعة للباقة أولاً.',
+          type: SnackType.warning,
+        );
+        return;
+      }
+      if (!formKey.currentState!.validate()) return;
+      isSaving.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: isEditing.value
+            ? 'جاري حفظ تعديلات الباقة...'
+            : 'جاري إنشاء باقة الكروت الجديدة...',
+      );
+
+      // تحويل القيم المدخلة للوحدات المعتمدة عبر PackageSpecFormatter
+      final rawBalance = double.tryParse(balanceController.text.trim()) ?? 0.0;
+      final balanceInBytes = PackageSpecFormatter.toCanonicalBytes(
+        rawBalance,
+        selectedBalanceUnit.value,
+      );
+
+      final rawUptime = double.tryParse(uptimeController.text.trim());
+      final uptimeInMinutes = rawUptime != null && rawUptime > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawUptime,
+              selectedUptimeUnit.value,
+            )
+          : null;
+
+      final rawValidity = double.tryParse(validityController.text.trim());
+      final validityInMinutes = rawValidity != null && rawValidity > 0
+          ? PackageSpecFormatter.toCanonicalMinutes(
+              rawValidity,
+              selectedValidityUnit.value,
+            )
+          : null;
+
+      final voucherCount =
+          int.tryParse(voucherCountController.text.trim()) ?? 1;
+      final voucherPrice = double.tryParse(priceController.text.trim()) ?? 0.0;
+      final cashDiscount =
+          double.tryParse(cashDiscountController.text.trim()) ?? 0.0;
+      final creditDiscount =
+          double.tryParse(creditDiscountController.text.trim()) ?? 0.0;
+
+      if (isEditing.value) {
+        final updateInput = UpdatePackageInput(
+          packageName: nameController.text.trim(),
+          packageColor: selectedColor.value,
+          packageBalance: balanceInBytes,
+          packageUptime: uptimeInMinutes,
+          packageValidity: validityInMinutes,
+          packageVoucherCount: voucherCount,
+          packageVoucherPrice: voucherPrice,
+          packageDefaultCashDiscount: cashDiscount,
+          packageDefaultCreditDiscount: creditDiscount,
+          status: status.value,
+        );
+
+        await updatePackageUseCase(packageId.value!, updateInput);
+      } else {
+        final createInput = CreatePackageInput(
+          networkId: selectedNetworkId.value!,
+          packageName: nameController.text.trim(),
+          packageColor: selectedColor.value,
+          packageBalance: balanceInBytes,
+          packageUptime: uptimeInMinutes,
+          packageValidity: validityInMinutes,
+          packageVoucherCount: voucherCount,
+          packageVoucherPrice: voucherPrice,
+          packageDefaultCashDiscount: cashDiscount,
+          packageDefaultCreditDiscount: creditDiscount,
+          status: status.value,
+        );
+
+        await createPackageUseCase(createInput);
+      }
+
+      if (Get.isRegistered<PackageCatalogController>()) {
+        unawaited(Get.find<PackageCatalogController>().refreshCatalog());
+      }
+
+      await CustomAnimationOverlay.showSuccess(
+        message: isEditing.value ? 'تم التعديل بنجاح' : 'تم الإنشاء بنجاح',
+      );
+
+      Get.back<void>();
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: AppException.sanitizeMessage(e),
+        type: SnackType.error,
+      );
+    } finally {
+      isSaving.value = false;
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
+  }
+}
+), '');
   }
 
   /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
