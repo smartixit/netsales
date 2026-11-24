@@ -31,9 +31,6 @@ class FakeInvoiceRepository implements InvoiceRepository {
 }
 
 class FakeRequestRepository implements RequestRepository {
-  bool throwOnceOnCreate = false;
-  Map<String, dynamic>? lastCreatePayload;
-  final List<String?> createIdempotencyKeys = [];
 
   @override
   Future<RequestStatusSummaryEntity> getRequestStatusSummary({
@@ -48,12 +45,6 @@ class FakeRequestRepository implements RequestRepository {
     Map<String, dynamic> data, {
     String? idempotencyKey,
   }) async {
-    lastCreatePayload = data;
-    createIdempotencyKeys.add(idempotencyKey);
-    if (throwOnceOnCreate) {
-      throwOnceOnCreate = false;
-      throw const AppException('تعذر الاتصال بالخادم', code: '500');
-    }
     return const RequestEntity(
       requestId: 55,
       requestUuid: 'REQ-UUID-55',
@@ -281,6 +272,10 @@ void main() {
     );
 
     expect(controller.hasCurrentProcurementSnapshots, isFalse);
+    expect(controller.needsPricingRefresh, isTrue);
+    expect(controller.estimatedLineTotalMinor(expiredPackage, 250), 2250000);
+    expect(controller.checkoutGrossAmount, 25000.0);
+    expect(controller.checkoutDiscountAmount, 2500.0);
     expect(controller.checkoutNetAmount, 22500.0);
 
     await controller.refreshNetworkPackages();
@@ -355,9 +350,18 @@ void main() {
     expect(invoiceController.checkoutDiscountAmount, 2500.0);
     expect(invoiceController.checkoutNetAmount, 47500.0);
 
+    invoiceController.setPackageVoucherCount(testPackage, 250);
+    expect(invoiceController.checkoutGrossAmount, 25000.0);
+    expect(invoiceController.checkoutDiscountAmount, 1250.0);
+    expect(invoiceController.checkoutNetAmount, 23750.0);
+
     invoiceController.paidAmount.value = 10000.0;
     expect(invoiceController.checkoutPaidAmount, 10000.0);
-    expect(invoiceController.checkoutRemainingCreditAmount, 37500.0);
+    expect(invoiceController.checkoutRemainingCreditAmount, 13750.0);
+
+    invoiceController.setPackageVoucherCount(testPackage, 0);
+    expect(invoiceController.directInvoiceCart, isEmpty);
+    expect(invoiceController.checkoutNetAmount, 0.0);
 
     invoiceController.onClose();
   });
@@ -368,20 +372,29 @@ void main() {
       controller.selectedPosId.value = 20;
 
       controller.setPackageVoucherCount(testPackage, 500);
-      await Future<void>.delayed(Duration.zero);
 
       expect(controller.checkoutCurrency, 'ر.ي');
       expect(controller.checkoutGrossAmount, 50000.0);
       expect(controller.checkoutDiscountAmount, 5000.0);
       expect(controller.checkoutNetAmount, 45000.0);
 
+      controller.setPackageVoucherCount(testPackage, 250);
+      expect(controller.checkoutGrossAmount, 25000.0);
+      expect(controller.checkoutDiscountAmount, 2500.0);
+      expect(controller.checkoutNetAmount, 22500.0);
+
       controller.selectedSaleType.value = SaleType.credit;
-      await Future<void>.delayed(Duration.zero);
 
       expect(controller.checkoutCurrency, 'ر.ي');
-      expect(controller.checkoutGrossAmount, 50000.0);
-      expect(controller.checkoutDiscountAmount, 2500.0);
-      expect(controller.checkoutNetAmount, 47500.0);
+      expect(controller.checkoutGrossAmount, 25000.0);
+      expect(controller.checkoutDiscountAmount, 1250.0);
+      expect(controller.checkoutNetAmount, 23750.0);
+
+      controller.setPackageVoucherCount(testPackage, 0);
+      expect(controller.procurementCart, isEmpty);
+      expect(controller.checkoutGrossAmount, 0.0);
+      expect(controller.checkoutDiscountAmount, 0.0);
+      expect(controller.checkoutNetAmount, 0.0);
     });
   });
 
