@@ -161,8 +161,10 @@ class PackageFormController extends GetxController {
   PackageEntity get livePreviewPackage {
     final count = liveVoucherCount.value > 0 ? liveVoucherCount.value : 1;
     final basePrice = liveBasePrice.value;
-    final cashRate = liveCashDiscountRate.value.clamp(0.0, 100.0);
-    final creditRate = liveCreditDiscountRate.value.clamp(0.0, 100.0);
+    final cashRate = liveCashDiscountRate.value.clamp(0.0, 100.0).toDouble();
+    final creditRate = liveCreditDiscountRate.value
+        .clamp(0.0, 100.0)
+        .toDouble();
     final cashSavings = basePrice * cashRate / 100;
     final creditSavings = basePrice * creditRate / 100;
 
