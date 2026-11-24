@@ -176,18 +176,33 @@ class _VelvetHeaderShowcase extends StatelessWidget {
       children: [
         // الخلفية اللونية الشفافة للباقة
         Positioned.fill(
-          child: Container(
-            color: accentColor.withValues(alpha: 0.06),
+          child: Container(color: accentColor.withValues(alpha: 0.06)),
+        ),
+
+        // ── الدائرة العائمة الزخرفية الناعمة في رأس الكرت ──
+        Positioned(
+          bottom: -45.r,
+          left: -35.r,
+          child: IgnorePointer(
+            child: Container(
+              width: 150.r,
+              height: 150.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accentColor.withValues(alpha: 0.05),
+              ),
+            ),
           ),
         ),
 
         // العلامة المائية الرقيقة في رأس الكرت
         Positioned(
-          top: -10.h,
+          top: 50.h,
+          bottom: 50.h,
           left: 12.w,
           child: IgnorePointer(
             child: Text(
-              priceWatermark,
+              AmountFormatter.format(priceWatermark),
               style: TextStyle(
                 fontSize: 64.sp,
                 fontWeight: FontWeight.w900,
@@ -220,7 +235,10 @@ class _VelvetHeaderShowcase extends StatelessWidget {
 
                   // ختم فئة الكرت الرسمي
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 3.h,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.surface.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(AppRadius.full),
@@ -255,11 +273,12 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                   if (hasAdminActions) ...[
                     SizedBox(width: 8.w),
                     CustomPopupMenu<String>(
-                      triggerDimension: 28.r,
-                      triggerIconSize: 16.r,
+                      // triggerDimension: 28.r,
+                      // triggerIconSize: 16.r,
                       triggerIcon: Icons.more_vert_rounded,
-                      triggerBackgroundColor:
-                          colors.surface.withValues(alpha: 0.85),
+                      triggerBackgroundColor: colors.surface.withValues(
+                        alpha: 0.85,
+                      ),
                       triggerIconColor: colors.onSurfaceVariant,
                       items: [
                         if (canEdit && onEdit != null)
@@ -355,18 +374,22 @@ class _VelvetHeaderShowcase extends StatelessWidget {
                 children: [
                   _VelvetSpecPill(
                     icon: Icons.layers_outlined,
-                    label: '${package.packageVoucherCount} كرت بالحزمة',
+                    label: '${package.packageVoucherCount} كرت',
+                  ),
+                  _VelvetSpecPill(
+                    icon: Icons.timer_outlined,
+                    label: package.uptimeDisplay,
                   ),
                   _VelvetSpecPill(
                     icon: Icons.calendar_today_outlined,
                     label: package.validityDisplay,
                   ),
-                  if (package.networkName != null &&
-                      package.networkName!.isNotEmpty)
-                    _VelvetSpecPill(
-                      icon: Icons.hub_outlined,
-                      label: package.networkName!,
-                    ),
+                  // if (package.networkName != null &&
+                  //     package.networkName!.isNotEmpty)
+                  //   _VelvetSpecPill(
+                  //     icon: Icons.hub_outlined,
+                  //     label: package.networkName!,
+                  //   ),
                 ],
               ),
             ],
@@ -489,39 +512,47 @@ class _VelvetCommercialSection extends StatelessWidget {
           SizedBox(height: 10.h),
 
           // ═══ زر استعراض التفاصيل ═══
-          CustomInteractiveBounce(
-            onTap: onDetails,
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(
-                  color: colors.outline.withValues(alpha: 0.12),
-                  width: 0.8.w,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'عرض تفاصيل الباقة والخصومات',
-                    style: AppTypography.labelMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
-                    ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 11.r,
-                    color: colors.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // CustomButton.primary(
+          //   onPressed: onDetails,
+          //   text: 'عرض تفاصيل الباقة',
+          //   size: AppButtonSize.small,
+          //   icon: Icons.chevron_right_rounded,
+          //   width: double.infinity,
+          // ),
+
+          // CustomInteractiveBounce(
+          //   onTap: onDetails,
+          //   child: Container(
+          //     width: double.infinity,
+          //     padding: EdgeInsets.symmetric(vertical: 8.h),
+          //     decoration: BoxDecoration(
+          //       color: colors.surface,
+          //       borderRadius: BorderRadius.circular(AppRadius.sm),
+          //       border: Border.all(
+          //         color: colors.outline.withValues(alpha: 0.12),
+          //         width: 0.8.w,
+          //       ),
+          //     ),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       children: [
+          //         Text(
+          //           'عرض تفاصيل الباقة',
+          //           style: AppTypography.labelMedium.copyWith(
+          //             fontWeight: FontWeight.w700,
+          //             color: colors.onSurface,
+          //           ),
+          //         ),
+          //         SizedBox(width: 6.w),
+          //         Icon(
+          //           Icons.arrow_back_ios_new_rounded,
+          //           size: 11.r,
+          //           color: colors.onSurfaceVariant,
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -572,11 +603,7 @@ class _VelvetDealPod extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // ── الشريط اللوني العلوي المميز للكبسولة ──
-          Container(
-            height: 3.h,
-            width: double.infinity,
-            color: themeColor,
-          ),
+          Container(height: 3.h, width: double.infinity, color: themeColor),
 
           Padding(
             padding: EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 9.h),
@@ -598,8 +625,10 @@ class _VelvetDealPod extends StatelessWidget {
                     ),
                     if (discountPercent > 0)
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.5.h,
+                        ),
                         decoration: BoxDecoration(
                           color: themeColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.full),
@@ -658,7 +687,9 @@ class _VelvetDealPod extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 9.5.sp,
                     fontWeight: FontWeight.w600,
-                    color: voucherSavings > 0 ? themeColor : colors.onSurfaceVariant,
+                    color: voucherSavings > 0
+                        ? themeColor
+                        : colors.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

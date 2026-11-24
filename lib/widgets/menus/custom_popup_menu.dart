@@ -159,7 +159,7 @@ class CustomPopupMenu<T> extends StatelessWidget {
         padding: EdgeInsets.zero,
         constraints: BoxConstraints(minWidth: effectiveMinWidth),
         elevation: 6,
-        color: colors.surfaceContainerHighest,
+        color: colors.surfaceContainerLow,
         shadowColor: AppElevation.level4(context).first.color,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadius.mdRadius,

@@ -348,9 +348,16 @@ class PackageFormController extends GetxController {
 
   /// إرسال النموذج وحفظ التعديلات أو إنشاء الباقة الجديدة
   Future<void> submitForm() async {
+    try {
     if (!formKey.currentState!.validate()) {
       return;
     }
+      isSaving.value = true;
+      await CustomAnimationOverlay.showLoading(
+        message: isEditing.value
+            ? 'جاري حفظ تعديلات الباقة...'
+            : 'جاري إنشاء باقة الكروت الجديدة...',
+      );
 
     if (selectedNetworkId.value == null) {
       CustomSnackbar.show(
@@ -361,13 +368,6 @@ class PackageFormController extends GetxController {
       return;
     }
 
-    try {
-      isSaving.value = true;
-      await CustomAnimationOverlay.showLoading(
-        message: isEditing.value
-            ? 'جاري حفظ تعديلات الباقة...'
-            : 'جاري إنشاء باقة الكروت الجديدة...',
-      );
 
       // تحويل القيم المدخلة للوحدات المعتمدة عبر PackageSpecFormatter
       final rawBalance = double.tryParse(balanceController.text.trim()) ?? 0.0;
@@ -437,12 +437,8 @@ class PackageFormController extends GetxController {
         unawaited(Get.find<PackageCatalogController>().refreshCatalog());
       }
 
-      CustomSnackbar.show(
-        title: isEditing.value ? 'تم التعديل بنجاح' : 'تم الإنشاء بنجاح',
-        message: isEditing.value
-            ? 'تم حفظ تعديلات باقة الكروت بنجاح.'
-            : 'تمت إضافة باقة الكروت الجديدة للكتالوج بنجاح.',
-        type: SnackType.success,
+      await CustomAnimationOverlay.showSuccess(
+        message: isEditing.value ? 'تم التعديل بنجاح' : 'تم الإنشاء بنجاح',
       );
 
       Get.back<void>();
