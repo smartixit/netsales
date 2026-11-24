@@ -69,6 +69,7 @@ class PackageFormController extends GetxController {
   final liveBalanceInBytes = 0.obs;
   final liveUptimeInMinutes = Rxn<int>();
   final liveValidityInMinutes = Rxn<int>();
+  final liveBasePrice = 0.0.obs;
 
   @override
   void onInit() {
@@ -138,6 +139,10 @@ class PackageFormController extends GetxController {
     validityController.addListener(updateValidity);
     ever(selectedValidityUnit, (_) => updateValidity());
 
+    priceController.addListener(() {
+      liveBasePrice.value = double.tryParse(priceController.text.trim()) ?? 0;
+    });
+
   }
 
   /// كيان الباقة الحي المخصص للمعاينة التفاعلية المباشرة (Live Simulator Entity)
@@ -156,7 +161,7 @@ class PackageFormController extends GetxController {
       packageUptime: liveUptimeInMinutes.value,
       packageValidity: liveValidityInMinutes.value,
       packageVoucherCount: count,
-      packageVoucherPrice: 0,
+      packageVoucherPrice: liveBasePrice.value,
       packageDefaultCashDiscount: 0,
       packageDefaultCreditDiscount: 0,
       cashDiscountAmount: 0,
@@ -260,6 +265,7 @@ class PackageFormController extends GetxController {
     voucherCountController.text = package.packageVoucherCount.toString();
     liveVoucherCount.value = package.packageVoucherCount;
     priceController.text = package.packageVoucherPrice.toString();
+    liveBasePrice.value = package.packageVoucherPrice;
     cashDiscountController.text = package.packageDefaultCashDiscount.toString();
     creditDiscountController.text = package.packageDefaultCreditDiscount
         .toString();
