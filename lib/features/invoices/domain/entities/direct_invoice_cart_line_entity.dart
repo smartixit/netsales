@@ -22,13 +22,13 @@ class DirectInvoiceCartLineEntity extends Equatable {
   int get packageId => package.packageId;
 
   /// إجمالي السطر قبل الخصم
-  double get lineGrossTotal => package.resolvedBasePrice * voucherCount;
+  double get lineGrossTotal => package.packageVoucherPrice * voucherCount;
 
   /// إجمالي الخصم للسطر حسب نوع البيع (نقدي أو آجل)
   double lineDiscountTotal(bool isCash) {
     final unitDiscount = isCash
-        ? package.resolvedCashDiscount
-        : package.resolvedCreditDiscount;
+        ? package.effectiveCashPrice
+        : package.effectiveCreditPrice;
     return unitDiscount * voucherCount;
   }
 

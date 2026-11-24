@@ -45,19 +45,19 @@ class DirectInvoicePackageOptionCard extends StatelessWidget {
   final Color? customHeaderTagColor;
 
   double get _basePrice =>
-      customDiscount?.originalPackagePrice ?? package.resolvedBasePrice;
+      customDiscount?.originalPackagePrice ?? package.packageVoucherPrice;
 
   double get _cashPrice =>
-      customDiscount?.effectiveCashPrice ?? package.resolvedCashPrice;
+      customDiscount?.effectiveCashPrice ?? package.effectiveCashPrice;
 
   double get _creditPrice =>
-      customDiscount?.effectiveCreditPrice ?? package.resolvedCreditPrice;
+      customDiscount?.effectiveCreditPrice ?? package.effectiveCreditPrice;
 
   double get _cashDiscount =>
-      customDiscount?.discountCash ?? package.resolvedCashDiscount;
+      customDiscount?.discountCash ?? package.cashDiscountAmount;
 
   double get _creditDiscount =>
-      customDiscount?.discountCredit ?? package.resolvedCreditDiscount;
+      customDiscount?.discountCredit ?? package.creditDiscountAmount;
 
   String? get _formattedLineTotal {
     if (estimatedLineTotal != null) {

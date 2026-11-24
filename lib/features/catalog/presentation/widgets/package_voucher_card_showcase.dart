@@ -115,8 +115,8 @@ class PackageVoucherCardShowcase extends StatelessWidget {
 
                 // ═══ سعة البيانات واسم الباقة بأسلوب الكتالوج ═══
                 _ShowcaseHeroQuota(
-                  balanceValue: package.balanceValue,
-                  balanceUnit: package.balanceUnit,
+                  balanceValue: package.balanceParts.value,
+                  balanceUnit: package.balanceParts.unit,
                   packageName: package.packageName,
                 ),
 
