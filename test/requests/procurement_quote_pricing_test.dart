@@ -13,6 +13,9 @@ import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
+import 'package:netsales/features/invoices/domain/repositories/invoice_repository.dart';
+import 'package:netsales/features/invoices/domain/usecases/create_direct_sale_invoice_use_case.dart';
+import 'package:netsales/features/invoices/presentation/controllers/network_direct_invoice_controller.dart';
 import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_quote_entity.dart';
@@ -26,6 +29,11 @@ import 'package:netsales/features/requests/domain/repositories/request_repositor
 import 'package:netsales/features/requests/domain/usecases/create_request_use_case.dart';
 import 'package:netsales/features/requests/domain/usecases/get_procurement_quote_use_case.dart';
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
+
+class FakeInvoiceRepository implements InvoiceRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class FakeQuoteRequestRepository implements RequestRepository {
   ProcurementQuoteEntity? nextQuote;
@@ -372,6 +380,34 @@ void main() {
       expect(controller.isRefreshingCartPricing.value, isFalse);
     },
   );
+
+  test('Direct invoice checkout calculates discounts locally and keeps the fixed currency', () {
+    final invoiceController = NetworkDirectInvoiceController(
+      createDirectSaleInvoiceUseCase: CreateDirectSaleInvoiceUseCase(
+        FakeInvoiceRepository(),
+      ),
+    );
+
+    invoiceController.setPackageVoucherCount(testPackage, 500);
+
+    expect(invoiceController.checkoutCurrency, 'ر.ي');
+    expect(invoiceController.checkoutGrossAmount, 50000.0);
+    expect(invoiceController.checkoutDiscountAmount, 5000.0);
+    expect(invoiceController.checkoutNetAmount, 45000.0);
+
+    invoiceController.selectedSaleType.value = SaleType.credit;
+
+    expect(invoiceController.checkoutCurrency, 'ر.ي');
+    expect(invoiceController.checkoutGrossAmount, 50000.0);
+    expect(invoiceController.checkoutDiscountAmount, 2500.0);
+    expect(invoiceController.checkoutNetAmount, 47500.0);
+
+    invoiceController.paidAmount.value = 10000.0;
+    expect(invoiceController.checkoutPaidAmount, 10000.0);
+    expect(invoiceController.checkoutRemainingCreditAmount, 37500.0);
+
+    invoiceController.onClose();
+  });
 
   group('Local checkout calculation', () {
     test('Checkout values are calculated locally and use the fixed Yemeni rial label', () async {
