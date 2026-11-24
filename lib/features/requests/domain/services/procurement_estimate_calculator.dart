@@ -2,7 +2,7 @@ import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/requests/domain/entities/procurement_cart_line_entity.dart';
 
-/// Calculates non-binding POS procurement display estimates from current API snapshots.
+/// Calculates local procurement display estimates from the latest cached package tariff.
 class ProcurementEstimateCalculator {
   const ProcurementEstimateCalculator();
 
@@ -22,7 +22,7 @@ class ProcurementEstimateCalculator {
     SaleType saleType, {
     DateTime? now,
   }) {
-    if (quantity <= 0 || !_hasCurrentSnapshot(package, now ?? DateTime.now())) {
+    if (quantity <= 0 || !_hasPriceData(package)) {
       return null;
     }
     final basePriceMinor = package.procurementBaseUnitPriceMinor!;
@@ -41,7 +41,7 @@ class ProcurementEstimateCalculator {
   }) {
     final cartLines = lines.toList(growable: false);
     if (cartLines.isEmpty ||
-        !hasCurrentSnapshots(cartLines.map((line) => line.package), now: now)) {
+        !cartLines.every((line) => _hasPriceData(line.package))) {
       return null;
     }
 
@@ -64,6 +64,11 @@ class ProcurementEstimateCalculator {
 
     return (grossTotalMinor, discountTotalMinor, netTotalMinor);
   }
+
+  bool _hasPriceData(PackageEntity package) =>
+      package.procurementBaseUnitPriceMinor != null &&
+      package.procurementCashDiscountBasisPoints != null &&
+      package.procurementCreditDiscountBasisPoints != null;
 
   bool _hasCurrentSnapshot(PackageEntity package, DateTime now) {
     final token = package.procurementPricingSnapshotToken;
