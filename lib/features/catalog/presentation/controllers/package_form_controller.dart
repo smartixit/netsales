@@ -292,47 +292,76 @@ class PackageFormController extends GetxController {
     status.value = package.isActive;
   }
 
-  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً
+  /// يحول القيمة المعروضة بين الوحدات دون تغيير مقدارها الفعلي.
+  /// يُستخدم التحويل المباشر double لتجنب فقد الكسور قبل الوصول لوحدة التخزين.
+  String _formatConvertedUnitValue(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(6).replaceAll(RegExp(r'\\.?0+$'), '');
+  }
+
+  /// تغيير وحدة رصيد البيانات مع تحويل القيمة المدخلة تلقائياً.
   void setBalanceUnit(DataSizeUnit newUnit) {
-    if (selectedBalanceUnit.value == newUnit) return;
-    final currentVal = double.tryParse(balanceController.text.trim());
-    if (currentVal != null && currentVal > 0) {
-      final bytes = selectedBalanceUnit.value.toCanonicalBytes(currentVal);
-      final inNewUnit = newUnit.fromCanonicalBytes(bytes);
-      final formatted = inNewUnit == inNewUnit.roundToDouble()
-          ? inNewUnit.toInt().toString()
-          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
-      balanceController.text = formatted;
+    final oldUnit = selectedBalanceUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(balanceController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertData(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      balanceController.value = balanceController.value.copyWith(
+        text: _formatConvertedUnitValue(converted),
+        selection: TextSelection.collapsed(
+          offset: _formatConvertedUnitValue(converted).length,
+        ),
+        composing: TextRange.empty,
+      );
     }
     selectedBalanceUnit.value = newUnit;
   }
 
-  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً
+  /// تغيير وحدة وقت الاستخدام مع تحويل القيمة المدخلة تلقائياً.
   void setUptimeUnit(TimeDurationUnit newUnit) {
-    if (selectedUptimeUnit.value == newUnit) return;
-    final currentVal = double.tryParse(uptimeController.text.trim());
-    if (currentVal != null && currentVal > 0) {
-      final minutes = selectedUptimeUnit.value.toCanonicalMinutes(currentVal);
-      final inNewUnit = newUnit.fromCanonicalMinutes(minutes);
-      final formatted = inNewUnit == inNewUnit.roundToDouble()
-          ? inNewUnit.toInt().toString()
-          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
-      uptimeController.text = formatted;
+    final oldUnit = selectedUptimeUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(uptimeController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      uptimeController.value = uptimeController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
     }
     selectedUptimeUnit.value = newUnit;
   }
 
-  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً
+  /// تغيير وحدة فترة الصلاحية مع تحويل القيمة المدخلة تلقائياً.
   void setValidityUnit(TimeDurationUnit newUnit) {
-    if (selectedValidityUnit.value == newUnit) return;
-    final currentVal = double.tryParse(validityController.text.trim());
-    if (currentVal != null && currentVal > 0) {
-      final minutes = selectedValidityUnit.value.toCanonicalMinutes(currentVal);
-      final inNewUnit = newUnit.fromCanonicalMinutes(minutes);
-      final formatted = inNewUnit == inNewUnit.roundToDouble()
-          ? inNewUnit.toInt().toString()
-          : inNewUnit.toStringAsFixed(4).replaceAll(RegExp(r'\.?0+$'), '');
-      validityController.text = formatted;
+    final oldUnit = selectedValidityUnit.value;
+    if (oldUnit == newUnit) return;
+
+    final currentValue = double.tryParse(validityController.text.trim());
+    if (currentValue != null && currentValue >= 0) {
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
+      final formatted = _formatConvertedUnitValue(converted);
+      validityController.value = validityController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+        composing: TextRange.empty,
+      );
     }
     selectedValidityUnit.value = newUnit;
   }
