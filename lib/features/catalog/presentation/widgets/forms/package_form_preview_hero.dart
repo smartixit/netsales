@@ -53,12 +53,8 @@ class PackageFormPreviewHero extends GetView<PackageFormController> {
           final preview = controller.livePreviewPackage;
           return PackageVoucherCardShowcase(
             package: preview,
-            showPricingSummary: false,
-            previewPricing: PackageVoucherPreviewPricing(
-              basePrice: controller.liveBasePrice.value,
-              cashDiscountRate: controller.liveCashDiscountRate.value,
-              creditDiscountRate: controller.liveCreditDiscountRate.value,
-            ),
+            showPricingSummary: true,
+            showEstimatedPricingLabel: true,
           );
         }),
       ],
