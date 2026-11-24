@@ -113,7 +113,7 @@ class CustomDropdown<T> extends StatefulWidget {
     required this.items,
     this.valueListenable,
     this.rxValue,
-    required this.onChanged,
+    this.onChanged,
     this.onValueChanging,
     this.hint,
     this.label,
