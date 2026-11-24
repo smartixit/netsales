@@ -293,6 +293,24 @@ void main() {
     expect(controller.isRefreshingCartPricing.value, isFalse);
   });
 
+  test('Continuing to review does not refresh or replace the local estimate', () {
+    controller.selectedNetworkId.value = 10;
+    controller.selectedPosId.value = 20;
+    controller.procurementCart.add(
+      ProcurementCartLineEntity(
+        package: _expiredTestPackage(),
+        sheets: 2.5,
+        voucherCount: 250,
+      ),
+    );
+
+    controller.continueToOrderReview();
+
+    expect(controller.currentOrderStep.value, 1);
+    expect(packageRepo.lastRequestedPackageIds, isNull);
+    expect(controller.checkoutNetAmount, 22500.0);
+  });
+
   test(
     'Incomplete cart tariff refresh keeps expired snapshots and quantities',
     () async {
@@ -372,6 +390,7 @@ void main() {
       controller.selectedPosId.value = 20;
 
       controller.setPackageVoucherCount(testPackage, 500);
+      expect(packageRepo.lastRequestedPackageIds, isNull);
 
       expect(controller.checkoutCurrency, 'ر.ي');
       expect(controller.checkoutGrossAmount, 50000.0);
