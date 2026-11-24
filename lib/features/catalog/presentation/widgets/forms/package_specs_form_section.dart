@@ -54,8 +54,9 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                   decimal: true,
                 ),
                 isRequired: true,
-                validator: FormValidators.doubleValidator(
+                validator: FormValidators.amountValidator(
                   fieldName: 'رصيد البيانات',
+                  decimalPlaces: 12,
                 ),
               ),
             ),
@@ -105,6 +106,11 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                validator: FormValidators.amountValidator(
+                  fieldName: 'وقت الاستخدام',
+                  isRequired: false,
+                  decimalPlaces: 12,
+                ),
               ),
             ),
             SizedBox(width: AppSpacing.sm),
@@ -152,6 +158,11 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                 prefixIcon: const Icon(Icons.event_available_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
+                ),
+                validator: FormValidators.amountValidator(
+                  fieldName: 'فترة الصلاحية',
+                  isRequired: false,
+                  decimalPlaces: 12,
                 ),
               ),
             ),
