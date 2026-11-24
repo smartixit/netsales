@@ -171,7 +171,7 @@ class NetworkDirectInvoiceController extends GetxController {
     );
   }
 
-  /// صافي الفاتورة التقديري (يعتمد الخادم سيادياً عند توفره)
+  /// صافي الفاتورة التقديري المحسوب محلياً
   double get checkoutNetAmount {
     final net = checkoutGrossAmount - checkoutDiscountAmount;
     return net > 0 ? net : 0.0;
