@@ -43,6 +43,15 @@ class PackageDetailsController extends GetxController {
   final posDiscountSearchController = TextEditingController();
   Timer? _searchTimer;
   int _requestRevision = 0;
+  final selectedActivationFilter = 0.obs;
+  final selectedValidityFilter = 0.obs;
+
+  String? get activationStatus => switch (selectedActivationFilter.value) {
+    1 => 'true', 2 => 'false', _ => null,
+  };
+  String? get validityStateFilter => switch (selectedValidityFilter.value) {
+    1 => 'EFFECTIVE', 2 => 'SCHEDULED', 3 => 'EXPIRED', 4 => 'DISABLED', _ => null,
+  };
   bool get hasMorePosDiscounts => posDiscountsNextCursor.value?.isNotEmpty ?? false;
 
   bool get canEditPackage =>
@@ -107,6 +116,18 @@ class PackageDetailsController extends GetxController {
 
   void changeDetailsTab(int index) => selectedDetailsTab.value = index;
 
+  void changeActivationFilter(int index) {
+    if (selectedActivationFilter.value == index) return;
+    selectedActivationFilter.value = index;
+    unawaited(fetchPosDiscounts(refresh: true));
+  }
+
+  void changeValidityFilter(int index) {
+    if (selectedValidityFilter.value == index) return;
+    selectedValidityFilter.value = index;
+    unawaited(fetchPosDiscounts(refresh: true));
+  }
+
   void onPosDiscountSearchChanged(String value) {
     _searchTimer?.cancel();
     _searchTimer = Timer(const Duration(milliseconds: 350),
@@ -133,6 +154,8 @@ class PackageDetailsController extends GetxController {
         networkId: current.networkId, packageId: current.packageId,
         search: posDiscountSearchController.text.trim().isEmpty
             ? null : posDiscountSearchController.text.trim(),
+        status: activationStatus,
+        validityState: validityStateFilter,
         cursor: refresh ? null : posDiscountsNextCursor.value,
       );
       if (revision != _requestRevision) return;
