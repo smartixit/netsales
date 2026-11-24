@@ -1,15 +1,10 @@
 import 'package:netsales/core/models/api_response.dart';
-import 'package:netsales/features/requests/data/models/procurement_quote_model.dart';
 import 'package:netsales/features/requests/data/models/request_model.dart';
 import 'package:netsales/features/requests/data/models/request_approval_result_model.dart';
 import 'package:netsales/features/requests/data/models/request_status_summary_model.dart';
 
 /// واجهة مصدر البيانات البعيد لطلبات الكروت والتوريد
 abstract interface class RequestRemoteDataSource {
-  Future<ApiResponse<ProcurementQuoteModel>> getQuote(
-    Map<String, dynamic> data,
-  );
-
   Future<ApiResponse<List<RequestModel>>> getRequests({
     Map<String, dynamic>? query,
   });
