@@ -3,6 +3,6 @@ import 'package:netsales/features/catalog/domain/entities/package_pos_discount_e
 
 abstract class PackagePosDiscountRepository {
   Future<PaginatedList<PackagePosDiscountEntity>> getForPackage({
-    required int networkId, required int packageId, String? search, String? cursor,
+    required int networkId, required int packageId, String? search, String? cursor, String? status, String? validityState,
   });
 }
