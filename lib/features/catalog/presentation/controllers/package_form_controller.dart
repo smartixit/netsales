@@ -324,8 +324,11 @@ class PackageFormController extends GetxController {
 
     final currentValue = double.tryParse(balanceController.text.trim());
     if (currentValue != null && currentValue >= 0) {
-      final bytes = oldUnit.toCanonicalBytes(currentValue);
-      final converted = newUnit.fromCanonicalBytes(bytes);
+      final converted = PackageSpecFormatter.convertData(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
       final formatted = _formatConvertedUnitValue(converted);
       balanceController.value = balanceController.value.copyWith(
         text: formatted,
@@ -343,8 +346,11 @@ class PackageFormController extends GetxController {
 
     final currentValue = double.tryParse(uptimeController.text.trim());
     if (currentValue != null && currentValue >= 0) {
-      final minutes = oldUnit.toCanonicalMinutes(currentValue);
-      final converted = newUnit.fromCanonicalMinutes(minutes);
+      final converted = PackageSpecFormatter.convertDuration(
+        currentValue,
+        oldUnit,
+        newUnit,
+      );
       final formatted = _formatConvertedUnitValue(converted);
       uptimeController.value = uptimeController.value.copyWith(
         text: formatted,
