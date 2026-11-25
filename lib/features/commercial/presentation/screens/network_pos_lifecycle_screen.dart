@@ -279,7 +279,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
             if (controller.effectiveDiscounts.isEmpty)
               const CustomEmptyState.compact(
                 title: 'لا توجد خصومات فعالة',
-                subtitle: 'لا توجد حالياً خصومات فعالة مخصصة لهذه العلاقة أو موروثة من كتالوج الشبكة.',
+                subtitle: 'لا توجد حالياً خصومات مخصصة لهذه العلاقة.',
                 icon: Icons.local_offer_outlined,
               ),
             ...controller.effectiveDiscounts.map((discount) => Padding(
@@ -299,7 +299,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        Chip(label: Text(discount.isCustom ? 'خصم مخصص للعلاقة' : 'الخصم الافتراضي للباقة')),
+                        Chip(label: Text('خصم مخصص لنقطة البيع')),
                       ],
                     ),
                     AppSpacing.vSm,
