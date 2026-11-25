@@ -40,6 +40,13 @@ import 'package:netsales/features/requests/presentation/screens/pos_new_procurem
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_request_details_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_directory_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/pos_directory_binding.dart';
+import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/pos_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_directory_screen.dart';
+
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
@@ -232,6 +239,33 @@ abstract final class AppPages {
     // ========================================================================
     // 6. مسارات الكيانات والعلاقات التجارية (Commercial Entities & Relationships)
     // ========================================================================
+    GetPage(
+      name: AppRoutes.networkEntityDirectory,
+      page: () => const NetworkDirectoryScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkDirectoryBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityDirectory,
+      page: () => const PosDirectoryScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosDirectoryBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
     GetPage(
       name: AppRoutes.posDirectory,
       page: () => const CommercialDirectoryScreen(isNetwork: true),
