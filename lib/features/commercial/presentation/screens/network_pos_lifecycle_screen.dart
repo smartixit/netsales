@@ -408,6 +408,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     'AGREEMENT_DRAFT_UPDATED' => 'تحديث مسودة اتفاقية',
     'AGREEMENT_ACTIVATED' => 'اعتماد اتفاقية',
     'AGREEMENT_TERMINATED' => 'إنهاء اتفاقية',
+    'AGREEMENT_EXPIRED' => 'انتهاء صلاحية الاتفاقية',
     _ => type,
   };
 }
