@@ -138,7 +138,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
     }
 
     if (!Get.isRegistered<PermissionService>()) {
-      return null;
+      return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
     final perm = PermissionService.to;
