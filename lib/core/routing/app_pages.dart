@@ -477,6 +477,9 @@ abstract final class AppPages {
         PermissionGuardMiddleware(
           requiredPermission: AppPermissions.posWalletsView,
         ),
+        // Network members may inspect linked POS wallets with their
+        // Network-scoped grant; require a valid workspace without forcing POS.
+        WorkspaceGuard(),
       ],
     ),
     GetPage(
