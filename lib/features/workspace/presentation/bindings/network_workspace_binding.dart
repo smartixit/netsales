@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_networks_page_use_case.dart';
+import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
 import 'package:netsales/features/billing/data/datasources/billing_remote_data_source.dart';
 import 'package:netsales/features/billing/data/datasources/billing_remote_data_source_impl.dart';
 import 'package:netsales/features/billing/data/repositories/billing_repository_impl.dart';
@@ -72,6 +74,10 @@ class NetworkWorkspaceBinding extends Bindings {
     }
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
+    registerLazyIfAbsent<NetworkDirectoryController>(
+      () => NetworkDirectoryController(Get.find<GetNetworksPageUseCase>()),
+      fenix: true,
+    );
     ExpenseBinding().dependencies();
     InvoiceBinding().dependencies();
     WorkspaceEntityPickerBinding().dependencies();
