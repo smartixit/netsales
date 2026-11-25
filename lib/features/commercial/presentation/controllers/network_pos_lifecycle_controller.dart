@@ -205,7 +205,9 @@ class NetworkPosLifecycleController extends GetxController {
       agreements.addAll(result.items);
       _agreementsCursor = result.nextCursor;
     } catch (error) {
-      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      if (revision == _agreementsRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
     } finally {
       if (revision == _agreementsRevision) isLoadingMoreAgreements.value = false;
     }
@@ -359,7 +361,9 @@ class NetworkPosLifecycleController extends GetxController {
         _trashedDiscountsCursor = result.nextCursor;
       }
     } catch (error) {
-      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      if (revision == _trashedDiscountsRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
     } finally {
       if (revision == _trashedDiscountsRevision) isLoadingMoreTrashedDiscounts.value = false;
     }
@@ -590,14 +594,16 @@ class NetworkPosLifecycleController extends GetxController {
       archivedLinks.addAll(result.items);
       _archiveCursor = result.nextCursor;
     } catch (error) {
-      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      if (revision == _archiveRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
     } finally {
       if (revision == _archiveRevision) isLoadingMoreArchive.value = false;
     }
   }
 
   Future<void> restoreLink(NetworkPosLinkEntity link) async {
-    if (!canRestoreLinks) return;
+    if (!canRestoreLinks || isSaving.value) return;
     isSaving.value = true;
     try {
       await restoreLinkUseCase(link.networkPosId);
@@ -624,7 +630,9 @@ class NetworkPosLifecycleController extends GetxController {
       events.addAll(result.items);
       _eventsCursor = result.nextCursor;
     } catch (error) {
-      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      if (revision == _eventsRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
     } finally {
       if (revision == _eventsRevision) isLoadingMoreEvents.value = false;
     }
