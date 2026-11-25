@@ -87,9 +87,12 @@ class ApiService {
       // 0. Centralized connectivity guard (fail-fast, no retries when offline)
       _ConnectivityInterceptor(),
       _RetryInterceptor(_dio),
-      InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
       _CryptoInterceptor(_dio),
+      // Keep the hosting challenge handler last: Dio dispatches onError in
+      // reverse order, so InfinityFree must resolve gateway 401/403 HTML
+      // before SessionAuthInterceptor can invalidate the authenticated session.
+      InfinityFreeChallengeInterceptor(_dio),
     ]);
   }
 
