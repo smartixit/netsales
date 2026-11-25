@@ -19,7 +19,6 @@ abstract class CommercialRepository {
   Future<PaginatedList<NetworkEntity>> getNetworksPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   });
@@ -28,7 +27,6 @@ abstract class CommercialRepository {
   Future<PaginatedList<PosEntity>> getPosPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   });
