@@ -302,6 +302,7 @@ class NetworkPosLifecycleController extends GetxController {
   );
 
   Future<void> saveDraft({NetworkPosAgreementEntity? agreement}) async {
+    if (isSaving.value || !canManageAgreements) return;
     final title = titleController.text.trim();
     final terms = termsController.text.trim();
     if (title.isEmpty || terms.isEmpty) {
@@ -369,6 +370,7 @@ class NetworkPosLifecycleController extends GetxController {
     Future<NetworkPosAgreementEntity> Function() action,
     String success,
   ) async {
+    if (isSaving.value || !canManageAgreements) return;
     isSaving.value = true;
     try {
       await action();
