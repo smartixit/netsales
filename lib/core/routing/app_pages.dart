@@ -44,6 +44,10 @@ import 'package:netsales/features/commercial/presentation/bindings/network_direc
 import 'package:netsales/features/commercial/presentation/bindings/network_details_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_relationships_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_relationships_binding.dart';
+import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
+import 'package:netsales/features/membership/presentation/bindings/network_entity_membership_binding.dart';
+import 'package:netsales/features/membership/presentation/bindings/pos_entity_membership_binding.dart';
+import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_form_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_form_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_details_binding.dart';
@@ -358,6 +362,39 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkEntityMembers,
+      page: () => MembershipsScreen(
+        isNetwork: true,
+        controllerTag: 'network-members-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        MembershipBinding().dependencies();
+        NetworkEntityMembershipBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networkMembersView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityMembers,
+      page: () => MembershipsScreen(
+        isNetwork: false,
+        controllerTag: 'pos-members-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        MembershipBinding().dependencies();
+        PosEntityMembershipBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posMembersView),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
