@@ -49,7 +49,8 @@ class PackageFormController extends GetxController {
   final isEditing = false.obs;
   final packageId = Rxn<int>();
   final selectedNetworkId = Rxn<int>();
-  final selectedColor = Rxn<String>();
+  static const String defaultPackageColor = '0xFF0D7A5F';
+  final selectedColor = defaultPackageColor.obs;
   final status = true.obs;
 
   // محددات الوحدات القياسية المعتمدة
@@ -256,7 +257,7 @@ class PackageFormController extends GetxController {
     selectedNetworkId.value = package.networkId;
     nameController.text = package.packageName;
     livePackageName.value = package.packageName;
-    selectedColor.value = package.packageColor;
+    selectedColor.value = package.packageColor ?? defaultPackageColor;
 
     // استخراج أفضل وحدة لعرض الرصيد بالاعتماد على الحجم الفعلي
     if (package.packageBalance > 0) {
