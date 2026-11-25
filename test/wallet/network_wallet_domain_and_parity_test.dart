@@ -3,7 +3,6 @@ import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/wallet/data/models/network_wallet_log_model.dart';
 import 'package:netsales/features/wallet/data/models/network_wallet_model.dart';
 import 'package:netsales/features/wallet/domain/entities/network_wallet_entity.dart';
