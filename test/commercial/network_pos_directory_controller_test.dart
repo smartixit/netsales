@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
@@ -295,6 +297,30 @@ void main() {
       expect(controller.resolvedInvitationTarget.value, isNull);
     });
 
+    test('Network actions require their dedicated link permissions', () {
+      PermissionService.instance.updateAccess(
+        roleKey: 'NETWORK_OWNER',
+        permissions: [AppPermissions.networksEdit],
+      );
+
+      expect(controller.canCreateInvitation, isFalse);
+      expect(controller.canTogglePartnerLink, isFalse);
+      expect(controller.canDeletePartnerLink, isFalse);
+
+      PermissionService.instance.updateAccess(
+        roleKey: 'NETWORK_OWNER',
+        permissions: [
+          AppPermissions.networkCreateLinkChallenge,
+          AppPermissions.networkTogglePosLink,
+          AppPermissions.networkDeletePosLink,
+        ],
+      );
+
+      expect(controller.canCreateInvitation, isTrue);
+      expect(controller.canTogglePartnerLink, isTrue);
+      expect(controller.canDeletePartnerLink, isTrue);
+    });
+
     test('Loads initial networks and links successfully', () async {
       await controller.loadInitialData();
 
@@ -388,6 +414,29 @@ void main() {
             ConfirmNetworkPosLinkChallengeUseCase(repo),
         getMyPosUseCase: GetMyPosUseCase(repo),
       );
+    });
+
+    test('POS linking requires preview and confirmation permissions', () {
+      PermissionService.instance.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [AppPermissions.posEdit],
+      );
+      expect(controller.canLinkNetwork, isFalse);
+
+      PermissionService.instance.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [AppPermissions.posPreviewLinkChallenge],
+      );
+      expect(controller.canLinkNetwork, isFalse);
+
+      PermissionService.instance.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [
+          AppPermissions.posPreviewLinkChallenge,
+          AppPermissions.posConfirmLinkChallenge,
+        ],
+      );
+      expect(controller.canLinkNetwork, isTrue);
     });
 
     test('Loads POS networks and handles links count', () async {
