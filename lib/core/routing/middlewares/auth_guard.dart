@@ -65,7 +65,9 @@ class GuestGuard extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     if (Get.isRegistered<SessionService>() &&
-        SessionService.to.isAccessBlocked) {
+        (SessionService.to.isAccessBlocked ||
+            (SessionService.to.isAuthenticated &&
+                SessionService.to.currentUser?.isPlatformUser == true))) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
