@@ -5,7 +5,7 @@ class RestoreNetworkPosLinkUseCase {
 
   final CommercialRepository _repository;
 
-  void call(int networkPosId) {
+  Future<void> call(int networkPosId) {
     return _repository.restoreNetworkPosLink(int networkPosId);
   }
 }
