@@ -25,7 +25,7 @@ class NetworkFormScreen extends GetView<NetworkFormController> {
         return CustomStateView.error(
           title: 'تعذر فتح نموذج الشبكة',
           subtitle: controller.errorMessage.value,
-          actionLabel: 'العودة',
+          actionLabel: 'إعادة المحاولة',
           onAction: controller.retryInitialize,
         );
       }
