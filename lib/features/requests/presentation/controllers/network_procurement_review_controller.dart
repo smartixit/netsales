@@ -1028,6 +1028,7 @@ class NetworkProcurementReviewController
     List<RequestModificationLineEntity>? items,
     double? paidAmount,
   }) async {
+    if (!canApproveRequests) return;
     try {
       isProcessingDecision.value = true;
       await CustomAnimationOverlay.showLoading(
@@ -1108,6 +1109,7 @@ class NetworkProcurementReviewController
 
   /// رفض طلب الكروت مع توثيق السبب الإلزامي
   Future<void> rejectRequest(int requestId, String rejectionReason) async {
+    if (!canRejectRequests) return;
     try {
       if (rejectionReason.trim().isEmpty) {
         CustomSnackbar.show(
@@ -1204,6 +1206,7 @@ class NetworkProcurementReviewController
 
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
+    if (!canApproveRequests || !request.isPending) return;
     final isCredit = request.saleType == SaleType.credit;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
@@ -1219,6 +1222,7 @@ class NetworkProcurementReviewController
 
   /// حوار رفض طلب التوريد
   Future<void> promptRejectRequest(RequestEntity request) async {
+    if (!canRejectRequests || !request.isPending) return;
     await ProcurementActionDialogs.showRejectionDialog(
       requestUuid: request.requestUuid ?? '-',
       onConfirm: (reason) => rejectRequest(request.requestId, reason),
@@ -1227,6 +1231,7 @@ class NetworkProcurementReviewController
 
   /// تأكيد واعتماد التعديل بعد المعاينة
   Future<void> confirmAndApproveModification() async {
+    if (!canModifyRequests || !canApproveRequests) return;
     final preview = currentPreview.value;
     if (preview == null || !preview.hasModifications) return;
 
