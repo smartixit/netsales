@@ -108,7 +108,7 @@ class NetworkPosLifecycleBinding extends Bindings {
         networkPosId: id,
         networkId: (Get.arguments is Map ? (Get.arguments['network_id'] as num?)?.toInt() : null) ?? 0,
         posId: (Get.arguments is Map ? (Get.arguments['pos_id'] as num?)?.toInt() : null) ?? 0,
-        getEffectiveDiscountsUseCase: Get.find<GetEffectivePackageDiscountsForPosUseCase>(),
+        getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),
         getPackagePosDiscountsUseCase: Get.find<GetPackagePosDiscountsForPosUseCase>(),
         createPackagePosDiscountUseCase: Get.find<CreatePackagePosDiscountUseCase>(),
         updatePackagePosDiscountUseCase: Get.find<UpdatePackagePosDiscountUseCase>(),
