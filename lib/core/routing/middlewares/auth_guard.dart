@@ -32,7 +32,8 @@ class AuthGuard extends GetMiddleware {
       });
       return const RouteSettings(name: AppRoutes.login);
     }
-    if (SessionService.to.isAccessBlocked) {
+    if (SessionService.to.isAccessBlocked ||
+        SessionService.to.currentUser?.isPlatformUser == true) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
     if (!SessionService.to.isSessionVerified) {
@@ -64,7 +65,9 @@ class GuestGuard extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     if (Get.isRegistered<SessionService>() &&
-        SessionService.to.isAccessBlocked) {
+        (SessionService.to.isAccessBlocked ||
+            (SessionService.to.isAuthenticated &&
+                SessionService.to.currentUser?.isPlatformUser == true))) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
@@ -99,7 +102,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
     this.requiredRole,
     this.anyRoles,
     int? priority,
-  }) : _priority = priority ?? 2;
+  }) : _priority = priority ?? 3;
 
   final int _priority;
 
@@ -122,7 +125,8 @@ class PermissionGuardMiddleware extends GetMiddleware {
       return const RouteSettings(name: AppRoutes.login);
     }
 
-    if (SessionService.to.isAccessBlocked) {
+    if (SessionService.to.isAccessBlocked ||
+        SessionService.to.currentUser?.isPlatformUser == true) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
@@ -136,15 +140,10 @@ class PermissionGuardMiddleware extends GetMiddleware {
     }
 
     if (!Get.isRegistered<PermissionService>()) {
-      return null;
+      return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
     final perm = PermissionService.to;
-
-    // تجاوز المشرف العام تلقائياً
-    if (perm.isSuperAdmin) {
-      return null;
-    }
 
     // التحقق من الدور
     if (requiredRole != null && !perm.hasRole(requiredRole!)) {

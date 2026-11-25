@@ -20,6 +20,51 @@ void main() {
 
   tearDown(() => permissions.clear());
 
+  test('platform role names do not bypass explicit permission grants', () {
+    permissions.updateAccess(
+      roleKey: 'SUPER_ADMIN',
+      permissions: const [],
+    );
+
+    expect(permissions.can('sales.view'), isFalse);
+    expect(permissions.canAny(['sales.view', 'requests.approve']), isFalse);
+    expect(permissions.canAll(['sales.view']), isFalse);
+  });
+
+
+  test('fails closed when only account-wide permission union is available', () {
+    permissions.updateAccess(
+      roleKey: 'NETWORK_OWNER',
+      permissions: const ['sales.view', 'requests.approve'],
+    );
+
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.currentRole, isEmpty);
+    expect(permissions.can('sales.view'), isFalse);
+    expect(permissions.canAny(['sales.view', 'requests.approve']), isFalse);
+    expect(permissions.canAll(['sales.view']), isFalse);
+  });
+
+  test('rejects Platform and unknown scopes as operational permission contexts', () {
+    permissions.setWorkspaceContext(
+      scope: RoleScope.platform,
+      tenantId: 12,
+      roleKey: 'SUPER_ADMIN',
+      permissions: const ['sales.view'],
+    );
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.can('sales.view'), isFalse);
+
+    permissions.setWorkspaceContext(
+      scope: RoleScope.unknown,
+      tenantId: 12,
+      roleKey: 'NETWORK_OWNER',
+      permissions: const ['sales.view'],
+    );
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.can('sales.view'), isFalse);
+  });
+
   test('uses only permissions from the active Network membership', () {
     permissions.setWorkspaceContext(
       scope: RoleScope.network,

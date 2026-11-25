@@ -217,6 +217,7 @@ class SessionService extends GetxService {
         role: current.role,
         rawIsSuperAdmin: current.rawIsSuperAdmin,
         generalRoleKey: current.generalRoleKey,
+        roleScope: current.roleScope,
         workspaceMemberships: current.workspaceMemberships,
       );
       await updateCurrentUser(updated);

@@ -1,7 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netsales/features/membership/domain/entities/member_user_entity.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
@@ -21,8 +25,10 @@ void main() {
   late MockMembershipRepository repository;
   late NetworkMembershipsController controller;
 
-  setUp(() {
+  setUp(() async {
     Get.reset();
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
     repository = MockMembershipRepository();
 
     // Setup mock members
@@ -124,6 +130,7 @@ void main() {
 
     Get.put<WorkspaceService>(WorkspaceService.instance);
     Get.put<PermissionService>(PermissionService.instance);
+    await WorkspaceService.to.saveActiveNetworkId(5);
 
     controller = NetworkMembershipsController(
       getNetworkMembersUseCase: GetNetworkMembersUseCase(repository),
@@ -190,6 +197,45 @@ void main() {
       expect(controller.expandedMemberId.value, 3);
       controller.toggleAccordion(4);
       expect(controller.expandedMemberId.value, 4);
+    });
+  });
+
+  group('Backend RBAC contract alignment', () {
+    test('uses granular Network membership capabilities independently', () {
+      PermissionService.to.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 5,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [
+          AppPermissions.networkMembersView,
+          AppPermissions.networkMembersCreate,
+          AppPermissions.networkMembersChangeRole,
+        ],
+      );
+
+      expect(controller.canViewMembers, isTrue);
+      expect(controller.canAddMember, isTrue);
+      expect(controller.canChangeMemberRole, isTrue);
+      expect(controller.canChangeMemberStatus, isFalse);
+      expect(controller.canRemoveMember, isFalse);
+    });
+
+    test('exposes only NETWORK_USER for Network', () async {
+      repository.networkRoles.add(
+        const MembershipRoleEntity(
+          roleId: 4,
+          roleKey: 'POS_ACCOUNTANT',
+          roleName: 'محاسب نقطة بيع',
+          scope: 'POS',
+        ),
+      );
+
+      await controller.loadAssignableRoles();
+
+      expect(
+        controller.assignableRoles.map((role) => role.roleKey).toSet(),
+        {'NETWORK_USER'},
+      );
     });
   });
 

@@ -143,8 +143,14 @@ class NetworkCommercialDirectoryController
 
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
-  bool get canManageCommercial =>
-      PermissionService.to.can(AppPermissions.networksEdit);
+  bool get canCreateInvitation =>
+      PermissionService.to.can(AppPermissions.networkCreateLinkChallenge);
+  bool get canRevokeInvitation =>
+      PermissionService.to.can(AppPermissions.networkRevokeLinkChallenge);
+  bool get canTogglePartnerLink =>
+      PermissionService.to.can(AppPermissions.networkTogglePosLink);
+  bool get canDeletePartnerLink =>
+      PermissionService.to.can(AppPermissions.networkDeletePosLink);
 
   int? get resolvedNetworkId {
     return selectedNetworkId.value ??
@@ -168,7 +174,7 @@ class NetworkCommercialDirectoryController
 
   @override
   Widget? get headerAction {
-    if (!canManageCommercial) return null;
+    if (!canCreateInvitation) return null;
     return CustomButton.icon(
       tooltip: 'دعوة نقطة بيع',
       icon: Icons.qr_code_rounded,
@@ -477,16 +483,18 @@ class NetworkCommercialDirectoryController
       link: link,
       isNetworkView: true,
       onViewDetails: () => openPartnerDetails(link),
-      onToggleStatus: canManageCommercial ? () => onToggleStatus(link) : null,
-      onDelete: canManageCommercial ? () => onDeleteLink(link) : null,
+      onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
+      onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
     );
   }
 
   void onToggleStatus(NetworkPosLinkEntity link) {
+    if (!canTogglePartnerLink) return;
     CommercialActionDialogs.showToggleStatusDialog(
       partnerName: link.displayPosName,
       willDeactivate: link.isActive,
       onConfirm: () async {
+        if (!canTogglePartnerLink) return;
         try {
           final updated = await toggleNetworkPosLinkStatusUseCase(
             link.networkPosId,
@@ -514,9 +522,11 @@ class NetworkCommercialDirectoryController
   }
 
   void onDeleteLink(NetworkPosLinkEntity link) {
+    if (!canDeletePartnerLink) return;
     CommercialActionDialogs.showUnlinkDialog(
       partnerName: link.displayPosName,
       onConfirm: () async {
+        if (!canDeletePartnerLink) return;
         try {
           await deleteNetworkPosLinkUseCase(link.networkPosId);
           links.removeWhere(
@@ -808,6 +818,7 @@ class NetworkCommercialDirectoryController
   }
 
   Future<void> revokeActiveInvitation() async {
+    if (!canRevokeInvitation) return;
     final challenge = _activeInvitation;
     if (challenge == null ||
         invitationStatus.value != LinkingChallengeStatus.pending ||
@@ -844,6 +855,7 @@ class NetworkCommercialDirectoryController
   }
 
   Future<void> openCreateQrInvitation() async {
+    if (!canCreateInvitation) return;
     if (_isInvitationTargetDialogOpen || isLoadingInvitationTargets.value) {
       return;
     }
@@ -894,7 +906,7 @@ class NetworkCommercialDirectoryController
         isLoadingMoreInvitationTargets.value = false;
         _isInvitationTargetDialogOpen = false;
       }
-      if (!_isInvitationTargetConfirmed) return;
+      if (!_isInvitationTargetConfirmed || !canCreateInvitation) return;
       final target = resolvedInvitationTarget.value;
       if (target == null) return;
       late final NetworkPosLinkChallengeEntity challenge;

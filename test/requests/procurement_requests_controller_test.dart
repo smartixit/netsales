@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
@@ -363,6 +366,17 @@ void main() {
     late PosProcurementOrdersController ordersController;
 
     setUp(() {
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
+        roleKey: 'POS_AGENT',
+        permissions: [
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsEdit,
+          AppPermissions.requestsCancel,
+          AppPermissions.requestsDelete,
+        ],
+      );
       mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
       mockCommercialRepo = MockCommercialRepository(
         posList: [samplePos],
@@ -387,6 +401,23 @@ void main() {
         getPackagesUseCase: GetPackagesUseCase(mockPackageRepo),
       );
       controller.onInit();
+    });
+
+    test('POS role capabilities distinguish edit, cancel and delete', () {
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
+        roleKey: 'POS_USER',
+        permissions: [
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsCancel,
+        ],
+      );
+
+      expect(ordersController.canCreateOrder, isTrue);
+      expect(ordersController.canEditOrder, isFalse);
+      expect(ordersController.canCancelOrder, isTrue);
+      expect(ordersController.canDeleteOrder, isFalse);
     });
 
     test('Initializes state and loads requests with cursor', () async {
@@ -501,6 +532,17 @@ void main() {
     late NetworkProcurementReviewController controller;
 
     setUp(() {
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: [
+          AppPermissions.requestsView,
+          AppPermissions.requestsApprove,
+          AppPermissions.requestsReject,
+          AppPermissions.requestsPreviewModification,
+        ],
+      );
       mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
       mockCommercialRepo = MockCommercialRepository(networks: [sampleNetwork]);
 
@@ -518,6 +560,24 @@ void main() {
         getMyNetworksUseCase: GetMyNetworksUseCase(mockCommercialRepo),
       );
       controller.onInit();
+    });
+
+    test('Request modification requires preview-modification grant, not requests.edit', () {
+      expect(controller.canModifyRequests, isTrue);
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: [AppPermissions.requestsEdit],
+      );
+      expect(controller.canModifyRequests, isFalse);
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: [AppPermissions.requestsPreviewModification],
+      );
+      expect(controller.canModifyRequests, isTrue);
     });
 
     test(

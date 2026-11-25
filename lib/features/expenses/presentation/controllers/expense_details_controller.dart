@@ -44,17 +44,18 @@ class ExpenseDetailsController extends GetxController {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesDelete);
     }
-    return true;
+    return false;
   }
 
   bool get canEditExpense {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesEdit);
     }
-    return true;
+    return false;
   }
 
   void onEditCurrentExpense() {
+    if (!canEditExpense) return;
     final exp = expense.value;
     if (exp == null) return;
     Get.toNamed<void>(
@@ -220,6 +221,7 @@ class ExpenseDetailsController extends GetxController {
 
   /// تأكيد وحذف المصروف واسترداد مبلغه للمحفظة
   Future<void> confirmDelete(BuildContext context) async {
+    if (!canDeleteExpense) return;
     final exp = expense.value;
     if (exp == null) return;
 

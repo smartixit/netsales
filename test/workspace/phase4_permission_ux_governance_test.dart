@@ -2,9 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
+import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/core/routing/screen_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -64,11 +66,107 @@ void main() {
       final expensesPage = AppPages.routes.firstWhere((p) => p.name == AppRoutes.operatingExpenses);
       expect(expensesPage.middlewares?.any((m) => m is PermissionGuardMiddleware), isTrue);
 
+      // 5. Network wallet statement must be scoped and permission-gated.
+      final networkWalletPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.networkWalletStatement,
+      );
+      expect(
+        networkWalletPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.networkWalletsView,
+        ),
+        isTrue,
+      );
+
+      // POS procurement form supports either creation or editing; mutations are checked separately.
+      final procurementFormPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.newProcurementOrder,
+      );
+      final procurementFormPermissions = procurementFormPage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .expand((m) => m.anyPermissions ?? const <String>[])
+          .toList();
+      expect(
+        procurementFormPermissions,
+        containsAll([
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsEdit,
+        ]),
+      );
+
+      // Expense form is shared by creation and editing; each submit path has its own permission.
+      final expenseFormPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.createOperatingExpense,
+      );
+      final expenseFormPermissions = expenseFormPage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .expand((m) => m.anyPermissions ?? const <String>[])
+          .toList();
+      expect(
+        expenseFormPermissions,
+        containsAll([
+          AppPermissions.expensesCreate,
+          AppPermissions.expensesEdit,
+        ]),
+      );
+
+      // 7. Procurement detail deep links require request visibility.
+      final requestDetailsPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.voucherRequestDetails,
+      );
+      expect(
+        requestDetailsPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.requestsView,
+        ),
+        isTrue,
+      );
+
+      // 8. Direct network invoices require sales creation, not unrelated request visibility.
+      final directInvoicePage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.networkCreateSaleInvoice,
+      );
+      final directInvoicePermissions = directInvoicePage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .map((m) => m.requiredPermission)
+          .toList();
+      expect(directInvoicePermissions, contains(AppPermissions.salesCreate));
+      expect(directInvoicePermissions, isNot(contains(AppPermissions.requestsView)));
+
+      // 6. POS wallet statement must be scoped and permission-gated.
+      final posWalletPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.posWalletStatement,
+      );
+      expect(
+        posWalletPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.posWalletsView,
+        ),
+        isTrue,
+      );
+      // Network owners can inspect linked POS wallet statements through
+      // their Network-scoped pos_wallets.view permission. Do not force a
+      // switch into a POS membership they may not possess.
+      expect(
+        posWalletPage.middlewares?.whereType<WorkspaceGuard>().any(
+          (m) => m.targetWorkspace == AppWorkspace.pos,
+        ),
+        isFalse,
+      );
+
+    });
+
+
+    test('workspace guard executes before permission evaluation', () {
+      final workspace = WorkspaceGuard();
+      final permission = PermissionGuardMiddleware(
+        requiredPermission: AppPermissions.salesView,
+      );
+      expect(workspace.priority, lessThan(permission.priority!));
     });
 
     test('PermissionGuardMiddleware redirects unauthorized access and prevents 403 deep-link states', () {
       // Simulate authenticated user without salesCreate permission
-      permissionService.updateAccess(
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 12,
         roleKey: 'POS_AGENT',
         permissions: [AppPermissions.salesView],
       );
@@ -83,12 +181,21 @@ void main() {
       expect(permissionService.can(AppPermissions.salesCreate), isFalse);
       expect(permissionService.can(AppPermissions.salesView), isTrue);
 
-      // SuperAdmin bypass verification
+      // Platform identities are outside the mobile app and never bypass
+      // tenant-scoped capabilities.
       permissionService.updateAccess(
         roleKey: AppRoles.superAdmin,
         permissions: [],
       );
-      expect(permissionService.can(AppPermissions.salesCreate), isTrue);
+      expect(permissionService.can(AppPermissions.salesCreate), isFalse);
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 12,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const ['sales.view'],
+      );
+      expect(permissionService.can(AppPermissions.salesCreate), isFalse);
+      expect(permissionService.can(AppPermissions.salesView), isTrue);
     });
   });
 }

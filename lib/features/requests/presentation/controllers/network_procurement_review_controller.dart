@@ -315,7 +315,7 @@ class NetworkProcurementReviewController
   bool get canRejectRequests =>
       PermissionService.to.can(AppPermissions.requestsReject);
   bool get canModifyRequests =>
-      PermissionService.to.can(AppPermissions.requestsEdit);
+      PermissionService.to.can(AppPermissions.requestsPreviewModification);
 
   /// هل توجد تعديلات فعلية على مسودة الباقات مقارنة بالطلب الأصلي
   bool get hasModificationChanges {
@@ -479,7 +479,7 @@ class NetworkProcurementReviewController
   }
 
   Future<void> beginModification(RequestEntity request) async {
-    if (!request.isPending) return;
+    if (!canModifyRequests || !request.isPending) return;
 
     final requestId = request.requestId;
     final loadRevision = ++_editorLoadRevision;
@@ -738,6 +738,7 @@ class NetworkProcurementReviewController
   }
 
   Future<bool> previewModification() async {
+    if (!canModifyRequests) return false;
     final requestId = editingRequestId.value;
     if (requestId == null ||
         modificationLines.isEmpty ||
@@ -1027,6 +1028,7 @@ class NetworkProcurementReviewController
     List<RequestModificationLineEntity>? items,
     double? paidAmount,
   }) async {
+    if (!canApproveRequests) return;
     try {
       isProcessingDecision.value = true;
       await CustomAnimationOverlay.showLoading(
@@ -1107,6 +1109,7 @@ class NetworkProcurementReviewController
 
   /// رفض طلب الكروت مع توثيق السبب الإلزامي
   Future<void> rejectRequest(int requestId, String rejectionReason) async {
+    if (!canRejectRequests) return;
     try {
       if (rejectionReason.trim().isEmpty) {
         CustomSnackbar.show(
@@ -1185,7 +1188,7 @@ class NetworkProcurementReviewController
 
   /// فتح شاشة تعديل طلب التوريد
   Future<void> openModificationSheet(RequestEntity request) async {
-    if (!request.isPending) return;
+    if (!canModifyRequests || !request.isPending) return;
 
     unawaited(beginModification(request));
 
@@ -1203,6 +1206,7 @@ class NetworkProcurementReviewController
 
   /// حوار اعتماد طلب التوريد
   Future<void> promptApproveRequest(RequestEntity request) async {
+    if (!canApproveRequests || !request.isPending) return;
     final isCredit = request.saleType == SaleType.credit;
     await ProcurementActionDialogs.showApprovalDialog(
       requestUuid: request.requestUuid ?? '-',
@@ -1218,6 +1222,7 @@ class NetworkProcurementReviewController
 
   /// حوار رفض طلب التوريد
   Future<void> promptRejectRequest(RequestEntity request) async {
+    if (!canRejectRequests || !request.isPending) return;
     await ProcurementActionDialogs.showRejectionDialog(
       requestUuid: request.requestUuid ?? '-',
       onConfirm: (reason) => rejectRequest(request.requestId, reason),
@@ -1226,6 +1231,7 @@ class NetworkProcurementReviewController
 
   /// تأكيد واعتماد التعديل بعد المعاينة
   Future<void> confirmAndApproveModification() async {
+    if (!canModifyRequests || !canApproveRequests) return;
     final preview = currentPreview.value;
     if (preview == null || !preview.hasModifications) return;
 

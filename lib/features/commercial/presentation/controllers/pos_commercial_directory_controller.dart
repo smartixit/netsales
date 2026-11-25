@@ -12,12 +12,10 @@ import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_action_dialogs.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
@@ -35,14 +33,12 @@ class PosCommercialDirectoryController
     extends BaseCommercialDirectoryController {
   PosCommercialDirectoryController({
     required this.getPosNetworksListUseCase,
-    required this.deleteNetworkPosLinkUseCase,
     required this.previewNetworkPosLinkChallengeUseCase,
     required this.confirmNetworkPosLinkChallengeUseCase,
     this.getMyPosUseCase,
   });
 
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
-  final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
   final PreviewNetworkPosLinkChallengeUseCase
   previewNetworkPosLinkChallengeUseCase;
   final ConfirmNetworkPosLinkChallengeUseCase
@@ -94,8 +90,12 @@ class PosCommercialDirectoryController
 
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
-  bool get canManageCommercial =>
-      PermissionService.to.can(AppPermissions.posEdit);
+  bool get canPreviewLinkChallenge =>
+      PermissionService.to.can(AppPermissions.posPreviewLinkChallenge);
+  bool get canConfirmLinkChallenge =>
+      PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
+  bool get canLinkNetwork =>
+      canPreviewLinkChallenge && canConfirmLinkChallenge;
 
   int? get resolvedPosId {
     return selectedPosId.value ??
@@ -117,7 +117,7 @@ class PosCommercialDirectoryController
 
   @override
   Widget? get headerAction {
-    if (!canManageCommercial) return null;
+    if (!canLinkNetwork) return null;
     return CustomButton.icon(
       tooltip: 'ربط مزود شبكة',
       icon: Icons.qr_code_scanner_rounded,
@@ -394,34 +394,14 @@ class PosCommercialDirectoryController
       link: link,
       isNetworkView: false,
       onViewDetails: () => openPartnerDetails(link),
-      onDelete: canManageCommercial ? () => onDeleteLink(link) : null,
+      onDelete: null,
     );
   }
 
-  void onDeleteLink(NetworkPosLinkEntity link) {
-    CommercialActionDialogs.showUnlinkDialog(
-      partnerName: link.displayNetworkName,
-      onConfirm: () async {
-        try {
-          await deleteNetworkPosLinkUseCase(link.networkPosId);
-          links.removeWhere(
-            (element) => element.networkPosId == link.networkPosId,
-          );
-          await CustomAnimationOverlay.showSuccess(
-            message: 'تم فك الارتباط بمزود الشبكة بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
-    );
-  }
+
 
   Future<void> openQrScannerFlow() async {
+    if (!canLinkNetwork) return;
     final posId = resolvedPosId;
     final pos = authorizedPosList.firstWhereOrNull(
       (item) => item.posId == posId,
@@ -457,6 +437,7 @@ class PosCommercialDirectoryController
     int posId,
     String posUuid,
   ) async {
+    if (!canLinkNetwork) return;
     try {
       if (resolvedPosId != posId ||
           authorizedPosList

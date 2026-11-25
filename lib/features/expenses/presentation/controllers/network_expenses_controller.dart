@@ -59,24 +59,25 @@ class NetworkExpensesController extends GetxController {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesCreate);
     }
-    return true;
+    return false;
   }
 
   bool get canDeleteExpense {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesDelete);
     }
-    return true;
+    return false;
   }
 
   bool get canEditExpense {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesEdit);
     }
-    return true;
+    return false;
   }
 
   void onEditExpense(ExpenseEntity expense) {
+    if (!canEditExpense) return;
     Get.toNamed<void>(
       AppRoutes.createOperatingExpense,
       arguments: {'expense': expense},
@@ -277,6 +278,7 @@ class NetworkExpensesController extends GetxController {
     BuildContext context,
     ExpenseEntity expense,
   ) async {
+    if (!canDeleteExpense) return;
     final confirmed = await CustomDialog.show(
       type: DialogType.danger,
       title: 'حذف سند المصروف',

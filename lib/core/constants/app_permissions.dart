@@ -47,11 +47,24 @@ abstract final class AppPermissions {
   static const String networksView = 'networks.view';
   static const String networksCreate = 'networks.create';
   static const String networksEdit = 'networks.edit';
+  static const String networkCreatePosLink = 'networks.create_pos_link';
+  static const String networkUpdatePosLink = 'networks.update_pos_link';
+  static const String networkDeletePosLink = 'networks.delete_pos_link';
+  static const String networkTogglePosLink = 'networks.toggle_pos_link';
+  static const String networkCreateLinkChallenge = 'networks.create_link_challenge';
+  static const String networkRevokeLinkChallenge = 'networks.revoke_link_challenge';
   static const String networksDelete = 'networks.delete';
   static const String networksApprove = 'networks.approve';
   static const String networksReject = 'networks.reject';
   static const String networksReport = 'networks.report';
   static const String networksExport = 'networks.export';
+
+  // 5.1. عضويات الشبكات (network_members)
+  static const String networkMembersView = 'network_members.view';
+  static const String networkMembersCreate = 'network_members.create';
+  static const String networkMembersChangeRole = 'network_members.change_role';
+  static const String networkMembersChangeStatus = 'network_members.change_status';
+  static const String networkMembersDelete = 'network_members.delete';
 
   // 6. محافظ الشبكات (network_wallets)
   static const String networkWalletsView = 'network_wallets.view';
@@ -66,8 +79,17 @@ abstract final class AppPermissions {
   static const String posCreate = 'pos.create';
   static const String posEdit = 'pos.edit';
   static const String posDelete = 'pos.delete';
+  static const String posPreviewLinkChallenge = 'pos.preview_link_challenge';
+  static const String posConfirmLinkChallenge = 'pos.confirm_link_challenge';
   static const String posReport = 'pos.report';
   static const String posExport = 'pos.export';
+
+  // 7.1. عضويات نقاط البيع (pos_members)
+  static const String posMembersView = 'pos_members.view';
+  static const String posMembersCreate = 'pos_members.create';
+  static const String posMembersChangeRole = 'pos_members.change_role';
+  static const String posMembersChangeStatus = 'pos_members.change_status';
+  static const String posMembersDelete = 'pos_members.delete';
 
   // 8. محافظ نقاط البيع (pos_wallets)
   static const String posWalletsView = 'pos_wallets.view';
@@ -88,8 +110,10 @@ abstract final class AppPermissions {
   static const String requestsView = 'requests.view';
   static const String requestsCreate = 'requests.create';
   static const String requestsEdit = 'requests.edit';
+  static const String requestsCancel = 'requests.cancel';
   static const String requestsDelete = 'requests.delete';
   static const String requestsApprove = 'requests.approve';
+  static const String requestsPreviewModification = 'requests.preview_modification';
   static const String requestsReject = 'requests.reject';
   static const String requestsReport = 'requests.report';
 

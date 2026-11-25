@@ -139,6 +139,47 @@ void main() {
       );
     });
 
+    test('keeps all Platform roles outside mobile workspaces', () {
+      for (final roleKey in <String>[
+        'SUPER_ADMIN',
+        'SUPPORT_AGENT',
+        'ACCOUNTANT',
+      ]) {
+        final user = UserModel.fromJson({
+          'user_id': 99,
+          'user_full_name': 'Platform User',
+          'user_phone_number': '700000099',
+          'role_key': roleKey,
+          'workspace_roles': const <Map<String, dynamic>>[],
+          'is_super_admin': roleKey == 'SUPER_ADMIN',
+        });
+
+        expect(user.isPlatformUser, isTrue, reason: roleKey);
+        expect(
+          () => WorkspaceService.instance.resolveWorkspaceForUser(user),
+          throwsStateError,
+          reason: roleKey,
+        );
+      }
+    });
+
+    test('blocks Platform scope even when the role key is unknown', () {
+      final user = UserModel.fromJson({
+        'user_id': 100,
+        'user_full_name': 'Platform Identity',
+        'user_phone_number': '700000100',
+        'role_key': 'CUSTOM_PLATFORM_ROLE',
+        'role_scope': 'PLATFORM',
+        'workspace_roles': const <Map<String, dynamic>>[],
+      });
+
+      expect(user.isPlatformUser, isTrue);
+      expect(
+        () => WorkspaceService.instance.resolveWorkspaceForUser(user),
+        throwsStateError,
+      );
+    });
+
     test('honors the saved workspace when the account has both scopes', () {
       final user = UserModel.fromJson({
         'user_id': 11,

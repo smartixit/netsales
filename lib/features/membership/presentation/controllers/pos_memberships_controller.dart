@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/membership_status.dart';
+import 'package:netsales/core/enums/role_key.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -60,7 +62,7 @@ class PosMembershipsController extends BaseMembershipsController {
   bool get isNetworkView => false;
 
   @override
-  Widget? get headerAction => canManageMembers
+  Widget? get headerAction => canAddMember
       ? CustomButton.primary(
           text: 'إضافة عضو',
           icon: Icons.person_add_alt_1_rounded,
@@ -150,13 +152,13 @@ class PosMembershipsController extends BaseMembershipsController {
       member: member,
       isNetworkView: false,
       onDetails: () => openMemberDetails(member),
-      onChangeRole: canManageMembers && !member.isOwner
+      onChangeRole: canChangeMemberRole && !member.isOwner
           ? () => openChangeRoleSheet(member)
           : null,
-      onToggleStatus: canManageMembers && !member.isOwner
+      onToggleStatus: canChangeMemberStatus && !member.isOwner
           ? () => promptToggleMemberStatus(member)
           : null,
-      onRemove: canManageMembers && !member.isOwner
+      onRemove: canRemoveMember && !member.isOwner
           ? () => promptRemoveMember(member)
           : null,
     );
@@ -189,9 +191,18 @@ class PosMembershipsController extends BaseMembershipsController {
       _allMembers.where((m) => m.isSuspended).length;
   int get invitedMembersCount => _allMembers.where((m) => m.isInvited).length;
 
-  bool get canManageMembers => PermissionService.to.can(AppPermissions.posEdit);
+  bool get canViewMembers =>
+      PermissionService.to.can(AppPermissions.posMembersView);
+  bool get canAddMember =>
+      PermissionService.to.can(AppPermissions.posMembersCreate);
+  bool get canChangeMemberRole =>
+      PermissionService.to.can(AppPermissions.posMembersChangeRole);
+  bool get canChangeMemberStatus =>
+      PermissionService.to.can(AppPermissions.posMembersChangeStatus);
+  bool get canRemoveMember =>
+      PermissionService.to.can(AppPermissions.posMembersDelete);
 
-  int? get resolvedPosId => WorkspaceService.to.resolveActivePosId([]);
+  int? get resolvedPosId => WorkspaceService.to.savedActivePosId;
 
   @override
   void onInit() {
@@ -258,7 +269,13 @@ class PosMembershipsController extends BaseMembershipsController {
 
     try {
       final roles = await getPosAssignableRolesUseCase(posId);
-      assignableRoles.assignAll(roles);
+      assignableRoles.assignAll(
+        roles.where(
+          (role) =>
+              role.typedScope == RoleScope.pos &&
+              role.typedRoleKey == RoleKey.posUser,
+        ),
+      );
     } catch (_) {
       // Fallback
     }
@@ -323,6 +340,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void openAddMemberSheet() {
+    if (!canAddMember) return;
     final formKey = GlobalKey<FormState>();
     final phoneController = TextEditingController();
     final roleNotifier = ValueNotifier<int?>(
@@ -343,6 +361,7 @@ class PosMembershipsController extends BaseMembershipsController {
         statusNotifier: statusNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
+          if (!canAddMember) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
             CustomSnackbar.show(
@@ -386,6 +405,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void openChangeRoleSheet(WorkspaceMemberEntity member) {
+    if (!canChangeMemberRole) return;
     final formKey = GlobalKey<FormState>();
     final reasonController = TextEditingController();
     final roleNotifier = ValueNotifier<int?>(
@@ -407,6 +427,7 @@ class PosMembershipsController extends BaseMembershipsController {
         roleNotifier: roleNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
+          if (!canChangeMemberRole) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
             CustomSnackbar.show(
@@ -453,6 +474,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void promptToggleMemberStatus(WorkspaceMemberEntity member) {
+    if (!canChangeMemberStatus) return;
     final willSuspend = member.isActive;
     final nextStatus = willSuspend ? 'SUSPENDED' : 'ACTIVE';
 
@@ -460,6 +482,7 @@ class PosMembershipsController extends BaseMembershipsController {
       memberName: member.displayFullName,
       willSuspend: willSuspend,
       onConfirm: (reason) async {
+          if (!canChangeMemberStatus) return;
         final posId = resolvedPosId;
         if (posId == null) return;
 
@@ -490,9 +513,11 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void promptRemoveMember(WorkspaceMemberEntity member) {
+    if (!canRemoveMember) return;
     MembershipActionDialogs.showRemoveMemberDialog(
       memberName: member.displayFullName,
       onConfirm: (reason) async {
+          if (!canRemoveMember) return;
         final posId = resolvedPosId;
         if (posId == null) return;
 

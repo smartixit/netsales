@@ -74,7 +74,7 @@ class NetworkInvoicesController extends BaseInvoicesController {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.salesCreate);
     }
-    return true;
+    return false;
   }
 
   @override
