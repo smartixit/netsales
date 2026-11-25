@@ -65,7 +65,6 @@ class ApiService {
   /// This value is never sent to the API and is not an authentication credential.
   static int sessionGeneration = 0;
 
-
   /// تهيئة عميل الاتصال وضبط تجاوز الشهادات في بيئة التطوير
   void _configureHttpClient() {
     final allowBadCerts = AppEnvironment.allowBadCertificates;
