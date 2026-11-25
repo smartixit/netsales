@@ -159,7 +159,8 @@ class NetworkCommercialDirectoryController
       PermissionService.to.can(AppPermissions.networkViewPosAgreements) ||
       PermissionService.to.can(AppPermissions.networkViewPosLinkEvents) ||
       PermissionService.to.can(AppPermissions.networksView) ||
-      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView) ||
+      PermissionService.to.can(AppPermissions.voucherPackagesView);
 
   int? get resolvedNetworkId {
     return selectedNetworkId.value ??
