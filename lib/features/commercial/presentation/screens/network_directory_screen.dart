@@ -130,7 +130,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                             Text(network.displayLocation, style: Theme.of(context).textTheme.bodySmall),
                             AppSpacing.vXs,
                             CustomStatusBadge(
-                              label: network.statusLabel ?? network.status ?? 'غير محدد',
+                              label: network.statusLabel ?? network.typedStatus.label,
                               tone: network.typedStatus.tone,
                               isCompact: true,
                             ),
