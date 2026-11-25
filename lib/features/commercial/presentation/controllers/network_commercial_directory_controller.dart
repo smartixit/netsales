@@ -56,6 +56,7 @@ class NetworkCommercialDirectoryController
     this.getMyNetworksUseCase,
     required this.getNetworkPosLinkChallengeStatusUseCase,
     required this.searchNetworkLinkablePosUseCase,
+    this.initialNetworkId,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -69,6 +70,7 @@ class NetworkCommercialDirectoryController
   final GetNetworkPosLinkChallengeStatusUseCase
   getNetworkPosLinkChallengeStatusUseCase;
   final SearchNetworkLinkablePosUseCase searchNetworkLinkablePosUseCase;
+  final int? initialNetworkId;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -230,7 +232,7 @@ class NetworkCommercialDirectoryController
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      selectedNetworkId.value = WorkspaceService.to.resolveActiveNetworkId(
+      selectedNetworkId.value = initialNetworkId ?? WorkspaceService.to.resolveActiveNetworkId(
         networks.map((n) => n.networkId).toList(growable: false),
       );
     } catch (error) {
