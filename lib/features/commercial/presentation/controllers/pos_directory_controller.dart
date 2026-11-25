@@ -72,7 +72,9 @@ class PosDirectoryController extends GetxController {
     isRestoring.value = true;
     try {
       await _restoreUseCase(pos.posId);
-      points.removeWhere((item) => item.posId == pos.posId);
+      if (showArchived.value) {
+        points.removeWhere((item) => item.posId == pos.posId);
+      }
       CustomSnackbar.show(
         title: 'تمت الاستعادة',
         message: 'أعيدت نقطة البيع إلى دليل الكيانات النشطة.',
