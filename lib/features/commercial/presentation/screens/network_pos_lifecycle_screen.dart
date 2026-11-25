@@ -289,7 +289,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 padding: EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
                 child: Text(
                   'التسعير الموروث من الشبكة',
-                  style: Theme.of(Get.context!).textTheme.titleMedium,
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                 ),
               ),
               ...controller.effectiveDiscounts.where((item) => !item.isCustom).map((item) => Padding(
