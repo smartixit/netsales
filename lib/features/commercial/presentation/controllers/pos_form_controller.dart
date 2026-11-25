@@ -7,9 +7,9 @@ import 'package:netsales/features/auth/domain/entities/directorate_entity.dart';
 import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/get_governorates_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/create_network_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
-import 'package:netsales/features/commercial/domain/usecases/update_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_pos_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class PosFormController extends GetxController {
@@ -23,12 +23,13 @@ class PosFormController extends GetxController {
 
   final GetGovernoratesUseCase getGovernorates;
   final GetDirectoratesUseCase getDirectorates;
-  final CreateNetworkUseCase createPos;
-  final UpdateNetworkUseCase updatePos;
+  final CreatePosUseCase createPos;
+  final UpdatePosUseCase updatePos;
   final GetPosDetailsUseCase getPosDetails;
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
+  final emailController = TextEditingController();
   final addressController = TextEditingController();
   final logo = ValueNotifier<File?>(null);
   final governorates = <GovernorateEntity>[].obs;
@@ -62,8 +63,8 @@ class PosFormController extends GetxController {
       final entity = await getPosDetails(id);
       if (isClosed) return;
       nameController.text = entity.posName;
-      addressController.text = entity.posAddress ?? '';
       emailController.text = entity.posEmail ?? '';
+      addressController.text = entity.posAddress ?? '';
       final governorate = governorates.firstWhereOrNull(
         (item) => item.governorateId == entity.governorateId,
       );
@@ -127,9 +128,11 @@ class PosFormController extends GetxController {
     try {
       final payload = <String, dynamic>{
         'pos_name': nameController.text.trim(),
+        'pos_email': emailController.text.trim().isEmpty
+            ? null
+            : emailController.text.trim(),
         'governorate_id': governorate.governorateId,
         'directorate_id': directorate.directorateId,
-        'pos_email': emailController.text.trim().isEmpty ? null : emailController.text.trim(),
         'pos_address': addressController.text.trim().isEmpty
             ? null
             : addressController.text.trim(),
@@ -142,14 +145,16 @@ class PosFormController extends GetxController {
       }
       CustomSnackbar.show(
         type: SnackType.success,
-        title: isEditing ? 'تم تحديث النقطة البيع' : 'تم إنشاء النقطة البيع',
-        message: isEditing ? 'حُدثت بيانات النقطة البيع بنجاح.' : 'أُنشئت النقطة البيع بنجاح.',
+        title: isEditing ? 'تم تحديث نقطة البيع' : 'تم إنشاء نقطة البيع',
+        message: isEditing
+            ? 'حُدثت بيانات نقطة البيع بنجاح.'
+            : 'أُنشئت نقطة البيع بنجاح.',
       );
       Get.back(result: true);
     } catch (error) {
       CustomSnackbar.show(
         type: SnackType.error,
-        title: 'تعذر حفظ النقطة البيع',
+        title: 'تعذر حفظ نقطة البيع',
         message: AppException.sanitizeMessage(error),
       );
     } finally {
@@ -160,8 +165,8 @@ class PosFormController extends GetxController {
   @override
   void onClose() {
     nameController.dispose();
-    addressController.dispose();
     emailController.dispose();
+    addressController.dispose();
     logo.dispose();
     super.onClose();
   }
