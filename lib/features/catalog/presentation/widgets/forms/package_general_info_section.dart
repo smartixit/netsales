@@ -171,7 +171,7 @@ class PackageGeneralInfoSection extends GetView<PackageFormController> {
           child: Obx(
             () => CustomColorPicker(
               label: 'لون تمييز كرت الباقة',
-              selectedColorHex: controller.selectedColor.value ?? '0xFF0D7A5F',
+              selectedColorHex: controller.selectedColor.value,
               onColorChanged: (String hex) {
                 controller.selectedColor.value = hex;
               },
