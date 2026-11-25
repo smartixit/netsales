@@ -171,12 +171,17 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   }
 
   Widget _agreementCard(NetworkPosAgreementEntity agreement) {
-    final statusLabel = agreement.validityState == 'EXPIRED' ? 'منتهية الصلاحية' : switch (agreement.status) {
-      'DRAFT' => 'مسودة',
-      'ACTIVE' => 'نشطة',
-      'TERMINATED' => 'منتهية',
+    final statusLabel = switch (agreement.validityState) {
       'EXPIRED' => 'منتهية الصلاحية',
-      _ => agreement.status,
+      'SCHEDULED' => 'مجدولة',
+      'EFFECTIVE' => 'سارية',
+      _ => switch (agreement.status) {
+          'DRAFT' => 'مسودة',
+          'ACTIVE' => 'نشطة',
+          'TERMINATED' => 'منتهية',
+          'EXPIRED' => 'منتهية الصلاحية',
+          _ => agreement.status,
+        },
     };
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.md),
