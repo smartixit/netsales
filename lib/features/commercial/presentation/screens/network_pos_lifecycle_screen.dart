@@ -261,28 +261,34 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
 
   Widget _catalogTab() {
     return Obx(() {
-      if (controller.isLoadingDiscounts.value && controller.effectiveDiscounts.isEmpty) {
+      if (controller.isLoadingDiscounts.value && controller.packageDiscounts.isEmpty) {
         return const CustomStateView.loading();
       }
-      if (controller.discountsErrorMessage.value != null && controller.effectiveDiscounts.isEmpty) {
+      if (controller.discountsErrorMessage.value != null && controller.packageDiscounts.isEmpty) {
         return CustomErrorState(
-          title: 'تعذر تحميل الكتالوج والخصومات',
+          title: 'تعذر تحميل خصومات العلاقة',
           subtitle: controller.discountsErrorMessage.value,
-          onRetry: controller.loadEffectiveDiscounts,
+          onRetry: () => controller.loadPackageDiscounts(refresh: true),
         );
       }
       return RefreshIndicator(
-        onRefresh: controller.loadEffectiveDiscounts,
+        onRefresh: () => controller.loadPackageDiscounts(refresh: true),
         child: ListView(
           padding: EdgeInsets.all(AppSpacing.md),
           children: [
-            if (controller.effectiveDiscounts.isEmpty)
+            if (controller.canCreateDiscount)
+              CustomButton.primary(
+                text: 'تخصيص خصم لباقة',
+                prefix: Icons.add_rounded,
+                onPressed: controller.isSavingDiscount.value ? null : controller.openDiscountEditor,
+              ),
+            if (controller.packageDiscounts.isEmpty)
               const CustomEmptyState.compact(
-                title: 'لا توجد خصومات فعالة',
-                subtitle: 'لا توجد حالياً خصومات مخصصة لهذه العلاقة.',
+                title: 'لا توجد خصومات مخصصة',
+                subtitle: 'يمكن إنشاء خصم خاص لهذه العلاقة دون تغيير أسعار الباقة العامة أو خصومات العلاقات الأخرى.',
                 icon: Icons.local_offer_outlined,
               ),
-            ...controller.effectiveDiscounts.map((discount) => Padding(
+            ...controller.packageDiscounts.map((discount) => Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
               child: CustomSurfaceCard(
                 padding: EdgeInsets.all(AppSpacing.md),
@@ -295,16 +301,21 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                         AppSpacing.hSm,
                         Expanded(
                           child: Text(
-                            'الباقة #${discount.packageId ?? '—'}',
+                            controller.packageNameFor(discount.packageId),
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        Chip(label: Text('خصم مخصص لنقطة البيع')),
+                        Chip(label: Text(discount.isEnabled ? 'مفعّل' : 'معطّل')),
                       ],
                     ),
                     AppSpacing.vSm,
-                    Text(discount.isEffectiveNow ? 'الحالة: ساري الآن' : 'الحالة: غير ساري الآن'),
-                    AppSpacing.vSm,
+                    Chip(label: Text(switch (discount.validityState.wireValue) {
+                      'EFFECTIVE' => 'ساري الآن',
+                      'SCHEDULED' => 'مجدول',
+                      'EXPIRED' => 'منتهي',
+                      'DISABLED' => 'معطّل',
+                      _ => 'غير محدد',
+                    })),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -314,15 +325,63 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                       ],
                     ),
                     AppSpacing.vSm,
-                    Text('السعر الأساسي: ${AmountFormatter.formatValue(discount.originalPackagePrice)} ر.ي'),
-                    Text('السعر النقدي المعتمد: ${AmountFormatter.formatValue(discount.effectiveCashPrice)} ر.ي'),
-                    Text('السعر الآجل المعتمد: ${AmountFormatter.formatValue(discount.effectiveCreditPrice)} ر.ي'),
-                    Text('الوفر النقدي: ${AmountFormatter.formatValue(discount.cashSavings)} ر.ي'),
-                    Text('الوفر الآجل: ${AmountFormatter.formatValue(discount.creditSavings)} ر.ي'),
+                    Text('السعر النقدي المعتمد: ${discount.cashPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.cashPrice!)} ر.ي'}'),
+                    Text('السعر الآجل المعتمد: ${discount.creditPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.creditPrice!)} ر.ي'}'),
+                    if (discount.startDate != null || discount.endDate != null) ...[
+                      AppSpacing.vXs,
+                      Text('السريان: ${discount.startDate?.toString() ?? 'فوري'} — ${discount.displayEndDate ?? 'مفتوح'}'),
+                    ],
+                    AppSpacing.vMd,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (controller.canEditDiscount)
+                          CustomButton.secondary(
+                            text: 'تعديل',
+                            prefix: Icons.edit_outlined,
+                            onPressed: controller.isSavingDiscount.value
+                                ? null
+                                : () => controller.openDiscountEditor(discount: discount),
+                          ),
+                        if (controller.canToggleDiscount)
+                          CustomButton.secondary(
+                            text: discount.isEnabled ? 'تعطيل' : 'تفعيل',
+                            prefix: discount.isEnabled ? Icons.pause_circle_outline : Icons.play_circle_outline,
+                            onPressed: controller.isSavingDiscount.value
+                                ? null
+                                : () => controller.toggleDiscount(discount),
+                          ),
+                        if (controller.canDeleteDiscount)
+                          CustomButton.secondary(
+                            text: 'حذف',
+                            prefix: Icons.delete_outline,
+                            onPressed: controller.isSavingDiscount.value
+                                ? null
+                                : () => controller.deleteDiscount(discount),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             )),
+            if (controller.isLoadingMoreDiscounts.value)
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 2,
+                  cardHeight: 76,
+                ),
+              )
+            else if (controller.hasMorePackageDiscounts)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: CustomButton.secondary(
+                  text: 'تحميل المزيد',
+                  onPressed: controller.loadMorePackageDiscounts,
+                ),
+              ),
           ],
         ),
       );
