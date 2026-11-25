@@ -9,6 +9,13 @@ abstract class PackagePosDiscountRepository {
     int perPage = 15,
   });
 
+  Future<PaginatedList<PackagePosDiscountEntity>> getTrashedForPos({
+    required int networkId,
+    required int posId,
+    String? cursor,
+    int perPage = 15,
+  });
+  Future<void> restore(int discountId);
   Future<PackagePosDiscountEntity> create(Map<String, dynamic> payload);
   Future<PackagePosDiscountEntity> update(int discountId, Map<String, dynamic> payload);
   Future<PackagePosDiscountEntity> toggleStatus(int discountId);
