@@ -23,11 +23,11 @@ import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 class CommercialDirectoryScreen
     extends GetView<BaseCommercialDirectoryController> {
   const CommercialDirectoryScreen({
-    super.key,
+    Key? key,
     this.embedded = false,
     this.isNetwork,
     this.controllerTag,
-  }) : super(tag: controllerTag);
+  }) : super(key: key, tag: controllerTag);
 
   final String? controllerTag;
 
