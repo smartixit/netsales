@@ -13,6 +13,8 @@ const String infinityFreeVerificationProbeFlagKey =
     '__netsales_infinityfree_verification_probe';
 const String infinityFreeChallengeFailureFlagKey =
     '__netsales_infinityfree_challenge_failure';
+const String infinityFreeSessionAuthHandledFlagKey =
+    '__netsales_infinityfree_session_auth_already_handled';
 
 /// Handles the InfinityFree JavaScript test-cookie challenge.
 ///
@@ -388,6 +390,10 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       // example, an expired session), not an InfinityFree challenge failure.
       if (dioError?.response != null &&
           _isBackendApiResponse(dioError!.response!)) {
+        // The replay traversed the production session interceptor already.
+        // Prevent the outer challenge request from invoking the same logout
+        // callback a second time when this canonical Laravel error is bubbled up.
+        options.extra[infinityFreeSessionAuthHandledFlagKey] = true;
         throw DioException(
           requestOptions: options,
           response: _responseForOriginalRequest(dioError.response!, options),
