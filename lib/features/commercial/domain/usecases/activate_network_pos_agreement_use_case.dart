@@ -6,7 +6,7 @@ class ActivateNetworkPosAgreementUseCase {
 
   final CommercialRepository _repository;
 
-  NetworkPosAgreementEntity call({required int networkPosId, required int agreementId}) {
+  Future<NetworkPosAgreementEntity> call({required int networkPosId, required int agreementId}) {
     return _repository.activateNetworkPosAgreement({required int networkPosId, required int agreementId});
   }
 }
