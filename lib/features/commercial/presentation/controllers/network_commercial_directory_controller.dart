@@ -153,6 +153,8 @@ class NetworkCommercialDirectoryController
       PermissionService.to.can(AppPermissions.networkTogglePosLink);
   bool get canDeletePartnerLink =>
       PermissionService.to.can(AppPermissions.networkDeletePosLink);
+  bool get canViewPartnerWallet =>
+      PermissionService.to.can(AppPermissions.posWalletsView);
 
   int? get resolvedNetworkId {
     return selectedNetworkId.value ??
@@ -392,7 +394,11 @@ class NetworkCommercialDirectoryController
 
   @override
   void onPartnerCardTap(NetworkPosLinkEntity link) {
-    openPosWalletStatement(link);
+    if (canViewPartnerWallet) {
+      openPosWalletStatement(link);
+      return;
+    }
+    openPartnerDetails(link);
   }
 
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
@@ -491,6 +497,7 @@ class NetworkCommercialDirectoryController
       onViewDetails: () => openPartnerDetails(link),
       onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
       onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
+      onViewWallet: canViewPartnerWallet ? () => openPosWalletStatement(link) : null,
     );
   }
 
