@@ -53,6 +53,13 @@ abstract final class AppPermissions {
   static const String networksReport = 'networks.report';
   static const String networksExport = 'networks.export';
 
+  // 5.1. عضويات الشبكات (network_members)
+  static const String networkMembersView = 'network_members.view';
+  static const String networkMembersCreate = 'network_members.create';
+  static const String networkMembersChangeRole = 'network_members.change_role';
+  static const String networkMembersChangeStatus = 'network_members.change_status';
+  static const String networkMembersDelete = 'network_members.delete';
+
   // 6. محافظ الشبكات (network_wallets)
   static const String networkWalletsView = 'network_wallets.view';
   static const String networkWalletsCreate = 'network_wallets.create';
@@ -68,6 +75,13 @@ abstract final class AppPermissions {
   static const String posDelete = 'pos.delete';
   static const String posReport = 'pos.report';
   static const String posExport = 'pos.export';
+
+  // 7.1. عضويات نقاط البيع (pos_members)
+  static const String posMembersView = 'pos_members.view';
+  static const String posMembersCreate = 'pos_members.create';
+  static const String posMembersChangeRole = 'pos_members.change_role';
+  static const String posMembersChangeStatus = 'pos_members.change_status';
+  static const String posMembersDelete = 'pos_members.delete';
 
   // 8. محافظ نقاط البيع (pos_wallets)
   static const String posWalletsView = 'pos_wallets.view';
