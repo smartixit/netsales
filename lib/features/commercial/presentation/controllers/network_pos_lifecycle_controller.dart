@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_agreements_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_events_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_network_pos_links_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/terminate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_pos_agreement_draft_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
@@ -15,6 +18,10 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class NetworkPosLifecycleController extends GetxController {
   NetworkPosLifecycleController({
     required this.networkPosId,
+    required this.entityId,
+    required this.isNetworkScope,
+    required this.getTrashedLinksUseCase,
+    required this.restoreLinkUseCase,
     required this.getAgreementsUseCase,
     required this.getEventsUseCase,
     required this.createDraftUseCase,
@@ -24,6 +31,10 @@ class NetworkPosLifecycleController extends GetxController {
   });
 
   final int networkPosId;
+  final int entityId;
+  final bool isNetworkScope;
+  final GetTrashedNetworkPosLinksUseCase getTrashedLinksUseCase;
+  final RestoreNetworkPosLinkUseCase restoreLinkUseCase;
   final GetNetworkPosAgreementsUseCase getAgreementsUseCase;
   final GetNetworkPosEventsUseCase getEventsUseCase;
   final CreateNetworkPosAgreementDraftUseCase createDraftUseCase;
@@ -33,13 +44,16 @@ class NetworkPosLifecycleController extends GetxController {
 
   final agreements = <NetworkPosAgreementEntity>[].obs;
   final events = <NetworkPosEventEntity>[].obs;
+  final archivedLinks = <NetworkPosLinkEntity>[].obs;
   final isLoadingAgreements = true.obs;
   final isLoadingEvents = true.obs;
+  final isLoadingArchive = true.obs;
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
   final isSaving = false.obs;
   final errorMessage = RxnString();
   final eventsErrorMessage = RxnString();
+  final archiveErrorMessage = RxnString();
 
   final titleController = TextEditingController();
   final referenceController = TextEditingController();
@@ -49,6 +63,7 @@ class NetworkPosLifecycleController extends GetxController {
 
   String? _agreementsCursor;
   String? _eventsCursor;
+  String? _archiveCursor;
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
 
@@ -60,6 +75,7 @@ class NetworkPosLifecycleController extends GetxController {
     super.onInit();
     loadAgreements();
     loadEvents();
+    loadArchivedLinks();
   }
 
   Future<void> loadAgreements({bool refresh = false}) async {
@@ -115,6 +131,42 @@ class NetworkPosLifecycleController extends GetxController {
       if (revision == _eventsRevision) eventsErrorMessage.value = error.toString();
     } finally {
       if (revision == _eventsRevision) isLoadingEvents.value = false;
+    }
+  }
+
+  Future<void> loadArchivedLinks({bool refresh = false}) async {
+    if (refresh) {
+      _archiveCursor = null;
+      archivedLinks.clear();
+    }
+    isLoadingArchive.value = archivedLinks.isEmpty;
+    archiveErrorMessage.value = null;
+    try {
+      final result = await getTrashedLinksUseCase(
+        entityId: entityId,
+        isNetwork: isNetworkScope,
+        perPage: 15,
+      );
+      archivedLinks.assignAll(result.items);
+      _archiveCursor = result.nextCursor;
+    } catch (error) {
+      archiveErrorMessage.value = error.toString();
+    } finally {
+      isLoadingArchive.value = false;
+    }
+  }
+
+  Future<void> restoreLink(NetworkPosLinkEntity link) async {
+    isSaving.value = true;
+    try {
+      await restoreLinkUseCase(link.networkPosId);
+      archivedLinks.removeWhere((item) => item.networkPosId == link.networkPosId);
+      await loadEvents(refresh: true);
+      CustomSnackbar.show(title: 'نجاح', message: 'تمت استعادة العلاقة التجارية.', type: SnackType.success);
+    } catch (error) {
+      CustomSnackbar.show(title: 'تعذر الاستعادة', message: error.toString(), type: SnackType.error);
+    } finally {
+      isSaving.value = false;
     }
   }
 
