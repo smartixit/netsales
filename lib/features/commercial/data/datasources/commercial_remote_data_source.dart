@@ -142,6 +142,23 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> deletePos(int posId);
 
+  Future<PaginatedList<NetworkModel>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restoreNetwork(int networkId);
+
+  Future<PaginatedList<PosModel>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restorePos(int posId);
+
+
   Future<NetworkModel> getNetworkDetails(int networkId);
 
   Future<PosModel> getPosDetails(int posId);
