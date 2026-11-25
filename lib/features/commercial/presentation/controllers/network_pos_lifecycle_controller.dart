@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_agreements_use_case.dart';
@@ -67,15 +69,31 @@ class NetworkPosLifecycleController extends GetxController {
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
 
+  bool get canViewAgreements => PermissionService.to.can(
+    isNetworkScope ? AppPermissions.networkViewPosAgreements : AppPermissions.posViewNetworkAgreements,
+  );
+  bool get canViewEvents => PermissionService.to.can(
+    isNetworkScope ? AppPermissions.networkViewPosLinkEvents : AppPermissions.posViewNetworkLinkEvents,
+  );
+  bool get canManageAgreements => PermissionService.to.can(
+    isNetworkScope ? AppPermissions.networkManagePosAgreements : AppPermissions.posManageNetworkAgreements,
+  );
+  bool get canRestoreLinks => PermissionService.to.can(
+    isNetworkScope ? AppPermissions.networkRestorePosLink : AppPermissions.posRestoreNetworkLink,
+  );
+  bool get canViewArchive => PermissionService.to.can(
+    isNetworkScope ? AppPermissions.networksView : AppPermissions.posView,
+  );
+
   bool get hasMoreAgreements => _agreementsCursor?.isNotEmpty == true;
   bool get hasMoreEvents => _eventsCursor?.isNotEmpty == true;
 
   @override
   void onInit() {
     super.onInit();
-    loadAgreements();
-    loadEvents();
-    loadArchivedLinks();
+    if (canViewAgreements) loadAgreements();
+    if (canViewEvents) loadEvents();
+    if (canViewArchive) loadArchivedLinks();
   }
 
   Future<void> loadAgreements({bool refresh = false}) async {
@@ -157,6 +175,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> restoreLink(NetworkPosLinkEntity link) async {
+    if (!canRestoreLinks) return;
     isSaving.value = true;
     try {
       await restoreLinkUseCase(link.networkPosId);
@@ -187,6 +206,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   void openDraftEditor({NetworkPosAgreementEntity? agreement}) {
+    if (!canManageAgreements) return;
     titleController.text = agreement?.title ?? '';
     referenceController.text = agreement?.reference ?? '';
     termsController.text = agreement?.terms ?? '';
@@ -261,6 +281,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> activate(NetworkPosAgreementEntity agreement) async {
+    if (!canManageAgreements) return;
     final confirmed = await CustomDialog.confirmation(
       title: 'اعتماد الاتفاقية',
       message: 'سيتم اعتماد الإصدار ${agreement.version} كاتفاقية نشطة للعلاقة. لا يمكن تعديل الإصدار بعد اعتماده.',
@@ -275,6 +296,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> terminate(NetworkPosAgreementEntity agreement) async {
+    if (!canManageAgreements) return;
     final confirmed = await CustomDialog.confirmation(
       title: 'إنهاء الاتفاقية',
       message: 'سيتم إنهاء الاتفاقية النشطة. لن تُحذف بياناتها أو سجل اعتمادها.',
