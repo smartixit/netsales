@@ -8,6 +8,7 @@ import 'package:netsales/features/auth/domain/entities/governorate_entity.dart';
 import 'package:netsales/features/auth/domain/usecases/get_directorates_use_case.dart';
 import 'package:netsales/features/auth/domain/usecases/get_governorates_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_use_case.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -64,7 +65,10 @@ class NetworkFormController extends GetxController {
     if (id == null) return;
     isLoading.value = true;
     try {
-      final entity = await getNetworkDetails(id);
+      final argument = Get.arguments;
+      final entity = argument is NetworkEntity
+          ? argument
+          : await getNetworkDetails(id);
       if (isClosed) return;
       nameController.text = entity.networkName;
       addressController.text = entity.networkAddress ?? '';
