@@ -83,6 +83,7 @@ class NetworkPosLifecycleController extends GetxController {
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
   final isLoadingMoreArchive = false.obs;
+  final isLoadingMoreDiscounts = false.obs;
   final isSaving = false.obs;
   final errorMessage = RxnString();
   final eventsErrorMessage = RxnString();
@@ -124,6 +125,7 @@ class NetworkPosLifecycleController extends GetxController {
   bool get canEditDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsEdit);
   bool get canToggleDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsToggleStatus);
   bool get canDeleteDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsDelete);
+  bool get canManageDiscounts => canCreateDiscount || canEditDiscount || canToggleDiscount || canDeleteDiscount;
   bool get canViewArchive => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networksView : AppPermissions.posView,
   );
@@ -243,8 +245,8 @@ class NetworkPosLifecycleController extends GetxController {
   bool get hasMorePackageDiscounts => _discountsCursor?.isNotEmpty == true;
 
   Future<void> loadMorePackageDiscounts() async {
-    if (!hasMorePackageDiscounts || isLoadingMoreArchive.value) return;
-    isLoadingMoreArchive.value = true;
+    if (!hasMorePackageDiscounts || isLoadingMoreDiscounts.value) return;
+    isLoadingMoreDiscounts.value = true;
     try {
       final result = await getPackagePosDiscountsUseCase(
         networkId: networkId,
@@ -257,8 +259,15 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreArchive.value = false;
+      isLoadingMoreDiscounts.value = false;
     }
+  }
+
+  String packageNameFor(int? packageId) {
+    for (final package in packages) {
+      if (package.packageId == packageId) return package.packageName;
+    }
+    return packageId == null ? 'باقة غير محددة' : 'باقة #$packageId';
   }
 
   void openDiscountEditor({PackagePosDiscountEntity? discount}) {
