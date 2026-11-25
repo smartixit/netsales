@@ -413,6 +413,7 @@ class NetworkCommercialDirectoryController
       arguments: {
         'entity_id': link.networkId,
         'is_network': true,
+        'relationship': link,
         'network_id': link.networkId,
         'pos_id': link.posId,
         'relationship': link,
