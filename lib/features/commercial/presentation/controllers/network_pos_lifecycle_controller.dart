@@ -127,7 +127,9 @@ class NetworkPosLifecycleController extends GetxController {
   bool get canRestoreLinks => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networkRestorePosLink : AppPermissions.posRestoreNetworkLink,
   );
-  bool get canViewCatalog => PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+  bool get canViewDiscounts => PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+  bool get canViewPackageCatalog => PermissionService.to.can(AppPermissions.voucherPackagesView);
+  bool get canViewCatalog => canViewDiscounts || canViewPackageCatalog;
   bool get canViewRelationshipWallet => PermissionService.to.can(AppPermissions.posWalletsView);
   bool get canCreateDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsCreate);
   bool get canEditDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsEdit);
@@ -148,10 +150,8 @@ class NetworkPosLifecycleController extends GetxController {
     if (canViewAgreements) loadAgreements();
     if (canViewEvents) loadEvents();
     if (canViewArchive) loadArchivedLinks();
-    if (canViewCatalog) {
-      if (canCreateDiscount || canEditDiscount) loadPackages();
-      loadPackageDiscounts();
-    }
+    if (canViewPackageCatalog) loadPackages();
+    if (canViewDiscounts) loadPackageDiscounts();
   }
 
   Future<void> loadAgreements({bool refresh = false}) async {
