@@ -94,7 +94,9 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final pos = controller.points[index];
-                return CustomSurfaceCard(
+                return GestureDetector(
+                  onTap: () => Get.toNamed('/pos/entities/${pos.posId}'),
+                  child: CustomSurfaceCard(
                   margin: EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: Row(
@@ -123,6 +125,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                       ),
                       Icon(Icons.chevron_left_rounded, color: context.colors.onSurfaceVariant),
                     ],
+                  ),
                   ),
                 );
               },
