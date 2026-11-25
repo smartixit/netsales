@@ -52,6 +52,7 @@ class NetworkPosLifecycleController extends GetxController {
   final isLoadingArchive = true.obs;
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
+  final isLoadingMoreArchive = false.obs;
   final isSaving = false.obs;
   final errorMessage = RxnString();
   final eventsErrorMessage = RxnString();
@@ -175,8 +176,8 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> loadMoreArchivedLinks() async {
-    if (_archiveCursor == null || _archiveCursor!.isEmpty || isLoadingMoreEvents.value) return;
-    isLoadingMoreEvents.value = true;
+    if (_archiveCursor == null || _archiveCursor!.isEmpty || isLoadingMoreArchive.value) return;
+    isLoadingMoreArchive.value = true;
     try {
       final result = await getTrashedLinksUseCase(
         entityId: entityId,
@@ -189,7 +190,7 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreEvents.value = false;
+      isLoadingMoreArchive.value = false;
     }
   }
 
