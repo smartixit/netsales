@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
@@ -298,7 +299,9 @@ void main() {
     });
 
     test('Network actions require their dedicated link permissions', () {
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
         roleKey: 'NETWORK_OWNER',
         permissions: [AppPermissions.networksEdit],
       );
@@ -312,7 +315,9 @@ void main() {
       controller.onDeleteLink(controller.links.first);
       expect(repo.links, hasLength(2));
 
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
         roleKey: 'NETWORK_OWNER',
         permissions: [
           AppPermissions.networkCreateLinkChallenge,
@@ -424,19 +429,25 @@ void main() {
     });
 
     test('POS linking requires preview and confirmation permissions', () {
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_AGENT',
         permissions: [AppPermissions.posEdit],
       );
       expect(controller.canLinkNetwork, isFalse);
 
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_AGENT',
         permissions: [AppPermissions.posPreviewLinkChallenge],
       );
       expect(controller.canLinkNetwork, isFalse);
 
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_AGENT',
         permissions: [
           AppPermissions.posPreviewLinkChallenge,
