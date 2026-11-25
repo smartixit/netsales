@@ -356,6 +356,9 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.requestsView,
+        ),
+        PermissionGuardMiddleware(
           requiredPermission: AppPermissions.salesCreate,
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
