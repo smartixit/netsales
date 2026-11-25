@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
@@ -20,6 +22,9 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class NetworkPosLifecycleController extends GetxController {
   NetworkPosLifecycleController({
     required this.networkPosId,
+    required this.networkId,
+    required this.posId,
+    required this.getEffectiveDiscountsUseCase,
     required this.entityId,
     required this.isNetworkScope,
     required this.getTrashedLinksUseCase,
@@ -33,6 +38,9 @@ class NetworkPosLifecycleController extends GetxController {
   });
 
   final int networkPosId;
+  final int networkId;
+  final int posId;
+  final GetEffectivePackageDiscountsForPosUseCase getEffectiveDiscountsUseCase;
   final int entityId;
   final bool isNetworkScope;
   final GetTrashedNetworkPosLinksUseCase getTrashedLinksUseCase;
@@ -47,9 +55,11 @@ class NetworkPosLifecycleController extends GetxController {
   final agreements = <NetworkPosAgreementEntity>[].obs;
   final events = <NetworkPosEventEntity>[].obs;
   final archivedLinks = <NetworkPosLinkEntity>[].obs;
+  final effectiveDiscounts = <EffectivePackageDiscountEntity>[].obs;
   final isLoadingAgreements = true.obs;
   final isLoadingEvents = true.obs;
   final isLoadingArchive = true.obs;
+  final isLoadingDiscounts = true.obs;
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
   final isLoadingMoreArchive = false.obs;
@@ -57,6 +67,7 @@ class NetworkPosLifecycleController extends GetxController {
   final errorMessage = RxnString();
   final eventsErrorMessage = RxnString();
   final archiveErrorMessage = RxnString();
+  final discountsErrorMessage = RxnString();
 
   final titleController = TextEditingController();
   final referenceController = TextEditingController();
@@ -82,6 +93,7 @@ class NetworkPosLifecycleController extends GetxController {
   bool get canRestoreLinks => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networkRestorePosLink : AppPermissions.posRestoreNetworkLink,
   );
+  bool get canViewCatalog => PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
   bool get canViewArchive => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networksView : AppPermissions.posView,
   );
@@ -96,6 +108,7 @@ class NetworkPosLifecycleController extends GetxController {
     if (canViewAgreements) loadAgreements();
     if (canViewEvents) loadEvents();
     if (canViewArchive) loadArchivedLinks();
+    if (canViewCatalog) loadEffectiveDiscounts();
   }
 
   Future<void> loadAgreements({bool refresh = false}) async {
@@ -151,6 +164,27 @@ class NetworkPosLifecycleController extends GetxController {
       if (revision == _eventsRevision) eventsErrorMessage.value = error.toString();
     } finally {
       if (revision == _eventsRevision) isLoadingEvents.value = false;
+    }
+  }
+
+  Future<void> loadEffectiveDiscounts() async {
+    if (networkId <= 0 || posId <= 0) {
+      discountsErrorMessage.value = 'بيانات نطاق العلاقة غير مكتملة.';
+      isLoadingDiscounts.value = false;
+      return;
+    }
+    isLoadingDiscounts.value = true;
+    discountsErrorMessage.value = null;
+    try {
+      final result = await getEffectiveDiscountsUseCase(
+        networkId: networkId,
+        posId: posId,
+      );
+      effectiveDiscounts.assignAll(result);
+    } catch (error) {
+      discountsErrorMessage.value = error.toString();
+    } finally {
+      isLoadingDiscounts.value = false;
     }
   }
 
