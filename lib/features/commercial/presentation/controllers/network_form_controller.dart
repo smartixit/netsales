@@ -59,11 +59,10 @@ class NetworkFormController extends GetxController {
   }
 
   Future<void> _initialize() async {
-    await _loadGovernorates();
-    if (isClosed) return;
     final id = networkId;
-    if (id == null) return;
-    isLoading.value = true;
+    isLoading.value = id != null;
+    await _loadGovernorates();
+    if (isClosed || id == null) return;
     try {
       final argument = Get.arguments;
       final entity = argument is NetworkEntity
