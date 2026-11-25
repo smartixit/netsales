@@ -22,7 +22,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: CustomAppScaffold(
         appBarTitle: 'دورة حياة العلاقة التجارية',
         body: Column(
@@ -39,6 +39,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               tabs: const [
                 Tab(icon: Icon(Icons.description_outlined), text: 'الاتفاقيات'),
                 Tab(icon: Icon(Icons.history_rounded), text: 'سجل الأحداث'),
+                Tab(icon: Icon(Icons.archive_outlined), text: 'الأرشيف'),
               ],
             ),
             Expanded(
@@ -46,6 +47,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 children: [
                   _agreementsTab(),
                   _eventsTab(),
+                  _archiveTab(),
                 ],
               ),
             ),
@@ -235,6 +237,59 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                   onPressed: controller.isLoadingMoreEvents.value ? null : controller.loadMoreEvents,
                 ),
               ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _archiveTab() {
+    return Obx(() {
+      if (controller.isLoadingArchive.value && controller.archivedLinks.isEmpty) {
+        return const CustomStateView.loading();
+      }
+      if (controller.archiveErrorMessage.value != null && controller.archivedLinks.isEmpty) {
+        return CustomErrorState(
+          title: 'تعذر تحميل العلاقات المؤرشفة',
+          subtitle: controller.archiveErrorMessage.value,
+          onRetry: () => controller.loadArchivedLinks(refresh: true),
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: () => controller.loadArchivedLinks(refresh: true),
+        child: ListView(
+          padding: EdgeInsets.all(AppSpacing.md),
+          children: [
+            if (controller.archivedLinks.isEmpty)
+              const CustomEmptyState.compact(
+                title: 'الأرشيف فارغ',
+                subtitle: 'العلاقات التي يتم فك ارتباطها مؤقتاً ستظهر هنا مع إمكانية استعادتها.',
+                icon: Icons.archive_outlined,
+              ),
+            ...controller.archivedLinks.map((link) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: CustomSurfaceCard(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.isNetworkScope ? link.displayPosName : link.displayNetworkName,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    AppSpacing.vXs,
+                    Text('رقم العلاقة: #${link.networkPosId}'),
+                    Text('تاريخ الارتباط: ${link.formattedLinkedDate}'),
+                    AppSpacing.vSm,
+                    CustomButton.secondary(
+                      text: 'استعادة العلاقة',
+                      prefix: Icons.restore_rounded,
+                      onPressed: controller.isSaving.value ? null : () => controller.restoreLink(link),
+                    ),
+                  ],
+                ),
+              ),
+            )),
           ],
         ),
       );
