@@ -5,6 +5,8 @@ import 'package:netsales/features/commercial/domain/usecases/create_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_agreements_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_pos_events_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/terminate_network_pos_agreement_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_network_pos_links_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_pos_agreement_draft_use_case.dart';
 
 class NetworkPosLifecycleBinding extends Bindings {
@@ -15,6 +17,10 @@ class NetworkPosLifecycleBinding extends Bindings {
     Get.lazyPut<NetworkPosLifecycleController>(
       () => NetworkPosLifecycleController(
         networkPosId: id,
+        entityId: (Get.arguments is Map ? (Get.arguments['entity_id'] as num?)?.toInt() : null) ?? 0,
+        isNetworkScope: Get.arguments is Map ? Get.arguments['is_network'] == true : true,
+        getTrashedLinksUseCase: Get.find<GetTrashedNetworkPosLinksUseCase>(),
+        restoreLinkUseCase: Get.find<RestoreNetworkPosLinkUseCase>(),
         getAgreementsUseCase: Get.find<GetNetworkPosAgreementsUseCase>(),
         getEventsUseCase: Get.find<GetNetworkPosEventsUseCase>(),
         createDraftUseCase: Get.find<CreateNetworkPosAgreementDraftUseCase>(),
