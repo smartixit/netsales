@@ -278,6 +278,7 @@ class NetworkExpensesController extends GetxController {
     BuildContext context,
     ExpenseEntity expense,
   ) async {
+    if (!canDeleteExpense) return;
     final confirmed = await CustomDialog.show(
       type: DialogType.danger,
       title: 'حذف سند المصروف',
