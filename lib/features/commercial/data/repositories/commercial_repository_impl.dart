@@ -29,14 +29,12 @@ class CommercialRepositoryImpl implements CommercialRepository {
   Future<PaginatedList<NetworkEntity>> getNetworksPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   }) async {
     final page = await _remoteDataSource.getNetworksPage(
       search: search,
       status: status,
-      governorateId: governorateId,
       cursor: cursor,
       perPage: perPage,
     );
@@ -52,14 +50,12 @@ class CommercialRepositoryImpl implements CommercialRepository {
   Future<PaginatedList<PosEntity>> getPosPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   }) async {
     final page = await _remoteDataSource.getPosPage(
       search: search,
       status: status,
-      governorateId: governorateId,
       cursor: cursor,
       perPage: perPage,
     );
