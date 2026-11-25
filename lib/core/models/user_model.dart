@@ -20,6 +20,7 @@ class UserModel {
   final RoleModel? role;
   final bool rawIsSuperAdmin;
   final String? generalRoleKey;
+  final RoleScope roleScope;
   final List<WorkspaceMembershipModel> workspaceMemberships;
 
   const UserModel({
@@ -37,6 +38,7 @@ class UserModel {
     this.role,
     this.rawIsSuperAdmin = false,
     this.generalRoleKey,
+    this.roleScope = RoleScope.unknown,
     this.workspaceMemberships = const [],
   });
 
@@ -59,6 +61,7 @@ class UserModel {
     };
 
     return rawIsSuperAdmin ||
+        roleScope == RoleScope.platform ||
         platformRoleKeys.contains(role?.roleKey) ||
         platformRoleKeys.contains(generalRoleKey);
   }
@@ -156,6 +159,9 @@ class UserModel {
           : null,
       rawIsSuperAdmin: isSuper,
       generalRoleKey: genRole,
+      roleScope: RoleScope.fromWire(
+        json['role_scope']?.toString() ?? userMap['role_scope']?.toString(),
+      ),
       workspaceMemberships: List.unmodifiable(memberships),
     );
   }
@@ -175,6 +181,7 @@ class UserModel {
     RoleModel? role,
     bool? rawIsSuperAdmin,
     String? generalRoleKey,
+    RoleScope? roleScope,
     List<WorkspaceMembershipModel>? workspaceMemberships,
   }) {
     return UserModel(
@@ -192,6 +199,7 @@ class UserModel {
       role: role ?? this.role,
       rawIsSuperAdmin: rawIsSuperAdmin ?? this.rawIsSuperAdmin,
       generalRoleKey: generalRoleKey ?? this.generalRoleKey,
+      roleScope: roleScope ?? this.roleScope,
       workspaceMemberships: workspaceMemberships ?? this.workspaceMemberships,
     );
   }
@@ -212,6 +220,7 @@ class UserModel {
       'role': role?.toJson(),
       'is_super_admin': rawIsSuperAdmin,
       'role_key': generalRoleKey,
+      'role_scope': roleScope.wireValue,
       'workspace_roles': workspaceMemberships
           .map((m) => m.toJson())
           .toList(growable: false),
