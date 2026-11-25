@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
@@ -83,12 +84,21 @@ void main() {
       expect(permissionService.can(AppPermissions.salesCreate), isFalse);
       expect(permissionService.can(AppPermissions.salesView), isTrue);
 
-      // SuperAdmin bypass verification
+      // Platform identities are outside the mobile app and never bypass
+      // tenant-scoped capabilities.
       permissionService.updateAccess(
         roleKey: AppRoles.superAdmin,
         permissions: [],
       );
-      expect(permissionService.can(AppPermissions.salesCreate), isTrue);
+      expect(permissionService.can(AppPermissions.salesCreate), isFalse);
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 12,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const ['sales.view'],
+      );
+      expect(permissionService.can(AppPermissions.salesCreate), isFalse);
+      expect(permissionService.can(AppPermissions.salesView), isTrue);
     });
   });
 }
