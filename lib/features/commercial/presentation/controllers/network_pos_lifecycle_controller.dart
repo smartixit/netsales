@@ -4,8 +4,6 @@ import 'package:netsales/features/commercial/domain/entities/network_pos_agreeme
 import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
-import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_package_pos_discounts_for_pos_use_case.dart';
@@ -35,7 +33,6 @@ class NetworkPosLifecycleController extends GetxController {
     required this.networkId,
     required this.posId,
     required this.getNetworkPackagesUseCase,
-    required this.getEffectivePackageDiscountsUseCase,
     required this.getPackagePosDiscountsUseCase,
     required this.createPackagePosDiscountUseCase,
     required this.updatePackagePosDiscountUseCase,
@@ -57,7 +54,6 @@ class NetworkPosLifecycleController extends GetxController {
   final int networkId;
   final int posId;
   final GetNetworkPackagesUseCase getNetworkPackagesUseCase;
-  final GetEffectivePackageDiscountsForPosUseCase getEffectivePackageDiscountsUseCase;
   final GetPackagePosDiscountsForPosUseCase getPackagePosDiscountsUseCase;
   final CreatePackagePosDiscountUseCase createPackagePosDiscountUseCase;
   final UpdatePackagePosDiscountUseCase updatePackagePosDiscountUseCase;
@@ -79,7 +75,6 @@ class NetworkPosLifecycleController extends GetxController {
   final archivedLinks = <NetworkPosLinkEntity>[].obs;
   final packages = <PackageEntity>[].obs;
   final packageDiscounts = <PackagePosDiscountEntity>[].obs;
-  final effectiveDiscounts = <EffectivePackageDiscountEntity>[].obs;
   final selectedPackageId = RxnInt();
   final isLoadingAgreements = true.obs;
   final isLoadingEvents = true.obs;
@@ -154,7 +149,6 @@ class NetworkPosLifecycleController extends GetxController {
     if (canViewCatalog) {
       loadPackages();
       loadPackageDiscounts();
-      loadEffectivePackageDiscounts();
     }
   }
 
@@ -227,24 +221,6 @@ class NetworkPosLifecycleController extends GetxController {
       packagesErrorMessage.value = error.toString();
     } finally {
       isLoadingPackages.value = false;
-    }
-  }
-
-  Future<void> loadEffectivePackageDiscounts() async {
-    if (networkId <= 0 || posId <= 0) return;
-    final revision = ++_effectivePricingRevision;
-    try {
-      final result = await getEffectivePackageDiscountsUseCase(
-        networkId: networkId,
-        posId: posId,
-      );
-      if (revision != _effectivePricingRevision) return;
-      effectiveDiscounts.assignAll(result);
-    } catch (error) {
-      if (revision != _effectivePricingRevision) return;
-      // Keep the custom-discount management list usable if the effective
-      // pricing projection is temporarily unavailable.
-      discountsErrorMessage.value ??= error.toString();
     }
   }
 
@@ -394,7 +370,6 @@ class NetworkPosLifecycleController extends GetxController {
       }
       Get.back();
       await loadPackageDiscounts(refresh: true);
-      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ خصم الباقة.', type: SnackType.success);
     } catch (error) {
