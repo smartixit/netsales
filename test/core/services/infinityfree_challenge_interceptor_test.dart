@@ -445,7 +445,9 @@ void main() {
       dio.close(force: true);
     });
 
-    test('does not terminate the session for a missing-credential 401', () async {
+    test(
+      'does not terminate the session for a missing-credential 401',
+      () async {
       final previousGeneration = ApiService.sessionGeneration;
       ApiService.sessionGeneration = previousGeneration + 1;
       var unauthorizedCount = 0;
@@ -484,7 +486,9 @@ void main() {
       dio.close(force: true);
     });
 
-    test('ignores a terminal 401 that belongs to an earlier session generation', () async {
+    test(
+      'ignores a terminal 401 that belongs to an earlier session generation',
+      () async {
       final previousGeneration = ApiService.sessionGeneration;
       ApiService.sessionGeneration = previousGeneration + 1;
       var unauthorizedCount = 0;
