@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/membership_status.dart';
+import 'package:netsales/core/enums/role_key.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -267,7 +269,13 @@ class PosMembershipsController extends BaseMembershipsController {
 
     try {
       final roles = await getPosAssignableRolesUseCase(posId);
-      assignableRoles.assignAll(roles);
+      assignableRoles.assignAll(
+        roles.where(
+          (role) =>
+              role.typedScope == RoleScope.pos &&
+              {RoleKey.posUser, RoleKey.posAccountant}.contains(role.typedRoleKey),
+        ),
+      );
     } catch (_) {
       // Fallback
     }
