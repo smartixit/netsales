@@ -77,6 +77,22 @@ void main() {
         isTrue,
       );
 
+      // POS procurement form supports either creation or editing; mutations are checked separately.
+      final procurementFormPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.newProcurementOrder,
+      );
+      final procurementFormPermissions = procurementFormPage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .expand((m) => m.anyPermissions ?? const <String>[])
+          .toList();
+      expect(
+        procurementFormPermissions,
+        containsAll([
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsEdit,
+        ]),
+      );
+
       // 7. Procurement detail deep links require request visibility.
       final requestDetailsPage = AppPages.routes.firstWhere(
         (p) => p.name == AppRoutes.voucherRequestDetails,
