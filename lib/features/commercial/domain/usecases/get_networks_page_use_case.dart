@@ -14,7 +14,6 @@ class GetNetworksPageUseCase {
   }) => _repository.getNetworksPage(
     search: search,
     status: status,
-    governorateId: governorateId,
     cursor: cursor,
     perPage: perPage,
   );
