@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_details_use_case.dart';
 
@@ -11,6 +13,7 @@ class PosDetailsController extends GetxController {
   final isLoading = false.obs;
   final errorMessage = RxnString();
   int? posId;
+  bool get canEdit => PermissionService.to.can(AppPermissions.posEdit);
   int _revision = 0;
 
   @override
