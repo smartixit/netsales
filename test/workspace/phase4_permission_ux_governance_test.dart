@@ -77,6 +77,28 @@ void main() {
         isTrue,
       );
 
+      // 7. Procurement detail deep links require request visibility.
+      final requestDetailsPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.voucherRequestDetails,
+      );
+      expect(
+        requestDetailsPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.requestsView,
+        ),
+        isTrue,
+      );
+
+      // 8. Direct network invoices require sales creation, not unrelated request visibility.
+      final directInvoicePage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.networkCreateSaleInvoice,
+      );
+      final directInvoicePermissions = directInvoicePage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .map((m) => m.requiredPermission)
+          .toList();
+      expect(directInvoicePermissions, contains(AppPermissions.salesCreate));
+      expect(directInvoicePermissions, isNot(contains(AppPermissions.requestsView)));
+
       // 6. POS wallet statement must be scoped and permission-gated.
       final posWalletPage = AppPages.routes.firstWhere(
         (p) => p.name == AppRoutes.posWalletStatement,
