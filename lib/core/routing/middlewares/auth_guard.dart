@@ -33,7 +33,7 @@ class AuthGuard extends GetMiddleware {
       return const RouteSettings(name: AppRoutes.login);
     }
     if (SessionService.to.isAccessBlocked ||
-        SessionService.to.currentUser?.isSuperAdmin == true) {
+        SessionService.to.currentUser?.isPlatformUser == true) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
     if (!SessionService.to.isSessionVerified) {
@@ -124,7 +124,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
     }
 
     if (SessionService.to.isAccessBlocked ||
-        SessionService.to.currentUser?.isSuperAdmin == true) {
+        SessionService.to.currentUser?.isPlatformUser == true) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
