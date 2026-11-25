@@ -457,10 +457,12 @@ void main() {
         ApiService.onUnauthorized = null;
       });
 
-      final adapter = _ScriptedAdapter((request, body) async => _json(
-            '{"success":false,"code":"SESSION_CREDENTIAL_MISSING","message":"missing","data":{},"errors":[]}',
-            401,
-          ));
+      final adapter = _ScriptedAdapter(
+        (request, body) async => _json(
+          '{"success":false,"code":"SESSION_CREDENTIAL_MISSING","message":"missing","data":{},"errors":[]}',
+          401,
+        ),
+      );
       final dio = _dio(Uri.parse('https://missing-session-code.example'), adapter);
       dio.interceptors.add(SessionAuthInterceptor());
 
