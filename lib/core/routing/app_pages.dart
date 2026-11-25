@@ -456,7 +456,10 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(
-          anyPermissions: [AppPermissions.expensesCreate],
+          anyPermissions: [
+            AppPermissions.expensesCreate,
+            AppPermissions.expensesEdit,
+          ],
         ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
