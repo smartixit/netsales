@@ -106,7 +106,10 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
               (context, index) {
                 final network = controller.networks[index];
                 return GestureDetector(
-                  onTap: () => Get.toNamed('/network/entities/${network.networkId}'),
+                  onTap: () async {
+                    final changed = await Get.toNamed('/network/entities/${network.networkId}');
+                    if (changed == true) await controller.refreshDirectory();
+                  },
                   child: CustomSurfaceCard(
                   margin: EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: EdgeInsets.all(AppSpacing.md),
