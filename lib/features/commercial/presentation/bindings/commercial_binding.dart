@@ -15,6 +15,8 @@ import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_networks_page_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_page_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
@@ -45,6 +47,14 @@ class CommercialBinding extends Bindings {
     );
 
     // 2. حالات الاستخدام (Use Cases)
+    registerLazyIfAbsent<GetNetworksPageUseCase>(
+      () => GetNetworksPageUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetPosPageUseCase>(
+      () => GetPosPageUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
     registerLazyIfAbsent<GetMyNetworksUseCase>(
       () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
       fenix: true,
