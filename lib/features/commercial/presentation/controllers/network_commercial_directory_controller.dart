@@ -494,7 +494,6 @@ class NetworkCommercialDirectoryController
       partnerName: link.displayPosName,
       willDeactivate: link.isActive,
       onConfirm: () async {
-        if (!canDeletePartnerLink) return;
         if (!canTogglePartnerLink) return;
         try {
           final updated = await toggleNetworkPosLinkStatusUseCase(
@@ -527,6 +526,7 @@ class NetworkCommercialDirectoryController
     CommercialActionDialogs.showUnlinkDialog(
       partnerName: link.displayPosName,
       onConfirm: () async {
+        if (!canDeletePartnerLink) return;
         try {
           await deleteNetworkPosLinkUseCase(link.networkPosId);
           links.removeWhere(
