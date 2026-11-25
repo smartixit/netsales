@@ -114,6 +114,12 @@ abstract class CommercialRepository {
   /// تحديث بيانات نقطة البيع فقط دون تغيير علاقاتها أو عضوياتها أو التزاماتها.
   Future<PosEntity> updatePos(int posId, Map<String, dynamic> payload);
 
+  /// حذف مؤقت للشبكة دون المساس بسجلاتها المالية أو علاقاتها.
+  Future<void> deleteNetwork(int networkId);
+
+  /// حذف مؤقت لنقطة البيع دون المساس بسجلاتها المالية أو علاقاتها.
+  Future<void> deletePos(int posId);
+
   /// استرجاع التفاصيل الكاملة لشبكة محددة
   Future<NetworkEntity> getNetworkDetails(int networkId);
 
