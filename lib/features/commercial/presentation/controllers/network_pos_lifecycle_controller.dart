@@ -128,7 +128,7 @@ class NetworkPosLifecycleController extends GetxController {
       events.addAll(result.items);
       _eventsCursor = result.nextCursor;
     } catch (error) {
-      CustomSnackBar.showError(message: error.toString());
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
       isLoadingMoreEvents.value = false;
     }
@@ -200,7 +200,7 @@ class NetworkPosLifecycleController extends GetxController {
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ مسودة الاتفاقية.', type: SnackType.success);
     } catch (error) {
-      CustomSnackBar.showError(message: error.toString());
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
       isSaving.value = false;
     }
@@ -245,7 +245,7 @@ class NetworkPosLifecycleController extends GetxController {
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: success, type: SnackType.success);
     } catch (error) {
-      CustomSnackBar.showError(message: error.toString());
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
       isSaving.value = false;
     }
