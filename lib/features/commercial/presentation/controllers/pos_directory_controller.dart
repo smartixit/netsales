@@ -24,6 +24,7 @@ class PosDirectoryController extends GetxController {
   Timer? _debounce;
   int _revision = 0;
   bool _requestInFlight = false;
+  bool _suppressSearchListener = false;
 
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
 
@@ -35,6 +36,7 @@ class PosDirectoryController extends GetxController {
   }
 
   void _onSearchChanged() {
+    if (_suppressSearchListener) return;
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       searchQuery.value = searchController.text.trim();
@@ -50,7 +52,9 @@ class PosDirectoryController extends GetxController {
 
   void clearSearch() {
     _debounce?.cancel();
+    _suppressSearchListener = true;
     searchController.clear();
+    _suppressSearchListener = false;
     searchQuery.value = '';
     refreshDirectory();
   }
