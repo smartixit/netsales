@@ -115,8 +115,8 @@ class NetworkPosLifecycleBinding extends Bindings {
         relationship: arguments['relationship'] is NetworkPosLinkEntity
             ? arguments['relationship'] as NetworkPosLinkEntity
             : null,
-        networkId: (Get.arguments is Map ? (Get.arguments['network_id'] as num?)?.toInt() : null) ?? 0,
-        posId: (Get.arguments is Map ? (Get.arguments['pos_id'] as num?)?.toInt() : null) ?? 0,
+        networkId: (arguments['network_id'] as num?)?.toInt() ?? 0,
+        posId: (arguments['pos_id'] as num?)?.toInt() ?? 0,
         getNetworkPackagesUseCase: Get.find<GetNetworkPackagesUseCase>(),
         getPackagePosDiscountsUseCase: Get.find<GetPackagePosDiscountsForPosUseCase>(),
         createPackagePosDiscountUseCase: Get.find<CreatePackagePosDiscountUseCase>(),
@@ -125,8 +125,8 @@ class NetworkPosLifecycleBinding extends Bindings {
         deletePackagePosDiscountUseCase: Get.find<DeletePackagePosDiscountUseCase>(),
         getTrashedPackagePosDiscountsUseCase: Get.find<GetTrashedPackagePosDiscountsForPosUseCase>(),
         restorePackagePosDiscountUseCase: Get.find<RestorePackagePosDiscountUseCase>(),
-        entityId: (Get.arguments is Map ? (Get.arguments['entity_id'] as num?)?.toInt() : null) ?? 0,
-        isNetworkScope: Get.arguments is Map ? Get.arguments['is_network'] == true : true,
+        entityId: (arguments['entity_id'] as num?)?.toInt() ?? 0,
+        isNetworkScope: arguments['is_network'] == true,
         getTrashedLinksUseCase: Get.find<GetTrashedNetworkPosLinksUseCase>(),
         restoreLinkUseCase: Get.find<RestoreNetworkPosLinkUseCase>(),
         getAgreementsUseCase: Get.find<GetNetworkPosAgreementsUseCase>(),
