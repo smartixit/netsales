@@ -292,6 +292,20 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         child: ListView(
           padding: EdgeInsets.all(AppSpacing.md),
           children: [
+            if (controller.packagesErrorMessage.value != null && controller.canCreateDiscount)
+              CustomErrorState(
+                title: 'تعذر تحميل الباقات',
+                subtitle: controller.packagesErrorMessage.value,
+                onRetry: controller.loadPackages,
+              ),
+            if (controller.isLoadingPackages.value && controller.canCreateDiscount)
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 1,
+                  cardHeight: 64,
+                ),
+              ),
             if (controller.canCreateDiscount)
               CustomButton.primary(
                 text: 'تخصيص خصم لباقة',
