@@ -162,7 +162,7 @@ abstract final class ScreenRegistry {
       titleAr: 'إدارة فريق عمل وموظفي الشبكة',
       titleEn: 'Network Staff',
       workspace: AppWorkspace.network,
-      requiredPermission: AppPermissions.usersView,
+      requiredPermission: AppPermissions.networkMembersView,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
@@ -191,6 +191,15 @@ abstract final class ScreenRegistry {
       workspace: AppWorkspace.network,
       requiredPermission: AppPermissions.salesCreate,
       isBalanceMutation: true,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
+      screenId: 'NET-13',
+      route: AppRoutes.networkWalletStatement,
+      titleAr: 'كشف حساب خزينة الشبكة',
+      titleEn: 'Network Wallet Statement',
+      workspace: AppWorkspace.network,
+      requiredPermission: AppPermissions.networkWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
 
@@ -249,7 +258,7 @@ abstract final class ScreenRegistry {
       titleAr: 'إدارة موظفي ومحاسبي نقطة البيع',
       titleEn: 'POS Staff',
       workspace: AppWorkspace.pos,
-      requiredPermission: AppPermissions.usersView,
+      requiredPermission: AppPermissions.posMembersView,
       implementationState: ScreenImplementationState.implemented,
     ),
     ScreenDescriptor(
@@ -268,6 +277,15 @@ abstract final class ScreenRegistry {
       titleEn: 'Purchase Invoice Details',
       workspace: AppWorkspace.pos,
       requiredPermission: AppPermissions.salesView,
+      implementationState: ScreenImplementationState.implemented,
+    ),
+    ScreenDescriptor(
+      screenId: 'POS-10',
+      route: AppRoutes.posWalletStatement,
+      titleAr: 'كشف حساب محفظة نقطة البيع',
+      titleEn: 'POS Wallet Statement',
+      workspace: AppWorkspace.pos,
+      requiredPermission: AppPermissions.posWalletsView,
       implementationState: ScreenImplementationState.implemented,
     ),
 
