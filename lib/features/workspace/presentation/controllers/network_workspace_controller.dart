@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
@@ -10,6 +11,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/core/utils/greeting_formatter.dart';
@@ -290,6 +292,17 @@ class NetworkWorkspaceController extends GetxController {
     if (selectedPeriod.value == period) return;
     selectedPeriod.value = period;
     await loadOverview(clearOverview: false);
+  }
+
+  bool get canViewMembers =>
+      PermissionService.to.can(AppPermissions.networkMembersView);
+
+  Future<bool> handleBackFallback() async {
+    if (selectedMobileNavIndex.value != 0 || selectedNavIndex.value != 0) {
+      onNavItemSelected(0);
+      return false;
+    }
+    return true;
   }
 
   Future<void> retryNetworks() => loadWorkspace();

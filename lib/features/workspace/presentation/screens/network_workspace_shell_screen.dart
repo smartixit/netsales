@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
@@ -80,7 +78,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         activeIcon: Icons.query_stats_rounded,
         content: BillingReportsScreen(),
       ),
-      if (PermissionService.to.can(AppPermissions.networkMembersView))
+      if (controller.canViewMembers)
         const WorkspaceNavItem(
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
@@ -105,14 +103,7 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
             controller.isLoadingOverview.value) &&
         controller.selectedNetwork == null;
     return DoubleBackExitScope(
-      onFallback: () async {
-        if (controller.selectedMobileNavIndex.value != 0 ||
-            controller.selectedNavIndex.value != 0) {
-          controller.onNavItemSelected(0);
-          return false;
-        }
-        return true;
-      },
+      onFallback: controller.handleBackFallback,
       child: AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
           title: controller.activeNetworkName.isNotEmpty

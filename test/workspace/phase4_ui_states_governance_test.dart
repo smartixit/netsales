@@ -225,7 +225,7 @@ void main() {
       permissionService.setWorkspaceContext(
         scope: RoleScope.pos,
         tenantId: 10,
-        roleKey: 'POS_STAFF',
+        roleKey: 'POS_AGENT',
         permissions: [AppPermissions.requestsView],
       );
 
@@ -244,7 +244,7 @@ void main() {
       permissionService.setWorkspaceContext(
         scope: RoleScope.pos,
         tenantId: 10,
-        roleKey: 'POS_STAFF',
+        roleKey: 'POS_AGENT',
         permissions: [
           AppPermissions.requestsView,
           AppPermissions.requestsCreate,

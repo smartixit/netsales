@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_network_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_pos_actions.dart';

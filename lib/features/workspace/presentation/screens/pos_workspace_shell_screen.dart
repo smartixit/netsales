@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_directory_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
@@ -47,7 +45,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
         activeIcon: Icons.account_circle_rounded,
         content: ProfileScreen(embedded: true),
       ),
-      if (PermissionService.to.can(AppPermissions.posMembersView))
+      if (controller.canViewMembers)
         const WorkspaceNavItem(
           label: 'فريق العمل',
           icon: Icons.groups_outlined,
@@ -83,14 +81,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
     final loading =
         controller.isLoadingPos.value && controller.activePos.value == null;
     return DoubleBackExitScope(
-      onFallback: () async {
-        if (controller.selectedMobileNavIndex.value != 0 ||
-            controller.selectedNavIndex.value != 0) {
-          controller.onNavItemSelected(0);
-          return false;
-        }
-        return true;
-      },
+      onFallback: controller.handleBackFallback,
       child: AdaptiveWorkspaceScaffold(
         appBar: WorkspaceAppBar(
           title: controller.activePosName.isNotEmpty

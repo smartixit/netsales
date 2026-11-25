@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/wallet/data/models/network_wallet_log_model.dart';
 import 'package:netsales/features/wallet/data/models/network_wallet_model.dart';
 import 'package:netsales/features/wallet/domain/entities/network_wallet_entity.dart';
@@ -61,9 +62,9 @@ void main() {
       expect(log.typedOperationType, equals(WalletOperationType.deposit));
       expect(log.isDeposit, isTrue);
       expect(log.isWithdraw, isFalse);
-      expect(log.operationPresentation.tone, equals(SemanticTone.success));
+      expect(EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).tone, equals(SemanticTone.success));
       expect(
-        log.operationPresentation.label,
+        EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).label,
         equals('تحصيل فاتورة مبيعات كروت'),
       );
     });
@@ -85,8 +86,8 @@ void main() {
       expect(log.typedOperationType, equals(WalletOperationType.withdraw));
       expect(log.isWithdraw, isTrue);
       expect(log.isDeposit, isFalse);
-      expect(log.operationPresentation.tone, equals(SemanticTone.danger));
-      expect(log.operationPresentation.label, equals('تغذية رصيد نقطة بيع'));
+      expect(EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).tone, equals(SemanticTone.danger));
+      expect(EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).label, equals('تغذية رصيد نقطة بيع'));
     });
 
     test('NetworkWalletModel fromJson and toJson round-trip', () {

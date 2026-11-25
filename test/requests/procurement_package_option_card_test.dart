@@ -15,7 +15,7 @@ PackageEntity createPackage({
     networkId: 10,
     packageName: 'باقة الاختبار',
     packageColor: packageColor,
-    packageBalance: 2048,
+    packageBalance: 2 * 1024 * 1024 * 1024,
     packageUptime: 120,
     packageValidity: 24,
     packageVoucherCount: 100,

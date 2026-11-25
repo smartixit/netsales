@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -9,6 +11,8 @@ import 'package:netsales/features/commercial/domain/entities/network_entity.dart
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
@@ -156,6 +160,57 @@ class _FakeCommercialRepository implements CommercialRepository {
   Future<void> deleteNetworkPosLink(int networkPosId) async {
     links.removeWhere((l) => l.networkPosId == networkPosId);
   }
+
+  @override
+  Future<PaginatedList<NetworkPosAgreementEntity>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<NetworkPosAgreementEntity> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<NetworkPosAgreementEntity> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<NetworkPosAgreementEntity> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<NetworkPosAgreementEntity> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<PaginatedList<NetworkPosEventEntity>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<void> restoreNetworkPosLink(int networkPosId) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<PaginatedList<NetworkPosLinkEntity>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  }) async => throw UnimplementedError();
 
   @override
   Future<NetworkPosLinkChallengeEntity> createNetworkPosLinkChallenge({
@@ -370,7 +425,8 @@ void main() {
       expect(controller.resolvedInvitationTarget.value, isNull);
     });
 
-    test('Network actions require their dedicated link permissions', () {
+    test('Network actions require their dedicated link permissions', () async {
+      await controller.loadInitialData();
       PermissionService.instance.setWorkspaceContext(
         scope: RoleScope.network,
         tenantId: 1,
@@ -458,12 +514,31 @@ void main() {
       expect(controller.links.length, equals(1));
     });
 
-    test('onPartnerCardTap delegates to openPosWalletStatement', () async {
+    testWidgets('onPartnerCardTap delegates to openPosWalletStatement', (tester) async {
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [AppPermissions.posWalletsView],
+      );
+      await tester.pumpWidget(
+        GetMaterialApp(
+          getPages: [
+            GetPage<void>(
+              name: AppRoutes.posWalletStatement,
+              page: () => const SizedBox.shrink(),
+            ),
+          ],
+          home: const SizedBox.shrink(),
+        ),
+      );
       await controller.loadInitialData();
       final link = controller.links.first;
 
-      // Ensure calling onPartnerCardTap does not throw
-      expect(() => controller.onPartnerCardTap(link), returnsNormally);
+      controller.onPartnerCardTap(link);
+      await tester.pumpAndSettle();
+
+      expect(Get.currentRoute, AppRoutes.posWalletStatement);
     });
   });
 

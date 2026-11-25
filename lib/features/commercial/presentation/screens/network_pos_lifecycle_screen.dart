@@ -12,7 +12,6 @@ import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
-import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';

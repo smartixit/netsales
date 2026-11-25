@@ -355,21 +355,46 @@ void main() {
         userId: 1010,
         userFullName: 'عادل',
         userPhoneNumber: '770001010',
+        workspaceMemberships: const [
+          WorkspaceMembershipModel(
+            scope: RoleScope.network,
+            tenantId: 10,
+            roleKey: 'NETWORK_USER',
+            roleName: 'مستخدم شبكة',
+            permissions: ['permission.alpha', 'permission.beta'],
+          ),
+        ],
       );
 
       await SessionService.instance.syncSessionProfile(
         user: user,
         permissions: ['permission.alpha', 'permission.beta'],
+        roleKey: 'NETWORK_USER',
       );
 
       expect(PermissionService.instance.can('permission.alpha'), isTrue);
       expect(PermissionService.instance.can('permission.beta'), isTrue);
       expect(PermissionService.instance.can('permission.gamma'), isFalse);
 
-      // Backend revokes alpha and grants gamma
+      // Backend revokes alpha and grants gamma on the exact active membership.
+      final updatedUser = UserModel(
+        userId: 1010,
+        userFullName: 'عادل',
+        userPhoneNumber: '770001010',
+        workspaceMemberships: const [
+          WorkspaceMembershipModel(
+            scope: RoleScope.network,
+            tenantId: 10,
+            roleKey: 'NETWORK_USER',
+            roleName: 'مستخدم شبكة',
+            permissions: ['permission.beta', 'permission.gamma'],
+          ),
+        ],
+      );
       await SessionService.instance.syncSessionProfile(
-        user: user,
+        user: updatedUser,
         permissions: ['permission.beta', 'permission.gamma'],
+        roleKey: 'NETWORK_USER',
       );
 
       expect(PermissionService.instance.can('permission.alpha'), isFalse);

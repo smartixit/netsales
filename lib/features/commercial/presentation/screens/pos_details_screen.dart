@@ -14,7 +14,6 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 
 class PosDetailsScreen extends GetView<PosDetailsController> {
   const PosDetailsScreen({super.key});
@@ -85,7 +84,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
           if (controller.canManageMembers) CustomButton.secondary(
             text: 'إدارة فريق العمل والعضويات',
             prefix: Icons.groups_rounded,
-            onPressed: () => Get.toNamed(
+            onPressed: () => Get.toNamed<void>(
               AppRoutes.posEntityMembers.replaceFirst(':id', pos.posId.toString()),
             ),
           ),
@@ -93,7 +92,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
           if (controller.canViewRelationships) CustomButton.primary(
             text: 'إدارة العلاقات التجارية',
             prefix: Icons.hub_rounded,
-            onPressed: () => Get.toNamed(
+            onPressed: () => Get.toNamed<void>(
               AppRoutes.posEntityRelationships.replaceFirst(':id', pos.posId.toString()),
             ),
           ),
@@ -101,7 +100,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
           if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
-              final saved = await Get.toNamed(AppRoutes.posEntityEdit.replaceFirst(':id', pos.posId.toString()), arguments: pos);
+              final saved = await Get.toNamed<bool>(AppRoutes.posEntityEdit.replaceFirst(':id', pos.posId.toString()), arguments: pos);
               if (saved == true) {
                 await controller.load();
                 if (Get.isRegistered<PosDirectoryController>()) {
@@ -116,7 +115,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
             CustomButton.danger(
               text: 'حذف نقطة البيع',
               prefix: Icons.delete_outline_rounded,
-              onPressed: () => Get.dialog(
+              onPressed: () => Get.dialog<void>(
                 CustomDialog.confirmation(
                   title: 'تأكيد حذف نقطة البيع',
                   message: 'سيتم نقل الكيان إلى المحذوفات مؤقتاً. لن يتم حذف علاقاته أو سجلاته المالية من خلال هذا الإجراء.',

@@ -14,7 +14,6 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 
 class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
   const NetworkDetailsScreen({super.key});
@@ -83,7 +82,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           if (controller.canViewFinancials) CustomButton.secondary(
             text: 'الالتزامات المالية ودفتر أستاذ الشبكة',
             prefix: Icons.account_balance_wallet_outlined,
-            onPressed: () => Get.toNamed(
+            onPressed: () => Get.toNamed<void>(
               AppRoutes.networkWalletStatement,
               arguments: {'network_id': network.networkId},
             ),
@@ -92,7 +91,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           if (controller.canManageMembers) CustomButton.secondary(
             text: 'إدارة فريق العمل والعضويات',
             prefix: Icons.groups_rounded,
-            onPressed: () => Get.toNamed(
+            onPressed: () => Get.toNamed<void>(
               AppRoutes.networkEntityMembers.replaceFirst(':id', network.networkId.toString()),
             ),
           ),
@@ -100,7 +99,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           if (controller.canViewRelationships) CustomButton.primary(
             text: 'إدارة العلاقات التجارية',
             prefix: Icons.hub_rounded,
-            onPressed: () => Get.toNamed(
+            onPressed: () => Get.toNamed<void>(
               AppRoutes.networkEntityRelationships.replaceFirst(':id', network.networkId.toString()),
             ),
           ),
@@ -108,7 +107,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
-              final saved = await Get.toNamed(AppRoutes.networkEntityEdit.replaceFirst(':id', network.networkId.toString()), arguments: network);
+              final saved = await Get.toNamed<bool>(AppRoutes.networkEntityEdit.replaceFirst(':id', network.networkId.toString()), arguments: network);
               if (saved == true) {
                 await controller.load();
                 if (Get.isRegistered<NetworkDirectoryController>()) {
@@ -123,7 +122,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
             CustomButton.danger(
               text: 'حذف الشبكة',
               prefix: Icons.delete_outline_rounded,
-              onPressed: () => Get.dialog(
+              onPressed: () => Get.dialog<void>(
                 CustomDialog.confirmation(
                   title: 'تأكيد حذف الشبكة',
                   message: 'سيتم نقل الكيان إلى المحذوفات مؤقتاً. لن يتم حذف علاقاته أو سجلاته المالية من خلال هذا الإجراء.',

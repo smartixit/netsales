@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:netsales/core/services/api_service.dart';
 import 'package:netsales/features/wallet/data/datasources/network_wallet_remote_data_source.dart';
 import 'package:netsales/features/wallet/data/datasources/network_wallet_remote_data_source_impl.dart';
 import 'package:netsales/features/wallet/data/repositories/network_wallet_repository_impl.dart';
@@ -12,10 +11,9 @@ import 'package:netsales/features/wallet/presentation/controllers/network_wallet
 class NetworkWalletStatementBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ApiService>(()=>ApiService());
     // 1. Data Source
     Get.lazyPut<NetworkWalletRemoteDataSource>(
-      () => NetworkWalletRemoteDataSourceImpl(Get.find<ApiService>()),
+      () => NetworkWalletRemoteDataSourceImpl(),
     );
 
     // 2. Repository

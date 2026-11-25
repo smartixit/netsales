@@ -431,7 +431,7 @@ class NetworkPosLifecycleController extends GetxController {
     discountCreditController.text = discount?.discountCredit.toString() ?? '';
     discountStartController.text = discount?.startDate?.toIso8601String() ?? '';
     discountEndController.text = discount?.endDate?.toIso8601String() ?? '';
-    Get.dialog(CustomDialog(
+    Get.dialog<void>(CustomDialog(
       type: DialogType.custom,
       title: discount == null ? 'تخصيص خصم للباقة' : 'تعديل خصم نقطة البيع',
       confirmLabel: 'حفظ الخصم',
@@ -471,7 +471,9 @@ class NetworkPosLifecycleController extends GetxController {
   Future<void> saveDiscount({PackagePosDiscountEntity? discount}) async {
     if (isSavingDiscount.value ||
         (discount == null && !canCreateDiscount) ||
-        (discount != null && !canEditDiscount)) return;
+        (discount != null && !canEditDiscount)) {
+      return;
+    }
     final cash = double.tryParse(AmountFormatter.clean(discountCashController.text));
     final credit = double.tryParse(AmountFormatter.clean(discountCreditController.text));
     if (cash == null || credit == null || cash < 0 || cash > 100 || credit < 0 || credit > 100) {
@@ -501,7 +503,7 @@ class NetworkPosLifecycleController extends GetxController {
       } else {
         await updatePackagePosDiscountUseCase(discount.discountId, payload);
       }
-      Get.back();
+      Get.back<void>();
       await loadPackageDiscounts(refresh: true);
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ خصم الباقة.', type: SnackType.success);
@@ -645,7 +647,7 @@ class NetworkPosLifecycleController extends GetxController {
     termsController.text = agreement?.terms ?? '';
     startsAtController.text = agreement?.startsAt ?? '';
     endsAtController.text = agreement?.endsAt ?? '';
-    Get.dialog(CustomDialog(
+    Get.dialog<void>(CustomDialog(
       type: DialogType.custom,
       title: agreement == null ? 'إنشاء مسودة اتفاقية' : 'تعديل مسودة الاتفاقية',
       confirmLabel: 'حفظ المسودة',
@@ -705,7 +707,7 @@ class NetworkPosLifecycleController extends GetxController {
           networkPosId: networkPosId, agreementId: agreement.agreementId, payload: payload,
         );
       }
-      Get.back();
+      Get.back<void>();
       await loadAgreements(refresh: true);
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ مسودة الاتفاقية.', type: SnackType.success);

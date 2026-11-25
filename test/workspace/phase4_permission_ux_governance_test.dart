@@ -44,7 +44,12 @@ void main() {
       expect(procurementOrderDescriptor?.workspace, equals(AppWorkspace.pos));
 
       // hasAccessToRoute verifies permission checks
-      permissionService.updateAccess(roleKey: 'TEST_ROLE', permissions: [AppPermissions.requestsCreate]);
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 12,
+        roleKey: 'POS_AGENT',
+        permissions: [AppPermissions.requestsCreate],
+      );
       expect(ScreenRegistry.hasAccessToRoute(AppRoutes.newProcurementOrder, can: permissionService.can), isTrue);
       expect(ScreenRegistry.hasAccessToRoute(AppRoutes.voucherPackagesCatalog, can: permissionService.can), isFalse);
     });

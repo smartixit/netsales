@@ -46,7 +46,7 @@ void main() {
     Get.reset();
   });
 
-  test('exposes only POS_USER for POS', () async {
+  test('exposes only POS-scoped assignable roles for POS', () async {
     repository.posRoles = [
       const MembershipRoleEntity(
         roleId: 1,
@@ -72,7 +72,7 @@ void main() {
 
     expect(
       controller.assignableRoles.map((role) => role.roleKey).toSet(),
-      {'POS_USER'},
+      {'POS_USER', 'POS_ACCOUNTANT'},
     );
   });
 

@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/accounting_status.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 
 /// الكيان النقي لمحفظة نقطة البيع (POS Wallet Entity)
 ///
@@ -57,12 +55,6 @@ class PosWalletEntity extends Equatable {
   AccountingStatus get typedAccountingStatus =>
       AccountingStatus.fromWire(accountingStatus);
 
-  /// كائن العرض الدلالي الموحد للمركز المحاسبي عبر EnumPresentationRegistry
-  EnumPresentation get accountingPresentation =>
-      EnumPresentationRegistry.resolveAccountingStatus(
-        typedAccountingStatus,
-        serverLabel: accountingStatusLabel,
-      );
 
   /// هل المحفظة دائنة (تحتوي على رصيد متاح إيجابي)
   bool get isCredit => typedAccountingStatus == AccountingStatus.credit;
