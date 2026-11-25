@@ -4,10 +4,13 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/delete_network_use_case.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class NetworkDetailsController extends GetxController {
-  NetworkDetailsController(this._getDetails);
+  NetworkDetailsController(this._getDetails, this._deleteEntity);
   final GetNetworkDetailsUseCase _getDetails;
+  final DeleteNetworkUseCase _deleteEntity;
 
   final network = Rxn<NetworkEntity>();
   final isLoading = false.obs;
@@ -25,6 +28,28 @@ class NetworkDetailsController extends GetxController {
       return;
     }
     load();
+  }
+
+  bool get canDelete => PermissionService.to.can(AppPermissions.networksDelete);
+
+  Future<void> deleteEntity() async {
+    final id = networkId;
+    if (id == null || !canDelete) return;
+    try {
+      await _deleteEntity(id);
+      CustomSnackbar.show(
+        type: SnackType.success,
+        title: 'تم نقل الشبكة إلى المحذوفات',
+        message: 'يمكن استعادتها وفق صلاحيات الاستعادة المعتمدة.',
+      );
+      Get.back(result: true);
+    } catch (error) {
+      CustomSnackbar.show(
+        type: SnackType.error,
+        title: 'تعذر حذف الشبكة',
+        message: AppException.sanitizeMessage(error),
+      );
+    }
   }
 
   Future<void> load() async {
