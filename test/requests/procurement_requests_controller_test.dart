@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
@@ -365,7 +366,9 @@ void main() {
     late PosProcurementOrdersController ordersController;
 
     setUp(() {
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_AGENT',
         permissions: [
           AppPermissions.requestsCreate,
@@ -401,7 +404,9 @@ void main() {
     });
 
     test('POS role capabilities distinguish edit, cancel and delete', () {
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_USER',
         permissions: [
           AppPermissions.requestsCreate,
@@ -527,7 +532,9 @@ void main() {
     late NetworkProcurementReviewController controller;
 
     setUp(() {
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
         roleKey: 'NETWORK_OWNER',
         permissions: [
           AppPermissions.requestsView,
@@ -557,12 +564,16 @@ void main() {
 
     test('Request modification requires preview-modification grant, not requests.edit', () {
       expect(controller.canModifyRequests, isTrue);
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
         roleKey: 'NETWORK_OWNER',
         permissions: [AppPermissions.requestsEdit],
       );
       expect(controller.canModifyRequests, isFalse);
-      PermissionService.instance.updateAccess(
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
         roleKey: 'NETWORK_OWNER',
         permissions: [AppPermissions.requestsPreviewModification],
       );
