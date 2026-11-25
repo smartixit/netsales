@@ -62,6 +62,7 @@ class PackageFormController extends GetxController {
   final isLoadingNetworks = false.obs;
   final authorizedNetworks = <NetworkEntity>[].obs;
   final networkLoadError = RxnString();
+  final List<Worker> _workers = <Worker>[];
 
   // المراقبة الحية للحسابات والمعاينة التفاعلية في الاستوديو
   final livePackageName = ''.obs;
@@ -82,6 +83,10 @@ class PackageFormController extends GetxController {
 
   @override
   void onClose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    _workers.clear();
     nameController.dispose();
     voucherCountController.dispose();
     balanceController.dispose();
@@ -113,7 +118,7 @@ class PackageFormController extends GetxController {
     }
 
     balanceController.addListener(updateBalance);
-    ever(selectedBalanceUnit, (_) => updateBalance());
+    _workers.add(ever(selectedBalanceUnit, (_) => updateBalance()));
 
     void updateUptime() {
       final raw = double.tryParse(uptimeController.text.trim());
@@ -126,7 +131,7 @@ class PackageFormController extends GetxController {
     }
 
     uptimeController.addListener(updateUptime);
-    ever(selectedUptimeUnit, (_) => updateUptime());
+    _workers.add(ever(selectedUptimeUnit, (_) => updateUptime()));
 
     void updateValidity() {
       final raw = double.tryParse(validityController.text.trim());
@@ -139,7 +144,7 @@ class PackageFormController extends GetxController {
     }
 
     validityController.addListener(updateValidity);
-    ever(selectedValidityUnit, (_) => updateValidity());
+    _workers.add(ever(selectedValidityUnit, (_) => updateValidity()));
 
     priceController.addListener(() {
       liveBasePrice.value = double.tryParse(priceController.text.trim()) ?? 0;
@@ -208,17 +213,16 @@ class PackageFormController extends GetxController {
 
   /// تهيئة النموذج واكتشاف حالة التعديل أو الإنشاء
   Future<void> _initializeForm() async {
-    final activeTenantId = WorkspaceService.instance.savedActiveNetworkId;
-    selectedNetworkId.value = activeTenantId;
-
-    if (getMyNetworksUseCase != null) {
-      await _loadAuthorizedNetworks();
-    }
-
     final dynamic args = Get.arguments;
     if (args is PackageEntity) {
       _populateFromPackage(args);
+      return;
     }
+
+    selectedNetworkId.value =
+        WorkspaceService.instance.savedActiveNetworkId;
+
+    await _loadAuthorizedNetworks();
   }
 
   /// إعادة محاولة جلب الشبكات المصرح للمستخدم إدارتها.
@@ -226,11 +230,13 @@ class PackageFormController extends GetxController {
 
   /// جلب الشبكات المصرح للمستخدم إدارتها
   Future<void> _loadAuthorizedNetworks() async {
+    final useCase = getMyNetworksUseCase;
+    if (useCase == null) return;
+
     try {
-      isEditing.value = true;
       isLoadingNetworks.value = true;
       networkLoadError.value = null;
-      final networks = await getMyNetworksUseCase!();
+      final networks = await useCase();
       authorizedNetworks.assignAll(networks);
 
       if (selectedNetworkId.value == null && networks.isNotEmpty) {
