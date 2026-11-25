@@ -11,6 +11,7 @@ import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 
 class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
@@ -85,6 +86,21 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
             },
             prefix: Icons.edit_outlined,
           ),
+          if (controller.canDelete) ...[
+            AppSpacing.vSm,
+            CustomButton.danger(
+              text: 'حذف الشبكة',
+              prefix: Icons.delete_outline_rounded,
+              onPressed: () => Get.dialog(
+                CustomDialog.confirmation(
+                  title: 'تأكيد حذف الشبكة',
+                  message: 'سيتم نقل الكيان إلى المحذوفات مؤقتاً. لن يتم حذف علاقاته أو سجلاته المالية من خلال هذا الإجراء.',
+                  confirmLabel: 'نقل إلى المحذوفات',
+                  onConfirm: controller.deleteEntity,
+                ),
+              ),
+            ),
+          ],
         ],
       );
     }),
