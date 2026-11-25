@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_details_controller.dart';
@@ -84,7 +85,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
           if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
-              final saved = await Get.toNamed('/pos/entities/${pos.posId}/edit', arguments: pos);
+              final saved = await Get.toNamed(AppRoutes.posEntityEdit.replaceFirst(':id', pos.posId.toString()), arguments: pos);
               if (saved == true) {
                 await controller.load();
                 if (Get.isRegistered<PosDirectoryController>()) {
