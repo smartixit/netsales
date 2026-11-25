@@ -23,6 +23,7 @@ import 'package:netsales/features/commercial/domain/usecases/restore_network_pos
 import 'package:netsales/features/commercial/domain/usecases/terminate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/update_network_pos_agreement_draft_use_case.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
