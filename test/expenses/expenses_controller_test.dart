@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
