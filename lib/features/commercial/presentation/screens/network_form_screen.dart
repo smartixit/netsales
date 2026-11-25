@@ -21,6 +21,14 @@ class NetworkFormScreen extends GetView<NetworkFormController> {
   Widget build(BuildContext context) => CustomAppScaffold(
     appBarTitle: controller.isEditing ? 'تعديل بيانات الشبكة' : 'إنشاء شبكة',
     body: Obx(() {
+      if (controller.errorMessage.value != null && !controller.isLoading.value) {
+        return CustomStateView.error(
+          title: 'تعذر فتح نموذج الشبكة',
+          subtitle: controller.errorMessage.value,
+          actionLabel: 'العودة',
+          onAction: () => Get.back(),
+        );
+      }
       if (controller.isLoading.value) {
         return const CustomStateView.loading();
       }
