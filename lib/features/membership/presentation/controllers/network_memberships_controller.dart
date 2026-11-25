@@ -361,7 +361,6 @@ class NetworkMembershipsController extends BaseMembershipsController {
         statusNotifier: statusNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
-          if (!canChangeMemberRole) return;
           if (!canAddMember) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
@@ -428,6 +427,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
         roleNotifier: roleNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
+          if (!canChangeMemberRole) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
             CustomSnackbar.show(
@@ -482,7 +482,6 @@ class NetworkMembershipsController extends BaseMembershipsController {
       memberName: member.displayFullName,
       willSuspend: willSuspend,
       onConfirm: (reason) async {
-          if (!canRemoveMember) return;
           if (!canChangeMemberStatus) return;
         final networkId = resolvedNetworkId;
         if (networkId == null) return;
@@ -518,6 +517,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
     MembershipActionDialogs.showRemoveMemberDialog(
       memberName: member.displayFullName,
       onConfirm: (reason) async {
+          if (!canRemoveMember) return;
         final networkId = resolvedNetworkId;
         if (networkId == null) return;
 
