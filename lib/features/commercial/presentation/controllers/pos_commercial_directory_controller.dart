@@ -424,7 +424,12 @@ class PosCommercialDirectoryController
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
       AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
-      arguments: {'entity_id': link.posId, 'is_network': false},
+      arguments: {
+        'entity_id': link.posId,
+        'is_network': false,
+        'network_id': link.networkId,
+        'pos_id': link.posId,
+      },
     );
   }
 
