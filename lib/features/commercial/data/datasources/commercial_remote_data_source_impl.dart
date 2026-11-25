@@ -8,6 +8,8 @@ import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_agreement_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_event_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
@@ -524,4 +526,137 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     }
     return result;
   }
+  @override
+  Future<PaginatedList<NetworkPosAgreementModel>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreements(networkPosId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosAgreementModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreements(networkPosId),
+      data: payload,
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر إنشاء مسودة الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await ApiService.instance.put<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreement(networkPosId, agreementId),
+      data: payload,
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر تحديث مسودة الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreementActivate(networkPosId, agreementId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر اعتماد الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreementTerminate(networkPosId, agreementId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر إنهاء الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosEventModel>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkPosEventModel>(
+      ApiConstants.networkPosEvents(networkPosId),
+      fromJson: (data) => NetworkPosEventModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosEventModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetworkPosLink(int networkPosId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.networkPosRestore(networkPosId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة العلاقة التجارية.');
+    }
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosLinkModel>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final path = isNetwork
+        ? ApiConstants.networkPosNetworkTrashed(entityId)
+        : ApiConstants.networkPosPosTrashed(entityId);
+    final response = await ApiService.instance.getList<NetworkPosLinkModel>(
+      path,
+      fromJson: (data) => NetworkPosLinkModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosLinkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
 }
