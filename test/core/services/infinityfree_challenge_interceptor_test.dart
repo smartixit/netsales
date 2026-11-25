@@ -423,7 +423,7 @@ void main() {
           'GET',
           'POST',
         ]);
-        expect(adapter.requests[0].responseType, ResponseType.plain);
+        expect(adapter.requests[0].options.responseType, ResponseType.plain);
         expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
         expect(adapter.requests[1].body, isNull);
         expect(adapter.requests[2].body, isNotNull);
