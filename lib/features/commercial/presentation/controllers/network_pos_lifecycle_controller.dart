@@ -146,7 +146,7 @@ class NetworkPosLifecycleController extends GetxController {
     if (canViewEvents) loadEvents();
     if (canViewArchive) loadArchivedLinks();
     if (canViewCatalog) {
-      loadPackages();
+      if (canCreateDiscount || canEditDiscount) loadPackages();
       loadPackageDiscounts();
     }
   }
