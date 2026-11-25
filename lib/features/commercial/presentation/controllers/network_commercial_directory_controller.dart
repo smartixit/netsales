@@ -494,6 +494,8 @@ class NetworkCommercialDirectoryController
       partnerName: link.displayPosName,
       willDeactivate: link.isActive,
       onConfirm: () async {
+        if (!canDeletePartnerLink) return;
+        if (!canTogglePartnerLink) return;
         try {
           final updated = await toggleNetworkPosLinkStatusUseCase(
             link.networkPosId,
@@ -904,7 +906,7 @@ class NetworkCommercialDirectoryController
         isLoadingMoreInvitationTargets.value = false;
         _isInvitationTargetDialogOpen = false;
       }
-      if (!_isInvitationTargetConfirmed) return;
+      if (!_isInvitationTargetConfirmed || !canCreateInvitation) return;
       final target = resolvedInvitationTarget.value;
       if (target == null) return;
       late final NetworkPosLinkChallengeEntity challenge;
