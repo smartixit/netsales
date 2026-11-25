@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -98,6 +99,8 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
   bool get canLinkNetwork =>
       canPreviewLinkChallenge && canConfirmLinkChallenge;
+  bool get canViewPartnerWallet =>
+      PermissionService.to.can(AppPermissions.posWalletsView);
 
   int? get resolvedPosId {
     return selectedPosId.value ??
@@ -401,6 +404,12 @@ class PosCommercialDirectoryController
       isNetworkView: false,
       onViewDetails: () => openPartnerDetails(link),
       onDelete: null,
+      onViewWallet: canViewPartnerWallet
+          ? () => Get.toNamed<void>(
+              AppRoutes.posWalletStatement,
+              arguments: {'network_id': link.networkId, 'pos_id': link.posId},
+            )
+          : null,
     );
   }
 
