@@ -758,6 +758,12 @@ class NetworkPosLifecycleController extends GetxController {
 
   @override
   void onClose() {
+    _agreementsRevision++;
+    _eventsRevision++;
+    _archiveRevision++;
+    _discountsRevision++;
+    _trashedDiscountsRevision++;
+    _packagesRevision++;
     titleController.dispose();
     referenceController.dispose();
     termsController.dispose();
