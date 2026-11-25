@@ -7,7 +7,7 @@ class GetNetworkPosEventsUseCase {
 
   final CommercialRepository _repository;
 
-  PaginatedList<NetworkPosEventEntity> call({required int networkPosId, String? cursor, int perPage = 20}) {
+  Future<PaginatedList<NetworkPosEventEntity>> call({required int networkPosId, String? cursor, int perPage = 20}) {
     return _repository.getNetworkPosEvents({required int networkPosId, String? cursor, int perPage = 20});
   }
 }
