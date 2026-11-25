@@ -327,7 +327,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   }
 
   Widget _catalogTab() {
-    return ListView(
+    return Obx(() => ListView(
       padding: EdgeInsets.all(AppSpacing.md),
       children: [
         if (controller.canViewPackageCatalog) ...[
@@ -529,7 +529,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
             ),
         ],
       ],
-    );
+    ));
   }
 
   Widget _archiveTab() {
