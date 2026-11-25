@@ -23,6 +23,30 @@ void main() {
     });
   });
 
+  group('TimeDurationUnit.resolveBestUnit', () {
+    test('preserves exact fractional values in the largest useful unit', () {
+      expect(
+        TimeDurationUnit.resolveBestUnit(2160),
+        TimeDurationUnit.days,
+      );
+      expect(
+        TimeDurationUnit.resolveBestUnit(90),
+        TimeDurationUnit.hours,
+      );
+      expect(
+        TimeDurationUnit.resolveBestUnit(10080),
+        TimeDurationUnit.weeks,
+      );
+    });
+
+    test('falls back to minutes when a larger unit loses precision', () {
+      expect(
+        TimeDurationUnit.resolveBestUnit(61),
+        TimeDurationUnit.minutes,
+      );
+    });
+  });
+
   group('PackageSpecFormatter.formatDataParts', () {
     test('returns formatted value and unit separately for gigabytes', () {
       final parts = PackageSpecFormatter.formatDataParts(
