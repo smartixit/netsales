@@ -306,81 +306,22 @@ class PackageFormController extends GetxController {
     status.value = package.isActive;
   }
 
-  /// تنسيق القيمة المحولة دون فقد دقة التخزين أو إظهار أصفار عشرية زائدة.
-  String _formatConvertedUnitValue(double value) {
-    if (!value.isFinite) return '';
-    if (value == value.roundToDouble()) return value.toInt().toString();
-
-    var formatted = value.toStringAsFixed(12);
-    while (formatted.endsWith('0')) {
-      formatted = formatted.substring(0, formatted.length - 1);
-    }
-    if (formatted.endsWith('.')) {
-      formatted = formatted.substring(0, formatted.length - 1);
-    }
-    return formatted;
-  }
-
-  /// تغيير وحدة رصيد البيانات مع الحفاظ على القيمة المعيارية بالبايت.
+  /// تغيير وحدة رصيد البيانات دون تعديل الرقم الذي أدخله المستخدم.
+  /// يعاد تفسير الرقم بالوحدة الجديدة عند تحديث القيمة المعيارية بالبايت.
   void setBalanceUnit(DataSizeUnit newUnit) {
-    final oldUnit = selectedBalanceUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(balanceController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertData(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
-      final formatted = _formatConvertedUnitValue(converted);
-      balanceController.value = balanceController.value.copyWith(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-        composing: TextRange.empty,
-      );
-    }
+    if (selectedBalanceUnit.value == newUnit) return;
     selectedBalanceUnit.value = newUnit;
   }
 
-  /// تغيير وحدة وقت الاستخدام مع الحفاظ على القيمة المعيارية بالدقائق.
+  /// تغيير وحدة وقت الاستخدام دون تعديل الرقم المدخل؛ الوحدة الجديدة هي المعتمدة.
   void setUptimeUnit(TimeDurationUnit newUnit) {
-    final oldUnit = selectedUptimeUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(uptimeController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final converted = PackageSpecFormatter.convertDuration(
-        currentValue,
-        oldUnit,
-        newUnit,
-      );
-      final formatted = _formatConvertedUnitValue(converted);
-      uptimeController.value = uptimeController.value.copyWith(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-        composing: TextRange.empty,
-      );
-    }
+    if (selectedUptimeUnit.value == newUnit) return;
     selectedUptimeUnit.value = newUnit;
   }
 
-  /// تغيير وحدة فترة الصلاحية مع الحفاظ على القيمة المعيارية بالدقائق.
+  /// تغيير وحدة الصلاحية دون تحويل الرقم المدخل إلى قيمة عددية مختلفة.
   void setValidityUnit(TimeDurationUnit newUnit) {
-    final oldUnit = selectedValidityUnit.value;
-    if (oldUnit == newUnit) return;
-
-    final currentValue = double.tryParse(validityController.text.trim());
-    if (currentValue != null && currentValue >= 0) {
-      final minutes = oldUnit.toCanonicalMinutes(currentValue);
-      final converted = newUnit.fromCanonicalMinutes(minutes);
-      final formatted = _formatConvertedUnitValue(converted);
-      validityController.value = validityController.value.copyWith(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-        composing: TextRange.empty,
-      );
-    }
+    if (selectedValidityUnit.value == newUnit) return;
     selectedValidityUnit.value = newUnit;
   }
 
