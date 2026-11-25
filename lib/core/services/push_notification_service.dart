@@ -278,6 +278,9 @@ class PushNotificationService extends GetxService {
       return false;
     }
 
+    final sessionGeneration = ApiService.sessionGeneration;
+    final sessionId = SessionService.to.currentSessionId;
+    final userId = SessionService.to.currentUser?.userId;
     final storage = StorageService.instance;
     final cachedToken = storage.getString(StorageKeys.fcmTokenStorage);
 
@@ -301,7 +304,24 @@ class PushNotificationService extends GetxService {
       );
 
       if (response.success) {
+        final session = SessionService.to;
+        if (sessionGeneration != ApiService.sessionGeneration ||
+            !session.isAuthenticated ||
+            !session.isSessionVerified ||
+            session.currentSessionId != sessionId ||
+            session.currentUser?.userId != userId ||
+            _fcmToken != token) {
+          log('⏭️ [PushNotificationService] تجاهل مزامنة رمز FCM من جلسة سابقة.');
+          return false;
+        }
+
         await storage.setString(StorageKeys.fcmTokenStorage, token);
+        if (sessionGeneration != ApiService.sessionGeneration ||
+            SessionService.to.currentSessionId != sessionId ||
+            SessionService.to.currentUser?.userId != userId) {
+          log('⏭️ [PushNotificationService] تغيرت الجلسة أثناء حفظ رمز FCM؛ لن يُعلن نجاح المزامنة القديمة.');
+          return false;
+        }
         log('📡 [PushNotificationService] FCM token synced with server.');
         return true;
       }
