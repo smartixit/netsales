@@ -418,6 +418,17 @@ void main() {
       expect(formController.validityController.text, '0');
     });
 
+    test('new package preview starts with the canonical default color', () {
+      expect(
+        PackageFormController.defaultPackageColor,
+        '0xFF0D7A5F',
+      );
+      expect(
+        formController.livePreviewPackage.packageColor,
+        PackageFormController.defaultPackageColor,
+      );
+    });
+
     test('live preview retains the selected package color', () {
       formController.selectedColor.value = '0xFF0D7A5F';
 
