@@ -189,6 +189,13 @@ class ServerTaskRunnerService extends GetxService {
 
       if (response.success) {
         await storage.setInt(StorageKeys.lastServerCatchupRun, nowMs);
+        if (sessionGeneration != ApiService.sessionGeneration ||
+            session.currentSessionId != sessionId) {
+          if (storage.getInt(StorageKeys.lastServerCatchupRun) == nowMs) {
+            await storage.remove(StorageKeys.lastServerCatchupRun);
+          }
+          return ServerTaskResult.skippedNoSession;
+        }
         await _recordSuccess();
 
         log(
