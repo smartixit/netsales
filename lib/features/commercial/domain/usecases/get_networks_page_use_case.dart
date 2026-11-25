@@ -9,7 +9,6 @@ class GetNetworksPageUseCase {
   Future<PaginatedList<NetworkEntity>> call({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   }) => _repository.getNetworksPage(
