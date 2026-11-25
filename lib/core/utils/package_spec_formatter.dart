@@ -64,22 +64,24 @@ enum TimeDurationUnit {
     TimeDurationUnit defaultUnit = hours,
   }) {
     if (minutes <= 0) return defaultUnit;
-    if (minutes >= years.minuteFactor && minutes % years.minuteFactor == 0) {
-      return years;
+
+    // اختر أكبر وحدة يمكن تمثيلها بدقة حتى منزلتين عشريتين؛
+    // هذا يحافظ على القيمة المعيارية عند فتح النموذج ثم حفظه دون فقد.
+    final candidates = [
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+    ];
+    for (final unit in candidates) {
+      if (minutes >= unit.minuteFactor &&
+          (minutes * 100) % unit.minuteFactor == 0) {
+        return unit;
+      }
     }
-    if (minutes >= months.minuteFactor && minutes % months.minuteFactor == 0) {
-      return months;
-    }
-    if (minutes >= weeks.minuteFactor && minutes % weeks.minuteFactor == 0) {
-      return weeks;
-    }
-    if (minutes >= days.minuteFactor && minutes % days.minuteFactor == 0) {
-      return days;
-    }
-    if (minutes >= hours.minuteFactor && minutes % hours.minuteFactor == 0) {
-      return hours;
-    }
-    return minutes >= hours.minuteFactor ? hours : TimeDurationUnit.minutes;
+
+    return TimeDurationUnit.minutes;
   }
 }
 
