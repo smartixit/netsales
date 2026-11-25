@@ -4,6 +4,8 @@ import 'package:netsales/features/commercial/domain/entities/network_linkable_po
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
@@ -60,6 +62,48 @@ abstract class CommercialRepository {
 
   /// فك الارتباط التجاري بين الشبكة ونقطة البيع
   Future<void> deleteNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosAgreementEntity>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<NetworkPosAgreementEntity> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementEntity> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementEntity> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<NetworkPosAgreementEntity> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<PaginatedList<NetworkPosEventEntity>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  });
+
+  Future<void> restoreNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosLinkEntity>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  });
 
   /// التحقق من نقطة بيع محددة بواسطة المعرف التجاري قبل إصدار الدعوة.
   Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
