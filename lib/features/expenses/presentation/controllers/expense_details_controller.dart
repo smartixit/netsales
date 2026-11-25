@@ -44,14 +44,14 @@ class ExpenseDetailsController extends GetxController {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesDelete);
     }
-    return true;
+    return false;
   }
 
   bool get canEditExpense {
     if (Get.isRegistered<PermissionService>()) {
       return PermissionService.instance.can(AppPermissions.expensesEdit);
     }
-    return true;
+    return false;
   }
 
   void onEditCurrentExpense() {
