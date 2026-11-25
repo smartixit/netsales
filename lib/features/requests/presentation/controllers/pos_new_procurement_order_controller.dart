@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/form_validators.dart';
@@ -52,6 +54,11 @@ class PosNewProcurementOrderController extends GetxController {
     this.getEffectivePackageDiscountsForPosUseCase,
     this.procurementEstimateCalculator = const ProcurementEstimateCalculator(),
   });
+
+  bool get canCreateOrder =>
+      PermissionService.to.can(AppPermissions.requestsCreate);
+  bool get canEditOrder =>
+      PermissionService.to.can(AppPermissions.requestsEdit);
 
   /// حالة وضع التعديل (Edit Mode)
   final isEditing = false.obs;
@@ -1088,6 +1095,14 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// يملأ النموذج بالبيانات الكاملة للطلب المراد تعديله
   Future<void> populateFromRequest(RequestEntity request) async {
+    if (!canEditOrder || !request.isPending) {
+      CustomSnackbar.show(
+        title: 'صلاحية غير متوفرة',
+        message: 'لا تملك صلاحية تعديل طلب التوريد هذا.',
+        type: SnackType.warning,
+      );
+      return;
+    }
     final lifecycleRevision = _lifecycleRevision;
 
     isEditing.value = true;
@@ -1168,6 +1183,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// إرسال تحديثات الطلب المعلق إلى الخادم
   Future<void> updateOrder() async {
+    if (!canEditOrder) return;
     try {
       final requestId = editingRequestId.value;
       if (requestId == null || updateRequestUseCase == null) {
@@ -1237,6 +1253,7 @@ class PosNewProcurementOrderController extends GetxController {
 
   /// إرسال وتقديم طلب التوريد الجديد إلى الخادم
   Future<void> submitOrder() async {
+    if (!canCreateOrder) return;
     if (formKey.currentState != null && !formKey.currentState!.validate()) {
       return;
     }
