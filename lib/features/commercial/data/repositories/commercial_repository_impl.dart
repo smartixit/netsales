@@ -239,6 +239,16 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<void> deleteNetwork(int networkId) {
+    return _remoteDataSource.deleteNetwork(networkId);
+  }
+
+  @override
+  Future<void> deletePos(int posId) {
+    return _remoteDataSource.deletePos(posId);
+  }
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) {
     return _remoteDataSource.getNetworkDetails(networkId);
   }
