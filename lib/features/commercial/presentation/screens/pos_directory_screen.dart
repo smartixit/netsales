@@ -94,7 +94,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
           if (controller.errorMessage.value != null && controller.points.isEmpty) {
             return SliverToBoxAdapter(
               child: CustomErrorState(
-                title: 'تعذر تحميل نقاط البيع',
+                title: controller.showArchived.value ? 'تعذر تحميل أرشيف نقاط البيع' : 'تعذر تحميل نقاط البيع',
                 subtitle: controller.errorMessage.value,
                 onRetry: controller.refreshDirectory,
               ),
