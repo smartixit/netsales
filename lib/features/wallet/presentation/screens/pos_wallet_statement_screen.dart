@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/wallet/presentation/controllers/pos_wallet_statement_controller.dart';
 import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_filter_ribbon.dart';
 import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_hero_card.dart';
 import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_ledger_tile.dart';
+import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_purchasing_power_gauge.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
-/// شاشة كشف حساب ودفتر أستاذ محفظة نقطة البيع (POS Wallet Statement Screen)
-///
-/// تلتزم بالمعايير الصارمة للتفكيك: صفحة تجميعية فقط خالية من أي Helper Methods.
+/// شاشة حساب نقطة البيع وسجل حركاته.
 class PosWalletStatementScreen extends GetView<PosWalletStatementController> {
   const PosWalletStatementScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return CustomAppScaffold(
-      appBarTitle: 'دفتر أستاذ المحفظة',
+      appBarTitle: 'محفظة نقطة البيع',
       showBackButton: true,
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -44,7 +47,7 @@ class PosWalletStatementScreen extends GetView<PosWalletStatementController> {
         if (wallet == null) {
           return const CustomStateView.empty(
             title: 'لم يتم العثور على المحفظة',
-            subtitle: 'المحفظة المالية غير مسجلة أو تم تعطيلها مؤقتاً.',
+            subtitle: 'لا تتوفر بيانات حساب نقطة البيع المطلوب.',
           );
         }
 
@@ -63,28 +66,39 @@ class PosWalletStatementScreen extends GetView<PosWalletStatementController> {
             child: ListView(
               padding: EdgeInsets.all(AppSpacing.screenPadding),
               children: [
-                // 1. بطاقة المحفظة المالية التنفيذية
-                PosWalletHeroCard(
-                  wallet: wallet,
-                  onRefresh: () =>
-                      controller.loadWalletAndLogs(isRefresh: true),
+                PosWalletHeroCard(wallet: wallet),
+                SizedBox(height: AppSpacing.md),
+                PosWalletPurchasingPowerGauge(wallet: wallet),
+                SizedBox(height: AppSpacing.xl),
+                Text(
+                  'سجل الحركات',
+                  style: AppTypography.titleLarge.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: AppTypography.bold,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xxs),
+                Text(
+                  'الحركات المالية المسجلة على هذا الحساب',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
                 ),
                 SizedBox(height: AppSpacing.md),
-
-                // 2. شريط البحث والفلترة
                 PosWalletFilterRibbon(controller: controller),
                 SizedBox(height: AppSpacing.md),
-
-                // 3. قائمة قيود دفتر الأستاذ أو الحالة الفارغة
                 if (controller.logs.isEmpty)
                   const CustomStateView.empty(
-                    title: 'لا توجد قيود مالية مسجلة',
-                    subtitle: 'لم يتم العثور على أي حركات مالية تطابق محددات البحث الحالية.',
+                    title: 'لا توجد حركات مسجلة',
+                    subtitle:
+                        'لا توجد حركات تطابق معايير البحث والتصفية الحالية.',
                   )
                 else ...[
                   ...controller.logs.map(
-                    (log) =>
-                        PosWalletLedgerTile(key: ValueKey(log.logId), log: log),
+                    (log) => PosWalletLedgerTile(
+                      key: ValueKey(log.logId),
+                      log: log,
+                    ),
                   ),
                   CustomCursorLoadMore(
                     hasMore: controller.hasMore.value,
