@@ -51,9 +51,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     );
     return PaginatedList<NetworkModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
-      perPage: response.meta?['per_page'] as int? ?? perPage,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
     );
   }
 
@@ -76,9 +76,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     );
     return PaginatedList<PosModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
-      perPage: response.meta?['per_page'] as int? ?? perPage,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
     );
   }
 
@@ -130,8 +130,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkPosLinkModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
       perPage: response.meta?['per_page'] as int? ?? perPage ?? 15,
     );
   }
@@ -167,8 +167,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkPosLinkModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
       perPage: response.meta?['per_page'] as int? ?? perPage ?? 15,
     );
   }
@@ -244,9 +244,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkLinkablePosModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
-      perPage: response.meta?['per_page'] as int? ?? perPage,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
     );
   }
 
