@@ -428,6 +428,7 @@ class PosCommercialDirectoryController
       arguments: {
         'entity_id': link.posId,
         'is_network': false,
+        'relationship': link,
         'network_id': link.networkId,
         'pos_id': link.posId,
         'relationship': link,
