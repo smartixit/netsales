@@ -7,7 +7,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/wallet/domain/entities/pos_wallet_entity.dart';
 
-/// شريط قياس القدرة الشرائية والتسهيل الائتماني لمحفظة نقطة البيع (Purchasing Power Gauge)
+/// يعرض حدود التسهيل والقدرة الشرائية كما احتسبها الخادم.
 class PosWalletPurchasingPowerGauge extends StatelessWidget {
   const PosWalletPurchasingPowerGauge({super.key, required this.wallet});
 
@@ -16,139 +16,143 @@ class PosWalletPurchasingPowerGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
-    final creditLimitFormatted = wallet.creditLimit != null
+    final hasFacility = wallet.hasCreditFacility;
+    final creditLimitFormatted = hasFacility
         ? AmountFormatter.format(wallet.creditLimit!.toStringAsFixed(2))
-        : 'غير محدد';
-    final overdraftFormatted = AmountFormatter.format(
-      wallet.availableOverdraftCapacity.toStringAsFixed(2),
-    );
+        : 'غير معتمد';
+    final availableFormatted = hasFacility
+        ? AmountFormatter.format(
+            wallet.availableOverdraftCapacity.toStringAsFixed(2),
+          )
+        : '—';
     final purchasingPowerFormatted = AmountFormatter.format(
       wallet.totalPurchasingPower.toStringAsFixed(2),
     );
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.20),
+        color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
-          width: 0.8,
+          color: colors.outlineVariant.withValues(alpha: 0.45),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. السقف الائتماني
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'السقف الائتماني',
-                  maxLines: 1,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.70),
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xxs),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    creditLimitFormatted,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: colors.executiveGoldAccent,
-                      fontWeight: AppTypography.bold,
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            'التسهيل والقدرة الشرائية',
+            style: AppTypography.titleSmall.copyWith(
+              color: colors.onSurface,
+              fontWeight: AppTypography.bold,
             ),
           ),
-
-          // فاصل رأسي
-          Container(
-            height: 28.h,
-            width: 1.w,
-            color: Colors.white.withValues(alpha: 0.15),
-          ),
-          SizedBox(width: AppSpacing.sm),
-
-          // 2. المتبقي على المكشوف
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'المتاح على المكشوف',
-                  maxLines: 1,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.70),
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xxs),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    overdraftFormatted,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: AppTypography.semiBold,
-                    ),
-                  ),
-                ),
-              ],
+          SizedBox(height: AppSpacing.xxs),
+          Text(
+            'قيم معتمدة من النظام المالي',
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
-
-          // فاصل رأسي
-          Container(
-            height: 28.h,
-            width: 1.w,
-            color: Colors.white.withValues(alpha: 0.15),
-          ),
-          SizedBox(width: AppSpacing.sm),
-
-          // 3. إجمالي القدرة الشرائية
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'إجمالي القدرة الشرائية',
-                  maxLines: 1,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.70),
-                  ),
+          SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _WalletMetric(
+                  label: 'السقف الائتماني',
+                  value: creditLimitFormatted,
+                  currency: hasFacility ? wallet.currencyCode : null,
+                  valueColor: colors.onSurface,
                 ),
-                SizedBox(height: AppSpacing.xxs),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    purchasingPowerFormatted,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: const Color(0xFF5EEAD4),
-                      fontWeight: AppTypography.bold,
-                    ),
-                  ),
+              ),
+              Container(
+                width: 1,
+                height: 42.h,
+                margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                color: colors.outlineVariant.withValues(alpha: 0.7),
+              ),
+              Expanded(
+                child: _WalletMetric(
+                  label: 'المتاح من التسهيل',
+                  value: availableFormatted,
+                  currency: hasFacility ? wallet.currencyCode : null,
+                  valueColor: colors.primary,
                 ),
-              ],
-            ),
+              ),
+              Container(
+                width: 1,
+                height: 42.h,
+                margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                color: colors.outlineVariant.withValues(alpha: 0.7),
+              ),
+              Expanded(
+                child: _WalletMetric(
+                  label: 'القدرة الشرائية',
+                  value: purchasingPowerFormatted,
+                  currency: wallet.currencyCode,
+                  valueColor: colors.success,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _WalletMetric extends StatelessWidget {
+  const _WalletMetric({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.currency,
+  });
+
+  final String label;
+  final String value;
+  final String? currency;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.labelSmall.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        SizedBox(height: AppSpacing.xs),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.titleSmall.copyWith(
+            color: valueColor,
+            fontWeight: AppTypography.bold,
+          ),
+        ),
+        if (currency != null) ...[
+          SizedBox(height: AppSpacing.xxs),
+          Text(
+            currency!,
+            maxLines: 1,
+            style: AppTypography.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
