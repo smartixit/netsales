@@ -273,7 +273,7 @@ class PosMembershipsController extends BaseMembershipsController {
         roles.where(
           (role) =>
               role.typedScope == RoleScope.pos &&
-              {RoleKey.posUser, RoleKey.posAccountant}.contains(role.typedRoleKey),
+              role.typedRoleKey == RoleKey.posUser,
         ),
       );
     } catch (_) {
