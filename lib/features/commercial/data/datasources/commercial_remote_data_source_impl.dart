@@ -377,11 +377,21 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
   @override
   Future<NetworkModel> createNetwork(Map<String, dynamic> payload) async {
-    final response = await ApiService.instance.post<NetworkModel>(
-      ApiConstants.networks,
-      data: payload,
-      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
-    );
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_network_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<NetworkModel>(
+            ApiConstants.networks,
+            filePath: logoPath,
+            fileField: 'network_logo',
+            extraFields: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.post<NetworkModel>(
+            ApiConstants.networks,
+            data: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          );
     final result = response.data;
     if (result == null) {
       throw AppException('فشل إنشاء الشبكة.');
@@ -394,11 +404,21 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     int networkId,
     Map<String, dynamic> payload,
   ) async {
-    final response = await ApiService.instance.put<NetworkModel>(
-      ApiConstants.network(networkId),
-      data: payload,
-      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
-    );
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_network_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<NetworkModel>(
+            ApiConstants.network(networkId),
+            filePath: logoPath,
+            fileField: 'network_logo',
+            extraFields: {...fields, '_method': 'PUT'},
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.put<NetworkModel>(
+            ApiConstants.network(networkId),
+            data: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          );
     final result = response.data;
     if (result == null) {
       throw AppException('فشل تحديث بيانات الشبكة.');
@@ -408,11 +428,21 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
   @override
   Future<PosModel> createPos(Map<String, dynamic> payload) async {
-    final response = await ApiService.instance.post<PosModel>(
-      ApiConstants.pos,
-      data: payload,
-      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
-    );
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_pos_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<PosModel>(
+            ApiConstants.pos,
+            filePath: logoPath,
+            fileField: 'pos_profile_logo',
+            extraFields: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.post<PosModel>(
+            ApiConstants.pos,
+            data: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          );
     final result = response.data;
     if (result == null) {
       throw AppException('فشل إنشاء نقطة البيع.');
@@ -425,11 +455,21 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     int posId,
     Map<String, dynamic> payload,
   ) async {
-    final response = await ApiService.instance.put<PosModel>(
-      ApiConstants.posItem(posId),
-      data: payload,
-      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
-    );
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_pos_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<PosModel>(
+            ApiConstants.posItem(posId),
+            filePath: logoPath,
+            fileField: 'pos_profile_logo',
+            extraFields: {...fields, '_method': 'PUT'},
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.put<PosModel>(
+            ApiConstants.posItem(posId),
+            data: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          );
     final result = response.data;
     if (result == null) {
       throw AppException('فشل تحديث بيانات نقطة البيع.');
