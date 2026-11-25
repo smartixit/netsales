@@ -55,14 +55,10 @@ import 'package:netsales/features/commercial/presentation/screens/network_form_s
 import 'package:netsales/features/commercial/presentation/bindings/pos_details_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_form_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_form_screen.dart';
-import 'package:netsales/features/commercial/presentation/controllers/network_details_controller.dart';
-import 'package:netsales/features/commercial/presentation/controllers/pos_details_controller.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_details_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_details_screen.dart';
 
 import 'package:netsales/features/commercial/presentation/bindings/pos_directory_binding.dart';
-import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/controllers/pos_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/pos_directory_screen.dart';
 
@@ -261,7 +257,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.networkEntityCreate,
       page: () => const NetworkFormScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkFormBinding().dependencies();
       }),
@@ -274,7 +270,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.networkEntityEdit,
       page: () => const NetworkFormScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkFormBinding().dependencies();
       }),
@@ -287,7 +283,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.networkEntityDetails,
       page: () => const NetworkDetailsScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkDetailsBinding().dependencies();
       }),
@@ -300,7 +296,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.posEntityCreate,
       page: () => const PosFormScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         PosFormBinding().dependencies();
       }),
@@ -313,7 +309,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.posEntityEdit,
       page: () => const PosFormScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         PosFormBinding().dependencies();
       }),
@@ -326,7 +322,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.posEntityDetails,
       page: () => const PosDetailsScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         PosDetailsBinding().dependencies();
       }),
@@ -342,7 +338,7 @@ abstract final class AppPages {
       page: () => CommercialDirectoryScreen(
         controllerTag: 'network-relationships-${Get.parameters['id']}',
       ),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkRelationshipsBinding().dependencies();
       }),
@@ -357,7 +353,7 @@ abstract final class AppPages {
       page: () => CommercialDirectoryScreen(
         controllerTag: 'pos-relationships-${Get.parameters['id']}',
       ),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         PosRelationshipsBinding().dependencies();
       }),
@@ -374,7 +370,7 @@ abstract final class AppPages {
         isNetwork: true,
         controllerTag: 'network-members-${Get.parameters['id']}',
       ),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         MembershipBinding().dependencies();
         NetworkEntityMembershipBinding().dependencies();
       }),
@@ -390,7 +386,7 @@ abstract final class AppPages {
         isNetwork: false,
         controllerTag: 'pos-members-${Get.parameters['id']}',
       ),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         MembershipBinding().dependencies();
         PosEntityMembershipBinding().dependencies();
       }),
@@ -406,7 +402,7 @@ abstract final class AppPages {
       page: () => NetworkPosLifecycleScreen(
         controllerTag: 'network-pos-lifecycle-${Get.parameters['id']}',
       ),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkPosLifecycleBinding().dependencies();
       }),
@@ -416,7 +412,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.networkEntityDirectory,
       page: () => const NetworkDirectoryScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         NetworkDirectoryBinding().dependencies();
       }),
@@ -429,7 +425,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.posEntityDirectory,
       page: () => const PosDirectoryScreen(),
-      binding: BindingsBuilder(() {
+      binding: BindingsBuilder<void>(() {
         CommercialBinding().dependencies();
         PosDirectoryBinding().dependencies();
       }),

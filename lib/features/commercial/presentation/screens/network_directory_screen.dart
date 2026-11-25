@@ -17,7 +17,6 @@ import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 import 'package:netsales/widgets/images/custom_cached_image.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 
 class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
   const NetworkDirectoryScreen({super.key, this.embedded = false});
@@ -46,7 +45,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                       text: 'إنشاء شبكة',
                       prefix: Icons.add_rounded,
                       onPressed: () async {
-                        final saved = await Get.toNamed(AppRoutes.networkEntityCreate);
+                        final saved = await Get.toNamed<bool>(AppRoutes.networkEntityCreate);
                         if (saved == true) await controller.refreshDirectory();
                       },
                     )
@@ -157,7 +156,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 }
                 return GestureDetector(
                   onTap: () async {
-                    final changed = await Get.toNamed(AppRoutes.networkEntityDetails.replaceFirst(':id', network.networkId.toString()));
+                    final changed = await Get.toNamed<bool>(AppRoutes.networkEntityDetails.replaceFirst(':id', network.networkId.toString()));
                     if (changed == true) await controller.refreshDirectory();
                   },
                   child: CustomSurfaceCard(

@@ -1,5 +1,4 @@
 import 'package:netsales/features/catalog/domain/repositories/package_pos_discount_repository.dart';
-import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
 
 class DeletePackagePosDiscountUseCase {
   const DeletePackagePosDiscountUseCase(this._repository);

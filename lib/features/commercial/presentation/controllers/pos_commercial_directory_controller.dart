@@ -432,7 +432,6 @@ class PosCommercialDirectoryController
         'relationship': link,
         'network_id': link.networkId,
         'pos_id': link.posId,
-        'relationship': link,
       },
     );
   }
