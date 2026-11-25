@@ -60,7 +60,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
                       Text(network.displayName, style: Theme.of(context).textTheme.titleLarge),
                       AppSpacing.vXs,
                       CustomStatusBadge(
-                        label: network.statusLabel ?? network.status ?? 'غير محدد',
+                        label: network.statusLabel ?? network.typedStatus.label,
                         tone: network.typedStatus.tone,
                       ),
                     ],
