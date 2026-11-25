@@ -408,6 +408,7 @@ class NetworkCommercialDirectoryController
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
       AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
+      arguments: {'entity_id': link.networkId, 'is_network': true},
     );
   }
 
