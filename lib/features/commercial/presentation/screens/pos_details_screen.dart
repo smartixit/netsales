@@ -82,7 +82,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
           CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
-              final saved = await Get.toNamed('/pos/entities/${pos.posId}/edit');
+              final saved = await Get.toNamed('/pos/entities/${pos.posId}/edit', arguments: pos);
               if (saved == true) await controller.load();
             },
             prefix: Icons.edit_outlined,
