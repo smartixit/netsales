@@ -4,6 +4,8 @@ import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_agreement_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_event_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
@@ -51,6 +53,48 @@ abstract class CommercialRemoteDataSource {
   Future<NetworkPosLinkModel> toggleNetworkPosLinkStatus(int networkPosId);
 
   Future<void> deleteNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosAgreementModel>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<NetworkPosAgreementModel> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementModel> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementModel> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<NetworkPosAgreementModel> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<PaginatedList<NetworkPosEventModel>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  });
+
+  Future<void> restoreNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosLinkModel>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  });
 
   Future<PaginatedList<NetworkLinkablePosModel>> searchNetworkLinkablePos({
     required int networkId,
