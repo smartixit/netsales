@@ -273,7 +273,8 @@ class NetworkMembershipsController extends BaseMembershipsController {
         roles.where(
           (role) =>
               role.typedScope == RoleScope.network &&
-              role.typedRoleKey == RoleKey.networkUser,
+              (role.typedRoleKey == RoleKey.networkUser ||
+                  role.typedRoleKey == RoleKey.networkAccountant),
         ),
       );
     } catch (_) {
