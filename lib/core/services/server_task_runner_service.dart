@@ -115,11 +115,11 @@ class ServerTaskRunnerService extends GetxService {
     _isExecutionLocked = true;
     final executionId = ++_executionSequence;
     _activeExecutionId = executionId;
+    final sessionGeneration = ApiService.sessionGeneration;
 
     try {
       // 2. التحقق من وجود جلسة صالحة ومصادقة نشطة
       final session = SessionService.to;
-      final sessionGeneration = ApiService.sessionGeneration;
       final sessionId = session.currentSessionId;
       if (!session.isAuthenticated ||
           !session.isSessionVerified ||
