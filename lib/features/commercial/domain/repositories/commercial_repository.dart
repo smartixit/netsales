@@ -15,6 +15,24 @@ abstract class CommercialRepository {
   /// استرجاع نقاط البيع المصرح للمستخدم بالوصول إليها
   Future<List<PosEntity>> getMyPos();
 
+  /// دليل الشبكات المصرح بها مع البحث والتصفية والترقيم بالمؤشر.
+  Future<PaginatedList<NetworkEntity>> getNetworksPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  /// دليل نقاط البيع المصرح بها مع البحث والتصفية والترقيم بالمؤشر.
+  Future<PaginatedList<PosEntity>> getPosPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  });
+
   /// استرجاع قائمة نقاط البيع المرتبطة بشبكة محددة مع الفلترة والترقيم بالمؤشر
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
     required int networkId,
