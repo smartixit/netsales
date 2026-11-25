@@ -361,7 +361,6 @@ class PosMembershipsController extends BaseMembershipsController {
         statusNotifier: statusNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
-          if (!canChangeMemberRole) return;
           if (!canAddMember) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
@@ -428,6 +427,7 @@ class PosMembershipsController extends BaseMembershipsController {
         roleNotifier: roleNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
+          if (!canChangeMemberRole) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
             CustomSnackbar.show(
@@ -482,7 +482,6 @@ class PosMembershipsController extends BaseMembershipsController {
       memberName: member.displayFullName,
       willSuspend: willSuspend,
       onConfirm: (reason) async {
-          if (!canRemoveMember) return;
           if (!canChangeMemberStatus) return;
         final posId = resolvedPosId;
         if (posId == null) return;
@@ -518,6 +517,7 @@ class PosMembershipsController extends BaseMembershipsController {
     MembershipActionDialogs.showRemoveMemberDialog(
       memberName: member.displayFullName,
       onConfirm: (reason) async {
+          if (!canRemoveMember) return;
         final posId = resolvedPosId;
         if (posId == null) return;
 
