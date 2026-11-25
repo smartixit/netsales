@@ -7,7 +7,7 @@ class GetNetworkPosAgreementsUseCase {
 
   final CommercialRepository _repository;
 
-  PaginatedList<NetworkPosAgreementEntity> call({required int networkPosId, String? cursor, int perPage = 15}) {
+  Future<PaginatedList<NetworkPosAgreementEntity>> call({required int networkPosId, String? cursor, int perPage = 15}) {
     return _repository.getNetworkPosAgreements({required int networkPosId, String? cursor, int perPage = 15});
   }
 }
