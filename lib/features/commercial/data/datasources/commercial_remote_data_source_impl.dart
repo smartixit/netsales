@@ -478,6 +478,26 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<void> deleteNetwork(int networkId) async {
+    final response = await ApiService.instance.delete<void>(
+      ApiConstants.network(networkId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف الشبكة.');
+    }
+  }
+
+  @override
+  Future<void> deletePos(int posId) async {
+    final response = await ApiService.instance.delete<void>(
+      ApiConstants.posItem(posId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف نقطة البيع.');
+    }
+  }
+
+  @override
   Future<NetworkModel> getNetworkDetails(int networkId) async {
     final response = await ApiService.instance.get<NetworkModel>(
       ApiConstants.network(networkId),
