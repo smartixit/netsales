@@ -60,7 +60,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
   bool get isNetworkView => true;
 
   @override
-  Widget? get headerAction => canManageMembers
+  Widget? get headerAction => canAddMember
       ? CustomButton.primary(
           text: 'إضافة عضو',
           icon: Icons.person_add_alt_1_rounded,
@@ -150,13 +150,13 @@ class NetworkMembershipsController extends BaseMembershipsController {
       member: member,
       isNetworkView: true,
       onDetails: () => openMemberDetails(member),
-      onChangeRole: canManageMembers && !member.isOwner
+      onChangeRole: canChangeMemberRole && !member.isOwner
           ? () => openChangeRoleSheet(member)
           : null,
-      onToggleStatus: canManageMembers && !member.isOwner
+      onToggleStatus: canChangeMemberStatus && !member.isOwner
           ? () => promptToggleMemberStatus(member)
           : null,
-      onRemove: canManageMembers && !member.isOwner
+      onRemove: canRemoveMember && !member.isOwner
           ? () => promptRemoveMember(member)
           : null,
     );
@@ -189,8 +189,16 @@ class NetworkMembershipsController extends BaseMembershipsController {
       _allMembers.where((m) => m.isSuspended).length;
   int get invitedMembersCount => _allMembers.where((m) => m.isInvited).length;
 
-  bool get canManageMembers =>
-      PermissionService.to.can(AppPermissions.networksEdit);
+  bool get canViewMembers =>
+      PermissionService.to.can(AppPermissions.networkMembersView);
+  bool get canAddMember =>
+      PermissionService.to.can(AppPermissions.networkMembersCreate);
+  bool get canChangeMemberRole =>
+      PermissionService.to.can(AppPermissions.networkMembersChangeRole);
+  bool get canChangeMemberStatus =>
+      PermissionService.to.can(AppPermissions.networkMembersChangeStatus);
+  bool get canRemoveMember =>
+      PermissionService.to.can(AppPermissions.networkMembersDelete);
 
   int? get resolvedNetworkId => WorkspaceService.to.resolveActiveNetworkId([]);
 
