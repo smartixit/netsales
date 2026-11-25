@@ -57,15 +57,13 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 onPressed: controller.toggleArchiveView,
               )),
               AppSpacing.vSm,
-              Obx(() => controller.showArchived.value
-                  ? const SizedBox.shrink()
-                  : CustomSearchFilterBar<String?>(
+              Obx(() => CustomSearchFilterBar<String?>(
                 searchController: controller.searchController,
                 searchQuery: controller.searchQuery.value,
                 searchHint: 'ابحث باسم الشبكة أو بياناتها...',
                 onClearSearch: controller.clearSearch,
-                selectedFilter: controller.statusFilter.value,
-                filterOptions: const [
+                selectedFilter: controller.showArchived.value ? null : controller.statusFilter.value,
+                filterOptions: controller.showArchived.value ? const [] : const [
                   CustomSearchFilterOption(value: null, label: 'الكل'),
                   CustomSearchFilterOption(value: 'ACTIVE', label: 'نشطة'),
                   CustomSearchFilterOption(value: 'PENDING', label: 'قيد المراجعة'),
