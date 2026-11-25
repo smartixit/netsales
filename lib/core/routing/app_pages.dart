@@ -42,6 +42,8 @@ import 'package:netsales/features/requests/presentation/screens/procurement_requ
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_directory_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_details_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_form_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_form_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_details_binding.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_details_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_details_controller.dart';
@@ -246,6 +248,32 @@ abstract final class AppPages {
     // ========================================================================
     // 6. مسارات الكيانات والعلاقات التجارية (Commercial Entities & Relationships)
     // ========================================================================
+    GetPage(
+      name: AppRoutes.networkEntityCreate,
+      page: () => const NetworkFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksCreate),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.networkEntityEdit,
+      page: () => const NetworkFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksEdit),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
     GetPage(
       name: AppRoutes.networkEntityDetails,
       page: () => const NetworkDetailsScreen(),
