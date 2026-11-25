@@ -65,6 +65,34 @@ void main() {
       final expensesPage = AppPages.routes.firstWhere((p) => p.name == AppRoutes.operatingExpenses);
       expect(expensesPage.middlewares?.any((m) => m is PermissionGuardMiddleware), isTrue);
 
+      // 5. Network wallet statement must be scoped and permission-gated.
+      final networkWalletPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.networkWalletStatement,
+      );
+      expect(
+        networkWalletPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.networkWalletsView,
+        ),
+        isTrue,
+      );
+
+      // 6. POS wallet statement must be scoped and permission-gated.
+      final posWalletPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.posWalletStatement,
+      );
+      expect(
+        posWalletPage.middlewares?.whereType<PermissionGuardMiddleware>().any(
+          (m) => m.requiredPermission == AppPermissions.posWalletsView,
+        ),
+        isTrue,
+      );
+      expect(
+        posWalletPage.middlewares?.whereType<WorkspaceGuard>().any(
+          (m) => m.targetWorkspace == AppWorkspace.pos,
+        ),
+        isTrue,
+      );
+
     });
 
     test('PermissionGuardMiddleware redirects unauthorized access and prevents 403 deep-link states', () {
