@@ -26,7 +26,7 @@ class NetworkFormScreen extends GetView<NetworkFormController> {
           title: 'تعذر فتح نموذج الشبكة',
           subtitle: controller.errorMessage.value,
           actionLabel: 'العودة',
-          onAction: () => Get.back(),
+          onAction: controller.retryInitialize,
         );
       }
       if (controller.isLoading.value) {
