@@ -273,15 +273,17 @@ class NetworkPosLifecycleController extends GetxController {
       confirmLabel: 'حفظ المسودة',
       cancelLabel: 'إلغاء',
       maxWidth: 640,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           _agreementField(titleController, 'عنوان الاتفاقية'),
           _agreementField(referenceController, 'المرجع', required: false),
           _agreementField(termsController, 'الشروط والأحكام', lines: 5),
           _agreementField(startsAtController, 'بداية السريان (YYYY-MM-DD HH:mm:ss)', required: false),
-          _agreementField(endsAtController, 'نهاية السريان (YYYY-MM-DD HH:mm:ss)', required: false),
-        ],
+            _agreementField(endsAtController, 'نهاية السريان (YYYY-MM-DD HH:mm:ss)', required: false),
+          ],
+        ),
       ),
       autoCloseOnConfirm: false,
       onConfirm: () => saveDraft(agreement: agreement),
