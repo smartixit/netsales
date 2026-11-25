@@ -445,6 +445,77 @@ void main() {
       dio.close(force: true);
     });
 
+    test('does not terminate the session for a missing-credential 401', () async {
+      final previousGeneration = ApiService.sessionGeneration;
+      ApiService.sessionGeneration = previousGeneration + 1;
+      var unauthorizedCount = 0;
+      ApiService.onUnauthorized = () async {
+        unauthorizedCount++;
+      };
+      addTearDown(() {
+        ApiService.sessionGeneration = previousGeneration;
+        ApiService.onUnauthorized = null;
+      });
+
+      final adapter = _ScriptedAdapter((request, body) async => _json(
+            '{"success":false,"code":"SESSION_CREDENTIAL_MISSING","message":"missing","data":{},"errors":[]}',
+            401,
+          ));
+      final dio = _dio(Uri.parse('https://missing-session-code.example'), adapter);
+      dio.interceptors.add(SessionAuthInterceptor());
+
+      DioException? failure;
+      try {
+        await dio.get<String>(
+          '/api/v1/notifications/my',
+          options: Options(responseType: ResponseType.plain),
+        );
+      } on DioException catch (error) {
+        failure = error;
+      }
+
+      expect(failure?.response?.statusCode, 401);
+      expect(unauthorizedCount, 0);
+      dio.close(force: true);
+    });
+
+    test('ignores a terminal 401 that belongs to an earlier session generation', () async {
+      final previousGeneration = ApiService.sessionGeneration;
+      ApiService.sessionGeneration = previousGeneration + 1;
+      var unauthorizedCount = 0;
+      ApiService.onUnauthorized = () async {
+        unauthorizedCount++;
+      };
+      addTearDown(() {
+        ApiService.sessionGeneration = previousGeneration;
+        ApiService.onUnauthorized = null;
+      });
+
+      final adapter = _ScriptedAdapter((request, body) async {
+        ApiService.sessionGeneration++;
+        return _json(
+          '{"success":false,"code":"SESSION_INVALID","message":"expired","data":{},"errors":[]}',
+          401,
+        );
+      });
+      final dio = _dio(Uri.parse('https://stale-session-response.example'), adapter);
+      dio.interceptors.add(SessionAuthInterceptor());
+
+      DioException? failure;
+      try {
+        await dio.get<String>(
+          '/api/v1/notifications/my',
+          options: Options(responseType: ResponseType.plain),
+        );
+      } on DioException catch (error) {
+        failure = error;
+      }
+
+      expect(failure?.response?.statusCode, 401);
+      expect(unauthorizedCount, 0);
+      dio.close(force: true);
+    });
+
     test('passes a real Laravel 401 from the two-factor replay to session invalidation', () async {
       SharedPreferences.setMockInitialValues({});
       await StorageService.instance.init();
