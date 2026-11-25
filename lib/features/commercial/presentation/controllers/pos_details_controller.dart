@@ -31,6 +31,7 @@ class PosDetailsController extends GetxController {
   }
 
   bool get canDelete => PermissionService.to.can(AppPermissions.posDelete);
+  bool get canViewRelationships => PermissionService.to.can(AppPermissions.networksView);
 
   Future<void> deleteEntity() async {
     final id = posId;
