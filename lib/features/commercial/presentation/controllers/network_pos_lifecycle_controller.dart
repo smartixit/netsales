@@ -391,6 +391,7 @@ class NetworkPosLifecycleController extends GetxController {
     try {
       await togglePackagePosDiscountStatusUseCase(discount.discountId);
       await loadPackageDiscounts(refresh: true);
+      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم تحديث حالة الخصم.', type: SnackType.success);
     } catch (error) {
@@ -413,6 +414,7 @@ class NetworkPosLifecycleController extends GetxController {
     try {
       await deletePackagePosDiscountUseCase(discount.discountId);
       await loadPackageDiscounts(refresh: true);
+      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حذف الخصم.', type: SnackType.success);
     } catch (error) {
