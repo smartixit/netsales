@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
@@ -98,10 +99,21 @@ class PosWalletHeroCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: AppSpacing.xs),
-              CustomStatusBadge.fromPresentation(
-                accountingPresentation,
-                showDot: true,
-                isCompact: true,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CustomStatusBadge(
+                    label: wallet.status ? 'الحساب نشط' : 'الحساب موقوف',
+                    tone: wallet.status ? SemanticTone.success : SemanticTone.danger,
+                    isCompact: true,
+                    showDot: true,
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  CustomStatusBadge.fromPresentation(
+                    accountingPresentation,
+                    isCompact: true,
+                  ),
+                ],
               ),
             ],
           ),
