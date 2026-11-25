@@ -272,6 +272,10 @@ class NetworkPosLifecycleController extends GetxController {
 
   void openDiscountEditor({PackagePosDiscountEntity? discount}) {
     if (discount == null && !canCreateDiscount) return;
+    if (discount == null && packages.isEmpty) {
+      CustomSnackbar.show(title: 'لا توجد باقات', message: 'لا توجد باقات نشطة في الشبكة لتخصيص خصم عليها.', type: SnackType.warning);
+      return;
+    }
     if (discount != null && !canEditDiscount) return;
     selectedPackageId.value = discount?.packageId;
     discountCashController.text = discount?.discountCash.toString() ?? '';
