@@ -103,7 +103,8 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posWalletsView);
   bool get canViewRelationshipLifecycle =>
       PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
-      PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents);
+      PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents) ||
+      PermissionService.to.can(AppPermissions.posView);
 
   int? get resolvedPosId {
     return selectedPosId.value ??
