@@ -94,6 +94,10 @@ abstract class CommercialRemoteDataSource {
 
   Future<PosModel> updatePos(int posId, Map<String, dynamic> payload);
 
+  Future<void> deleteNetwork(int networkId);
+
+  Future<void> deletePos(int posId);
+
   Future<NetworkModel> getNetworkDetails(int networkId);
 
   Future<PosModel> getPosDetails(int posId);
