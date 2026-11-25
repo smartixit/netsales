@@ -22,10 +22,10 @@ class NetworkFormBinding extends Bindings {
       ));
     }
     if (!Get.isRegistered<GetGovernoratesUseCase>()) {
-      Get.lazyPut(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
+      Get.lazyPut<GetGovernoratesUseCase>(() => GetGovernoratesUseCase(Get.find<AuthRepository>()));
     }
     if (!Get.isRegistered<GetDirectoratesUseCase>()) {
-      Get.lazyPut(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
+      Get.lazyPut<GetDirectoratesUseCase>(() => GetDirectoratesUseCase(Get.find<AuthRepository>()));
     }
     Get.lazyPut<NetworkFormController>(() => NetworkFormController(
       getGovernorates: Get.find<GetGovernoratesUseCase>(),
