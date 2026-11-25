@@ -62,7 +62,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
                       AppSpacing.vXs,
                       CustomStatusBadge(
                         label: pos.statusLabel ?? pos.status ?? 'غير محدد',
-                        tone: pos.isActive ? SemanticTone.success : SemanticTone.warning,
+                        tone: pos.typedStatus.tone,
                       ),
                     ],
                   )),
