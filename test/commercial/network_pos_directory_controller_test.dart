@@ -306,6 +306,7 @@ void main() {
       expect(controller.canCreateInvitation, isFalse);
       expect(controller.canTogglePartnerLink, isFalse);
       expect(controller.canDeletePartnerLink, isFalse);
+      expect(controller.canRevokeInvitation, isFalse);
 
       controller.onToggleStatus(controller.links.first);
       controller.onDeleteLink(controller.links.first);
@@ -317,12 +318,14 @@ void main() {
           AppPermissions.networkCreateLinkChallenge,
           AppPermissions.networkTogglePosLink,
           AppPermissions.networkDeletePosLink,
+          AppPermissions.networkRevokeLinkChallenge,
         ],
       );
 
       expect(controller.canCreateInvitation, isTrue);
       expect(controller.canTogglePartnerLink, isTrue);
       expect(controller.canDeletePartnerLink, isTrue);
+      expect(controller.canRevokeInvitation, isTrue);
     });
 
     test('Loads initial networks and links successfully', () async {
