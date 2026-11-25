@@ -141,11 +141,14 @@ void main() {
         ),
         isTrue,
       );
+      // Network owners can inspect linked POS wallet statements through
+      // their Network-scoped pos_wallets.view permission. Do not force a
+      // switch into a POS membership they may not possess.
       expect(
         posWalletPage.middlewares?.whereType<WorkspaceGuard>().any(
           (m) => m.targetWorkspace == AppWorkspace.pos,
         ),
-        isTrue,
+        isFalse,
       );
 
     });
