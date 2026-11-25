@@ -202,7 +202,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
   bool get canRemoveMember =>
       PermissionService.to.can(AppPermissions.networkMembersDelete);
 
-  int? get resolvedNetworkId => WorkspaceService.to.resolveActiveNetworkId([]);
+  int? get resolvedNetworkId => WorkspaceService.to.savedActiveNetworkId;
 
   @override
   void onInit() {
