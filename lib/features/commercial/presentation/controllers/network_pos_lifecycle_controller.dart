@@ -114,6 +114,7 @@ class NetworkPosLifecycleController extends GetxController {
   String? _discountsCursor;
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
+  int _discountsRevision = 0;
 
   bool get canViewAgreements => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networkViewPosAgreements : AppPermissions.posViewNetworkAgreements,
@@ -239,6 +240,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> loadPackageDiscounts({bool refresh = false}) async {
+    final revision = ++_discountsRevision;
     if (networkId <= 0 || posId <= 0) {
       discountsErrorMessage.value = 'بيانات نطاق العلاقة غير مكتملة.';
       isLoadingDiscounts.value = false;
@@ -256,12 +258,13 @@ class NetworkPosLifecycleController extends GetxController {
         posId: posId,
         perPage: 15,
       );
+      if (revision != _discountsRevision) return;
       packageDiscounts.assignAll(result.items);
       _discountsCursor = result.nextCursor;
     } catch (error) {
-      discountsErrorMessage.value = error.toString();
+      if (revision == _discountsRevision) discountsErrorMessage.value = error.toString();
     } finally {
-      isLoadingDiscounts.value = false;
+      if (revision == _discountsRevision) isLoadingDiscounts.value = false;
     }
   }
 
@@ -269,6 +272,7 @@ class NetworkPosLifecycleController extends GetxController {
 
   Future<void> loadMorePackageDiscounts() async {
     if (!hasMorePackageDiscounts || isLoadingMoreDiscounts.value) return;
+    final revision = _discountsRevision;
     isLoadingMoreDiscounts.value = true;
     try {
       final result = await getPackagePosDiscountsUseCase(
@@ -277,8 +281,10 @@ class NetworkPosLifecycleController extends GetxController {
         cursor: _discountsCursor,
         perPage: 15,
       );
-      packageDiscounts.addAll(result.items);
-      _discountsCursor = result.nextCursor;
+      if (revision == _discountsRevision) {
+        packageDiscounts.addAll(result.items);
+        _discountsCursor = result.nextCursor;
+      }
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
@@ -343,7 +349,9 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> saveDiscount({PackagePosDiscountEntity? discount}) async {
-    if (isSavingDiscount.value) return;
+    if (isSavingDiscount.value ||
+        (discount == null && !canCreateDiscount) ||
+        (discount != null && !canEditDiscount)) return;
     final cash = double.tryParse(AmountFormatter.clean(discountCashController.text));
     final credit = double.tryParse(AmountFormatter.clean(discountCreditController.text));
     if (cash == null || credit == null || cash < 0 || cash > 100 || credit < 0 || credit > 100) {
