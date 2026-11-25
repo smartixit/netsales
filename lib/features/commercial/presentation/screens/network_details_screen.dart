@@ -79,7 +79,10 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           AppSpacing.vMd,
           CustomButton.secondary(
             text: 'تحديث البيانات',
-            onPressed: () => Get.toNamed('/network/entities/${network.networkId}/edit'),
+            onPressed: () async {
+              final saved = await Get.toNamed('/network/entities/${network.networkId}/edit');
+              if (saved == true) await controller.load();
+            },
             prefix: Icons.edit_outlined,
           ),
         ],
