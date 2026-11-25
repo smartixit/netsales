@@ -153,6 +153,15 @@ void main() {
 
     });
 
+
+    test('workspace guard executes before permission evaluation', () {
+      final workspace = WorkspaceGuard();
+      final permission = PermissionGuardMiddleware(
+        requiredPermission: AppPermissions.salesView,
+      );
+      expect(workspace.priority, lessThan(permission.priority!));
+    });
+
     test('PermissionGuardMiddleware redirects unauthorized access and prevents 403 deep-link states', () {
       // Simulate authenticated user without salesCreate permission
       permissionService.updateAccess(
