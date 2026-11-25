@@ -6,7 +6,7 @@ class TerminateNetworkPosAgreementUseCase {
 
   final CommercialRepository _repository;
 
-  NetworkPosAgreementEntity call({required int networkPosId, required int agreementId}) {
+  Future<NetworkPosAgreementEntity> call({required int networkPosId, required int agreementId}) {
     return _repository.terminateNetworkPosAgreement({required int networkPosId, required int agreementId});
   }
 }
