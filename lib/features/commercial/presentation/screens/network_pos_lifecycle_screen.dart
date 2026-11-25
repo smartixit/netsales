@@ -600,6 +600,78 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 ),
               ),
             )),
+            if (controller.canViewDiscounts) ...[
+              AppSpacing.vLg,
+              const Text(
+                'الخصومات المؤرشفة',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+              AppSpacing.vSm,
+              if (controller.isLoadingTrashedDiscounts.value && controller.trashedPackageDiscounts.isEmpty)
+                const CustomStateSkeletonView(
+                  recipe: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 2,
+                    cardHeight: 76,
+                  ),
+                )
+              else if (controller.trashedDiscountsErrorMessage.value != null && controller.trashedPackageDiscounts.isEmpty)
+                CustomErrorState(
+                  title: 'تعذر تحميل الخصومات المؤرشفة',
+                  subtitle: controller.trashedDiscountsErrorMessage.value,
+                  onRetry: () => controller.loadTrashedPackageDiscounts(refresh: true),
+                )
+              else if (controller.trashedPackageDiscounts.isEmpty)
+                const CustomEmptyState.compact(
+                  title: 'لا توجد خصومات مؤرشفة',
+                  subtitle: 'ستظهر هنا الخصومات المخصصة التي تم أرشفتها.',
+                  icon: Icons.archive_outlined,
+                ),
+              ...controller.trashedPackageDiscounts.map((discount) => Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                child: CustomSurfaceCard(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.packageNameFor(discount.packageId),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      AppSpacing.vXs,
+                      Text('خصم نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%'),
+                      Text('خصم آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%'),
+                      if (controller.canRestoreDiscount) ...[
+                        AppSpacing.vSm,
+                        CustomButton.secondary(
+                          text: 'استعادة الخصم',
+                          prefix: Icons.restore_rounded,
+                          onPressed: controller.isSavingDiscount.value
+                              ? null
+                              : () => controller.restorePackageDiscount(discount),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              )),
+              if (controller.isLoadingMoreTrashedDiscounts.value)
+                const CustomStateSkeletonView(
+                  recipe: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 1,
+                    cardHeight: 76,
+                  ),
+                )
+              else if (controller.hasMoreTrashedDiscounts)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  child: CustomButton.secondary(
+                    text: 'تحميل المزيد من الخصومات',
+                    onPressed: controller.loadMoreTrashedPackageDiscounts,
+                  ),
+                ),
+            ],
             if (controller.isLoadingMoreArchive.value)
               const CustomStateSkeletonView(
                 recipe: CustomStateSkeleton(
