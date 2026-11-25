@@ -299,6 +299,19 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 ),
               ),
             )),
+            if (controller.isLoadingMoreArchive.value)
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (controller.archivedLinks.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: CustomButton.secondary(
+                  text: 'تحميل المزيد',
+                  onPressed: controller.loadMoreArchivedLinks,
+                ),
+              ),
           ],
         ),
       );
