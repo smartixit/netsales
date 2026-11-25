@@ -10,7 +10,6 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
 
 class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   const NetworkPosLifecycleScreen({super.key, required this.controllerTag});
@@ -82,7 +81,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
             if (controller.agreements.isEmpty)
               const CustomEmptyState(
                 title: 'لا توجد اتفاقيات بعد',
-                message: 'أنشئ مسودة الاتفاقية الأولى لتوثيق الشروط التجارية بين الشبكة ونقطة البيع.',
+                subtitle: 'أنشئ مسودة الاتفاقية الأولى لتوثيق الشروط التجارية بين الشبكة ونقطة البيع.',
                 icon: Icons.description_outlined,
               ),
             ...controller.agreements.map(_agreementCard),
@@ -200,7 +199,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
             if (controller.events.isEmpty)
               const CustomEmptyState(
                 title: 'لا توجد أحداث مسجلة',
-                message: 'ستظهر هنا عمليات الإنشاء والتفعيل والأرشفة والاستعادة وتغييرات الاتفاقيات.',
+                subtitle: 'ستظهر هنا عمليات الإنشاء والتفعيل والأرشفة والاستعادة وتغييرات الاتفاقيات.',
                 icon: Icons.history_rounded,
               ),
             ...controller.events.map((event) => Padding(
