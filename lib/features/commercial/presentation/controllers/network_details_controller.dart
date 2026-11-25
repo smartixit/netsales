@@ -33,6 +33,7 @@ class NetworkDetailsController extends GetxController {
   bool get canDelete => PermissionService.to.can(AppPermissions.networksDelete);
   bool get canViewRelationships => PermissionService.to.can(AppPermissions.posView);
   bool get canManageMembers => PermissionService.to.can(AppPermissions.networkMembersView);
+  bool get canViewFinancials => PermissionService.to.can(AppPermissions.networkWalletsView);
 
   Future<void> deleteEntity() async {
     final id = networkId;
