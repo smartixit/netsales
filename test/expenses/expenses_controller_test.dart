@@ -311,6 +311,14 @@ void main() {
         ],
       );
 
+      // The edit path is permitted only inside an active Network membership.
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [AppPermissions.expensesEdit],
+      );
+
       // Set arguments to mimic Get.arguments in edit mode
       final controller = NetworkExpenseFormController(
         createExpenseUseCase: CreateExpenseUseCase(mockRepo),

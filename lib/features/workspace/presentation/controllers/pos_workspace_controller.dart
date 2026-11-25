@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/storage_keys.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -11,6 +12,7 @@ import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -608,6 +610,17 @@ class PosWorkspaceController extends GetxController {
     if (index < 0) return;
     selectedNavIndex.value = index;
     if (index < 4) selectedMobileNavIndex.value = index;
+  }
+
+  bool get canViewMembers =>
+      PermissionService.to.can(AppPermissions.posMembersView);
+
+  Future<bool> handleBackFallback() async {
+    if (selectedMobileNavIndex.value != 0 || selectedNavIndex.value != 0) {
+      onNavItemSelected(0);
+      return false;
+    }
+    return true;
   }
 
   void openProfile() => onNavItemSelected(3);

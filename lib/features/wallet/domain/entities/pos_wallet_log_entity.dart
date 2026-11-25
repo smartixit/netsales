@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/wallet/domain/entities/wallet_log_entry.dart';
 
 /// الكيان النقي لقيد دفتر أستاذ محفظة نقطة البيع (POS Wallet Log Entity)
@@ -59,13 +57,6 @@ class PosWalletLogEntity extends Equatable implements WalletLogEntry {
   WalletOperationType get typedOperationType =>
       WalletOperationType.fromWire(operationTypeRaw);
 
-  /// كائن العرض الدلالي الموحد لنوع الحركة عبر EnumPresentationRegistry
-  @override
-  EnumPresentation get operationPresentation =>
-      EnumPresentationRegistry.resolveWalletOperationType(
-        typedOperationType,
-        serverLabel: operationTypeLabel,
-      );
 
   /// هل الحركة إيداع / تغذية
   @override

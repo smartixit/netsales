@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/wallet/domain/entities/wallet_log_entry.dart';
 
 /// الكيان النقي لقيد دفتر أستاذ محفظة مزود الشبكة (Network Wallet Log Entity)
@@ -58,12 +56,6 @@ class NetworkWalletLogEntity extends Equatable implements WalletLogEntry {
   WalletOperationType get typedOperationType =>
       WalletOperationType.fromWire(operationTypeRaw);
 
-  @override
-  EnumPresentation get operationPresentation =>
-      EnumPresentationRegistry.resolveWalletOperationType(
-        typedOperationType,
-        serverLabel: operationTypeLabel,
-      );
 
   @override
   bool get isDeposit => typedOperationType == WalletOperationType.deposit;

@@ -167,8 +167,8 @@ void main() {
       expect(wallet.typedAccountingStatus, equals(AccountingStatus.credit));
       expect(wallet.isCredit, isTrue);
       expect(wallet.isDebit, isFalse);
-      expect(wallet.accountingPresentation.label, equals('رصيد دائن متاح'));
-      expect(wallet.accountingPresentation.tone, equals(SemanticTone.success));
+      expect(EnumPresentationRegistry.resolveAccountingStatus(wallet.typedAccountingStatus, serverLabel: wallet.accountingStatusLabel).label, equals('رصيد دائن متاح'));
+      expect(EnumPresentationRegistry.resolveAccountingStatus(wallet.typedAccountingStatus, serverLabel: wallet.accountingStatusLabel).tone, equals(SemanticTone.success));
     });
 
     test('PosWalletLogEntity typed getters map to authoritative enums', () {
@@ -188,8 +188,8 @@ void main() {
       expect(log.typedOperationType, equals(WalletOperationType.deposit));
       expect(log.isDeposit, isTrue);
       expect(log.isWithdraw, isFalse);
-      expect(log.operationPresentation.label, equals('إيداع نقدي'));
-      expect(log.operationPresentation.tone, equals(SemanticTone.success));
+      expect(EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).label, equals('إيداع نقدي'));
+      expect(EnumPresentationRegistry.resolveWalletOperationType(log.typedOperationType, serverLabel: log.operationTypeLabel).tone, equals(SemanticTone.success));
     });
 
     test('PosWalletModel fromJson and toJson round-trip', () {

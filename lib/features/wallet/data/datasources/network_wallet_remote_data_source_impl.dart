@@ -10,7 +10,8 @@ class NetworkWalletRemoteDataSourceImpl
     implements NetworkWalletRemoteDataSource {
   final ApiService _apiService;
 
-  const NetworkWalletRemoteDataSourceImpl(this._apiService);
+  NetworkWalletRemoteDataSourceImpl([ApiService? apiService])
+    : _apiService = apiService ?? ApiService.instance;
 
   @override
   Future<ApiResponse<NetworkWalletModel>> getWalletByNetworkId(

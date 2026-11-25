@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
@@ -22,7 +23,10 @@ class PosWalletLedgerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final presentation = log.operationPresentation;
+    final presentation = EnumPresentationRegistry.resolveWalletOperationType(
+      log.typedOperationType,
+      serverLabel: log.operationTypeLabel,
+    );
 
     final isDeposit = log.isDeposit;
     final amountFormatted = AmountFormatter.format(

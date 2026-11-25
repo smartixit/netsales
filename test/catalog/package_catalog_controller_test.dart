@@ -366,6 +366,11 @@ void main() {
         createPackageUseCase: CreatePackageUseCase(mockRepo),
         updatePackageUseCase: UpdatePackageUseCase(mockRepo),
       );
+      formController.onInit();
+    });
+
+    tearDown(() {
+      formController.onClose();
     });
 
     test('unit changes preserve the entered quantities without conversion', () {

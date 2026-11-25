@@ -220,7 +220,7 @@ void main() {
       expect(controller.canRemoveMember, isFalse);
     });
 
-    test('exposes only NETWORK_USER for Network', () async {
+    test('exposes only Network-scoped assignable roles for Network', () async {
       repository.networkRoles.add(
         const MembershipRoleEntity(
           roleId: 4,
@@ -234,7 +234,7 @@ void main() {
 
       expect(
         controller.assignableRoles.map((role) => role.roleKey).toSet(),
-        {'NETWORK_USER'},
+        {'NETWORK_USER', 'NETWORK_ACCOUNTANT'},
       );
     });
   });

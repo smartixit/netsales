@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/wallet/domain/entities/pos_wallet_entity.dart';
@@ -22,6 +23,11 @@ class PosWalletHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final accountingPresentation =
+        EnumPresentationRegistry.resolveAccountingStatus(
+          wallet.typedAccountingStatus,
+          serverLabel: wallet.accountingStatusLabel,
+        );
     final balanceFormatted = AmountFormatter.format(
       wallet.walletBalance.toStringAsFixed(2),
     );
@@ -92,7 +98,7 @@ class PosWalletHeroCard extends StatelessWidget {
                     ],
                   ),
                   CustomStatusBadge.fromPresentation(
-                    wallet.accountingPresentation,
+                    accountingPresentation,
                     showDot: true,
                     isCompact: true,
                   ),

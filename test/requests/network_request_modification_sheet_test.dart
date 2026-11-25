@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_packages_use_case.dart';
 import 'package:netsales/features/requests/domain/entities/request_approval_result_entity.dart';
@@ -208,6 +211,16 @@ void main() {
 
   setUp(() {
     Get.reset();
+    PermissionService.instance.setWorkspaceContext(
+      scope: RoleScope.network,
+      tenantId: 1,
+      roleKey: 'NETWORK_OWNER',
+      permissions: const [
+        AppPermissions.requestsView,
+        AppPermissions.requestsPreviewModification,
+        AppPermissions.requestsApprove,
+      ],
+    );
     controller = NetworkProcurementReviewController(
       getRequestsUseCase: _FakeGetRequestsUseCase(),
       approveRequestUseCase: _FakeApproveRequestUseCase(),

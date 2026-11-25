@@ -1,5 +1,4 @@
 import 'package:netsales/core/enums/wallet_operation_type.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation.dart';
 
 /// واجهة موحدة لقيد أي حركة في دفاتر الأستاذ المالية (POS أو Network)
 abstract interface class WalletLogEntry {
@@ -19,7 +18,6 @@ abstract interface class WalletLogEntry {
   String? get createdAt;
 
   WalletOperationType get typedOperationType;
-  EnumPresentation get operationPresentation;
   bool get isDeposit;
   bool get isWithdraw;
 }
