@@ -25,7 +25,7 @@ class PosFormScreen extends GetView<PosFormController> {
         return CustomStateView.error(
           title: 'تعذر فتح نموذج نقطة البيع',
           subtitle: controller.errorMessage.value,
-          actionLabel: 'العودة',
+          actionLabel: 'إعادة المحاولة',
           onAction: controller.retryInitialize,
         );
       }
