@@ -150,7 +150,7 @@ void main() {
           'user_full_name': 'Platform User',
           'user_phone_number': '700000099',
           'role_key': roleKey,
-          'workspace_roles': const [],
+          'workspace_roles': const <Map<String, dynamic>>[],
           'is_super_admin': roleKey == 'SUPER_ADMIN',
         });
 
