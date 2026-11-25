@@ -94,8 +94,12 @@ class PosCommercialDirectoryController
 
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
-  bool get canManageCommercial =>
-      PermissionService.to.can(AppPermissions.posEdit);
+  bool get canPreviewLinkChallenge =>
+      PermissionService.to.can(AppPermissions.posPreviewLinkChallenge);
+  bool get canConfirmLinkChallenge =>
+      PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
+  bool get canLinkNetwork =>
+      canPreviewLinkChallenge && canConfirmLinkChallenge;
 
   int? get resolvedPosId {
     return selectedPosId.value ??
@@ -117,7 +121,7 @@ class PosCommercialDirectoryController
 
   @override
   Widget? get headerAction {
-    if (!canManageCommercial) return null;
+    if (!canLinkNetwork) return null;
     return CustomButton.icon(
       tooltip: 'ربط مزود شبكة',
       icon: Icons.qr_code_scanner_rounded,
@@ -394,7 +398,7 @@ class PosCommercialDirectoryController
       link: link,
       isNetworkView: false,
       onViewDetails: () => openPartnerDetails(link),
-      onDelete: canManageCommercial ? () => onDeleteLink(link) : null,
+      onDelete: null,
     );
   }
 
@@ -422,6 +426,7 @@ class PosCommercialDirectoryController
   }
 
   Future<void> openQrScannerFlow() async {
+    if (!canLinkNetwork) return;
     final posId = resolvedPosId;
     final pos = authorizedPosList.firstWhereOrNull(
       (item) => item.posId == posId,
@@ -457,6 +462,7 @@ class PosCommercialDirectoryController
     int posId,
     String posUuid,
   ) async {
+    if (!canLinkNetwork) return;
     try {
       if (resolvedPosId != posId ||
           authorizedPosList
