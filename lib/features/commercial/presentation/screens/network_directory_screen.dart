@@ -40,7 +40,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.hub_rounded,
               ),
-              CustomButton.primary(
+              if (controller.canCreate) CustomButton.primary(
                 text: 'إنشاء شبكة',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
