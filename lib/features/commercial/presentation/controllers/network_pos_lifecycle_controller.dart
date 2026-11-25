@@ -140,7 +140,8 @@ class NetworkPosLifecycleController extends GetxController {
     termsController.text = agreement?.terms ?? '';
     startsAtController.text = agreement?.startsAt ?? '';
     endsAtController.text = agreement?.endsAt ?? '';
-    Get.dialog(CustomDialog.custom(
+    Get.dialog(CustomDialog(
+      type: DialogType.custom,
       title: agreement == null ? 'إنشاء مسودة اتفاقية' : 'تعديل مسودة الاتفاقية',
       confirmLabel: 'حفظ المسودة',
       cancelLabel: 'إلغاء',
@@ -155,6 +156,7 @@ class NetworkPosLifecycleController extends GetxController {
           _agreementField(endsAtController, 'نهاية السريان (YYYY-MM-DD HH:mm:ss)', required: false),
         ],
       ),
+      autoCloseOnConfirm: false,
       onConfirm: () => saveDraft(agreement: agreement),
     ));
   }
