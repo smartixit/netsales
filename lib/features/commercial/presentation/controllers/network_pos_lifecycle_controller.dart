@@ -12,6 +12,7 @@ import 'package:netsales/features/catalog/domain/usecases/update_package_pos_dis
 import 'package:netsales/features/catalog/domain/usecases/toggle_package_pos_discount_status_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/delete_package_pos_discount_use_case.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
@@ -321,8 +322,8 @@ class NetworkPosLifecycleController extends GetxController {
 
   Future<void> saveDiscount({PackagePosDiscountEntity? discount}) async {
     if (isSavingDiscount.value) return;
-    final cash = double.tryParse(discountCashController.text.trim());
-    final credit = double.tryParse(discountCreditController.text.trim());
+    final cash = double.tryParse(AmountFormatter.clean(discountCashController.text));
+    final credit = double.tryParse(AmountFormatter.clean(discountCreditController.text));
     if (cash == null || credit == null || cash < 0 || cash > 100 || credit < 0 || credit > 100) {
       CustomSnackbar.show(title: 'بيانات غير صحيحة', message: 'أدخل نسب خصم رقمية بين 0 و100.', type: SnackType.warning);
       return;
