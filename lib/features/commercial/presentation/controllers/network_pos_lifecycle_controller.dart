@@ -88,6 +88,7 @@ class NetworkPosLifecycleController extends GetxController {
 
   bool get hasMoreAgreements => _agreementsCursor?.isNotEmpty == true;
   bool get hasMoreEvents => _eventsCursor?.isNotEmpty == true;
+  bool get hasMoreArchive => _archiveCursor?.isNotEmpty == true;
 
   @override
   void onInit() {
