@@ -92,7 +92,7 @@ class NetworkPosLifecycleController extends GetxController {
       agreements.addAll(result.items);
       _agreementsCursor = result.nextCursor;
     } catch (error) {
-      CustomSnackBar.showError(message: error.toString());
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
       isLoadingMoreAgreements.value = false;
     }
@@ -176,7 +176,7 @@ class NetworkPosLifecycleController extends GetxController {
     final title = titleController.text.trim();
     final terms = termsController.text.trim();
     if (title.isEmpty || terms.isEmpty) {
-      CustomSnackBar.showError(message: 'عنوان الاتفاقية والشروط حقول إلزامية.');
+      CustomSnackbar.show(title: 'بيانات ناقصة', message: 'عنوان الاتفاقية والشروط حقول إلزامية.', type: SnackType.warning);
       return;
     }
     isSaving.value = true;
@@ -198,7 +198,7 @@ class NetworkPosLifecycleController extends GetxController {
       Get.back();
       await loadAgreements(refresh: true);
       await loadEvents(refresh: true);
-      CustomSnackBar.showSuccess(message: 'تم حفظ مسودة الاتفاقية.');
+      CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ مسودة الاتفاقية.', type: SnackType.success);
     } catch (error) {
       CustomSnackBar.showError(message: error.toString());
     } finally {
@@ -243,7 +243,7 @@ class NetworkPosLifecycleController extends GetxController {
       await action();
       await loadAgreements(refresh: true);
       await loadEvents(refresh: true);
-      CustomSnackBar.showSuccess(message: success);
+      CustomSnackbar.show(title: 'نجاح', message: success, type: SnackType.success);
     } catch (error) {
       CustomSnackBar.showError(message: error.toString());
     } finally {
