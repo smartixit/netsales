@@ -94,7 +94,9 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final network = controller.networks[index];
-                return CustomSurfaceCard(
+                return GestureDetector(
+                  onTap: () => Get.toNamed('/network/entities/${network.networkId}'),
+                  child: CustomSurfaceCard(
                   margin: EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: Row(
@@ -123,6 +125,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                       ),
                       Icon(Icons.chevron_left_rounded, color: context.colors.onSurfaceVariant),
                     ],
+                  ),
                   ),
                 );
               },
