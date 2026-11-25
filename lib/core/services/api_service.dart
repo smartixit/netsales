@@ -773,6 +773,7 @@ class SessionAuthInterceptor extends Interceptor {
 
     final statusCode = err.response?.statusCode;
 
+    // dart format off
     if (statusCode == 401) {
       final path = err.requestOptions.path;
       final isPublicAuth =
@@ -804,6 +805,7 @@ class SessionAuthInterceptor extends Interceptor {
         await ApiService.onUnauthorized?.call();
       }
     }
+    // dart format on
 
     return handler.next(err);
   }
