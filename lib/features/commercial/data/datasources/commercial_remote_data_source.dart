@@ -16,7 +16,6 @@ abstract class CommercialRemoteDataSource {
   Future<PaginatedList<NetworkModel>> getNetworksPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   });
@@ -24,7 +23,6 @@ abstract class CommercialRemoteDataSource {
   Future<PaginatedList<PosModel>> getPosPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   });
