@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_details_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/pos_directory_controller.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
@@ -84,7 +85,12 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
             text: 'تحديث البيانات',
             onPressed: () async {
               final saved = await Get.toNamed('/pos/entities/${pos.posId}/edit', arguments: pos);
-              if (saved == true) await controller.load();
+              if (saved == true) {
+                await controller.load();
+                if (Get.isRegistered<PosDirectoryController>()) {
+                  await Get.find<PosDirectoryController>().refreshDirectory();
+                }
+              }
             },
             prefix: Icons.edit_outlined,
           ),
