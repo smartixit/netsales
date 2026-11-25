@@ -299,7 +299,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        Chip(label: Text(discount.isCustom ? 'خصم مخصص' : 'خصم الشبكة')),
+                        Chip(label: Text(discount.isCustom ? 'خصم مخصص للعلاقة' : 'الخصم الافتراضي للباقة')),
                       ],
                     ),
                     AppSpacing.vSm,
