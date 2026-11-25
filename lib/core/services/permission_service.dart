@@ -39,7 +39,8 @@ class PermissionService extends GetxService {
   bool get hasWorkspaceContext =>
       _workspaceContextBound &&
       (_workspaceScope == RoleScope.network || _workspaceScope == RoleScope.pos) &&
-      _workspaceTenantId > 0;
+      _workspaceTenantId > 0 &&
+      _workspaceRoleKey.value.isNotEmpty;
 
   /// قائمة الصلاحيات النشطة (للقراءة فقط)
   Set<String> get permissions => _permissions.toSet();
