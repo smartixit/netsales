@@ -41,7 +41,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.hub_rounded,
               ),
-              if (controller.canCreate) CustomButton.primary(
+              if (controller.canCreate && !controller.showArchived.value) CustomButton.primary(
                 text: 'إنشاء شبكة',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
@@ -49,8 +49,15 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                   if (saved == true) await controller.refreshDirectory();
                 },
               ),
+              Obx(() => CustomButton.secondary(
+                text: controller.showArchived.value ? 'العودة إلى الشبكات النشطة' : 'عرض أرشيف الشبكات',
+                prefix: controller.showArchived.value ? Icons.arrow_forward_rounded : Icons.archive_outlined,
+                onPressed: controller.toggleArchiveView,
+              )),
               AppSpacing.vSm,
-              Obx(() => CustomSearchFilterBar<String?>(
+              Obx(() => controller.showArchived.value
+                  ? const SizedBox.shrink()
+                  : CustomSearchFilterBar<String?>(
                 searchController: controller.searchController,
                 searchQuery: controller.searchQuery.value,
                 searchHint: 'ابحث باسم الشبكة أو بياناتها...',
@@ -94,11 +101,13 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
             );
           }
           if (controller.networks.isEmpty) {
-            return const SliverToBoxAdapter(
+            return SliverToBoxAdapter(
               child: CustomEmptyState(
-                icon: Icons.hub_outlined,
-                title: 'لا توجد شبكات',
-                subtitle: 'لا توجد كيانات تطابق معايير البحث الحالية.',
+                icon: controller.showArchived.value ? Icons.archive_outlined : Icons.hub_outlined,
+                title: controller.showArchived.value ? 'أرشيف الشبكات فارغ' : 'لا توجد شبكات',
+                subtitle: controller.showArchived.value
+                    ? 'لا توجد شبكات مؤرشفة يمكن استعادتها.'
+                    : 'لا توجد كيانات تطابق معايير البحث الحالية.',
               ),
             );
           }
@@ -106,6 +115,46 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final network = controller.networks[index];
+                if (controller.showArchived.value) {
+                  return CustomSurfaceCard(
+                    margin: EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    child: Row(
+                      children: [
+                        CustomCachedImage.logo(
+                          url: network.networkProfileLogoUrl,
+                          size: 52,
+                          fallbackText: network.displayName,
+                        ),
+                        AppSpacing.hMd,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(network.displayName, style: Theme.of(context).textTheme.titleMedium),
+                              AppSpacing.vXxs,
+                              Text(network.displayLocation, style: Theme.of(context).textTheme.bodySmall),
+                              AppSpacing.vXs,
+                              CustomStatusBadge(
+                                label: network.statusLabel ?? network.typedStatus.label,
+                                tone: network.typedStatus.tone,
+                                isCompact: true,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (controller.canRestore)
+                          CustomButton.secondary(
+                            text: 'استعادة',
+                            prefix: Icons.restore_rounded,
+                            onPressed: controller.isRestoring.value
+                                ? null
+                                : () => controller.restoreNetwork(network),
+                          ),
+                      ],
+                    ),
+                  );
+                }
                 return GestureDetector(
                   onTap: () async {
                     final changed = await Get.toNamed(AppRoutes.networkEntityDetails.replaceFirst(':id', network.networkId.toString()));
