@@ -39,6 +39,7 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
     final manager = isNetworkView ? link.posOwnerName : link.networkOwnerName;
     final location = isNetworkView ? link.posLocation : link.networkLocation;
 
+    final linkStatusPres = EnumPresentationRegistry.resolveLinkStatus(link.isActive);
     final statusPres = isNetworkView
         ? EnumPresentationRegistry.resolvePosStatus(
             link.pos?.typedStatus ??
@@ -94,9 +95,9 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
                 ),
                 SizedBox(height: AppSpacing.xs),
                 CustomStatusBadge(
-                  label: statusPres.label,
-                  tone: statusPres.tone,
-                  icon: statusPres.icon,
+                  label: linkStatusPres.label,
+                  tone: linkStatusPres.tone,
+                  icon: linkStatusPres.icon,
                 ),
               ],
             ),
@@ -145,9 +146,45 @@ class CommercialPartnerDetailsSheet extends StatelessWidget {
                   height: 12.h,
                 ),
                 CommercialDetailRow(
+                  icon: Icons.tag_rounded,
+                  label: 'معرف العلاقة التجارية',
+                  value: '#${link.networkPosId}',
+                ),
+                Divider(
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
+                CommercialDetailRow(
+                  icon: Icons.link_rounded,
+                  label: 'حالة الارتباط التجاري',
+                  value: linkStatusPres.label,
+                ),
+                Divider(
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
+                CommercialDetailRow(
+                  icon: Icons.verified_outlined,
+                  label: 'حالة الكيان الشريك',
+                  value: statusPres.label,
+                ),
+                Divider(
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
+                CommercialDetailRow(
                   icon: Icons.event_available_rounded,
                   label: 'تاريخ بدء الارتباط',
                   value: link.formattedLinkedDate,
+                ),
+                Divider(
+                  color: colors.outlineVariant.withValues(alpha: .4),
+                  height: 12.h,
+                ),
+                CommercialDetailRow(
+                  icon: Icons.update_rounded,
+                  label: 'آخر تحديث للعلاقة',
+                  value: link.updatedAt ?? 'غير متوفر',
                 ),
               ],
             ),
