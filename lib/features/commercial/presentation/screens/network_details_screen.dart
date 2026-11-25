@@ -60,7 +60,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
                       AppSpacing.vXs,
                       CustomStatusBadge(
                         label: network.statusLabel ?? network.status ?? 'غير محدد',
-                        tone: network.isActive ? SemanticTone.success : SemanticTone.warning,
+                        tone: network.typedStatus.tone,
                       ),
                     ],
                   )),
