@@ -41,14 +41,16 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.hub_rounded,
               ),
-              if (controller.canCreate && !controller.showArchived.value) CustomButton.primary(
-                text: 'إنشاء شبكة',
-                prefix: Icons.add_rounded,
-                onPressed: () async {
-                  final saved = await Get.toNamed(AppRoutes.networkEntityCreate);
-                  if (saved == true) await controller.refreshDirectory();
-                },
-              ),
+              Obx(() => controller.canCreate && !controller.showArchived.value
+                  ? CustomButton.primary(
+                      text: 'إنشاء شبكة',
+                      prefix: Icons.add_rounded,
+                      onPressed: () async {
+                        final saved = await Get.toNamed(AppRoutes.networkEntityCreate);
+                        if (saved == true) await controller.refreshDirectory();
+                      },
+                    )
+                  : const SizedBox.shrink()),
               Obx(() => CustomButton.secondary(
                 text: controller.showArchived.value ? 'العودة إلى الشبكات النشطة' : 'عرض أرشيف الشبكات',
                 prefix: controller.showArchived.value ? Icons.arrow_forward_rounded : Icons.archive_outlined,
