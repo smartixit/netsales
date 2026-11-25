@@ -117,18 +117,6 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
       ),
     );
   }
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 class _LifecycleAgreementsTab extends StatelessWidget {
@@ -166,7 +154,10 @@ class _LifecycleAgreementsTab extends StatelessWidget {
                 subtitle: 'أنشئ مسودة الاتفاقية الأولى لتوثيق الشروط التجارية بين الشبكة ونقطة البيع.',
                 icon: Icons.description_outlined,
               ),
-            ...controller.agreements.map(_agreementCard),
+            ...controller.agreements.map((agreement) => _LifecycleAgreementCard(
+              controller: controller,
+              agreement: agreement,
+            )),
             if (controller.isLoadingMoreAgreements.value)
               const CustomStateSkeletonView(
                 recipe: CustomStateSkeleton(
@@ -187,7 +178,6 @@ class _LifecycleAgreementsTab extends StatelessWidget {
         ),
       );
     });
-  
   }
 }
 
@@ -290,7 +280,6 @@ class _LifecycleAgreementCard extends StatelessWidget {
         ),
       ),
     );
-  
   }
 }
 
@@ -368,7 +357,6 @@ class _LifecycleEventsTab extends StatelessWidget {
         ),
       );
     });
-  
   }
 
   String _eventLabel(String type) => switch (type) {
@@ -619,7 +607,6 @@ class _LifecycleCatalogTab extends StatelessWidget {
         ],
       ],
     ));
-  
   }
 }
 
@@ -772,6 +759,5 @@ class _LifecycleArchiveTab extends StatelessWidget {
         ),
       );
     });
-  
   }
 }
