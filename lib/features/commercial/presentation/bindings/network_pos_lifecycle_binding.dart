@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource.dart';
 import 'package:netsales/features/catalog/data/datasources/package_catalog_remote_datasource_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
@@ -28,6 +29,7 @@ class NetworkPosLifecycleBinding extends Bindings {
   @override
   void dependencies() {
     final id = int.tryParse(Get.parameters['id'] ?? '');
+    final arguments = Get.arguments is Map ? Get.arguments as Map : const <dynamic, dynamic>{};
     if (id == null || id <= 0) return;
     if (!Get.isRegistered<PackageCatalogRemoteDataSource>()) {
       Get.lazyPut<PackageCatalogRemoteDataSource>(
@@ -97,6 +99,9 @@ class NetworkPosLifecycleBinding extends Bindings {
     Get.lazyPut<NetworkPosLifecycleController>(
       () => NetworkPosLifecycleController(
         networkPosId: id,
+        relationship: arguments['relationship'] is NetworkPosLinkEntity
+            ? arguments['relationship'] as NetworkPosLinkEntity
+            : null,
         relationship: Get.arguments is Map && Get.arguments['relationship'] is NetworkPosLinkEntity
             ? Get.arguments['relationship'] as NetworkPosLinkEntity
             : null,
