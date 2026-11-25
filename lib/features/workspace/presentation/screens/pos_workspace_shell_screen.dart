@@ -4,6 +4,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_directory_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
 import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
@@ -65,6 +66,12 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           logoUrl: controller.activePos.value?.posProfileLogoUrl,
           embedded: true,
         ),
+      ),
+      const WorkspaceNavItem(
+        label: 'نقاط بيعي',
+        icon: Icons.storefront_outlined,
+        activeIcon: Icons.storefront_rounded,
+        content: PosDirectoryScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'الشبكات المرتبطة',
