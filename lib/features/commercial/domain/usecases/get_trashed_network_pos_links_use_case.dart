@@ -7,7 +7,7 @@ class GetTrashedNetworkPosLinksUseCase {
 
   final CommercialRepository _repository;
 
-  PaginatedList<NetworkPosLinkEntity> call({required int entityId, required bool isNetwork, String? cursor, int perPage = 15}) {
+  Future<PaginatedList<NetworkPosLinkEntity>> call({required int entityId, required bool isNetwork, String? cursor, int perPage = 15}) {
     return _repository.getTrashedNetworkPosLinks({required int entityId, required bool isNetwork, String? cursor, int perPage = 15});
   }
 }
