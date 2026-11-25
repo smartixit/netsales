@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_pos_lifecycle_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -32,6 +33,10 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     if (controller.canViewEvents) {
       tabs.add(const Tab(icon: Icon(Icons.history_rounded), text: 'سجل الأحداث'));
       views.add(_eventsTab());
+    }
+    if (controller.canViewCatalog) {
+      tabs.add(const Tab(icon: Icon(Icons.inventory_2_outlined), text: 'الكتالوج والخصومات'));
+      views.add(_catalogTab());
     }
     if (controller.canViewArchive) {
       tabs.add(const Tab(icon: Icon(Icons.archive_outlined), text: 'الأرشيف'));
@@ -248,6 +253,76 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                   onPressed: controller.isLoadingMoreEvents.value ? null : controller.loadMoreEvents,
                 ),
               ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _catalogTab() {
+    return Obx(() {
+      if (controller.isLoadingDiscounts.value && controller.effectiveDiscounts.isEmpty) {
+        return const CustomStateView.loading();
+      }
+      if (controller.discountsErrorMessage.value != null && controller.effectiveDiscounts.isEmpty) {
+        return CustomErrorState(
+          title: 'تعذر تحميل الكتالوج والخصومات',
+          subtitle: controller.discountsErrorMessage.value,
+          onRetry: controller.loadEffectiveDiscounts,
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: controller.loadEffectiveDiscounts,
+        child: ListView(
+          padding: EdgeInsets.all(AppSpacing.md),
+          children: [
+            if (controller.effectiveDiscounts.isEmpty)
+              const CustomEmptyState.compact(
+                title: 'لا توجد خصومات فعالة',
+                subtitle: 'لا توجد حالياً خصومات فعالة مخصصة لهذه العلاقة أو موروثة من كتالوج الشبكة.',
+                icon: Icons.local_offer_outlined,
+              ),
+            ...controller.effectiveDiscounts.map((discount) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: CustomSurfaceCard(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.inventory_2_outlined),
+                        AppSpacing.hSm,
+                        Expanded(
+                          child: Text(
+                            'الباقة #${discount.packageId ?? '—'}',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        Chip(label: Text(discount.isCustom ? 'خصم مخصص' : 'خصم الشبكة')),
+                      ],
+                    ),
+                    AppSpacing.vSm,
+                    Text(discount.isEffectiveNow ? 'الحالة: ساري الآن' : 'الحالة: غير ساري الآن'),
+                    AppSpacing.vSm,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        Chip(label: Text('نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%')),
+                        Chip(label: Text('آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%')),
+                      ],
+                    ),
+                    AppSpacing.vSm,
+                    Text('السعر الأساسي: ${AmountFormatter.formatValue(discount.originalPackagePrice)} ر.ي'),
+                    Text('السعر النقدي المعتمد: ${AmountFormatter.formatValue(discount.effectiveCashPrice)} ر.ي'),
+                    Text('السعر الآجل المعتمد: ${AmountFormatter.formatValue(discount.effectiveCreditPrice)} ر.ي'),
+                    Text('الوفر النقدي: ${AmountFormatter.formatValue(discount.cashSavings)} ر.ي'),
+                    Text('الوفر الآجل: ${AmountFormatter.formatValue(discount.creditSavings)} ر.ي'),
+                  ],
+                ),
+              ),
+            )),
           ],
         ),
       );
