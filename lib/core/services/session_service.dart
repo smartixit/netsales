@@ -100,6 +100,7 @@ class SessionService extends GetxService {
     required List<String> permissions,
     String? roleKey,
   }) async {
+    ApiService.sessionGeneration++;
     final sessionDeviceUuid = session.deviceUuid?.trim();
     if (sessionDeviceUuid == null || sessionDeviceUuid.isEmpty) {
       throw StateError(
@@ -225,6 +226,7 @@ class SessionService extends GetxService {
   }
 
   Future<void> terminateSession() {
+    ApiService.sessionGeneration++;
     final activeTermination = _terminationFuture;
     if (activeTermination != null) return activeTermination;
     final termination = _performSessionTermination();
