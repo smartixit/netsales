@@ -13,6 +13,8 @@ const String infinityFreeVerificationProbeFlagKey =
     '__netsales_infinityfree_verification_probe';
 const String infinityFreeChallengeFailureFlagKey =
     '__netsales_infinityfree_challenge_failure';
+const String infinityFreeChallengeReplayFlagKey =
+    '__netsales_infinityfree_challenge_replay';
 
 /// Handles the InfinityFree JavaScript test-cookie challenge.
 ///
@@ -351,7 +353,11 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // User-Agent, and one-shot recursion guard.
     final replayOptions = options.copyWith(
       queryParameters: <String, dynamic>{...options.queryParameters},
-      extra: <String, dynamic>{...options.extra, _retryFlagKey: true},
+      extra: <String, dynamic>{
+        ...options.extra,
+        _retryFlagKey: true,
+        infinityFreeChallengeReplayFlagKey: true,
+      },
     );
 
     final existingCookie = _headerValue(replayOptions.headers, 'Cookie');
