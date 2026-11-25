@@ -155,6 +155,9 @@ class NetworkCommercialDirectoryController
       PermissionService.to.can(AppPermissions.networkDeletePosLink);
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  bool get canViewRelationshipLifecycle =>
+      PermissionService.to.can(AppPermissions.networkViewPosAgreements) ||
+      PermissionService.to.can(AppPermissions.networkViewPosLinkEvents);
 
   int? get resolvedNetworkId {
     return selectedNetworkId.value ??
@@ -401,6 +404,13 @@ class NetworkCommercialDirectoryController
     openPartnerDetails(link);
   }
 
+  void openRelationshipLifecycle(NetworkPosLinkEntity link) {
+    if (!canViewRelationshipLifecycle) return;
+    Get.toNamed<void>(
+      AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
+    );
+  }
+
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
   void openPosWalletStatement(NetworkPosLinkEntity link) {
     Get.toNamed<void>(
@@ -498,6 +508,7 @@ class NetworkCommercialDirectoryController
       onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
       onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
       onViewWallet: canViewPartnerWallet ? () => openPosWalletStatement(link) : null,
+      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
     );
   }
 
