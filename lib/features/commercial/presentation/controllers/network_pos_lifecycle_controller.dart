@@ -207,7 +207,7 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreAgreements.value = false;
+      if (revision == _agreementsRevision) isLoadingMoreAgreements.value = false;
     }
   }
 
@@ -277,7 +277,7 @@ class NetworkPosLifecycleController extends GetxController {
         CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
       }
     } finally {
-      isLoadingMorePackages.value = false;
+      if (revision == _packagesRevision) isLoadingMorePackages.value = false;
     }
   }
 
@@ -361,7 +361,7 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreTrashedDiscounts.value = false;
+      if (revision == _trashedDiscountsRevision) isLoadingMoreTrashedDiscounts.value = false;
     }
   }
 
@@ -404,7 +404,7 @@ class NetworkPosLifecycleController extends GetxController {
         CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
       }
     } finally {
-      isLoadingMoreDiscounts.value = false;
+      if (revision == _discountsRevision) isLoadingMoreDiscounts.value = false;
     }
   }
 
@@ -592,7 +592,7 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreArchive.value = false;
+      if (revision == _archiveRevision) isLoadingMoreArchive.value = false;
     }
   }
 
@@ -626,7 +626,7 @@ class NetworkPosLifecycleController extends GetxController {
     } catch (error) {
       CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
     } finally {
-      isLoadingMoreEvents.value = false;
+      if (revision == _eventsRevision) isLoadingMoreEvents.value = false;
     }
   }
 
