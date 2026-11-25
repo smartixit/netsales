@@ -21,8 +21,23 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
 
   @override
   Widget build(BuildContext context) {
+    final tabs = <Widget>[];
+    final views = <Widget>[];
+    if (controller.canViewAgreements) {
+      tabs.add(const Tab(icon: Icon(Icons.description_outlined), text: 'الاتفاقيات'));
+      views.add(_agreementsTab());
+    }
+    if (controller.canViewEvents) {
+      tabs.add(const Tab(icon: Icon(Icons.history_rounded), text: 'سجل الأحداث'));
+      views.add(_eventsTab());
+    }
+    if (controller.canViewArchive) {
+      tabs.add(const Tab(icon: Icon(Icons.archive_outlined), text: 'الأرشيف'));
+      views.add(_archiveTab());
+    }
+
     return DefaultTabController(
-      length: 3,
+      length: tabs.length,
       child: CustomAppScaffold(
         appBarTitle: 'دورة حياة العلاقة التجارية',
         body: Column(
@@ -35,21 +50,15 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 icon: Icons.hub_rounded,
               ),
             ),
-            TabBar(
-              tabs: const [
-                Tab(icon: Icon(Icons.description_outlined), text: 'الاتفاقيات'),
-                Tab(icon: Icon(Icons.history_rounded), text: 'سجل الأحداث'),
-                Tab(icon: Icon(Icons.archive_outlined), text: 'الأرشيف'),
-              ],
-            ),
+            if (tabs.isNotEmpty) TabBar(tabs: tabs),
             Expanded(
-              child: TabBarView(
-                children: [
-                  _agreementsTab(),
-                  _eventsTab(),
-                  _archiveTab(),
-                ],
-              ),
+              child: tabs.isEmpty
+                  ? const CustomEmptyState.compact(
+                      title: 'لا تتوفر صلاحية العرض',
+                      subtitle: 'لا تملك صلاحية لعرض بيانات دورة حياة هذه العلاقة.',
+                      icon: Icons.lock_outline_rounded,
+                    )
+                  : TabBarView(children: views),
             ),
           ],
         ),
@@ -74,7 +83,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         child: ListView(
           padding: EdgeInsets.all(AppSpacing.md),
           children: [
-            CustomButton.primary(
+            if (controller.canManageAgreements) CustomButton.primary(
               text: 'إنشاء مسودة اتفاقية',
               prefix: Icons.add_rounded,
               onPressed: controller.isSaving.value ? null : controller.openDraftEditor,
@@ -149,7 +158,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               AppSpacing.vSm,
               Text('السريان: ${agreement.startsAt ?? 'مفتوح'} — ${agreement.endsAt ?? 'مفتوح'}'),
             ],
-            if (agreement.isDraft) ...[
+            if (agreement.isDraft && controller.canManageAgreements) ...[
               AppSpacing.vMd,
               Wrap(
                 spacing: 8,
@@ -167,7 +176,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                   ),
                 ],
               ),
-            ] else if (agreement.isActive) ...[
+            ] else if (agreement.isActive && controller.canManageAgreements) ...[
               AppSpacing.vMd,
               CustomButton.secondary(
                 text: 'إنهاء الاتفاقية',
@@ -281,7 +290,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                     Text('رقم العلاقة: #${link.networkPosId}'),
                     Text('تاريخ الارتباط: ${link.formattedLinkedDate}'),
                     AppSpacing.vSm,
-                    CustomButton.secondary(
+                    if (controller.canRestoreLinks) CustomButton.secondary(
                       text: 'استعادة العلاقة',
                       prefix: Icons.restore_rounded,
                       onPressed: controller.isSaving.value ? null : () => controller.restoreLink(link),
