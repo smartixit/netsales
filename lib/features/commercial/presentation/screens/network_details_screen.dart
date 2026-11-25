@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_details_controller.dart';
@@ -82,7 +83,7 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
           if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
-              final saved = await Get.toNamed('/network/entities/${network.networkId}/edit', arguments: network);
+              final saved = await Get.toNamed(AppRoutes.networkEntityEdit.replaceFirst(':id', network.networkId.toString()), arguments: network);
               if (saved == true) {
                 await controller.load();
                 if (Get.isRegistered<NetworkDirectoryController>()) {
