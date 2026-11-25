@@ -55,6 +55,7 @@ class ExpenseDetailsController extends GetxController {
   }
 
   void onEditCurrentExpense() {
+    if (!canEditExpense) return;
     final exp = expense.value;
     if (exp == null) return;
     Get.toNamed<void>(
