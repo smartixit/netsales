@@ -71,14 +71,12 @@ class PermissionService extends GetxService {
 
   /// فحص امتلاك أي صلاحية من قائمة معطاة (OR)
   bool canAny(Iterable<String> permissions) {
-    if (isSuperAdmin) return true;
     final source = _workspaceContextBound ? _workspacePermissions : _permissions;
     return permissions.any(source.contains);
   }
 
   /// فحص امتلاك كافة الصلاحيات المحددة (AND)
   bool canAll(Iterable<String> permissions) {
-    if (isSuperAdmin) return true;
     final source = _workspaceContextBound ? _workspacePermissions : _permissions;
     return permissions.every(source.contains);
   }
