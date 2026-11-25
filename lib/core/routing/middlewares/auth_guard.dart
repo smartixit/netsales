@@ -123,7 +123,8 @@ class PermissionGuardMiddleware extends GetMiddleware {
       return const RouteSettings(name: AppRoutes.login);
     }
 
-    if (SessionService.to.isAccessBlocked) {
+    if (SessionService.to.isAccessBlocked ||
+        SessionService.to.currentUser?.isSuperAdmin == true) {
       return const RouteSettings(name: AppRoutes.unauthorized);
     }
 
@@ -141,11 +142,6 @@ class PermissionGuardMiddleware extends GetMiddleware {
     }
 
     final perm = PermissionService.to;
-
-    // تجاوز المشرف العام تلقائياً
-    if (perm.isSuperAdmin) {
-      return null;
-    }
 
     // التحقق من الدور
     if (requiredRole != null && !perm.hasRole(requiredRole!)) {
