@@ -164,7 +164,9 @@ void main() {
 
     test('PermissionGuardMiddleware redirects unauthorized access and prevents 403 deep-link states', () {
       // Simulate authenticated user without salesCreate permission
-      permissionService.updateAccess(
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 12,
         roleKey: 'POS_AGENT',
         permissions: [AppPermissions.salesView],
       );
