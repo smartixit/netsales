@@ -6,6 +6,7 @@ import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/routing/app_pages.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/auth_guard.dart';
+import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/core/routing/screen_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
