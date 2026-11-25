@@ -79,6 +79,44 @@ void main() {
     expect(permissions.currentRole, 'NETWORK_ACCOUNTANT');
   });
 
+  test('rejects a Network role bound to a POS tenant', () {
+    permissions.setWorkspaceContext(
+      scope: RoleScope.pos,
+      tenantId: 12,
+      roleKey: 'NETWORK_OWNER',
+      permissions: const ['sales.view'],
+    );
+
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.currentRole, isEmpty);
+    expect(permissions.can('sales.view'), isFalse);
+  });
+
+  test('rejects a POS role bound to a Network tenant', () {
+    permissions.setWorkspaceContext(
+      scope: RoleScope.network,
+      tenantId: 12,
+      roleKey: 'POS_AGENT',
+      permissions: const ['sales.view'],
+    );
+
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.currentRole, isEmpty);
+    expect(permissions.can('sales.view'), isFalse);
+  });
+
+  test('rejects unknown operational role keys', () {
+    permissions.setWorkspaceContext(
+      scope: RoleScope.network,
+      tenantId: 12,
+      roleKey: 'CUSTOM_UNKNOWN_ROLE',
+      permissions: const ['sales.view'],
+    );
+
+    expect(permissions.hasWorkspaceContext, isFalse);
+    expect(permissions.can('sales.view'), isFalse);
+  });
+
   test('does not fall back to account-wide permissions without a tenant', () {
     permissions.setWorkspaceContext(
       scope: RoleScope.pos,
