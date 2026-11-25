@@ -103,12 +103,20 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 icon: Icons.description_outlined,
               ),
             ...controller.agreements.map(_agreementCard),
-            if (controller.hasMoreAgreements)
+            if (controller.isLoadingMoreAgreements.value)
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 2,
+                  cardHeight: 92,
+                ),
+              )
+            else if (controller.hasMoreAgreements)
               Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: CustomButton.secondary(
-                  text: controller.isLoadingMoreAgreements.value ? 'جارٍ تحميل المزيد' : 'تحميل المزيد',
-                  onPressed: controller.isLoadingMoreAgreements.value ? null : controller.loadMoreAgreements,
+                  text: 'تحميل المزيد',
+                  onPressed: controller.loadMoreAgreements,
                 ),
               ),
           ],
@@ -245,12 +253,20 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 ),
               ),
             )),
-            if (controller.hasMoreEvents)
+            if (controller.isLoadingMoreEvents.value)
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 2,
+                  cardHeight: 76,
+                ),
+              )
+            else if (controller.hasMoreEvents)
               Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: CustomButton.secondary(
-                  text: controller.isLoadingMoreEvents.value ? 'جارٍ تحميل المزيد' : 'تحميل المزيد',
-                  onPressed: controller.isLoadingMoreEvents.value ? null : controller.loadMoreEvents,
+                  text: 'تحميل المزيد',
+                  onPressed: controller.loadMoreEvents,
                 ),
               ),
           ],
