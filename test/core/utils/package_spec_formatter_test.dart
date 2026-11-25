@@ -11,7 +11,8 @@ void main() {
     test('selects the largest useful unit even for fractional terabytes', () {
       expect(
         DataSizeUnit.resolveBestUnit(
-          DataSizeUnit.terabytes.byteFactor + 512 * DataSizeUnit.megabytes.byteFactor,
+          DataSizeUnit.terabytes.byteFactor +
+              512 * DataSizeUnit.megabytes.byteFactor,
         ),
         DataSizeUnit.terabytes,
       );
