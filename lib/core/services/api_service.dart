@@ -60,6 +60,11 @@ class ApiService {
   /// دالة رد نداء تُستدعى تلقائياً عند انتهاء صلاحية الجلسة (401 Unauthorized)
   static Future<void> Function()? onUnauthorized;
 
+  /// Monotonic local generation used to ignore responses from a previous session.
+  /// This value is never sent to the API and is not an authentication credential.
+  static int sessionGeneration = 0;
+
+
   /// تهيئة عميل الاتصال وضبط تجاوز الشهادات في بيئة التطوير
   void _configureHttpClient() {
     final allowBadCerts = AppEnvironment.allowBadCertificates;
@@ -711,6 +716,8 @@ class SessionAuthInterceptor extends Interceptor {
       return handler.next(options);
     }
 
+    options.extra['session_generation'] = ApiService.sessionGeneration;
+
     final storage = StorageService.instance;
 
     // حقن معرف الجلسة
@@ -768,16 +775,29 @@ class SessionAuthInterceptor extends Interceptor {
 
     final statusCode = err.response?.statusCode;
 
-    // التعامل مع انتهاء صلاحية الجلسة
+    // Only an explicit Laravel session rejection is terminal. Missing request
+    // headers and unrelated gateway/application 401s must not destroy a session.
     if (statusCode == 401) {
       final path = err.requestOptions.path;
       final isPublicAuth =
           path.contains('/auth/login') ||
           path.contains('/auth/register') ||
           path.contains('/auth/password');
-
       final isSessionValidation = path.endsWith('/auth/me');
-      if (!isPublicAuth && !isSessionValidation) {
+      final responseData = err.response?.data;
+      final errorCode = responseData is Map
+          ? responseData['code']?.toString()
+          : null;
+      final requestGeneration =
+          err.requestOptions.extra['session_generation'];
+      final isCurrentSessionGeneration =
+          requestGeneration is int &&
+          requestGeneration == ApiService.sessionGeneration;
+
+      if (!isPublicAuth &&
+          !isSessionValidation &&
+          errorCode == 'SESSION_INVALID' &&
+          isCurrentSessionGeneration) {
         await ApiService.onUnauthorized?.call();
       }
     }
