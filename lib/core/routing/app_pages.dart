@@ -433,7 +433,13 @@ abstract final class AppPages {
       name: AppRoutes.posWalletStatement,
       page: () => const PosWalletStatementScreen(),
       binding: PosWalletStatementBinding(),
-      middlewares: [AuthGuard()],
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.posWalletsView,
+        ),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
     ),
     GetPage(
       name: AppRoutes.networkWalletStatement,
@@ -441,6 +447,9 @@ abstract final class AppPages {
       binding: NetworkWalletStatementBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.networkWalletsView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
