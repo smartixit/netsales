@@ -355,6 +355,26 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                     ? null
                     : controller.openDiscountEditor,
               ),
+            if (controller.isLoadingPackages.value)
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 1,
+                  cardHeight: 64,
+                ),
+              )
+            else if (controller.packagesErrorMessage.value != null)
+              CustomErrorState(
+                title: 'تعذر تحميل باقات الشبكة',
+                subtitle: controller.packagesErrorMessage.value,
+                onRetry: controller.loadPackages,
+              )
+            else if (controller.packages.isEmpty)
+              const CustomEmptyState.compact(
+                title: 'لا توجد باقات نشطة',
+                subtitle: 'لا يمكن إنشاء خصم مخصص قبل توفر باقة نشطة في كتالوج الشبكة.',
+                icon: Icons.inventory_2_outlined,
+              ),
             if (controller.effectiveDiscounts.any((item) => !item.isCustom)) ...[
               Padding(
                 padding: EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
