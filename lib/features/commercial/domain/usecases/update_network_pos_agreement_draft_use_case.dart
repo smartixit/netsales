@@ -6,7 +6,7 @@ class UpdateNetworkPosAgreementDraftUseCase {
 
   final CommercialRepository _repository;
 
-  NetworkPosAgreementEntity call({required int networkPosId, required int agreementId, required Map<String, dynamic> payload}) {
+  Future<NetworkPosAgreementEntity> call({required int networkPosId, required int agreementId, required Map<String, dynamic> payload}) {
     return _repository.updateNetworkPosAgreementDraft({required int networkPosId, required int agreementId, required Map<String, dynamic> payload});
   }
 }
