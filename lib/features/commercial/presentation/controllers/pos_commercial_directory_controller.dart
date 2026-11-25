@@ -376,6 +376,7 @@ class PosCommercialDirectoryController
 
   @override
   Widget? buildExtraFilters(BuildContext context) {
+    if (initialPosId != null) return null;
     final posList = authorizedPosList;
     if (posList.length <= 1) return null;
 
