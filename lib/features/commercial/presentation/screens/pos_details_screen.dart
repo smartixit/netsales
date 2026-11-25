@@ -82,6 +82,14 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
             ),
           ),
           AppSpacing.vMd,
+          if (controller.canManageMembers) CustomButton.secondary(
+            text: 'إدارة فريق العمل والعضويات',
+            prefix: Icons.groups_rounded,
+            onPressed: () => Get.toNamed(
+              AppRoutes.posEntityMembers.replaceFirst(':id', pos.posId.toString()),
+            ),
+          ),
+          AppSpacing.vSm,
           if (controller.canViewRelationships) CustomButton.primary(
             text: 'إدارة العلاقات التجارية',
             prefix: Icons.hub_rounded,
