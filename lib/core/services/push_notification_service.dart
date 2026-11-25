@@ -319,6 +319,9 @@ class PushNotificationService extends GetxService {
         if (sessionGeneration != ApiService.sessionGeneration ||
             SessionService.to.currentSessionId != sessionId ||
             SessionService.to.currentUser?.userId != userId) {
+          if (storage.getString(StorageKeys.fcmTokenStorage) == token) {
+            await storage.remove(StorageKeys.fcmTokenStorage);
+          }
           log('⏭️ [PushNotificationService] تغيرت الجلسة أثناء حفظ رمز FCM؛ لن يُعلن نجاح المزامنة القديمة.');
           return false;
         }
