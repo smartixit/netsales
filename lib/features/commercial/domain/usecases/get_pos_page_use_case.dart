@@ -14,7 +14,6 @@ class GetPosPageUseCase {
   }) => _repository.getPosPage(
     search: search,
     status: status,
-    governorateId: governorateId,
     cursor: cursor,
     perPage: perPage,
   );
