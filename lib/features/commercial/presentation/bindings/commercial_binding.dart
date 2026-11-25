@@ -137,7 +137,6 @@ class CommercialBinding extends Bindings {
     registerLazyIfAbsent<PosCommercialDirectoryController>(
       () => PosCommercialDirectoryController(
         getPosNetworksListUseCase: Get.find<GetPosNetworksListUseCase>(),
-        deleteNetworkPosLinkUseCase: Get.find<DeleteNetworkPosLinkUseCase>(),
         previewNetworkPosLinkChallengeUseCase:
             Get.find<PreviewNetworkPosLinkChallengeUseCase>(),
         confirmNetworkPosLinkChallengeUseCase:
