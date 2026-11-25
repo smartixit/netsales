@@ -212,7 +212,6 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     return verificationOptions;
   }
 
-
   Future<Response<dynamic>> _processChallengeResponse(
     Response<dynamic> response,
   ) async {
@@ -353,10 +352,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     // User-Agent, and one-shot recursion guard.
     final replayOptions = options.copyWith(
       queryParameters: <String, dynamic>{...options.queryParameters},
-      extra: <String, dynamic>{
-        ...options.extra,
-        _retryFlagKey: true,
-      },
+      extra: <String, dynamic>{...options.extra, _retryFlagKey: true},
     );
 
     final existingCookie = _headerValue(replayOptions.headers, 'Cookie');
