@@ -35,14 +35,12 @@ class PosCommercialDirectoryController
     extends BaseCommercialDirectoryController {
   PosCommercialDirectoryController({
     required this.getPosNetworksListUseCase,
-    required this.deleteNetworkPosLinkUseCase,
     required this.previewNetworkPosLinkChallengeUseCase,
     required this.confirmNetworkPosLinkChallengeUseCase,
     this.getMyPosUseCase,
   });
 
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
-  final DeleteNetworkPosLinkUseCase deleteNetworkPosLinkUseCase;
   final PreviewNetworkPosLinkChallengeUseCase
   previewNetworkPosLinkChallengeUseCase;
   final ConfirmNetworkPosLinkChallengeUseCase
@@ -402,28 +400,7 @@ class PosCommercialDirectoryController
     );
   }
 
-  void onDeleteLink(NetworkPosLinkEntity link) {
-    CommercialActionDialogs.showUnlinkDialog(
-      partnerName: link.displayNetworkName,
-      onConfirm: () async {
-        try {
-          await deleteNetworkPosLinkUseCase(link.networkPosId);
-          links.removeWhere(
-            (element) => element.networkPosId == link.networkPosId,
-          );
-          await CustomAnimationOverlay.showSuccess(
-            message: 'تم فك الارتباط بمزود الشبكة بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
-    );
-  }
+
 
   Future<void> openQrScannerFlow() async {
     if (!canLinkNetwork) return;
