@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/services/permission_service.dart';
@@ -221,7 +222,9 @@ void main() {
       final mockRepo = MockResilientRequestRepo([sampleReq1]);
 
       // Configure permissions without cancel rights
-      permissionService.updateAccess(
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_STAFF',
         permissions: [AppPermissions.requestsView],
       );
@@ -238,7 +241,9 @@ void main() {
       expect(posController.canCreateOrder, isFalse);
 
       // Granting create permission updates state reactively
-      permissionService.updateAccess(
+      permissionService.setWorkspaceContext(
+        scope: RoleScope.pos,
+        tenantId: 10,
         roleKey: 'POS_STAFF',
         permissions: [
           AppPermissions.requestsView,
