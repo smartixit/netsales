@@ -202,7 +202,7 @@ class PosMembershipsController extends BaseMembershipsController {
   bool get canRemoveMember =>
       PermissionService.to.can(AppPermissions.posMembersDelete);
 
-  int? get resolvedPosId => WorkspaceService.to.resolveActivePosId([]);
+  int? get resolvedPosId => WorkspaceService.to.savedActivePosId;
 
   @override
   void onInit() {
