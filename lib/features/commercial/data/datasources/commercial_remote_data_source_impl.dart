@@ -326,6 +326,68 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<NetworkModel> createNetwork(Map<String, dynamic> payload) async {
+    final response = await ApiService.instance.post<NetworkModel>(
+      ApiConstants.networks,
+      data: payload,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل إنشاء الشبكة.');
+    }
+    return result;
+  }
+
+  @override
+  Future<NetworkModel> updateNetwork(
+    int networkId,
+    Map<String, dynamic> payload,
+  ) async {
+    final response = await ApiService.instance.put<NetworkModel>(
+      ApiConstants.network(networkId),
+      data: payload,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل تحديث بيانات الشبكة.');
+    }
+    return result;
+  }
+
+  @override
+  Future<PosModel> createPos(Map<String, dynamic> payload) async {
+    final response = await ApiService.instance.post<PosModel>(
+      ApiConstants.pos,
+      data: payload,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل إنشاء نقطة البيع.');
+    }
+    return result;
+  }
+
+  @override
+  Future<PosModel> updatePos(
+    int posId,
+    Map<String, dynamic> payload,
+  ) async {
+    final response = await ApiService.instance.put<PosModel>(
+      ApiConstants.posItem(posId),
+      data: payload,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل تحديث بيانات نقطة البيع.');
+    }
+    return result;
+  }
+
+  @override
   Future<NetworkModel> getNetworkDetails(int networkId) async {
     final response = await ApiService.instance.get<NetworkModel>(
       ApiConstants.network(networkId),
