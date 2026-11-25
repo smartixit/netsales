@@ -16,7 +16,7 @@ class AuthGuard extends GetMiddleware {
   int? get priority => 1;
 
   @override
-  RouteSettings? redirect(String? route) {
+  Future<dynamic>? redirect(String? route) {
     if (!Get.isRegistered<SessionService>() ||
         !SessionService.to.isAuthenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -30,14 +30,14 @@ class AuthGuard extends GetMiddleware {
           type: SnackType.warning,
         );
       });
-      return const RouteSettings(name: AppRoutes.login);
+      return Get.offAllNamed(AppRoutes.login);
     }
     if (SessionService.to.isAccessBlocked ||
         SessionService.to.currentUser?.isPlatformUser == true) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return  Get.toNamed(AppRoutes.unauthorized);
     }
     if (!SessionService.to.isSessionVerified) {
-      return const RouteSettings(name: AppRoutes.initial);
+      return Get.offAllNamed(AppRoutes.initial);
     }
 
     // الحزام الأمني: منع الوصول لأي صفحة إذا كان تغيير كلمة المرور إلزامياً
@@ -50,7 +50,7 @@ class AuthGuard extends GetMiddleware {
           type: SnackType.warning,
         );
       });
-      return const RouteSettings(name: AppRoutes.resetPassword);
+      return Get.toNamed(AppRoutes.resetPassword);
     }
 
     return null;
@@ -63,27 +63,27 @@ class GuestGuard extends GetMiddleware {
   int? get priority => 1;
 
   @override
-  RouteSettings? redirect(String? route) {
+  Future<dynamic>? redirect(String? route) {
     if (Get.isRegistered<SessionService>() &&
         (SessionService.to.isAccessBlocked ||
             (SessionService.to.isAuthenticated &&
                 SessionService.to.currentUser?.isPlatformUser == true))) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     if (Get.isRegistered<SessionService>() &&
         SessionService.to.isAuthenticated &&
         !SessionService.to.isSessionVerified) {
-      return const RouteSettings(name: AppRoutes.initial);
+      return Get.offAllNamed(AppRoutes.initial);
     }
 
     if (Get.isRegistered<SessionService>() &&
         SessionService.to.isAuthenticated &&
         SessionService.to.isSessionVerified) {
       if (SessionService.to.mustChangePassword) {
-        return const RouteSettings(name: AppRoutes.resetPassword);
+        return Get.toNamed(AppRoutes.resetPassword);
       }
-      return const RouteSettings(name: AppRoutes.dashboard);
+      return Get.offAllNamed(AppRoutes.dashboard);
     }
     return null;
   }
@@ -110,7 +110,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
   int? get priority => _priority;
 
   @override
-  RouteSettings? redirect(String? route) {
+  Future<dynamic>? redirect(String? route) {
     if (!Get.isRegistered<SessionService>() ||
         !SessionService.to.isAuthenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -122,25 +122,25 @@ class PermissionGuardMiddleware extends GetMiddleware {
           type: SnackType.warning,
         );
       });
-      return const RouteSettings(name: AppRoutes.login);
+      return Get.offAllNamed(AppRoutes.login);
     }
 
     if (SessionService.to.isAccessBlocked ||
         SessionService.to.currentUser?.isPlatformUser == true) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     if (!SessionService.to.isSessionVerified) {
-      return const RouteSettings(name: AppRoutes.initial);
+      return Get.offAllNamed(AppRoutes.initial);
     }
 
     if (SessionService.to.mustChangePassword &&
         route != AppRoutes.resetPassword) {
-      return const RouteSettings(name: AppRoutes.resetPassword);
+      return Get.toNamed(AppRoutes.resetPassword);
     }
 
     if (!Get.isRegistered<PermissionService>()) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     final perm = PermissionService.to;
@@ -148,21 +148,21 @@ class PermissionGuardMiddleware extends GetMiddleware {
     // التحقق من الدور
     if (requiredRole != null && !perm.hasRole(requiredRole!)) {
       _notifyDenied('يتطلب هذا المسار دور: $requiredRole');
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
     if (anyRoles != null && !perm.hasAnyRole(anyRoles!)) {
       _notifyDenied('لا تملك أحد الأدوار المطلوبة للوصول لهذا المسار');
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     // التحقق من الصلاحيات الدقيقة
     if (requiredPermission != null && !perm.can(requiredPermission!)) {
       _notifyDenied('يتطلب هذا المسار صلاحية: $requiredPermission');
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
     if (anyPermissions != null && !perm.canAny(anyPermissions!)) {
       _notifyDenied('لا تملك أي من الصلاحيات المطلوبة للوصول لهذا المسار');
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     return null;

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -191,10 +192,10 @@ class RegisterNetworkController extends GetxController {
         await Get.offAllNamed<void>(AppRoutes.login);
       }
     } catch (e) {
-      await CustomAnimationOverlay.hide();
       // الحارس يمنع إظهار التنبيه بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;
       final cleanMessage = AppException.sanitizeMessage(e);
+      log(cleanMessage);
       CustomSnackbar.show(
         type: SnackType.error,
         title: 'تعذر إتمام طلب التسجيل',

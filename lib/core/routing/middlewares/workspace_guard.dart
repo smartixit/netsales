@@ -16,21 +16,21 @@ class WorkspaceGuard extends GetMiddleware {
   int? get priority => 2;
 
   @override
-  RouteSettings? redirect(String? route) {
+  Future<dynamic>? redirect(String? route) {
     if (!Get.isRegistered<SessionService>() ||
         !SessionService.to.isAuthenticated) {
-      return const RouteSettings(name: AppRoutes.login);
+      return Get.offAllNamed(AppRoutes.login);
     }
     if (SessionService.to.isAccessBlocked) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
     if (!SessionService.to.isSessionVerified) {
-      return const RouteSettings(name: AppRoutes.initial);
+      return Get.offAllNamed(AppRoutes.initial);
     }
 
     final user = SessionService.to.currentUser;
     if (user == null) {
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     final AppWorkspace resolved;
@@ -39,20 +39,20 @@ class WorkspaceGuard extends GetMiddleware {
     } on StateError {
       // An authenticated session without a supported operational role is
       // invalid. Never infer a workspace from partial or unknown role data.
-      return const RouteSettings(name: AppRoutes.unauthorized);
+      return Get.toNamed(AppRoutes.unauthorized);
     }
 
     if (targetWorkspace != null && targetWorkspace != resolved) {
-      return RouteSettings(
-        name: resolved == AppWorkspace.network
+      return Get.offAllNamed(
+        resolved == AppWorkspace.network
             ? AppRoutes.networkWorkspace
             : AppRoutes.posWorkspace,
       );
     }
 
     if (route == AppRoutes.dashboard) {
-      return RouteSettings(
-        name: resolved == AppWorkspace.network
+      return Get.offAllNamed(
+        resolved == AppWorkspace.network
             ? AppRoutes.networkWorkspace
             : AppRoutes.posWorkspace,
       );

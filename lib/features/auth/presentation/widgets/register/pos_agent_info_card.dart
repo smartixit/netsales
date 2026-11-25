@@ -59,7 +59,7 @@ class PosAgentInfoCard extends GetView<RegisterPosController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'بيانات وكيل ومسؤول نقطة البيع',
+                          'بيانات مسؤول نقطة البيع',
                           style: AppTypography.titleMedium.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
@@ -114,6 +114,7 @@ class PosAgentInfoCard extends GetView<RegisterPosController> {
                 label: 'الاسم الكامل للوكيل / المسؤول',
                 hint: 'الاسم الثلاثي أو الرباعي',
                 prefixIcon: Icon(Icons.badge_outlined, size: 20.r),
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.nameValidator(
                   fieldName: 'اسم الوكيل',
                   minWordsCount: 2,
@@ -127,6 +128,7 @@ class PosAgentInfoCard extends GetView<RegisterPosController> {
               CustomPhoneField(
                 controller: controller.phoneController,
                 label: 'رقم الهاتف',
+                textInputAction: TextInputAction.next,
                 suffixIcon: CustomContactPickerIconButton(
                   controller: controller.phoneController,
                   nameController: controller.agentNameController,
@@ -154,6 +156,7 @@ class PosAgentInfoCard extends GetView<RegisterPosController> {
                 label: 'البريد الإلكتروني للوكيل',
                 hint: 'agent@example.com',
                 prefixIcon: Icon(Icons.email_outlined, size: 20.r),
+                textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.emailAddress,
                 validator: FormValidators.emailValidator(
                   fieldName: 'البريد الإلكتروني للوكيل',

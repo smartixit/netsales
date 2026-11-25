@@ -23,17 +23,12 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       maxWidth: AppBreakpoints.maxFormWidth,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(
-          top: CustomAppScaffold.topBarHeight(context) + AppSpacing.xs,
-          bottom: AppSpacing.xl,
-          left: context.responsive(
-            mobile: AppSpacing.lg,
-            tablet: AppSpacing.xl,
-          ),
-          right: context.responsive(
-            mobile: AppSpacing.lg,
-            tablet: AppSpacing.xl,
-          ),
+    
+          padding: EdgeInsets.fromLTRB(
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.appBarHeight + AppSpacing.md,
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.md,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

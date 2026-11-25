@@ -113,6 +113,7 @@ class NetworkInfoCard extends GetView<RegisterNetworkController> {
                 controller: controller.networkNameController,
                 label: 'اسم الشبكة',
                 hint: 'مثال: شبكة النور اللاسلكية',
+                textInputAction: TextInputAction.next,
                 prefixIcon: Icon(Icons.wifi_rounded, size: 20.r),
                 validator: FormValidators.required(fieldName: 'اسم الشبكة'),
               ),
@@ -185,6 +186,7 @@ class NetworkInfoCard extends GetView<RegisterNetworkController> {
                 controller: controller.networkAddressController,
                 label: 'العنوان التفصيلي',
                 hint: 'مثال: الشارع العام، بجوار البريد',
+                textInputAction: TextInputAction.next,
                 prefixIcon: Icon(Icons.place_outlined, size: 20.r),
                 isRequired: false,
                 validator: FormValidators.addressValidator(
@@ -203,6 +205,7 @@ class NetworkInfoCard extends GetView<RegisterNetworkController> {
                 prefixIcon: Icon(Icons.alternate_email_rounded, size: 20.r),
                 keyboardType: TextInputType.emailAddress,
                 isRequired: false,
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.emailValidator(
                   fieldName: 'بريد الشبكة',
                   isRequired: false,

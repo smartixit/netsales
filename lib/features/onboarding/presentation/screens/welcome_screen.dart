@@ -24,16 +24,14 @@ class WelcomeScreen extends GetView<WelcomeController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
-      useSurfaceMesh: true,
       maxWidth: AppBreakpoints.maxFormWidth,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: context.responsive(
-            mobile: AppSpacing.lg,
-            tablet: AppSpacing.xl,
-          ),
-          vertical: AppSpacing.md,
+        padding: EdgeInsets.fromLTRB(
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.appBarHeight + AppSpacing.md,
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.md,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

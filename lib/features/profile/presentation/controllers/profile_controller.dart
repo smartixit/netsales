@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
@@ -25,6 +26,7 @@ class ProfileController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxBool isUpdatingAvatar = false.obs;
+  final ValueNotifier<File?> avatar = ValueNotifier<File?>(null);
 
   int _loadRevision = 0;
 

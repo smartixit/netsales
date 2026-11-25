@@ -59,7 +59,7 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'بيانات مسؤول ومالك الشبكة',
+                          'بيانات مالك الشبكة',
                           style: AppTypography.titleMedium.copyWith(
                             color: colors.onSurface,
                             fontWeight: FontWeight.w800,
@@ -114,6 +114,7 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
                 label: 'الاسم الكامل للمسؤول',
                 hint: 'الاسم الثلاثي أو الرباعي',
                 prefixIcon: Icon(Icons.badge_outlined, size: 20.r),
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.nameValidator(
                   fieldName: 'اسم مسؤول الشبكة',
                   minWordsCount: 2,
@@ -131,6 +132,7 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
                   controller: controller.phoneController,
                   nameController: controller.ownerNameController,
                 ),
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.phoneValidator(
                   fieldName: 'رقم هاتف المسؤول',
                 ),
@@ -155,6 +157,7 @@ class NetworkOwnerInfoCard extends GetView<RegisterNetworkController> {
                 hint: 'owner@example.com',
                 prefixIcon: Icon(Icons.email_outlined, size: 20.r),
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
                 isRequired: false,
                 validator: FormValidators.emailValidator(
                   fieldName: 'البريد الإلكتروني للمسؤول',

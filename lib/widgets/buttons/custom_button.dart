@@ -637,8 +637,8 @@ class CustomButton extends StatelessWidget {
         resolvedFgColor = foregroundColor ?? colors.primary;
         // if (borderColor != null) {
         resolvedBorder = Border.all(
-          color: borderColor ?? colors.outlineVariant.withValues(alpha: .6),
-          width: borderWidth ?? 1.0.w,
+          color: borderColor ?? Colors.transparent,
+          width: borderWidth ?? 0,
         );
         // }
         break;

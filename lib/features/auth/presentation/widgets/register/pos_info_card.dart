@@ -111,6 +111,7 @@ class PosInfoCard extends GetView<RegisterPosController> {
               // اسم نقطة البيع
               CustomTextField(
                 controller: controller.posNameController,
+                textInputAction: TextInputAction.next,
                 label: 'اسم نقطة البيع / المحل',
                 hint: 'مثال: سوبرماركت الأمانة / مركز النور',
                 prefixIcon: Icon(Icons.store_outlined, size: 20.r),
@@ -186,6 +187,7 @@ class PosInfoCard extends GetView<RegisterPosController> {
                 label: 'العنوان التفصيلي',
                 hint: 'مثال: الشارع العام، بجوار مسجد الفاروق',
                 prefixIcon: Icon(Icons.place_outlined, size: 20.r),
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.addressValidator(
                   fieldName: 'عنوان نقطة البيع',
                   isRequired: false,
@@ -201,6 +203,7 @@ class PosInfoCard extends GetView<RegisterPosController> {
                 hint: 'pos@example.com',
                 prefixIcon: Icon(Icons.alternate_email_rounded, size: 20.r),
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
                 validator: FormValidators.emailValidator(
                   fieldName: 'بريد نقطة البيع',
                   isRequired: false,

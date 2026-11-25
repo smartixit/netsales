@@ -12,7 +12,7 @@ abstract final class ApiConstants {
   static String get baseUrl => AppEnvironment.apiBaseUrl;
 
   // ── مهلات الاتصال (Timeouts in milliseconds) ──
-  static const int connectTimeout = 15000;
+  static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;
   static const int sendTimeout = 30000;
 
@@ -144,8 +144,7 @@ abstract final class ApiConstants {
   static String networkPosRestore(int id) => '/network-pos/$id/restore';
   static String networkPosNetworkTrashed(int id) =>
       '/networks/$id/network-pos/trashed';
-  static String networkPosPosTrashed(int id) =>
-      '/pos/$id/network-pos/trashed';
+  static String networkPosPosTrashed(int id) => '/pos/$id/network-pos/trashed';
   static String networkPosToggleStatus(int id) =>
       '/network-pos/$id/toggle-status';
   static const String networkPosBatchDelete = '/network-pos/batch-delete';
@@ -282,7 +281,6 @@ abstract final class ApiConstants {
   static const String saleInvoicesBatchRestore = '/sale-invoices/batch-restore';
   static const String saleInvoicesBatchForceDelete =
       '/sale-invoices/batch-force-delete';
-
 
   static String posWalletCreditLimit(int id) => '/pos-wallets/$id/credit-limit';
 

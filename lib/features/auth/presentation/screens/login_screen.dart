@@ -22,12 +22,11 @@ class LoginScreen extends GetView<LoginController> {
       maxWidth: AppBreakpoints.maxFormWidth,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: context.responsive(
-            mobile: AppSpacing.lg,
-            tablet: AppSpacing.xl,
-          ),
-          vertical: AppSpacing.lg,
+        padding: EdgeInsets.fromLTRB(
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.appBarHeight + AppSpacing.md,
+          context.responsive(mobile: AppSpacing.lg, tablet: AppSpacing.xl),
+          AppSpacing.md,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -190,7 +190,6 @@ class RegisterPosController extends GetxController {
         await Get.offAllNamed<void>(AppRoutes.login);
       }
     } catch (e) {
-      await CustomAnimationOverlay.hide();
       // الحارس يمنع إظهار التنبيه بعد إغلاق الشاشة أثناء الطلب.
       if (isClosed) return;
       final cleanMessage = AppException.sanitizeMessage(e);
