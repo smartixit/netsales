@@ -140,7 +140,7 @@ void main() {
     });
 
     test('keeps all Platform roles outside mobile workspaces', () {
-      for (final roleKey in [
+      for (final roleKey in <String>[
         'SUPER_ADMIN',
         'SUPPORT_AGENT',
         'ACCOUNTANT',
