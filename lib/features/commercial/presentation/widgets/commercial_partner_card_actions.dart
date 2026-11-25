@@ -20,6 +20,7 @@ class CommercialPartnerCardActions extends StatelessWidget {
     this.onToggleStatus,
     this.onDelete,
     this.onViewWallet,
+    this.onViewLifecycle,
     this.isNetworkView = true,
   });
 
@@ -28,6 +29,7 @@ class CommercialPartnerCardActions extends StatelessWidget {
   final VoidCallback? onToggleStatus;
   final VoidCallback? onDelete;
   final VoidCallback? onViewWallet;
+  final VoidCallback? onViewLifecycle;
   final bool isNetworkView;
 
   Future<void> _showMoreActions() async {
@@ -43,6 +45,13 @@ class CommercialPartnerCardActions extends StatelessWidget {
         icon: isNetworkView ? Icons.storefront_outlined : Icons.hub_outlined,
         onTap: onViewDetails,
       ),
+      if (onViewLifecycle != null)
+        CustomBottomSheetActionItem(
+          title: 'الاتفاقيات وسجل أحداث العلاقة',
+          subtitle: 'إصدارات الاتفاقيات والتغييرات التاريخية',
+          icon: Icons.history_edu_rounded,
+          onTap: onViewLifecycle!,
+        ),
       if (isNetworkView) ...[
         if (onViewWallet != null)
           CustomBottomSheetActionItem(
