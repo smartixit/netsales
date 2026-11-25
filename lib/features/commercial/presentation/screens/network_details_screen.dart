@@ -80,6 +80,15 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
             ),
           ),
           AppSpacing.vMd,
+          if (controller.canViewFinancials) CustomButton.secondary(
+            text: 'الالتزامات المالية ودفتر أستاذ الشبكة',
+            prefix: Icons.account_balance_wallet_outlined,
+            onPressed: () => Get.toNamed(
+              AppRoutes.networkWalletStatement,
+              arguments: {'network_id': network.networkId},
+            ),
+          ),
+          AppSpacing.vSm,
           if (controller.canManageMembers) CustomButton.secondary(
             text: 'إدارة فريق العمل والعضويات',
             prefix: Icons.groups_rounded,
