@@ -181,6 +181,9 @@ abstract final class AppPages {
       binding: NetworkWorkspaceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.networksView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -192,6 +195,9 @@ abstract final class AppPages {
       binding: PosWorkspaceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.posView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
@@ -238,6 +244,9 @@ abstract final class AppPages {
       binding: CommercialBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.posView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -247,6 +256,9 @@ abstract final class AppPages {
       binding: CommercialBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.networksView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
@@ -260,6 +272,9 @@ abstract final class AppPages {
       binding: PackageCatalogBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.voucherPackagesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -269,6 +284,9 @@ abstract final class AppPages {
       binding: PackageDetailsBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.voucherPackagesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -297,6 +315,9 @@ abstract final class AppPages {
       binding: PosProcurementOrdersBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.requestsView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
@@ -352,6 +373,9 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.salesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -361,6 +385,9 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.salesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -370,6 +397,9 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.salesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
@@ -379,6 +409,9 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.salesView,
+        ),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
