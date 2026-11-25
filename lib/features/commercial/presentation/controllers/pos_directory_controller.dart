@@ -49,6 +49,7 @@ class PosDirectoryController extends GetxController {
   }
 
   void clearSearch() {
+    _debounce?.cancel();
     searchController.clear();
     searchQuery.value = '';
     refreshDirectory();
@@ -58,6 +59,7 @@ class PosDirectoryController extends GetxController {
     final revision = ++_revision;
     _nextCursor = null;
     loadMoreError.value = null;
+    isLoadingMore.value = false;
     errorMessage.value = null;
     isLoading.value = true;
     _requestInFlight = true;
@@ -94,7 +96,9 @@ class PosDirectoryController extends GetxController {
       );
       if (isClosed || revision != _revision) return;
       final knownIds = points.map((item) => item.posId).toSet();
-      points.addAll(page.items.where((item) => !knownIds.contains(item.posId)));
+      for (final item in page.items) {
+        if (knownIds.add(item.posId)) points.add(item);
+      }
       _nextCursor = page.nextCursor;
     } catch (error) {
       if (!isClosed && revision == _revision) {
