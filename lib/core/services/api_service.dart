@@ -758,7 +758,11 @@ class SessionAuthInterceptor extends Interceptor {
         err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true;
     final isChallengeFailure =
         err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true;
-    if (isVerificationProbe || isChallengeFailure) {
+    final isSessionAuthAlreadyHandled =
+        err.requestOptions.extra[infinityFreeSessionAuthHandledFlagKey] == true;
+    if (isVerificationProbe ||
+        isChallengeFailure ||
+        isSessionAuthAlreadyHandled) {
       return handler.next(err);
     }
 
