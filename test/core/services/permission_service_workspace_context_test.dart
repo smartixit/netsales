@@ -20,6 +20,17 @@ void main() {
 
   tearDown(() => permissions.clear());
 
+  test('platform role names do not bypass explicit permission grants', () {
+    permissions.updateAccess(
+      roleKey: 'SUPER_ADMIN',
+      permissions: const [],
+    );
+
+    expect(permissions.can('sales.view'), isFalse);
+    expect(permissions.canAny(['sales.view', 'requests.approve']), isFalse);
+    expect(permissions.canAll(['sales.view']), isFalse);
+  });
+
   test('uses only permissions from the active Network membership', () {
     permissions.setWorkspaceContext(
       scope: RoleScope.network,
