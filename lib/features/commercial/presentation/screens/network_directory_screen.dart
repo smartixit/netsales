@@ -45,7 +45,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 text: 'إنشاء شبكة',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
-                  final saved = await Get.toNamed('AppRoutes.networkEntityCreate');
+                  final saved = await Get.toNamed(AppRoutes.networkEntityCreate);
                   if (saved == true) await controller.refreshDirectory();
                 },
               ),
