@@ -33,6 +33,60 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<PaginatedList<NetworkModel>> getNetworksPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkModel>(
+      ApiConstants.networks,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (governorateId != null) 'governorate_id': governorateId,
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.meta?['next_cursor'] as String?,
+      prevCursor: response.meta?['prev_cursor'] as String?,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<PaginatedList<PosModel>> getPosPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<PosModel>(
+      ApiConstants.pos,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (governorateId != null) 'governorate_id': governorateId,
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<PosModel>(
+      items: response.data ?? const [],
+      nextCursor: response.meta?['next_cursor'] as String?,
+      prevCursor: response.meta?['prev_cursor'] as String?,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
   Future<List<PosModel>> getMyPos() async {
     final response = await ApiService.instance.get<List<PosModel>>(
       ApiConstants.pos,
