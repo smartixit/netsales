@@ -420,6 +420,11 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> loadArchivedLinks({bool refresh = false}) async {
+    if (entityId <= 0) {
+      archiveErrorMessage.value = 'لم يتم تحديد نطاق الكيان لعرض الأرشيف.';
+      isLoadingArchive.value = false;
+      return;
+    }
     final revision = ++_archiveRevision;
     if (refresh) {
       _archiveCursor = null;
