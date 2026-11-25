@@ -24,19 +24,11 @@ enum DataSizeUnit {
 
   /// تحديد الوحدة الأنسب والأكثر تعبيراً لقيمة بايت معينة تلقائياً
   static DataSizeUnit resolveBestUnit(num bytes) {
-    if (bytes >= terabytes.byteFactor && bytes % gigabytes.byteFactor == 0) {
-      return terabytes;
-    }
-    if (bytes >= gigabytes.byteFactor) {
-      return gigabytes;
-    }
-    if (bytes >= megabytes.byteFactor) {
-      return megabytes;
-    }
-    if (bytes >= kilobytes.byteFactor) {
-      return kilobytes;
-    }
-    return megabytes;
+    if (bytes >= terabytes.byteFactor) return terabytes;
+    if (bytes >= gigabytes.byteFactor) return gigabytes;
+    if (bytes >= megabytes.byteFactor) return megabytes;
+    if (bytes >= kilobytes.byteFactor) return kilobytes;
+    return DataSizeUnit.bytes;
   }
 }
 
