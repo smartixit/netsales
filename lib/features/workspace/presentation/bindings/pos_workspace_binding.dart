@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_pos_use_case.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
@@ -29,7 +31,11 @@ class PosWorkspaceBinding extends Bindings {
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     registerLazyIfAbsent<PosDirectoryController>(
-      () => PosDirectoryController(Get.find<GetPosPageUseCase>()),
+      () => PosDirectoryController(
+        Get.find<GetPosPageUseCase>(),
+        Get.find<GetTrashedPosUseCase>(),
+        Get.find<RestorePosUseCase>(),
+      ),
       fenix: true,
     );
     WorkspaceEntityPickerBinding().dependencies();
