@@ -72,7 +72,7 @@ abstract class CommercialRemoteDataSource {
 
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
 
-  Future<NetworkModel> getNetworkDetails(int networkId);
+  Future<NetworkModel> createNetwork(Map<String, dynamic> payload);\n\n  Future<NetworkModel> updateNetwork(int networkId, Map<String, dynamic> payload);\n\n  Future<PosModel> createPos(Map<String, dynamic> payload);\n\n  Future<PosModel> updatePos(int posId, Map<String, dynamic> payload);\n\n  Future<NetworkModel> getNetworkDetails(int networkId);
 
   Future<PosModel> getPosDetails(int posId);
 }
