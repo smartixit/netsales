@@ -1188,7 +1188,7 @@ class NetworkProcurementReviewController
 
   /// فتح شاشة تعديل طلب التوريد
   Future<void> openModificationSheet(RequestEntity request) async {
-    if (!request.isPending) return;
+    if (!canModifyRequests || !request.isPending) return;
 
     unawaited(beginModification(request));
 
