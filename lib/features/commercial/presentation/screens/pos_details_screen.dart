@@ -79,7 +79,7 @@ class PosDetailsScreen extends GetView<PosDetailsController> {
             ),
           ),
           AppSpacing.vMd,
-          CustomButton.secondary(
+          if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
               final saved = await Get.toNamed('/pos/entities/${pos.posId}/edit', arguments: pos);
