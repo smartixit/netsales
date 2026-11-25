@@ -7,16 +7,28 @@ void main() {
     const fallback = Color(0xFF607D8B);
 
     test('resolves the ARGB hex format emitted by CustomColorPicker', () {
-      expect(ColorResolver.resolve('0xFF0D7A5F', fallback), const Color(0xFF0D7A5F));
+      expect(
+        ColorResolver.resolve('0xFF0D7A5F', fallback),
+        const Color(0xFF0D7A5F),
+      );
     });
 
     test('resolves six-digit and hash-prefixed hex values', () {
-      expect(ColorResolver.resolve('0D7A5F', fallback), const Color(0xFF0D7A5F));
-      expect(ColorResolver.resolve('#1976D2', fallback), const Color(0xFF1976D2));
+      expect(
+        ColorResolver.resolve('0D7A5F', fallback),
+        const Color(0xFF0D7A5F),
+      );
+      expect(
+        ColorResolver.resolve('#1976D2', fallback),
+        const Color(0xFF1976D2),
+      );
     });
 
     test('keeps alpha from eight-digit values', () {
-      expect(ColorResolver.resolve('#800D7A5F', fallback), const Color(0x800D7A5F));
+      expect(
+        ColorResolver.resolve('#800D7A5F', fallback),
+        const Color(0x800D7A5F),
+      );
     });
 
     test('uses fallback for malformed values', () {
