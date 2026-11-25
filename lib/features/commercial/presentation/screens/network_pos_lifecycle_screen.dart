@@ -280,7 +280,9 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               CustomButton.primary(
                 text: 'تخصيص خصم لباقة',
                 prefix: Icons.add_rounded,
-                onPressed: controller.isSavingDiscount.value ? null : controller.openDiscountEditor,
+                onPressed: controller.isSavingDiscount.value || controller.isLoadingPackages.value || controller.packages.isEmpty
+                    ? null
+                    : controller.openDiscountEditor,
               ),
             if (controller.packageDiscounts.isEmpty)
               const CustomEmptyState.compact(
