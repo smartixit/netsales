@@ -10,6 +10,8 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
+import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
 
 class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   const NetworkPosLifecycleScreen({super.key, required this.controllerTag});
@@ -300,11 +302,14 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               ),
             )),
             if (controller.isLoadingMoreArchive.value)
-              const Padding(
-                padding: EdgeInsets.all(12),
-                child: Center(child: CircularProgressIndicator()),
+              const CustomStateSkeletonView(
+                recipe: CustomStateSkeleton(
+                  layout: CustomStateSkeletonLayout.list,
+                  itemCount: 2,
+                  cardHeight: 76,
+                ),
               )
-            else if (controller.archivedLinks.isNotEmpty)
+            else if (controller.hasMoreArchive)
               Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: CustomButton.secondary(
