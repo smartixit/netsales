@@ -500,6 +500,72 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<PaginatedList<NetworkModel>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkModel>(
+      ApiConstants.networksTrashed,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetwork(int networkId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.networkRestore(networkId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة الشبكة.');
+    }
+  }
+
+  @override
+  Future<PaginatedList<PosModel>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<PosModel>(
+      ApiConstants.posTrashed,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<PosModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restorePos(int posId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.posRestore(posId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة نقطة البيع.');
+    }
+  }
+
+  @override
   Future<NetworkModel> getNetworkDetails(int networkId) async {
     final response = await ApiService.instance.get<NetworkModel>(
       ApiConstants.network(networkId),
