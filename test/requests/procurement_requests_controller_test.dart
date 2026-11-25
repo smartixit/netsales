@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
@@ -363,6 +365,15 @@ void main() {
     late PosProcurementOrdersController ordersController;
 
     setUp(() {
+      PermissionService.instance.updateAccess(
+        roleKey: 'POS_AGENT',
+        permissions: [
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsEdit,
+          AppPermissions.requestsCancel,
+          AppPermissions.requestsDelete,
+        ],
+      );
       mockRequestRepo = MockRequestRepository([sampleRequest1, sampleRequest2]);
       mockCommercialRepo = MockCommercialRepository(
         posList: [samplePos],
@@ -387,6 +398,21 @@ void main() {
         getPackagesUseCase: GetPackagesUseCase(mockPackageRepo),
       );
       controller.onInit();
+    });
+
+    test('POS role capabilities distinguish edit, cancel and delete', () {
+      PermissionService.instance.updateAccess(
+        roleKey: 'POS_USER',
+        permissions: [
+          AppPermissions.requestsCreate,
+          AppPermissions.requestsCancel,
+        ],
+      );
+
+      expect(ordersController.canCreateOrder, isTrue);
+      expect(ordersController.canEditOrder, isFalse);
+      expect(ordersController.canCancelOrder, isTrue);
+      expect(ordersController.canDeleteOrder, isFalse);
     });
 
     test('Initializes state and loads requests with cursor', () async {
