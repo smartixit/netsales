@@ -5,6 +5,8 @@ import 'package:netsales/features/commercial/domain/entities/network_linkable_po
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
@@ -134,6 +136,78 @@ class CommercialRepositoryImpl implements CommercialRepository {
   @override
   Future<void> deleteNetworkPosLink(int networkPosId) {
     return _remoteDataSource.deleteNetworkPosLink(networkPosId);
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosAgreementEntity>> getNetworkPosAgreements({
+    required int networkPosId, String? cursor, int perPage = 15,
+  }) async {
+    final result = await _remoteDataSource.getNetworkPosAgreements(
+      networkPosId: networkPosId, cursor: cursor, perPage: perPage,
+    );
+    return PaginatedList<NetworkPosAgreementEntity>(
+      items: result.items, nextCursor: result.nextCursor,
+      prevCursor: result.prevCursor, perPage: result.perPage,
+    );
+  }
+
+  @override
+  Future<NetworkPosAgreementEntity> createNetworkPosAgreementDraft({
+    required int networkPosId, required Map<String, dynamic> payload,
+  }) => _remoteDataSource.createNetworkPosAgreementDraft(
+    networkPosId: networkPosId, payload: payload,
+  );
+
+  @override
+  Future<NetworkPosAgreementEntity> updateNetworkPosAgreementDraft({
+    required int networkPosId, required int agreementId,
+    required Map<String, dynamic> payload,
+  }) => _remoteDataSource.updateNetworkPosAgreementDraft(
+    networkPosId: networkPosId, agreementId: agreementId, payload: payload,
+  );
+
+  @override
+  Future<NetworkPosAgreementEntity> activateNetworkPosAgreement({
+    required int networkPosId, required int agreementId,
+  }) => _remoteDataSource.activateNetworkPosAgreement(
+    networkPosId: networkPosId, agreementId: agreementId,
+  );
+
+  @override
+  Future<NetworkPosAgreementEntity> terminateNetworkPosAgreement({
+    required int networkPosId, required int agreementId,
+  }) => _remoteDataSource.terminateNetworkPosAgreement(
+    networkPosId: networkPosId, agreementId: agreementId,
+  );
+
+  @override
+  Future<PaginatedList<NetworkPosEventEntity>> getNetworkPosEvents({
+    required int networkPosId, String? cursor, int perPage = 20,
+  }) async {
+    final result = await _remoteDataSource.getNetworkPosEvents(
+      networkPosId: networkPosId, cursor: cursor, perPage: perPage,
+    );
+    return PaginatedList<NetworkPosEventEntity>(
+      items: result.items, nextCursor: result.nextCursor,
+      prevCursor: result.prevCursor, perPage: result.perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetworkPosLink(int networkPosId) =>
+      _remoteDataSource.restoreNetworkPosLink(networkPosId);
+
+  @override
+  Future<PaginatedList<NetworkPosLinkEntity>> getTrashedNetworkPosLinks({
+    required int entityId, required bool isNetwork, String? cursor, int perPage = 15,
+  }) async {
+    final result = await _remoteDataSource.getTrashedNetworkPosLinks(
+      entityId: entityId, isNetwork: isNetwork, cursor: cursor, perPage: perPage,
+    );
+    return PaginatedList<NetworkPosLinkEntity>(
+      items: result.items, nextCursor: result.nextCursor,
+      prevCursor: result.prevCursor, perPage: result.perPage,
+    );
   }
 
   @override
