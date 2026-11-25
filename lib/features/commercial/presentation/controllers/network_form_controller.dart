@@ -48,7 +48,12 @@ class NetworkFormController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    networkId = int.tryParse(Get.parameters['id'] ?? '');
+    final rawId = Get.parameters['id'];
+    networkId = rawId == null ? null : int.tryParse(rawId);
+    if (rawId != null && (networkId == null || networkId! <= 0)) {
+      errorMessage.value = 'معرّف الشبكة غير صالح.';
+      return;
+    }
     _initialize();
   }
 
@@ -83,7 +88,9 @@ class NetworkFormController extends GetxController {
   Future<void> _loadGovernorates() async {
     isLoadingGovernorates.value = true;
     try {
-      governorates.assignAll(await getGovernorates.execute());
+      final result = await getGovernorates.execute();
+      if (isClosed) return;
+      governorates.assignAll(result);
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(error);
     } finally {
