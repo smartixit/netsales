@@ -4,6 +4,8 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netsales/features/membership/domain/entities/member_user_entity.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
@@ -23,8 +25,10 @@ void main() {
   late MockMembershipRepository repository;
   late NetworkMembershipsController controller;
 
-  setUp(() {
+  setUp(() async {
     Get.reset();
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.instance.init();
     repository = MockMembershipRepository();
 
     // Setup mock members
@@ -126,6 +130,7 @@ void main() {
 
     Get.put<WorkspaceService>(WorkspaceService.instance);
     Get.put<PermissionService>(PermissionService.instance);
+    await WorkspaceService.to.saveActiveNetworkId(5);
 
     controller = NetworkMembershipsController(
       getNetworkMembersUseCase: GetNetworkMembersUseCase(repository),
