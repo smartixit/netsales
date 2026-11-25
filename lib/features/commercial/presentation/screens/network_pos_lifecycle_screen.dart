@@ -199,11 +199,17 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                Chip(label: Text(statusLabel)),
+                CustomStatusBadge(
+                  label: statusLabel,
+                  tone: agreement.validityState == 'EXPIRED' || agreement.status == 'TERMINATED'
+                      ? SemanticTone.danger
+                      : agreement.status == 'ACTIVE'
+                          ? SemanticTone.success
+                          : SemanticTone.warning,
+                  isCompact: true,
+                ),
                 if (agreement.reference?.isNotEmpty == true)
-                  Chip(label: Text('مرجع: ${agreement.reference}')),
-                if (agreement.validityState?.isNotEmpty == true)
-                  Chip(label: Text(agreement.validityState!)),
+                  Text('المرجع: ${agreement.reference}'),
               ],
             ),
             AppSpacing.vSm,
