@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
@@ -71,12 +73,13 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         activeIcon: Icons.query_stats_rounded,
         content: BillingReportsScreen(),
       ),
-      const WorkspaceNavItem(
-        label: 'فريق العمل',
-        icon: Icons.groups_outlined,
-        activeIcon: Icons.groups_rounded,
-        content: MembershipsScreen(embedded: true, isNetwork: true),
-      ),
+      if (PermissionService.to.can(AppPermissions.networkMembersView))
+        const WorkspaceNavItem(
+          label: 'فريق العمل',
+          icon: Icons.groups_outlined,
+          activeIcon: Icons.groups_rounded,
+          content: MembershipsScreen(embedded: true, isNetwork: true),
+        ),
       WorkspaceNavItem(
         label: 'التقارير التشغيلية',
         icon: Icons.analytics_outlined,
