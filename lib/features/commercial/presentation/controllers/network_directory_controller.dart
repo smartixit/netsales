@@ -49,6 +49,7 @@ class NetworkDirectoryController extends GetxController {
   }
 
   void clearSearch() {
+    _debounce?.cancel();
     searchController.clear();
     searchQuery.value = '';
     refreshDirectory();
@@ -58,6 +59,7 @@ class NetworkDirectoryController extends GetxController {
     final revision = ++_revision;
     _nextCursor = null;
     loadMoreError.value = null;
+    isLoadingMore.value = false;
     errorMessage.value = null;
     isLoading.value = true;
     _requestInFlight = true;
@@ -94,7 +96,9 @@ class NetworkDirectoryController extends GetxController {
       );
       if (isClosed || revision != _revision) return;
       final knownIds = networks.map((item) => item.networkId).toSet();
-      networks.addAll(page.items.where((item) => !knownIds.contains(item.networkId)));
+      for (final item in page.items) {
+        if (knownIds.add(item.networkId)) networks.add(item);
+      }
       _nextCursor = page.nextCursor;
     } catch (error) {
       if (!isClosed && revision == _revision) {
