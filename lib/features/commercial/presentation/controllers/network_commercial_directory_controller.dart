@@ -415,6 +415,7 @@ class NetworkCommercialDirectoryController
         'is_network': true,
         'network_id': link.networkId,
         'pos_id': link.posId,
+        'relationship': link,
       },
     );
   }
