@@ -106,7 +106,10 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
               (context, index) {
                 final pos = controller.points[index];
                 return GestureDetector(
-                  onTap: () => Get.toNamed('/pos/entities/${pos.posId}'),
+                  onTap: () async {
+                    final changed = await Get.toNamed('/pos/entities/${pos.posId}');
+                    if (changed == true) await controller.refreshDirectory();
+                  },
                   child: CustomSurfaceCard(
                   margin: EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: EdgeInsets.all(AppSpacing.md),
