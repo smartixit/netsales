@@ -45,7 +45,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 text: 'إنشاء نقطة بيع',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
-                  final saved = await Get.toNamed('AppRoutes.posEntityCreate');
+                  final saved = await Get.toNamed(AppRoutes.posEntityCreate);
                   if (saved == true) await controller.refreshDirectory();
                 },
               ),
