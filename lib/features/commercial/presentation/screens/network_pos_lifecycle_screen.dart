@@ -8,6 +8,8 @@ import 'package:netsales/features/commercial/presentation/controllers/network_po
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -375,36 +377,6 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                 subtitle: 'لا يمكن إنشاء خصم مخصص قبل توفر باقة نشطة في كتالوج الشبكة.',
                 icon: Icons.inventory_2_outlined,
               ),
-            if (controller.effectiveDiscounts.any((item) => !item.isCustom)) ...[
-              Padding(
-                padding: EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
-                child: Text(
-                  'التسعير الموروث من الشبكة',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-                ),
-              ),
-              ...controller.effectiveDiscounts.where((item) => !item.isCustom).map((item) => Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.sm),
-                child: CustomSurfaceCard(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'الباقة #${item.packageId ?? '—'}',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      AppSpacing.vXs,
-                      Text('الخصم النقدي: ${AmountFormatter.formatValue(item.discountCash)}%'),
-                      Text('الخصم الآجل: ${AmountFormatter.formatValue(item.discountCredit)}%'),
-                      Text('السعر النقدي الفعلي: ${AmountFormatter.formatValue(item.effectiveCashPrice)} ر.ي'),
-                      Text('السعر الآجل الفعلي: ${AmountFormatter.formatValue(item.effectiveCreditPrice)} ر.ي'),
-                      Text(item.isEffectiveNow ? 'التسعير ساري الآن' : 'التسعير غير ساري الآن'),
-                    ],
-                  ),
-                ),
-              )),
-            ],
             if (controller.packageDiscounts.isEmpty)
               const CustomEmptyState.compact(
                 title: 'لا توجد خصومات مخصصة',
@@ -428,23 +400,36 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        Chip(label: Text(discount.isEnabled ? 'مفعّل' : 'معطّل')),
+                        CustomStatusBadge(
+                          label: discount.isEnabled ? 'مفعّل' : 'معطّل',
+                          tone: discount.isEnabled ? SemanticTone.success : SemanticTone.neutral,
+                          isCompact: true,
+                        ),
                       ],
                     ),
                     AppSpacing.vSm,
-                    Chip(label: Text(switch (discount.validityState.wireValue) {
-                      'EFFECTIVE' => 'ساري الآن',
-                      'SCHEDULED' => 'مجدول',
-                      'EXPIRED' => 'منتهي',
-                      'DISABLED' => 'معطّل',
-                      _ => 'غير محدد',
-                    })),
+                    CustomStatusBadge(
+                      label: switch (discount.validityState.wireValue) {
+                        'EFFECTIVE' => 'ساري الآن',
+                        'SCHEDULED' => 'مجدول',
+                        'EXPIRED' => 'منتهي',
+                        'DISABLED' => 'معطّل',
+                        _ => 'غير محدد',
+                      },
+                      tone: switch (discount.validityState.wireValue) {
+                        'EFFECTIVE' => SemanticTone.success,
+                        'SCHEDULED' => SemanticTone.warning,
+                        'EXPIRED' => SemanticTone.danger,
+                        _ => SemanticTone.neutral,
+                      },
+                      isCompact: true,
+                    ),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        Chip(label: Text('نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%')),
-                        Chip(label: Text('آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%')),
+                        Text('خصم نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%'),
+                        Text('خصم آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%'),
                       ],
                     ),
                     AppSpacing.vSm,
