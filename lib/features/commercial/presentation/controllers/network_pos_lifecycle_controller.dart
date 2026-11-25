@@ -174,6 +174,25 @@ class NetworkPosLifecycleController extends GetxController {
     }
   }
 
+  Future<void> loadMoreArchivedLinks() async {
+    if (_archiveCursor == null || _archiveCursor!.isEmpty || isLoadingMoreEvents.value) return;
+    isLoadingMoreEvents.value = true;
+    try {
+      final result = await getTrashedLinksUseCase(
+        entityId: entityId,
+        isNetwork: isNetworkScope,
+        cursor: _archiveCursor,
+        perPage: 15,
+      );
+      archivedLinks.addAll(result.items);
+      _archiveCursor = result.nextCursor;
+    } catch (error) {
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+    } finally {
+      isLoadingMoreEvents.value = false;
+    }
+  }
+
   Future<void> restoreLink(NetworkPosLinkEntity link) async {
     if (!canRestoreLinks) return;
     isSaving.value = true;
