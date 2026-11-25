@@ -55,8 +55,6 @@ class PosNewProcurementOrderController extends GetxController {
     this.procurementEstimateCalculator = const ProcurementEstimateCalculator(),
   });
 
-  bool get canCreateOrder =>
-      PermissionService.to.can(AppPermissions.requestsCreate);
   bool get canEditOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
 
@@ -272,7 +270,7 @@ class PosNewProcurementOrderController extends GetxController {
   bool get canCreateOrder =>
       PermissionService.to.can(AppPermissions.requestsCreate);
   bool get canCancelOrder =>
-      PermissionService.to.can(AppPermissions.requestsEdit);
+      PermissionService.to.can(AppPermissions.requestsCancel);
 
   /// سعة الورقة الواحدة للباقة المحددة حالياً.
   int get currentSheetSize => selectedPackage.value?.packageVoucherCount ?? 0;
