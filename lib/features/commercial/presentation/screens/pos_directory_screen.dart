@@ -130,7 +130,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                             Text(pos.displayLocation, style: Theme.of(context).textTheme.bodySmall),
                             AppSpacing.vXs,
                             CustomStatusBadge(
-                              label: pos.statusLabel ?? pos.status ?? 'غير محدد',
+                              label: pos.statusLabel ?? pos.typedStatus.label,
                               tone: pos.typedStatus.tone,
                               isCompact: true,
                             ),
