@@ -369,6 +369,77 @@ void main() {
     });
 
     test(
+      'solves an HTTP 401 InfinityFree challenge on two-factor verification before session rejection',
+      () async {
+        final baseUri = Uri.parse('https://two-factor-challenge.example');
+        final verifyUri = baseUri.resolve('/api/v1/auth/2fa/verify');
+        final challenge = _challenge(verifyUri);
+        var verificationPostCount = 0;
+
+        final adapter = _ScriptedAdapter((request, body) async {
+          if (request.uri.path == verifyUri.path &&
+              request.method == 'POST') {
+            verificationPostCount++;
+            if (verificationPostCount == 1) {
+              return _html(challenge, 401);
+            }
+            return _json(
+              '{"success":true,"message":"تم التحقق","data":{"session_id":"new-session"},"errors":[]}',
+              200,
+            );
+          }
+
+          if (request.uri.path == verifyUri.path &&
+              request.method == 'GET' &&
+              request.uri.queryParameters['i'] == '1') {
+            expect(body, isNull);
+            expect(
+              _headerValue(request.headers, 'X-Device-Uuid'),
+              'device-after-otp',
+            );
+            return _text('hosting challenge accepted', 200);
+          }
+
+          return _text('unexpected request', 400);
+        });
+
+        final dio = _dio(baseUri, adapter);
+        final response = await dio.post<String>(
+          '/api/v1/auth/2fa/verify',
+          data: '{"otp":"123456"}',
+          options: Options(
+            contentType: Headers.jsonContentType,
+            responseType: ResponseType.plain,
+            headers: {'X-Device-Uuid': 'device-after-otp'},
+          ),
+        );
+
+        expect(response.statusCode, 200);
+        expect(response.data, contains('"session_id":"new-session"'));
+        expect(verificationPostCount, 2);
+        expect(adapter.requests, hasLength(3));
+        expect(adapter.requests.map((request) => request.method), [
+          'POST',
+          'GET',
+          'POST',
+        ]);
+        expect(adapter.requests[0].responseType, ResponseType.plain);
+        expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+        expect(adapter.requests[1].body, isNull);
+        expect(adapter.requests[2].body, isNotNull);
+        expect(
+          String.fromCharCodes(adapter.requests[2].body!),
+          '{"otp":"123456"}',
+        );
+        expect(
+          adapter.requests[2].header('Cookie'),
+          contains('__test='),
+        );
+        dio.close(force: true);
+      },
+    );
+
+    test(
       'does not replay or cache cookie when verification GET is challenged',
       () async {
         final baseUri = Uri.parse('https://probe-fails.example');
@@ -496,10 +567,10 @@ location.href="$redirect";
 ''';
 }
 
-ResponseBody _html(String body) {
+ResponseBody _html(String body, [int statusCode = 200]) {
   return ResponseBody.fromString(
     body,
-    200,
+    statusCode,
     headers: {
       Headers.contentTypeHeader: ['text/html; charset=utf-8'],
     },
