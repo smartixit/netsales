@@ -470,6 +470,12 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     'AGREEMENT_ACTIVATED' => 'اعتماد اتفاقية',
     'AGREEMENT_TERMINATED' => 'إنهاء اتفاقية',
     'AGREEMENT_EXPIRED' => 'انتهاء صلاحية الاتفاقية',
+    'DISCOUNT_CREATED' => 'إنشاء خصم مخصص لباقة',
+    'DISCOUNT_UPDATED' => 'تعديل خصم مخصص',
+    'DISCOUNT_ACTIVATED' => 'تفعيل خصم مخصص',
+    'DISCOUNT_DEACTIVATED' => 'تعطيل خصم مخصص',
+    'DISCOUNT_ARCHIVED' => 'أرشفة خصم مخصص',
+    'DISCOUNT_RESTORED' => 'استعادة خصم مخصص',
     _ => type,
   };
 }
