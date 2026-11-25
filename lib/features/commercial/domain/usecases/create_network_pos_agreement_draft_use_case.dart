@@ -6,7 +6,7 @@ class CreateNetworkPosAgreementDraftUseCase {
 
   final CommercialRepository _repository;
 
-  NetworkPosAgreementEntity call({required int networkPosId, required Map<String, dynamic> payload}) {
+  Future<NetworkPosAgreementEntity> call({required int networkPosId, required Map<String, dynamic> payload}) {
     return _repository.createNetworkPosAgreementDraft({required int networkPosId, required Map<String, dynamic> payload});
   }
 }
