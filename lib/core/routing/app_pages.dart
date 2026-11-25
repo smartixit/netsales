@@ -44,6 +44,8 @@ import 'package:netsales/features/commercial/presentation/bindings/network_direc
 import 'package:netsales/features/commercial/presentation/bindings/network_details_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_relationships_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_relationships_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_pos_lifecycle_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_pos_lifecycle_screen.dart';
 import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/network_entity_membership_binding.dart';
 import 'package:netsales/features/membership/presentation/bindings/pos_entity_membership_binding.dart';
@@ -397,6 +399,18 @@ abstract final class AppPages {
         PermissionGuardMiddleware(requiredPermission: AppPermissions.posMembersView),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkPosLifecycle,
+      page: () => NetworkPosLifecycleScreen(
+        controllerTag: 'network-pos-lifecycle-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkPosLifecycleBinding().dependencies();
+      }),
+      middlewares: [AuthGuard()],
     ),
 
     GetPage(
