@@ -853,6 +853,7 @@ class NetworkCommercialDirectoryController
   }
 
   Future<void> openCreateQrInvitation() async {
+    if (!canCreateInvitation) return;
     if (_isInvitationTargetDialogOpen || isLoadingInvitationTargets.value) {
       return;
     }
