@@ -257,7 +257,6 @@ class NetworkPosLifecycleController extends GetxController {
 
   Future<void> loadMorePackageDiscounts() async {
     if (!hasMorePackageDiscounts || isLoadingMoreDiscounts.value) return;
-    final revision = _discountsRevision;
     isLoadingMoreDiscounts.value = true;
     final revision = _discountsRevision;
     final cursor = _discountsCursor;
@@ -273,7 +272,9 @@ class NetworkPosLifecycleController extends GetxController {
         _discountsCursor = result.nextCursor;
       }
     } catch (error) {
-      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      if (revision == _discountsRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
     } finally {
       isLoadingMoreDiscounts.value = false;
     }
