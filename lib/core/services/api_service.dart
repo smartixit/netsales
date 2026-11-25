@@ -87,12 +87,12 @@ class ApiService {
       // 0. Centralized connectivity guard (fail-fast, no retries when offline)
       _ConnectivityInterceptor(),
       _RetryInterceptor(_dio),
+      // Dio 5.11.1 executes request, response, and error interceptors FIFO.
+      // Hosting challenges must be recognized before session invalidation and
+      // before the crypto interceptor disposes the request's ephemeral key.
+      InfinityFreeChallengeInterceptor(_dio),
       _SessionAuthInterceptor(),
       _CryptoInterceptor(_dio),
-      // Keep the hosting challenge handler last: Dio dispatches onError in
-      // reverse order, so InfinityFree must resolve gateway 401/403 HTML
-      // before SessionAuthInterceptor can invalidate the authenticated session.
-      InfinityFreeChallengeInterceptor(_dio),
     ]);
   }
 
@@ -758,7 +758,9 @@ class _SessionAuthInterceptor extends Interceptor {
         err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true;
     final isChallengeFailure =
         err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true;
-    if (isVerificationProbe || isChallengeFailure) {
+    final isChallengeReplay =
+        err.requestOptions.extra[infinityFreeChallengeReplayFlagKey] == true;
+    if (isVerificationProbe || isChallengeFailure || isChallengeReplay) {
       return handler.next(err);
     }
 
