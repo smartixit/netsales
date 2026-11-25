@@ -96,6 +96,11 @@ class WorkspaceService extends GetxService {
         'Cannot resolve a workspace without an authenticated user.',
       );
     }
+    if (user.isPlatformUser) {
+      throw StateError(
+        'Platform identities cannot enter operational mobile workspaces.',
+      );
+    }
 
     final hasNetworkRole = _hasNetworkScope(user);
     final hasPosRole = _hasPosScope(user);
@@ -133,7 +138,7 @@ class WorkspaceService extends GetxService {
 
   bool canSwitchWorkspace(UserModel? user) =>
       user != null &&
-      !user.isSuperAdmin &&
+      !user.isPlatformUser &&
       _hasNetworkScope(user) &&
       _hasPosScope(user);
 
