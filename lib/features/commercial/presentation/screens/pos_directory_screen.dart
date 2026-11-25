@@ -41,16 +41,25 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.storefront_rounded,
               ),
-              if (controller.canCreate) CustomButton.primary(
-                text: 'إنشاء نقطة بيع',
-                prefix: Icons.add_rounded,
-                onPressed: () async {
-                  final saved = await Get.toNamed(AppRoutes.posEntityCreate);
-                  if (saved == true) await controller.refreshDirectory();
-                },
-              ),
+              Obx(() => controller.canCreate && !controller.showArchived.value
+                  ? CustomButton.primary(
+                      text: 'إنشاء نقطة بيع',
+                      prefix: Icons.add_rounded,
+                      onPressed: () async {
+                        final saved = await Get.toNamed(AppRoutes.posEntityCreate);
+                        if (saved == true) await controller.refreshDirectory();
+                      },
+                    )
+                  : const SizedBox.shrink()),
+              Obx(() => CustomButton.secondary(
+                text: controller.showArchived.value ? 'العودة إلى نقاط البيع النشطة' : 'عرض أرشيف نقاط البيع',
+                prefix: controller.showArchived.value ? Icons.arrow_forward_rounded : Icons.archive_outlined,
+                onPressed: controller.toggleArchiveView,
+              )),
               AppSpacing.vSm,
-              Obx(() => CustomSearchFilterBar<String?>(
+              Obx(() => controller.showArchived.value
+                  ? const SizedBox.shrink()
+                  : CustomSearchFilterBar<String?>(
                 searchController: controller.searchController,
                 searchQuery: controller.searchQuery.value,
                 searchHint: 'ابحث باسم نقطة البيع أو بياناتها...',
@@ -94,11 +103,13 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
             );
           }
           if (controller.points.isEmpty) {
-            return const SliverToBoxAdapter(
+            return SliverToBoxAdapter(
               child: CustomEmptyState(
-                icon: Icons.storefront_outlined,
-                title: 'لا توجد نقاط بيع',
-                subtitle: 'لا توجد كيانات تطابق معايير البحث الحالية.',
+                icon: controller.showArchived.value ? Icons.archive_outlined : Icons.storefront_outlined,
+                title: controller.showArchived.value ? 'أرشيف نقاط البيع فارغ' : 'لا توجد نقاط بيع',
+                subtitle: controller.showArchived.value
+                    ? 'لا توجد نقاط بيع مؤرشفة يمكن استعادتها.'
+                    : 'لا توجد كيانات تطابق معايير البحث الحالية.',
               ),
             );
           }
@@ -106,6 +117,46 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final pos = controller.points[index];
+                if (controller.showArchived.value) {
+                  return CustomSurfaceCard(
+                    margin: EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    child: Row(
+                      children: [
+                        CustomCachedImage.logo(
+                          url: pos.posProfileLogoUrl,
+                          size: 52,
+                          fallbackText: pos.displayName,
+                        ),
+                        AppSpacing.hMd,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(pos.displayName, style: Theme.of(context).textTheme.titleMedium),
+                              AppSpacing.vXxs,
+                              Text(pos.displayLocation, style: Theme.of(context).textTheme.bodySmall),
+                              AppSpacing.vXs,
+                              CustomStatusBadge(
+                                label: pos.statusLabel ?? pos.typedStatus.label,
+                                tone: pos.typedStatus.tone,
+                                isCompact: true,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (controller.canRestore)
+                          CustomButton.secondary(
+                            text: 'استعادة',
+                            prefix: Icons.restore_rounded,
+                            onPressed: controller.isRestoring.value
+                                ? null
+                                : () => controller.restorePos(pos),
+                          ),
+                      ],
+                    ),
+                  );
+                }
                 return GestureDetector(
                   onTap: () async {
                     final changed = await Get.toNamed(AppRoutes.posEntityDetails.replaceFirst(':id', pos.posId.toString()));
