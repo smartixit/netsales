@@ -41,6 +41,8 @@ class ServerTaskRunnerService extends GetxService {
 
   // ─── الحالة الداخلية للخدمة ───
   bool _isExecutionLocked = false;
+  int _executionSequence = 0;
+  int _activeExecutionId = 0;
   Timer? _heartbeatTimer;
 
   /// هل النبض الدوري للواجهة الأمامية نشط حالياً
@@ -111,6 +113,9 @@ class ServerTaskRunnerService extends GetxService {
     }
 
     _isExecutionLocked = true;
+    final executionId = ++_executionSequence;
+    _activeExecutionId = executionId;
+    final sessionGeneration = ApiService.sessionGeneration;
 
     try {
       // 2. التحقق من وجود جلسة صالحة ومصادقة نشطة
@@ -174,8 +179,23 @@ class ServerTaskRunnerService extends GetxService {
             json is Map<String, dynamic> ? json : <String, dynamic>{},
       );
 
+      if (sessionGeneration != ApiService.sessionGeneration ||
+          !session.isAuthenticated ||
+          !session.isSessionVerified ||
+          session.currentSessionId != sessionId) {
+        log('⏭️ [ServerTaskRunnerService] تجاهل نتيجة نبضة تعود إلى جلسة سابقة.');
+        return ServerTaskResult.skippedNoSession;
+      }
+
       if (response.success) {
         await storage.setInt(StorageKeys.lastServerCatchupRun, nowMs);
+        if (sessionGeneration != ApiService.sessionGeneration ||
+            session.currentSessionId != sessionId) {
+          if (storage.getInt(StorageKeys.lastServerCatchupRun) == nowMs) {
+            await storage.remove(StorageKeys.lastServerCatchupRun);
+          }
+          return ServerTaskResult.skippedNoSession;
+        }
         await _recordSuccess();
 
         log(
@@ -204,11 +224,18 @@ class ServerTaskRunnerService extends GetxService {
         return ServerTaskResult.failed;
       }
     } catch (e) {
+      if (executionId != _activeExecutionId ||
+          sessionGeneration != ApiService.sessionGeneration) {
+        log('⏭️ [ServerTaskRunnerService] تجاهل فشل طلب تابع لجلسة سابقة.');
+        return ServerTaskResult.skippedNoSession;
+      }
       log('❌ [ServerTaskRunnerService] خطأ أثناء تشغيل مهام السيرفر: $e');
       await _recordFailure();
       return ServerTaskResult.failed;
     } finally {
-      _isExecutionLocked = false;
+      if (executionId == _activeExecutionId) {
+        _isExecutionLocked = false;
+      }
     }
   }
 
@@ -258,6 +285,8 @@ class ServerTaskRunnerService extends GetxService {
   /// تصفير الحالات والمؤقتات وسجلات التخزين (عند تسجيل الخروج)
   Future<void> reset() async {
     stopForegroundHeartbeat();
+    _executionSequence++;
+    _activeExecutionId = _executionSequence;
     _isExecutionLocked = false;
     final storage = StorageService.instance;
     await storage.remove(StorageKeys.lastServerCatchupRun);

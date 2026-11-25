@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
@@ -59,6 +60,8 @@ class ApiService {
 
   /// دالة رد نداء تُستدعى تلقائياً عند انتهاء صلاحية الجلسة (401 Unauthorized)
   static Future<void> Function()? onUnauthorized;
+
+  static int sessionGeneration = 0;
 
   /// تهيئة عميل الاتصال وضبط تجاوز الشهادات في بيئة التطوير
   void _configureHttpClient() {
@@ -711,6 +714,8 @@ class SessionAuthInterceptor extends Interceptor {
       return handler.next(options);
     }
 
+    options.extra['session_generation'] = ApiService.sessionGeneration;
+
     final storage = StorageService.instance;
 
     // حقن معرف الجلسة
@@ -768,19 +773,39 @@ class SessionAuthInterceptor extends Interceptor {
 
     final statusCode = err.response?.statusCode;
 
-    // التعامل مع انتهاء صلاحية الجلسة
+    // dart format off
     if (statusCode == 401) {
       final path = err.requestOptions.path;
       final isPublicAuth =
           path.contains('/auth/login') ||
           path.contains('/auth/register') ||
           path.contains('/auth/password');
-
       final isSessionValidation = path.endsWith('/auth/me');
-      if (!isPublicAuth && !isSessionValidation) {
+      Object? responseData = err.response?.data;
+      if (responseData is String) {
+        try {
+          responseData = jsonDecode(responseData);
+        } on FormatException {
+          responseData = null;
+        }
+      }
+      final errorCode = responseData is Map
+          ? responseData['code']?.toString()
+          : err.response?.headers.value('X-Error-Code');
+      final requestGeneration =
+          err.requestOptions.extra['session_generation'];
+      final isCurrentSessionGeneration =
+          requestGeneration is int &&
+          requestGeneration == ApiService.sessionGeneration;
+
+      if (!isPublicAuth &&
+          !isSessionValidation &&
+          errorCode == 'SESSION_INVALID' &&
+          isCurrentSessionGeneration) {
         await ApiService.onUnauthorized?.call();
       }
     }
+    // dart format on
 
     return handler.next(err);
   }

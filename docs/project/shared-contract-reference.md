@@ -128,3 +128,12 @@ The canonical API contract is `netsales_api/docs/project/API_CONTRACTS.md`, sect
 
 
 POS invoices and procurement flows support both CASH and CREDIT. CREDIT may include an initial partial payment where the API endpoint permits it. The backend is authoritative for paid_amount, remaining_amount, payment_status, credit-limit enforcement, wallet settlement, and accounting; Flutter only collects the initial amount and displays returned fields. POS Repayment collection, reversal, invoice allocations/FIFO, and repayment-specific reports/documents are removed. Receivables aging and invoice payment state remain distinct from repayment collection. Wallet transfers and ordinary wallet ledger statements remain supported.
+
+
+## Session authentication and scheduled-task activity tick
+
+- Laravel returns stable top-level `code` values and an `X-Error-Code` header for session middleware failures: `SESSION_CREDENTIAL_MISSING`, `SESSION_DEVICE_ID_MISSING`, and `SESSION_INVALID`.
+- Only `SESSION_INVALID` is terminal for the matching local session generation. Missing credential/device headers are client request-configuration failures and must not automatically terminate an otherwise active local session. HTTP 403 account, tenant, and device-policy denials are not session-expiration responses.
+- Flutter tags each authenticated request with a local-only monotonically increasing session generation. The value is not transmitted to Laravel. A terminal response from an older generation must not terminate a newer login.
+- `POST /api/v1/scheduled-tasks/catchup` remains the mobile activity-tick URL. Network/POS system roles receive only `scheduled_tasks.run_activity_tick`; Laravel executes the bounded activity tick and rejects `force=true` or a supplied `task`. Platform administrative execution remains gated by `scheduled_tasks.run_catchup`.
+- The application must continue sending `force=false` or omit it, and must not send an administrative `task` selector from its foreground heartbeat.
