@@ -284,6 +284,36 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                     ? null
                     : controller.openDiscountEditor,
               ),
+            if (controller.effectiveDiscounts.any((item) => !item.isCustom)) ...[
+              Padding(
+                padding: EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
+                child: Text(
+                  'التسعير الموروث من الشبكة',
+                  style: Theme.of(Get.context!).textTheme.titleMedium,
+                ),
+              ),
+              ...controller.effectiveDiscounts.where((item) => !item.isCustom).map((item) => Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                child: CustomSurfaceCard(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'الباقة #${item.packageId ?? '—'}',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      AppSpacing.vXs,
+                      Text('الخصم النقدي: ${AmountFormatter.formatValue(item.discountCash)}%'),
+                      Text('الخصم الآجل: ${AmountFormatter.formatValue(item.discountCredit)}%'),
+                      Text('السعر النقدي الفعلي: ${AmountFormatter.formatValue(item.effectiveCashPrice)} ر.ي'),
+                      Text('السعر الآجل الفعلي: ${AmountFormatter.formatValue(item.effectiveCreditPrice)} ر.ي'),
+                      Text(item.isEffectiveNow ? 'التسعير ساري الآن' : 'التسعير غير ساري الآن'),
+                    ],
+                  ),
+                ),
+              )),
+            ],
             if (controller.packageDiscounts.isEmpty)
               const CustomEmptyState.compact(
                 title: 'لا توجد خصومات مخصصة',
