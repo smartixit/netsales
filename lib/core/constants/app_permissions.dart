@@ -47,6 +47,12 @@ abstract final class AppPermissions {
   static const String networksView = 'networks.view';
   static const String networksCreate = 'networks.create';
   static const String networksEdit = 'networks.edit';
+  static const String networkCreatePosLink = 'networks.create_pos_link';
+  static const String networkUpdatePosLink = 'networks.update_pos_link';
+  static const String networkDeletePosLink = 'networks.delete_pos_link';
+  static const String networkTogglePosLink = 'networks.toggle_pos_link';
+  static const String networkCreateLinkChallenge = 'networks.create_link_challenge';
+  static const String networkRevokeLinkChallenge = 'networks.revoke_link_challenge';
   static const String networksDelete = 'networks.delete';
   static const String networksApprove = 'networks.approve';
   static const String networksReject = 'networks.reject';
