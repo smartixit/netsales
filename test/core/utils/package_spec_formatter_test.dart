@@ -2,6 +2,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/utils/package_spec_formatter.dart';
 
 void main() {
+  group('DataSizeUnit.resolveBestUnit', () {
+    test('selects bytes for balances below one kilobyte', () {
+      expect(DataSizeUnit.resolveBestUnit(512), DataSizeUnit.bytes);
+      expect(DataSizeUnit.resolveBestUnit(0), DataSizeUnit.bytes);
+    });
+
+    test('selects the largest useful unit even for fractional terabytes', () {
+      expect(
+        DataSizeUnit.resolveBestUnit(
+          DataSizeUnit.terabytes.byteFactor + 512 * DataSizeUnit.megabytes.byteFactor,
+        ),
+        DataSizeUnit.terabytes,
+      );
+      expect(
+        DataSizeUnit.resolveBestUnit(DataSizeUnit.kilobytes.byteFactor),
+        DataSizeUnit.kilobytes,
+      );
+    });
+  });
+
   group('PackageSpecFormatter.formatDataParts', () {
     test('returns formatted value and unit separately for gigabytes', () {
       final parts = PackageSpecFormatter.formatDataParts(
