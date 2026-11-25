@@ -284,14 +284,14 @@ void main() {
             return _html(_challenge(meUri));
           }
           return _json(
-            '{"success":false,"message":"الجلسة غير صالحة","data":{},"errors":[]}',
+            '{"success":false,"code":"SESSION_INVALID","message":"الجلسة غير صالحة","data":{},"errors":[]}',
             401,
           );
         }
         if (request.uri.path == meUri.path &&
             request.uri.queryParameters['i'] == '1') {
           return _json(
-            '{"success":false,"message":"الجلسة غير صالحة","data":{},"errors":[]}',
+            '{"success":false,"code":"SESSION_INVALID","message":"الجلسة غير صالحة","data":{},"errors":[]}',
             401,
           );
         }
@@ -467,7 +467,7 @@ void main() {
             return _html(challenge, 401);
           }
           return _json(
-            '{"success":false,"message":"انتهت صلاحية الجلسة","data":null,"errors":[]}',
+            '{"success":false,"code":"SESSION_INVALID","message":"انتهت صلاحية الجلسة","data":null,"errors":[]}',
             401,
           );
         }
