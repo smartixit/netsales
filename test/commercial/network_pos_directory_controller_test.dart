@@ -268,6 +268,26 @@ class _FakeCommercialRepository implements CommercialRepository {
   }
 
   @override
+  Future<PaginatedList<NetworkEntity>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<NetworkEntity>(items: const []);
+
+  @override
+  Future<void> restoreNetwork(int networkId) async {}
+
+  @override
+  Future<PaginatedList<PosEntity>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<PosEntity>(items: const []);
+
+  @override
+  Future<void> restorePos(int posId) async {}
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) async {
     throw UnimplementedError();
   }
