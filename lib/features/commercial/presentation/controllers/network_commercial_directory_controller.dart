@@ -232,9 +232,12 @@ class NetworkCommercialDirectoryController
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      selectedNetworkId.value = initialNetworkId ?? WorkspaceService.to.resolveActiveNetworkId(
-        networks.map((n) => n.networkId).toList(growable: false),
-      );
+      final authorizedIds = networks.map((network) => network.networkId).toSet();
+      selectedNetworkId.value = initialNetworkId != null
+          ? (authorizedIds.contains(initialNetworkId) ? initialNetworkId : null)
+          : WorkspaceService.to.resolveActiveNetworkId(
+              networks.map((network) => network.networkId).toList(growable: false),
+            );
     } catch (error) {
       authorizedNetworks.clear();
       selectedNetworkId.value = null;
