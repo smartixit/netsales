@@ -3,7 +3,7 @@ import 'package:netsales/features/catalog/domain/entities/package_pos_discount_e
 
 class PackagePosDiscountModel extends PackagePosDiscountEntity {
   const PackagePosDiscountModel({
-    required super.discountId, required super.posId,
+    required super.discountId, required super.posId, super.packageId,
     required super.discountCash, required super.discountCredit,
     required super.isEnabled, required super.validityState,
     super.posName, super.startDate, super.endDate, super.displayEndDate,
@@ -27,6 +27,7 @@ class PackagePosDiscountModel extends PackagePosDiscountEntity {
     final status=json['status'];
     return PackagePosDiscountModel(
       discountId: requiredInt('discount_id'), posId: requiredInt('pos_id'),
+      packageId: (json['package_id'] as num?)?.toInt(),
       discountCash: number(json['discount_cash']),
       discountCredit: number(json['discount_credit']),
       isEnabled: status == true || status == 1 || status == '1',
