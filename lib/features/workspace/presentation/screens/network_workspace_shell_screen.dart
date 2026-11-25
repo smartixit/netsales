@@ -6,6 +6,7 @@ import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
 import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_directory_screen.dart';
 import 'package:netsales/features/expenses/presentation/screens/expenses_screen.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
@@ -36,6 +37,12 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         icon: Icons.receipt_long_outlined,
         activeIcon: Icons.receipt_long_rounded,
         content: ProcurementOrdersScreen(embedded: true, isNetwork: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'شبكاتي',
+        icon: Icons.hub_outlined,
+        activeIcon: Icons.hub_rounded,
+        content: NetworkDirectoryScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'نقاط البيع',
