@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_pos_page_use_case.dart';
@@ -25,6 +27,8 @@ class PosDirectoryController extends GetxController {
   int _revision = 0;
   bool _requestInFlight = false;
   bool _suppressSearchListener = false;
+
+  bool get canCreate => PermissionService.to.can(AppPermissions.posCreate);
 
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
 
