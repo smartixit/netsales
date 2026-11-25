@@ -327,126 +327,154 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   }
 
   Widget _catalogTab() {
-    return Obx(() {
-      if (controller.isLoadingDiscounts.value && controller.packageDiscounts.isEmpty) {
-        return const CustomStateView.loading();
-      }
-      if (controller.discountsErrorMessage.value != null && controller.packageDiscounts.isEmpty) {
-        return CustomErrorState(
-          title: 'تعذر تحميل خصومات العلاقة',
-          subtitle: controller.discountsErrorMessage.value,
-          onRetry: () => controller.loadPackageDiscounts(refresh: true),
-        );
-      }
-      return RefreshIndicator(
-        onRefresh: () => controller.loadPackageDiscounts(refresh: true),
-        child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
-            if (controller.packagesErrorMessage.value != null && controller.canCreateDiscount)
-              CustomErrorState(
-                title: 'تعذر تحميل الباقات',
-                subtitle: controller.packagesErrorMessage.value,
-                onRetry: controller.loadPackages,
+    return ListView(
+      padding: EdgeInsets.all(AppSpacing.md),
+      children: [
+        if (controller.canViewPackageCatalog) ...[
+          Text(
+            'كتالوج الشبكة المتاح',
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          AppSpacing.vSm,
+          if (controller.isLoadingPackages.value && controller.packages.isEmpty)
+            const CustomStateSkeletonView(
+              recipe: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 3,
+                cardHeight: 108,
               ),
-            if (controller.isLoadingPackages.value && controller.canCreateDiscount)
-              const CustomStateSkeletonView(
-                recipe: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.list,
-                  itemCount: 1,
-                  cardHeight: 64,
-                ),
-              ),
-            if (controller.canCreateDiscount)
-              CustomButton.primary(
-                text: 'تخصيص خصم لباقة',
-                prefix: Icons.add_rounded,
-                onPressed: controller.isSavingDiscount.value || controller.isLoadingPackages.value || controller.packages.isEmpty
-                    ? null
-                    : controller.openDiscountEditor,
-              ),
-            if (controller.isLoadingPackages.value)
-              const CustomStateSkeletonView(
-                recipe: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.list,
-                  itemCount: 1,
-                  cardHeight: 64,
-                ),
-              )
-            else if (controller.packagesErrorMessage.value != null)
-              CustomErrorState(
-                title: 'تعذر تحميل باقات الشبكة',
-                subtitle: controller.packagesErrorMessage.value,
-                onRetry: controller.loadPackages,
-              )
-            else if (controller.packages.isEmpty)
-              const CustomEmptyState.compact(
-                title: 'لا توجد باقات نشطة',
-                subtitle: 'لا يمكن إنشاء خصم مخصص قبل توفر باقة نشطة في كتالوج الشبكة.',
-                icon: Icons.inventory_2_outlined,
-              ),
-            if (controller.packageDiscounts.isEmpty)
-              const CustomEmptyState.compact(
-                title: 'لا توجد خصومات مخصصة',
-                subtitle: 'يمكن إنشاء خصم خاص لهذه العلاقة دون تغيير أسعار الباقة العامة أو خصومات العلاقات الأخرى.',
-                icon: Icons.local_offer_outlined,
-              ),
-            ...controller.packageDiscounts.map((discount) => Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: CustomSurfaceCard(
-                padding: EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.inventory_2_outlined),
-                        AppSpacing.hSm,
-                        Expanded(
-                          child: Text(
-                            controller.packageNameFor(discount.packageId),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        CustomStatusBadge(
-                          label: discount.isEnabled ? 'مفعّل' : 'معطّل',
-                          tone: discount.isEnabled ? SemanticTone.success : SemanticTone.neutral,
-                          isCompact: true,
-                        ),
-                      ],
-                    ),
-                    AppSpacing.vSm,
-                    CustomStatusBadge(
-                      label: switch (discount.validityState.wireValue) {
-                        'EFFECTIVE' => 'ساري الآن',
-                        'SCHEDULED' => 'مجدول',
-                        'EXPIRED' => 'منتهي',
-                        'DISABLED' => 'معطّل',
-                        _ => 'غير محدد',
-                      },
-                      tone: switch (discount.validityState.wireValue) {
-                        'EFFECTIVE' => SemanticTone.success,
-                        'SCHEDULED' => SemanticTone.warning,
-                        'EXPIRED' => SemanticTone.danger,
-                        _ => SemanticTone.neutral,
-                      },
-                      isCompact: true,
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        Text('خصم نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%'),
-                        Text('خصم آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%'),
-                      ],
-                    ),
-                    AppSpacing.vSm,
-                    Text('السعر النقدي المعتمد: ${discount.cashPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.cashPrice!)} ر.ي'}'),
-                    Text('السعر الآجل المعتمد: ${discount.creditPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.creditPrice!)} ر.ي'}'),
-                    if (discount.startDate != null || discount.endDate != null) ...[
-                      AppSpacing.vXs,
-                      Text('السريان: ${discount.startDate?.toString() ?? 'فوري'} — ${discount.displayEndDate ?? 'مفتوح'}'),
+            ),
+          if (controller.packagesErrorMessage.value != null && controller.packages.isEmpty)
+            CustomErrorState(
+              title: 'تعذر تحميل كتالوج الشبكة',
+              subtitle: controller.packagesErrorMessage.value,
+              onRetry: controller.loadPackages,
+            ),
+          if (!controller.isLoadingPackages.value && controller.packages.isEmpty && controller.packagesErrorMessage.value == null)
+            const CustomEmptyState.compact(
+              title: 'لا توجد باقات متاحة',
+              subtitle: 'لا توجد باقات نشطة في كتالوج الشبكة حالياً.',
+              icon: Icons.inventory_2_outlined,
+            ),
+          ...controller.packages.map((package) => Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.sm),
+            child: CustomSurfaceCard(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(package.packageName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      CustomStatusBadge(
+                        label: package.isActive ? 'متاحة' : 'غير متاحة',
+                        tone: package.isActive ? SemanticTone.success : SemanticTone.neutral,
+                        isCompact: true,
+                      ),
                     ],
+                  ),
+                  AppSpacing.vXs,
+                  Text('الباقة #${package.packageId} • عدد الكروت: ${package.packageVoucherCount}'),
+                  Text('السعر الأساسي للكرت: ${AmountFormatter.formatValue(package.packageVoucherPrice)} ر.ي'),
+                  AppSpacing.vSm,
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    children: [
+                      Text('خصم الشبكة نقداً: ${AmountFormatter.formatValue(package.packageDefaultCashDiscount)}%'),
+                      Text('خصم الشبكة آجلاً: ${AmountFormatter.formatValue(package.packageDefaultCreditDiscount)}%'),
+                    ],
+                  ),
+                  AppSpacing.vXs,
+                  Text('السعر المرجعي نقداً: ${AmountFormatter.formatValue(package.effectiveCashPrice)} ر.ي'),
+                  Text('السعر المرجعي آجلاً: ${AmountFormatter.formatValue(package.effectiveCreditPrice)} ر.ي'),
+                ],
+              ),
+            ),
+          )),
+        ],
+        if (controller.canViewDiscounts) ...[
+          AppSpacing.vLg,
+          Text(
+            'الخصومات المخصصة لهذه العلاقة',
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          AppSpacing.vSm,
+          if (controller.discountsErrorMessage.value != null && controller.packageDiscounts.isEmpty)
+            CustomErrorState(
+              title: 'تعذر تحميل خصومات العلاقة',
+              subtitle: controller.discountsErrorMessage.value,
+              onRetry: () => controller.loadPackageDiscounts(refresh: true),
+            ),
+          if (controller.canCreateDiscount)
+            CustomButton.primary(
+              text: 'تخصيص خصم لباقة',
+              prefix: Icons.add_rounded,
+              onPressed: controller.isSavingDiscount.value ||
+                      controller.isLoadingPackages.value ||
+                      controller.packages.isEmpty
+                  ? null
+                  : controller.openDiscountEditor,
+            ),
+          if (controller.packageDiscounts.isEmpty && controller.discountsErrorMessage.value == null)
+            const CustomEmptyState.compact(
+              title: 'لا توجد خصومات مخصصة',
+              subtitle: 'يمكن إنشاء خصم خاص لهذه العلاقة دون تغيير أسعار الباقة العامة أو خصومات العلاقات الأخرى.',
+              icon: Icons.local_offer_outlined,
+            ),
+          ...controller.packageDiscounts.map((discount) => Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.md),
+            child: CustomSurfaceCard(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.local_offer_outlined),
+                      AppSpacing.hSm,
+                      Expanded(
+                        child: Text(
+                          controller.packageNameFor(discount.packageId),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      CustomStatusBadge(
+                        label: discount.isEnabled ? 'مفعّل' : 'معطّل',
+                        tone: discount.isEnabled ? SemanticTone.success : SemanticTone.neutral,
+                        isCompact: true,
+                      ),
+                    ],
+                  ),
+                  AppSpacing.vSm,
+                  CustomStatusBadge(
+                    label: switch (discount.validityState.wireValue) {
+                      'EFFECTIVE' => 'ساري الآن',
+                      'SCHEDULED' => 'مجدول',
+                      'EXPIRED' => 'منتهي',
+                      'DISABLED' => 'معطّل',
+                      _ => 'غير محدد',
+                    },
+                    tone: switch (discount.validityState.wireValue) {
+                      'EFFECTIVE' => SemanticTone.success,
+                      'SCHEDULED' => SemanticTone.warning,
+                      'EXPIRED' => SemanticTone.danger,
+                      _ => SemanticTone.neutral,
+                    },
+                    isCompact: true,
+                  ),
+                  AppSpacing.vSm,
+                  Text('خصم نقدي: ${AmountFormatter.formatValue(discount.discountCash)}%'),
+                  Text('خصم آجل: ${AmountFormatter.formatValue(discount.discountCredit)}%'),
+                  Text('السعر النقدي المعتمد: ${discount.cashPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.cashPrice!)} ر.ي'}'),
+                  Text('السعر الآجل المعتمد: ${discount.creditPrice == null ? 'غير متاح' : '${AmountFormatter.formatValue(discount.creditPrice!)} ر.ي'}'),
+                  if (discount.startDate != null || discount.endDate != null) ...[
+                    AppSpacing.vXs,
+                    Text('السريان: ${discount.startDate?.toString() ?? 'فوري'} — ${discount.displayEndDate ?? 'مفتوح'}'),
+                  ],
+                  if (controller.canEditDiscount || controller.canToggleDiscount || controller.canDeleteDiscount) ...[
                     AppSpacing.vMd,
                     Wrap(
                       spacing: 8,
@@ -479,29 +507,29 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                       ],
                     ),
                   ],
-                ),
+                ],
               ),
-            )),
-            if (controller.isLoadingMoreDiscounts.value)
-              const CustomStateSkeletonView(
-                recipe: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.list,
-                  itemCount: 2,
-                  cardHeight: 76,
-                ),
-              )
-            else if (controller.hasMorePackageDiscounts)
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: CustomButton.secondary(
-                  text: 'تحميل المزيد',
-                  onPressed: controller.loadMorePackageDiscounts,
-                ),
+            ),
+          )),
+          if (controller.isLoadingMoreDiscounts.value)
+            const CustomStateSkeletonView(
+              recipe: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 2,
+                cardHeight: 76,
               ),
-          ],
-        ),
-      );
-    });
+            )
+          else if (controller.hasMorePackageDiscounts)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: CustomButton.secondary(
+                text: 'تحميل المزيد',
+                onPressed: controller.loadMorePackageDiscounts,
+              ),
+            ),
+        ],
+      ],
+    );
   }
 
   Widget _archiveTab() {
