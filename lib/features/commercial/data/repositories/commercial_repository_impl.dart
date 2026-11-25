@@ -174,6 +174,29 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<NetworkEntity> createNetwork(Map<String, dynamic> payload) {
+    return _remoteDataSource.createNetwork(payload);
+  }
+
+  @override
+  Future<NetworkEntity> updateNetwork(
+    int networkId,
+    Map<String, dynamic> payload,
+  ) {
+    return _remoteDataSource.updateNetwork(networkId, payload);
+  }
+
+  @override
+  Future<PosEntity> createPos(Map<String, dynamic> payload) {
+    return _remoteDataSource.createPos(payload);
+  }
+
+  @override
+  Future<PosEntity> updatePos(int posId, Map<String, dynamic> payload) {
+    return _remoteDataSource.updatePos(posId, payload);
+  }
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) {
     return _remoteDataSource.getNetworkDetails(networkId);
   }
