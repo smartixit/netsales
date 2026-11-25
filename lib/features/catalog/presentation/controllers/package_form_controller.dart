@@ -262,6 +262,7 @@ class PackageFormController extends GetxController {
           : valueInUnit.toString();
       liveBalanceInBytes.value = package.packageBalance;
     } else {
+      selectedBalanceUnit.value = DataSizeUnit.bytes;
       balanceController.text = '0';
       liveBalanceInBytes.value = 0;
     }
