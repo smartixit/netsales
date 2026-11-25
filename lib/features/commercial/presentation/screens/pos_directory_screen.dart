@@ -106,7 +106,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 icon: controller.showArchived.value ? Icons.archive_outlined : Icons.storefront_outlined,
                 title: controller.showArchived.value ? 'أرشيف نقاط البيع فارغ' : 'لا توجد نقاط بيع',
                 subtitle: controller.showArchived.value
-                    ? 'لا توجد نقاط بيع مؤرشفة يمكن استعادتها.'
+                    ? 'لا توجد نقاط بيع مؤرشفة ضمن نطاق صلاحيتك.'
                     : 'لا توجد كيانات تطابق معايير البحث الحالية.',
               ),
             );
