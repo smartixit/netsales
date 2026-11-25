@@ -22,9 +22,7 @@ class ColorResolver {
       return fallback;
     }
 
-    if (!RegExp(r'^[0-9a-fA-F]{8}
-}
-).hasMatch(clean)) {
+    if (!RegExp(r'^[0-9a-fA-F]{8}').hasMatch(clean)) {
       return fallback;
     }
 
