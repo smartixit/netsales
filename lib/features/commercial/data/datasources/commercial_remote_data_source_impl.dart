@@ -36,7 +36,6 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   Future<PaginatedList<NetworkModel>> getNetworksPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   }) async {
@@ -46,7 +45,6 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       queryParameters: {
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
         if (status != null && status.isNotEmpty) 'status': status,
-        if (governorateId != null) 'governorate_id': governorateId,
       },
       cursor: cursor,
       perPage: perPage,
@@ -63,7 +61,6 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   Future<PaginatedList<PosModel>> getPosPage({
     String? search,
     String? status,
-    int? governorateId,
     String? cursor,
     int perPage = 15,
   }) async {
@@ -73,7 +70,6 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       queryParameters: {
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
         if (status != null && status.isNotEmpty) 'status': status,
-        if (governorateId != null) 'governorate_id': governorateId,
       },
       cursor: cursor,
       perPage: perPage,
