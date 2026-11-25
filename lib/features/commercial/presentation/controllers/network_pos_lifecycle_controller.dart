@@ -302,7 +302,7 @@ class NetworkPosLifecycleController extends GetxController {
             else
               Align(
                 alignment: Alignment.centerRight,
-                child: Text('الباقة: ${packages.firstWhereOrNull((item) => item.packageId == discount.packageId)?.packageName ?? '#${discount.packageId}'}'),
+                child: Text('الباقة: ${packageNameFor(discount.packageId)}'),
               ),
             _agreementField(discountCashController, 'نسبة الخصم النقدي %'),
             _agreementField(discountCreditController, 'نسبة الخصم الآجل %'),
