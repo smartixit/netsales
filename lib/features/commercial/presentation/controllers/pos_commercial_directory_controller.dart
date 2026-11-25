@@ -164,9 +164,12 @@ class PosCommercialDirectoryController
     try {
       final posList = await getMyPosUseCase!();
       authorizedPosList.assignAll(posList);
-      selectedPosId.value = initialPosId ?? WorkspaceService.to.resolveActivePosId(
-        posList.map((pos) => pos.posId).toList(growable: false),
-      );
+      final authorizedIds = posList.map((pos) => pos.posId).toSet();
+      selectedPosId.value = initialPosId != null
+          ? (authorizedIds.contains(initialPosId) ? initialPosId : null)
+          : WorkspaceService.to.resolveActivePosId(
+              posList.map((pos) => pos.posId).toList(growable: false),
+            );
     } catch (_) {
       authorizedPosList.clear();
       selectedPosId.value = null;
