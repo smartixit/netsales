@@ -31,19 +31,19 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     final views = <Widget>[];
     if (controller.canViewAgreements) {
       tabs.add(const Tab(icon: Icon(Icons.description_outlined), text: 'الاتفاقيات'));
-      views.add(_agreementsTab());
+      views.add(_LifecycleAgreementsTab(controller: controller));
     }
     if (controller.canViewEvents) {
       tabs.add(const Tab(icon: Icon(Icons.history_rounded), text: 'سجل الأحداث'));
-      views.add(_eventsTab());
+      views.add(_LifecycleEventsTab(controller: controller));
     }
     if (controller.canViewCatalog) {
       tabs.add(const Tab(icon: Icon(Icons.inventory_2_outlined), text: 'الكتالوج والخصومات'));
-      views.add(_catalogTab());
+      views.add(_LifecycleCatalogTab(controller: controller));
     }
     if (controller.canViewArchive) {
       tabs.add(const Tab(icon: Icon(Icons.archive_outlined), text: 'الأرشيف'));
-      views.add(_archiveTab());
+      views.add(_LifecycleArchiveTab(controller: controller));
     }
 
     return DefaultTabController(
@@ -118,7 +118,26 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     );
   }
 
-  Widget _agreementsTab() {
+
+
+
+
+
+
+
+
+
+
+
+}
+
+class _LifecycleAgreementsTab extends StatelessWidget {
+  const _LifecycleAgreementsTab({required this.controller});
+
+  final NetworkPosLifecycleController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoadingAgreements.value && controller.agreements.isEmpty) {
         return const CustomStateView.loading();
@@ -168,9 +187,21 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         ),
       );
     });
+  
   }
+}
 
-  Widget _agreementCard(NetworkPosAgreementEntity agreement) {
+class _LifecycleAgreementCard extends StatelessWidget {
+  const _LifecycleAgreementCard({
+    required this.controller,
+    required this.agreement,
+  });
+
+  final NetworkPosLifecycleController controller;
+  final NetworkPosAgreementEntity agreement;
+
+  @override
+  Widget build(BuildContext context) {
     final statusLabel = switch (agreement.validityState) {
       'EXPIRED' => 'منتهية الصلاحية',
       'SCHEDULED' => 'مجدولة',
@@ -259,9 +290,17 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         ),
       ),
     );
+  
   }
+}
 
-  Widget _eventsTab() {
+class _LifecycleEventsTab extends StatelessWidget {
+  const _LifecycleEventsTab({required this.controller});
+
+  final NetworkPosLifecycleController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoadingEvents.value && controller.events.isEmpty) {
         return const CustomStateView.loading();
@@ -329,9 +368,38 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         ),
       );
     });
+  
   }
 
-  Widget _catalogTab() {
+  String _eventLabel(String type) => switch (type) {
+    'CREATED' => 'إنشاء العلاقة',
+    'ACTIVATED' => 'تفعيل العلاقة',
+    'DEACTIVATED' => 'تعطيل العلاقة',
+    'ARCHIVED' => 'أرشفة العلاقة',
+    'RESTORED' => 'استعادة العلاقة',
+    'AGREEMENT_DRAFT_CREATED' => 'إنشاء مسودة اتفاقية',
+    'AGREEMENT_DRAFT_UPDATED' => 'تحديث مسودة اتفاقية',
+    'AGREEMENT_ACTIVATED' => 'اعتماد اتفاقية',
+    'AGREEMENT_TERMINATED' => 'إنهاء اتفاقية',
+    'AGREEMENT_EXPIRED' => 'انتهاء صلاحية الاتفاقية',
+    'DISCOUNT_CREATED' => 'إنشاء خصم مخصص لباقة',
+    'DISCOUNT_UPDATED' => 'تعديل خصم مخصص',
+    'DISCOUNT_ACTIVATED' => 'تفعيل خصم مخصص',
+    'DISCOUNT_DEACTIVATED' => 'تعطيل خصم مخصص',
+    'DISCOUNT_ARCHIVED' => 'أرشفة خصم مخصص',
+    'DISCOUNT_RESTORED' => 'استعادة خصم مخصص',
+    'DISCOUNT_FORCE_DELETED' => 'حذف خصم مخصص نهائياً',
+    _ => type,
+  };
+}
+
+class _LifecycleCatalogTab extends StatelessWidget {
+  const _LifecycleCatalogTab({required this.controller});
+
+  final NetworkPosLifecycleController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() => ListView(
       padding: EdgeInsets.all(AppSpacing.md),
       children: [
@@ -551,9 +619,17 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         ],
       ],
     ));
+  
   }
+}
 
-  Widget _archiveTab() {
+class _LifecycleArchiveTab extends StatelessWidget {
+  const _LifecycleArchiveTab({required this.controller});
+
+  final NetworkPosLifecycleController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       return RefreshIndicator(
         onRefresh: () => controller.loadArchivedLinks(refresh: true),
@@ -696,26 +772,6 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
         ),
       );
     });
+  
   }
-
-  String _eventLabel(String type) => switch (type) {
-    'CREATED' => 'إنشاء العلاقة',
-    'ACTIVATED' => 'تفعيل العلاقة',
-    'DEACTIVATED' => 'تعطيل العلاقة',
-    'ARCHIVED' => 'أرشفة العلاقة',
-    'RESTORED' => 'استعادة العلاقة',
-    'AGREEMENT_DRAFT_CREATED' => 'إنشاء مسودة اتفاقية',
-    'AGREEMENT_DRAFT_UPDATED' => 'تحديث مسودة اتفاقية',
-    'AGREEMENT_ACTIVATED' => 'اعتماد اتفاقية',
-    'AGREEMENT_TERMINATED' => 'إنهاء اتفاقية',
-    'AGREEMENT_EXPIRED' => 'انتهاء صلاحية الاتفاقية',
-    'DISCOUNT_CREATED' => 'إنشاء خصم مخصص لباقة',
-    'DISCOUNT_UPDATED' => 'تعديل خصم مخصص',
-    'DISCOUNT_ACTIVATED' => 'تفعيل خصم مخصص',
-    'DISCOUNT_DEACTIVATED' => 'تعطيل خصم مخصص',
-    'DISCOUNT_ARCHIVED' => 'أرشفة خصم مخصص',
-    'DISCOUNT_RESTORED' => 'استعادة خصم مخصص',
-    'DISCOUNT_FORCE_DELETED' => 'حذف خصم مخصص نهائياً',
-    _ => type,
-  };
 }
