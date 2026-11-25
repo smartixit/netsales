@@ -773,8 +773,6 @@ class SessionAuthInterceptor extends Interceptor {
 
     final statusCode = err.response?.statusCode;
 
-    // Only an explicit Laravel session rejection is terminal. Missing request
-    // headers and unrelated gateway/application 401s must not destroy a session.
     if (statusCode == 401) {
       final path = err.requestOptions.path;
       final isPublicAuth =
