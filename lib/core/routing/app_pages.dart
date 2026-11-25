@@ -42,6 +42,8 @@ import 'package:netsales/features/requests/presentation/screens/procurement_requ
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_directory_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_details_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_relationships_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/pos_relationships_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/network_form_binding.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_form_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/pos_details_binding.dart';
@@ -325,6 +327,37 @@ abstract final class AppPages {
       middlewares: [
         AuthGuard(),
         PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkEntityRelationships,
+      page: () => CommercialDirectoryScreen(
+        controllerTag: 'network-relationships-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkRelationshipsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityRelationships,
+      page: () => CommercialDirectoryScreen(
+        controllerTag: 'pos-relationships-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosRelationshipsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
