@@ -114,6 +114,9 @@ class NetworkPosLifecycleController extends GetxController {
   String? _discountsCursor;
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
+  int _archiveRevision = 0;
+  int _discountsRevision = 0;
+  int _effectivePricingRevision = 0;
   int _discountsRevision = 0;
 
   bool get canViewAgreements => PermissionService.to.can(
@@ -178,10 +181,13 @@ class NetworkPosLifecycleController extends GetxController {
   Future<void> loadMoreAgreements() async {
     if (!hasMoreAgreements || isLoadingMoreAgreements.value) return;
     isLoadingMoreAgreements.value = true;
+    final revision = _agreementsRevision;
+    final cursor = _agreementsCursor;
     try {
       final result = await getAgreementsUseCase(
-        networkPosId: networkPosId, cursor: _agreementsCursor, perPage: 15,
+        networkPosId: networkPosId, cursor: cursor, perPage: 15,
       );
+      if (revision != _agreementsRevision) return;
       agreements.addAll(result.items);
       _agreementsCursor = result.nextCursor;
     } catch (error) {
@@ -226,13 +232,16 @@ class NetworkPosLifecycleController extends GetxController {
 
   Future<void> loadEffectivePackageDiscounts() async {
     if (networkId <= 0 || posId <= 0) return;
+    final revision = ++_effectivePricingRevision;
     try {
       final result = await getEffectivePackageDiscountsUseCase(
         networkId: networkId,
         posId: posId,
       );
+      if (revision != _effectivePricingRevision) return;
       effectiveDiscounts.assignAll(result);
     } catch (error) {
+      if (revision != _effectivePricingRevision) return;
       // Keep the custom-discount management list usable if the effective
       // pricing projection is temporarily unavailable.
       discountsErrorMessage.value ??= error.toString();
@@ -274,11 +283,13 @@ class NetworkPosLifecycleController extends GetxController {
     if (!hasMorePackageDiscounts || isLoadingMoreDiscounts.value) return;
     final revision = _discountsRevision;
     isLoadingMoreDiscounts.value = true;
+    final revision = _discountsRevision;
+    final cursor = _discountsCursor;
     try {
       final result = await getPackagePosDiscountsUseCase(
         networkId: networkId,
         posId: posId,
-        cursor: _discountsCursor,
+        cursor: cursor,
         perPage: 15,
       );
       if (revision == _discountsRevision) {
@@ -433,6 +444,7 @@ class NetworkPosLifecycleController extends GetxController {
   }
 
   Future<void> loadArchivedLinks({bool refresh = false}) async {
+    final revision = ++_archiveRevision;
     if (refresh) {
       _archiveCursor = null;
       archivedLinks.clear();
@@ -445,25 +457,29 @@ class NetworkPosLifecycleController extends GetxController {
         isNetwork: isNetworkScope,
         perPage: 15,
       );
+      if (revision != _archiveRevision) return;
       archivedLinks.assignAll(result.items);
       _archiveCursor = result.nextCursor;
     } catch (error) {
-      archiveErrorMessage.value = error.toString();
+      if (revision == _archiveRevision) archiveErrorMessage.value = error.toString();
     } finally {
-      isLoadingArchive.value = false;
+      if (revision == _archiveRevision) isLoadingArchive.value = false;
     }
   }
 
   Future<void> loadMoreArchivedLinks() async {
     if (_archiveCursor == null || _archiveCursor!.isEmpty || isLoadingMoreArchive.value) return;
     isLoadingMoreArchive.value = true;
+    final revision = _archiveRevision;
+    final cursor = _archiveCursor;
     try {
       final result = await getTrashedLinksUseCase(
         entityId: entityId,
         isNetwork: isNetworkScope,
-        cursor: _archiveCursor,
+        cursor: cursor,
         perPage: 15,
       );
+      if (revision != _archiveRevision) return;
       archivedLinks.addAll(result.items);
       _archiveCursor = result.nextCursor;
     } catch (error) {
@@ -491,10 +507,13 @@ class NetworkPosLifecycleController extends GetxController {
   Future<void> loadMoreEvents() async {
     if (!hasMoreEvents || isLoadingMoreEvents.value) return;
     isLoadingMoreEvents.value = true;
+    final revision = _eventsRevision;
+    final cursor = _eventsCursor;
     try {
       final result = await getEventsUseCase(
-        networkPosId: networkPosId, cursor: _eventsCursor, perPage: 20,
+        networkPosId: networkPosId, cursor: cursor, perPage: 20,
       );
+      if (revision != _eventsRevision) return;
       events.addAll(result.items);
       _eventsCursor = result.nextCursor;
     } catch (error) {
