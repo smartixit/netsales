@@ -101,6 +101,9 @@ class PosCommercialDirectoryController
       canPreviewLinkChallenge && canConfirmLinkChallenge;
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  bool get canViewRelationshipLifecycle =>
+      PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
+      PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents);
 
   int? get resolvedPosId {
     return selectedPosId.value ??
@@ -404,6 +407,7 @@ class PosCommercialDirectoryController
       isNetworkView: false,
       onViewDetails: () => openPartnerDetails(link),
       onDelete: null,
+      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
       onViewWallet: canViewPartnerWallet
           ? () => Get.toNamed<void>(
               AppRoutes.posWalletStatement,
@@ -414,6 +418,13 @@ class PosCommercialDirectoryController
   }
 
 
+
+  void openRelationshipLifecycle(NetworkPosLinkEntity link) {
+    if (!canViewRelationshipLifecycle) return;
+    Get.toNamed<void>(
+      AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
+    );
+  }
 
   Future<void> openQrScannerFlow() async {
     if (!canLinkNetwork) return;
