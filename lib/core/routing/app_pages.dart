@@ -343,7 +343,13 @@ abstract final class AppPages {
       name: AppRoutes.voucherRequestDetails,
       page: () => const ProcurementRequestDetailsScreen(),
       binding: ProcurementRequestBinding(),
-      middlewares: [AuthGuard()],
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(
+          requiredPermission: AppPermissions.requestsView,
+        ),
+        WorkspaceGuard(),
+      ],
     ),
 
     // ==========================================
@@ -355,9 +361,6 @@ abstract final class AppPages {
       binding: InvoiceBinding(),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(
-          requiredPermission: AppPermissions.requestsView,
-        ),
         PermissionGuardMiddleware(
           requiredPermission: AppPermissions.salesCreate,
         ),
