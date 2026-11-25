@@ -447,11 +447,11 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException error, ErrorInterceptorHandler handler) async {
-    final response = error.response;
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    final response = err.response;
     if (response == null ||
         !InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
-      handler.next(error);
+      handler.next(err);
       return;
     }
 
@@ -464,10 +464,10 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     } on DioException catch (challengeError) {
       handler.reject(challengeError);
     } catch (challengeError) {
-      _finishCryptoLifecycle(error.requestOptions);
+      _finishCryptoLifecycle(err.requestOptions);
       handler.reject(
         _challengeFailure(
-          options: error.requestOptions,
+          options: err.requestOptions,
           response: response,
           message: 'تعذر إكمال تحقق الاستضافة.',
           cause: challengeError,
