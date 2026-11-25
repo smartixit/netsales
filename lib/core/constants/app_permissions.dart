@@ -67,6 +67,7 @@ abstract final class AppPermissions {
   static const String networkCreateLinkChallenge = 'networks.create_link_challenge';
   static const String networkRevokeLinkChallenge = 'networks.revoke_link_challenge';
   static const String networksDelete = 'networks.delete';
+  static const String networksRestore = 'networks.restore';
   static const String networksApprove = 'networks.approve';
   static const String networksReject = 'networks.reject';
   static const String networksReport = 'networks.report';
@@ -92,6 +93,7 @@ abstract final class AppPermissions {
   static const String posCreate = 'pos.create';
   static const String posEdit = 'pos.edit';
   static const String posDelete = 'pos.delete';
+  static const String posRestore = 'pos.restore';
   static const String posPreviewLinkChallenge = 'pos.preview_link_challenge';
   static const String posConfirmLinkChallenge = 'pos.confirm_link_challenge';
   static const String posReport = 'pos.report';
