@@ -86,6 +86,18 @@ abstract class CommercialRepository {
   /// إلغاء وإبطال دعوة الربط المشفرة
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
 
+  /// إنشاء شبكة للمستخدم المصادق عليه. لا يتضمن payload المالك أو الحالة.
+  Future<NetworkEntity> createNetwork(Map<String, dynamic> payload);
+
+  /// تحديث بيانات الشبكة فقط دون تغيير علاقاتها أو عضوياتها أو التزاماتها.
+  Future<NetworkEntity> updateNetwork(int networkId, Map<String, dynamic> payload);
+
+  /// إنشاء نقطة بيع للمستخدم المصادق عليه. لا يتضمن payload المالك أو الحالة.
+  Future<PosEntity> createPos(Map<String, dynamic> payload);
+
+  /// تحديث بيانات نقطة البيع فقط دون تغيير علاقاتها أو عضوياتها أو التزاماتها.
+  Future<PosEntity> updatePos(int posId, Map<String, dynamic> payload);
+
   /// استرجاع التفاصيل الكاملة لشبكة محددة
   Future<NetworkEntity> getNetworkDetails(int networkId);
 
