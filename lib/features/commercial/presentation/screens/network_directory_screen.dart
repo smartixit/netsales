@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -39,6 +40,15 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.hub_rounded,
               ),
+              CustomButton.primary(
+                text: 'إنشاء شبكة',
+                prefix: Icons.add_rounded,
+                onPressed: () async {
+                  final saved = await Get.toNamed('/network/entities/create');
+                  if (saved == true) await controller.refreshDirectory();
+                },
+              ),
+              AppSpacing.vSm,
               Obx(() => CustomSearchFilterBar<String?>(
                 searchController: controller.searchController,
                 searchQuery: controller.searchQuery.value,
