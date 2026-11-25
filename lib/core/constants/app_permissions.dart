@@ -64,6 +64,7 @@ abstract final class AppPermissions {
   static const String voucherPackageDiscountsEdit = 'voucher_package_discounts.edit';
   static const String voucherPackageDiscountsToggleStatus = 'voucher_package_discounts.toggle_status';
   static const String voucherPackageDiscountsDelete = 'voucher_package_discounts.delete';
+  static const String voucherPackageDiscountsRestore = 'voucher_package_discounts.restore';
   static const String networkCreateLinkChallenge = 'networks.create_link_challenge';
   static const String networkRevokeLinkChallenge = 'networks.revoke_link_challenge';
   static const String networksDelete = 'networks.delete';
