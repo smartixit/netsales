@@ -30,6 +30,7 @@ import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 class NetworkPosLifecycleController extends GetxController {
   NetworkPosLifecycleController({
     required this.networkPosId,
+    this.relationship,
     required this.networkId,
     required this.posId,
     required this.getNetworkPackagesUseCase,
@@ -51,6 +52,7 @@ class NetworkPosLifecycleController extends GetxController {
   });
 
   final int networkPosId;
+  final NetworkPosLinkEntity? relationship;
   final int networkId;
   final int posId;
   final GetNetworkPackagesUseCase getNetworkPackagesUseCase;
@@ -126,6 +128,7 @@ class NetworkPosLifecycleController extends GetxController {
     isNetworkScope ? AppPermissions.networkRestorePosLink : AppPermissions.posRestoreNetworkLink,
   );
   bool get canViewCatalog => PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+  bool get canViewRelationshipWallet => PermissionService.to.can(AppPermissions.posWalletsView);
   bool get canCreateDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsCreate);
   bool get canEditDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsEdit);
   bool get canToggleDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsToggleStatus);
