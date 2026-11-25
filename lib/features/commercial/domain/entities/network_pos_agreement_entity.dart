@@ -30,7 +30,7 @@ class NetworkPosAgreementEntity extends Equatable {
   final String? validityState;
 
   bool get isDraft => status == 'DRAFT';
-  bool get isActive => status == 'ACTIVE';
+  bool get isActive => status == 'ACTIVE' && validityState != 'EXPIRED';
   bool get isTerminated => status == 'TERMINATED';
 
   @override
