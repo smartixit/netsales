@@ -164,6 +164,23 @@ abstract class CommercialRepository {
   /// حذف مؤقت لنقطة البيع دون المساس بسجلاتها المالية أو علاقاتها.
   Future<void> deletePos(int posId);
 
+  Future<PaginatedList<NetworkEntity>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restoreNetwork(int networkId);
+
+  Future<PaginatedList<PosEntity>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restorePos(int posId);
+
+
   /// استرجاع التفاصيل الكاملة لشبكة محددة
   Future<NetworkEntity> getNetworkDetails(int networkId);
 
