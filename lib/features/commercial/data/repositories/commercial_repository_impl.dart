@@ -323,6 +323,51 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<PaginatedList<NetworkEntity>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final page = await _remoteDataSource.getTrashedNetworks(
+      search: search,
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkEntity>(
+      items: page.items,
+      nextCursor: page.nextCursor,
+      prevCursor: page.prevCursor,
+      perPage: page.perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetwork(int networkId) =>
+      _remoteDataSource.restoreNetwork(networkId);
+
+  @override
+  Future<PaginatedList<PosEntity>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final page = await _remoteDataSource.getTrashedPos(
+      search: search,
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<PosEntity>(
+      items: page.items,
+      nextCursor: page.nextCursor,
+      prevCursor: page.prevCursor,
+      perPage: page.perPage,
+    );
+  }
+
+  @override
+  Future<void> restorePos(int posId) => _remoteDataSource.restorePos(posId);
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) {
     return _remoteDataSource.getNetworkDetails(networkId);
   }
