@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -520,12 +521,24 @@ void main() {
         roleKey: 'NETWORK_OWNER',
         permissions: const [AppPermissions.posWalletsView],
       );
-      await tester.pumpWidget(GetMaterialApp(home: const SizedBox.shrink()));
+      await tester.pumpWidget(
+        GetMaterialApp(
+          getPages: [
+            GetPage<void>(
+              name: AppRoutes.posWalletStatement,
+              page: () => const SizedBox.shrink(),
+            ),
+          ],
+          home: const SizedBox.shrink(),
+        ),
+      );
       await controller.loadInitialData();
       final link = controller.links.first;
 
-      // Ensure calling onPartnerCardTap does not throw
-      expect(() => controller.onPartnerCardTap(link), returnsNormally);
+      controller.onPartnerCardTap(link);
+      await tester.pumpAndSettle();
+
+      expect(Get.currentRoute, AppRoutes.posWalletStatement);
     });
   });
 
