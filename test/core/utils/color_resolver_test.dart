@@ -34,6 +34,7 @@ void main() {
     test('uses fallback for malformed values', () {
       expect(ColorResolver.resolve('not-a-color', fallback), fallback);
       expect(ColorResolver.resolve('0x12345', fallback), fallback);
+      expect(ColorResolver.resolve('0xFF0D7A5Fgarbage', fallback), fallback);
       expect(ColorResolver.resolve(null, fallback), fallback);
     });
   });
