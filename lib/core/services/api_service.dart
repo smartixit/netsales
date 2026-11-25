@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
@@ -784,10 +785,17 @@ class SessionAuthInterceptor extends Interceptor {
           path.contains('/auth/register') ||
           path.contains('/auth/password');
       final isSessionValidation = path.endsWith('/auth/me');
-      final responseData = err.response?.data;
+      Object? responseData = err.response?.data;
+      if (responseData is String) {
+        try {
+          responseData = jsonDecode(responseData);
+        } on FormatException {
+          responseData = null;
+        }
+      }
       final errorCode = responseData is Map
           ? responseData['code']?.toString()
-          : null;
+          : err.response?.headers.value('X-Error-Code');
       final requestGeneration =
           err.requestOptions.extra['session_generation'];
       final isCurrentSessionGeneration =
