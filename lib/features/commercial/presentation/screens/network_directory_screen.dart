@@ -106,7 +106,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 icon: controller.showArchived.value ? Icons.archive_outlined : Icons.hub_outlined,
                 title: controller.showArchived.value ? 'أرشيف الشبكات فارغ' : 'لا توجد شبكات',
                 subtitle: controller.showArchived.value
-                    ? 'لا توجد شبكات مؤرشفة يمكن استعادتها.'
+                    ? 'لا توجد شبكات مؤرشفة ضمن نطاق صلاحيتك.'
                     : 'لا توجد كيانات تطابق معايير البحث الحالية.',
               ),
             );
