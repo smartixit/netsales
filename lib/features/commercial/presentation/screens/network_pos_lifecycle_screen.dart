@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_pos_lifecycle_controller.dart';
+import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
+import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
+import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton.dart';
-import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
 
 class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
   const NetworkPosLifecycleScreen({super.key, required this.controllerTag});
