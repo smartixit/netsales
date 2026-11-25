@@ -73,8 +73,10 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                       Row(
                         children: [
                           Expanded(child: Text('بيانات العلاقة', style: const TextStyle(fontWeight: FontWeight.w700))),
-                          Chip(
-                            label: Text(controller.relationship!.isActive ? 'نشطة' : 'معطّلة'),
+                          CustomStatusBadge(
+                            label: controller.relationship!.isActive ? 'نشطة' : 'معطّلة',
+                            tone: controller.relationship!.isActive ? SemanticTone.success : SemanticTone.neutral,
+                            isCompact: true,
                           ),
                         ],
                       ),
