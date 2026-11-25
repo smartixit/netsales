@@ -59,6 +59,7 @@ abstract final class AppPermissions {
   static const String posManageNetworkAgreements = 'pos.manage_network_agreements';
   static const String posViewNetworkLinkEvents = 'pos.view_network_link_events';
   static const String posRestoreNetworkLink = 'pos.restore_network_link';
+  static const String voucherPackageDiscountsView = 'voucher_package_discounts.view';
   static const String networkCreateLinkChallenge = 'networks.create_link_challenge';
   static const String networkRevokeLinkChallenge = 'networks.revoke_link_challenge';
   static const String networksDelete = 'networks.delete';
