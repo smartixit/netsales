@@ -307,6 +307,10 @@ void main() {
       expect(controller.canTogglePartnerLink, isFalse);
       expect(controller.canDeletePartnerLink, isFalse);
 
+      controller.onToggleStatus(controller.links.first);
+      controller.onDeleteLink(controller.links.first);
+      expect(repo.links, hasLength(2));
+
       PermissionService.instance.updateAccess(
         roleKey: 'NETWORK_OWNER',
         permissions: [
