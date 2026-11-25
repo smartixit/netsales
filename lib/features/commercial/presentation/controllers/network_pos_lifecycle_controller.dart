@@ -83,6 +83,7 @@ class NetworkPosLifecycleController extends GetxController {
   final isLoadingArchive = true.obs;
   final isLoadingDiscounts = true.obs;
   final isLoadingPackages = true.obs;
+  final isLoadingMorePackages = false.obs;
   final isSavingDiscount = false.obs;
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
@@ -109,6 +110,8 @@ class NetworkPosLifecycleController extends GetxController {
   String? _eventsCursor;
   String? _archiveCursor;
   String? _discountsCursor;
+  String? _packagesCursor;
+  int _packagesRevision = 0;
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
   int _archiveRevision = 0;
@@ -213,16 +216,53 @@ class NetworkPosLifecycleController extends GetxController {
     }
   }
 
-  Future<void> loadPackages() async {
-    isLoadingPackages.value = true;
+  bool get hasMorePackages => _packagesCursor?.isNotEmpty == true;
+
+  Future<void> loadPackages({bool refresh = false}) async {
+    final revision = ++_packagesRevision;
+    if (refresh) {
+      _packagesCursor = null;
+      packages.clear();
+    }
+    isLoadingPackages.value = packages.isEmpty;
     packagesErrorMessage.value = null;
     try {
-      final result = await getNetworkPackagesUseCase(networkId, status: true, perPage: 50);
+      final result = await getNetworkPackagesUseCase(
+        networkId,
+        status: true,
+        perPage: 50,
+      );
+      if (revision != _packagesRevision) return;
       packages.assignAll(result.items);
+      _packagesCursor = result.nextCursor;
     } catch (error) {
-      packagesErrorMessage.value = error.toString();
+      if (revision == _packagesRevision) packagesErrorMessage.value = error.toString();
     } finally {
-      isLoadingPackages.value = false;
+      if (revision == _packagesRevision) isLoadingPackages.value = false;
+    }
+  }
+
+  Future<void> loadMorePackages() async {
+    if (!hasMorePackages || isLoadingMorePackages.value) return;
+    final revision = _packagesRevision;
+    final cursor = _packagesCursor;
+    isLoadingMorePackages.value = true;
+    try {
+      final result = await getNetworkPackagesUseCase(
+        networkId,
+        status: true,
+        cursor: cursor,
+        perPage: 50,
+      );
+      if (revision != _packagesRevision) return;
+      packages.addAll(result.items);
+      _packagesCursor = result.nextCursor;
+    } catch (error) {
+      if (revision == _packagesRevision) {
+        CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+      }
+    } finally {
+      isLoadingMorePackages.value = false;
     }
   }
 
