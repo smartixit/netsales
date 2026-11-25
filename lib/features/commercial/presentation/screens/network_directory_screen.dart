@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
@@ -44,7 +45,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 text: 'إنشاء شبكة',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
-                  final saved = await Get.toNamed('/network/entities/create');
+                  final saved = await Get.toNamed('AppRoutes.networkEntityCreate');
                   if (saved == true) await controller.refreshDirectory();
                 },
               ),
@@ -107,7 +108,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
                 final network = controller.networks[index];
                 return GestureDetector(
                   onTap: () async {
-                    final changed = await Get.toNamed('/network/entities/${network.networkId}');
+                    final changed = await Get.toNamed(AppRoutes.networkEntityDetails.replaceFirst(':id', network.networkId.toString()));
                     if (changed == true) await controller.refreshDirectory();
                   },
                   child: CustomSurfaceCard(
