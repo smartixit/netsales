@@ -210,34 +210,27 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     return verificationOptions;
   }
 
-  @override
-  void onResponse(
+
+  Future<Response<dynamic>> _processChallengeResponse(
     Response<dynamic> response,
-    ResponseInterceptorHandler handler,
   ) async {
     final options = response.requestOptions;
     final challengeHtml = InfinityFreeChallengeSolver.challengeHtml(
       response.data,
     );
 
-    if (challengeHtml == null) {
-      handler.next(response);
-      return;
-    }
+    if (challengeHtml == null) return response;
 
-    // A challenge on either the verification probe or the original replay
-    // means verification did not complete. Never start another handshake.
+    // A challenge on a verification probe or a replay means that the
+    // handshake did not complete. Never start an unbounded second handshake.
     if (options.extra[_retryFlagKey] == true) {
       _clearCachedCookie(options.uri.host);
       _finishCryptoLifecycle(options);
-      handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'رفضت الاستضافة طلب التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
-        ),
+      throw _challengeFailure(
+        options: options,
+        response: response,
+        message: 'رفضت الاستضافة طلب التحقق؛ ما زالت صفحة JavaScript تصل إلى التطبيق.',
       );
-      return;
     }
 
     final requestUri = options.uri;
@@ -255,39 +248,30 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
           'same-endpoint redirect غير صالح.',
         );
       }
-      handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'تعذر استخراج بيانات خطوة تحقق الاستضافة.',
-        ),
+      throw _challengeFailure(
+        options: options,
+        response: response,
+        message: 'تعذر استخراج بيانات خطوة تحقق الاستضافة.',
       );
-      return;
     }
 
     // FormData and streaming bodies are one-shot and cannot be replayed safely.
     if (options.data is FormData || options.data is Stream) {
       _finishCryptoLifecycle(options);
-      handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
-        ),
+      throw _challengeFailure(
+        options: options,
+        response: response,
+        message: 'طلب يحتوي على ملفات أو تدفق بيانات لا يمكن إعادة إرساله بأمان بعد تحقق الاستضافة.',
       );
-      return;
     }
 
     if (requestUri.host.isEmpty) {
       _finishCryptoLifecycle(options);
-      handler.reject(
-        _challengeFailure(
-          options: options,
-          response: response,
-          message: 'تعذر تحديد نطاق الاستضافة لحفظ كوكي التحقق.',
-        ),
+      throw _challengeFailure(
+        options: options,
+        response: response,
+        message: 'تعذر تحديد نطاق الاستضافة لحفظ كوكي التحقق.',
       );
-      return;
     }
 
     final verificationOptions = _createVerificationOptions(
@@ -296,9 +280,10 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       challengeCookie: cookie,
     );
 
-    // First perform the browser-equivalent location.href navigation (GET).
-    // The cookie is not cached and the original request is not replayed unless
-    // this request stops returning the challenge page.
+    // Verify the browser-equivalent location.href navigation before replaying
+    // the original method and body. validateStatus on the probe accepts 401,
+    // 403, 404, and 405 so a real Laravel response is distinguishable from
+    // another hosting challenge.
     Response<dynamic>? verificationResponse;
     try {
       final probeResponse = await _dio.fetch<dynamic>(verificationOptions);
@@ -312,10 +297,6 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
         );
       }
 
-      // A canonical Laravel 401/403 proves that the hosting challenge is
-      // cleared and the request reached the application. It is therefore
-      // safe to replay the exact original request, allowing the normal
-      // interceptors and Splash flow to process the real auth decision.
       final verificationStatus = probeResponse.statusCode;
       final acceptedVerificationStatus =
           (verificationStatus != null &&
@@ -323,6 +304,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
                   verificationStatus == 404 ||
                   verificationStatus == 405)) ||
           _isBackendApiResponse(probeResponse);
+
       if (!acceptedVerificationStatus) {
         throw _challengeFailure(
           options: verificationOptions,
@@ -337,6 +319,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       final failedOptions = dioError?.requestOptions ?? verificationOptions;
       final failedResponse = dioError?.response ?? verificationResponse;
       _finishCryptoLifecycle(options);
+
       if (AppEnvironment.enableLogging) {
         log(
           'فشل GET التحقق من InfinityFree: '
@@ -344,20 +327,18 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
           'type=${dioError?.type.name ?? error.runtimeType}.',
         );
       }
-      handler.reject(
-        _challengeFailure(
-          options: failedOptions,
-          response: failedResponse,
-          message:
-              'فشل طلب GET المستقل للتحقق من كوكي الاستضافة؛ '
-              'لم يُعَد إرسال الطلب الأصلي.',
-          cause:
-              dioError?.error ??
-              dioError?.message ??
-              error.runtimeType.toString(),
-        ),
+
+      throw _challengeFailure(
+        options: failedOptions,
+        response: failedResponse,
+        message:
+            'فشل طلب GET المستقل للتحقق من كوكي الاستضافة؛ '
+            'لم يُعَد إرسال الطلب الأصلي.',
+        cause:
+            dioError?.error ??
+            dioError?.message ??
+            error.runtimeType.toString(),
       );
-      return;
     }
 
     // Cache only after the verification navigation has been accepted.
@@ -367,7 +348,7 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
     );
 
     // Replay the original request unchanged apart from the verified cookie,
-    // User-Agent, and one-shot recursion guard. This preserves POST + payload.
+    // User-Agent, and one-shot recursion guard.
     final replayOptions = options.copyWith(
       queryParameters: <String, dynamic>{...options.queryParameters},
       extra: <String, dynamic>{...options.extra, _retryFlagKey: true},
@@ -388,30 +369,28 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
       InfinityFreeChallengeSolver.browserUserAgent,
     );
 
-    // The original request may already be sealed. Preserve its exact body and
-    // ephemeral response key; do not encrypt the body a second time.
+    // Keep the original sealed payload and ephemeral response key alive until
+    // the replay has passed through the normal crypto response lifecycle.
     ApiRequestReplayState.markCryptoPrepared(replayOptions);
 
     try {
-      final retried = await _dio.fetch<dynamic>(replayOptions);
-      handler.resolve(retried);
+      return await _dio.fetch<dynamic>(replayOptions);
     } catch (error) {
       final dioError = error is DioException ? error : null;
       final failedOptions = dioError?.requestOptions ?? replayOptions;
       final failedResponse = dioError?.response ?? response;
       _finishCryptoLifecycle(replayOptions);
 
+      // A structured Laravel API response is a real application result (for
+      // example, an expired session), not an InfinityFree challenge failure.
       if (dioError?.response != null &&
           _isBackendApiResponse(dioError!.response!)) {
-        handler.reject(
-          DioException(
-            requestOptions: options,
-            response: _responseForOriginalRequest(dioError.response!, options),
-            type: DioExceptionType.badResponse,
-            message: dioError.message,
-          ),
+        throw DioException(
+          requestOptions: options,
+          response: _responseForOriginalRequest(dioError.response!, options),
+          type: DioExceptionType.badResponse,
+          message: dioError.message,
         );
-        return;
       }
 
       if (AppEnvironment.enableLogging) {
@@ -421,15 +400,72 @@ class InfinityFreeChallengeInterceptor extends Interceptor {
           'type=${dioError?.type.name ?? error.runtimeType}.',
         );
       }
+
+      throw _challengeFailure(
+        options: failedOptions,
+        response: failedResponse,
+        message: 'تعذرت إعادة الطلب الأصلي بعد اجتياز تحقق الاستضافة.',
+        cause:
+            dioError?.error ??
+            dioError?.message ??
+            error.runtimeType.toString(),
+      );
+    }
+  }
+
+  @override
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) async {
+    if (!InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
+      handler.next(response);
+      return;
+    }
+
+    try {
+      final replayedResponse = await _processChallengeResponse(response);
+      handler.resolve(replayedResponse);
+    } on DioException catch (error) {
+      handler.reject(error);
+    } catch (error) {
+      _finishCryptoLifecycle(response.requestOptions);
       handler.reject(
         _challengeFailure(
-          options: failedOptions,
-          response: failedResponse,
-          message: 'تعذرت إعادة الطلب الأصلي بعد اجتياز تحقق الاستضافة.',
-          cause:
-              dioError?.error ??
-              dioError?.message ??
-              error.runtimeType.toString(),
+          options: response.requestOptions,
+          response: response,
+          message: 'تعذر إكمال تحقق الاستضافة.',
+          cause: error,
+        ),
+      );
+    }
+  }
+
+  @override
+  void onError(DioException error, ErrorInterceptorHandler handler) async {
+    final response = error.response;
+    if (response == null ||
+        !InfinityFreeChallengeSolver.isChallengeResponse(response.data)) {
+      handler.next(error);
+      return;
+    }
+
+    // InfinityFree can serve the same JavaScript challenge with an HTTP error
+    // status (commonly 401/403). It must be solved before SessionAuthInterceptor
+    // interprets that status as an expired application session.
+    try {
+      final replayedResponse = await _processChallengeResponse(response);
+      handler.resolve(replayedResponse);
+    } on DioException catch (challengeError) {
+      handler.reject(challengeError);
+    } catch (challengeError) {
+      _finishCryptoLifecycle(error.requestOptions);
+      handler.reject(
+        _challengeFailure(
+          options: error.requestOptions,
+          response: response,
+          message: 'تعذر إكمال تحقق الاستضافة.',
+          cause: challengeError,
         ),
       );
     }
