@@ -462,6 +462,7 @@ class NetworkCommercialDirectoryController
 
   @override
   Widget? buildExtraFilters(BuildContext context) {
+    if (initialNetworkId != null) return null;
     final networks = authorizedNetworks;
     if (networks.length <= 1) return null;
 
