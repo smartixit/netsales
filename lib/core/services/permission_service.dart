@@ -1,12 +1,11 @@
 import 'package:get/get.dart';
-import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 
 /// ============================================================================
 /// خدمة فحص الصلاحيات والأدوار (Enterprise RBAC & Capability Service)
 /// ============================================================================
 /// توفر استعلاماً لحظياً بزمن ثابت O(1) عن صلاحيات وأدوار المستخدم الحالي،
-/// مع دعم تجاوز المشرف العام (Super Admin Bypass) تلقائياً.
+/// مع الالتزام بنطاقات التشغيل؛ أدوار المنصة خارج تطبيق Flutter.
 class PermissionService extends GetxService {
   PermissionService._();
 
@@ -29,9 +28,6 @@ class PermissionService extends GetxService {
   String get currentRole => _workspaceContextBound
       ? _workspaceRoleKey.value
       : _roleKey.value;
-
-  /// هل المستخدم هو المشرف العام على النظام
-  bool get isSuperAdmin => _roleKey.value == AppRoles.superAdmin;
 
   /// تهيئة أو تحديث الصلاحيات والدور
   void updateAccess({
@@ -68,7 +64,6 @@ class PermissionService extends GetxService {
 
   /// فحص امتلاك صلاحية مفردة
   bool can(String permission) {
-    if (isSuperAdmin) return true;
     return _workspaceContextBound
         ? _workspacePermissions.contains(permission)
         : _permissions.contains(permission);
