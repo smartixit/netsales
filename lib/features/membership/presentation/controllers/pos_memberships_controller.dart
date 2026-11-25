@@ -60,7 +60,7 @@ class PosMembershipsController extends BaseMembershipsController {
   bool get isNetworkView => false;
 
   @override
-  Widget? get headerAction => canManageMembers
+  Widget? get headerAction => canAddMember
       ? CustomButton.primary(
           text: 'إضافة عضو',
           icon: Icons.person_add_alt_1_rounded,
@@ -150,13 +150,13 @@ class PosMembershipsController extends BaseMembershipsController {
       member: member,
       isNetworkView: false,
       onDetails: () => openMemberDetails(member),
-      onChangeRole: canManageMembers && !member.isOwner
+      onChangeRole: canChangeMemberRole && !member.isOwner
           ? () => openChangeRoleSheet(member)
           : null,
-      onToggleStatus: canManageMembers && !member.isOwner
+      onToggleStatus: canChangeMemberStatus && !member.isOwner
           ? () => promptToggleMemberStatus(member)
           : null,
-      onRemove: canManageMembers && !member.isOwner
+      onRemove: canRemoveMember && !member.isOwner
           ? () => promptRemoveMember(member)
           : null,
     );
@@ -189,7 +189,16 @@ class PosMembershipsController extends BaseMembershipsController {
       _allMembers.where((m) => m.isSuspended).length;
   int get invitedMembersCount => _allMembers.where((m) => m.isInvited).length;
 
-  bool get canManageMembers => PermissionService.to.can(AppPermissions.posEdit);
+  bool get canViewMembers =>
+      PermissionService.to.can(AppPermissions.posMembersView);
+  bool get canAddMember =>
+      PermissionService.to.can(AppPermissions.posMembersCreate);
+  bool get canChangeMemberRole =>
+      PermissionService.to.can(AppPermissions.posMembersChangeRole);
+  bool get canChangeMemberStatus =>
+      PermissionService.to.can(AppPermissions.posMembersChangeStatus);
+  bool get canRemoveMember =>
+      PermissionService.to.can(AppPermissions.posMembersDelete);
 
   int? get resolvedPosId => WorkspaceService.to.resolveActivePosId([]);
 
