@@ -477,7 +477,6 @@ abstract final class AppPages {
         PermissionGuardMiddleware(
           requiredPermission: AppPermissions.posWalletsView,
         ),
-        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
     GetPage(
