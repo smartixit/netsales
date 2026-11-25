@@ -52,7 +52,9 @@ abstract final class AppRoutes {
   static const String networkEntityDirectory = '/network/entities';
   static const String posEntityDirectory = '/pos/entities';
   static const String networkEntityDetails = '/network/entities/:id';
+  static const String networkEntityRelationships = '/network/entities/:id/relationships';
   static const String posEntityDetails = '/pos/entities/:id';
+  static const String posEntityRelationships = '/pos/entities/:id/relationships';
   static const String networkEntityCreate = '/network/entities/create';
   static const String networkEntityEdit = '/network/entities/:id/edit';
   static const String posEntityCreate = '/pos/entities/create';
