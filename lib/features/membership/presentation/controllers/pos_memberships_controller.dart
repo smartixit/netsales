@@ -340,6 +340,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void openAddMemberSheet() {
+    if (!canAddMember) return;
     final formKey = GlobalKey<FormState>();
     final phoneController = TextEditingController();
     final roleNotifier = ValueNotifier<int?>(
@@ -360,6 +361,8 @@ class PosMembershipsController extends BaseMembershipsController {
         statusNotifier: statusNotifier,
         isSubmitting: isSubmitting,
         onSubmit: () async {
+          if (!canChangeMemberRole) return;
+          if (!canAddMember) return;
           if (!formKey.currentState!.validate()) return;
           if (roleNotifier.value == null) {
             CustomSnackbar.show(
@@ -403,6 +406,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void openChangeRoleSheet(WorkspaceMemberEntity member) {
+    if (!canChangeMemberRole) return;
     final formKey = GlobalKey<FormState>();
     final reasonController = TextEditingController();
     final roleNotifier = ValueNotifier<int?>(
@@ -470,6 +474,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void promptToggleMemberStatus(WorkspaceMemberEntity member) {
+    if (!canChangeMemberStatus) return;
     final willSuspend = member.isActive;
     final nextStatus = willSuspend ? 'SUSPENDED' : 'ACTIVE';
 
@@ -477,6 +482,8 @@ class PosMembershipsController extends BaseMembershipsController {
       memberName: member.displayFullName,
       willSuspend: willSuspend,
       onConfirm: (reason) async {
+          if (!canRemoveMember) return;
+          if (!canChangeMemberStatus) return;
         final posId = resolvedPosId;
         if (posId == null) return;
 
@@ -507,6 +514,7 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   void promptRemoveMember(WorkspaceMemberEntity member) {
+    if (!canRemoveMember) return;
     MembershipActionDialogs.showRemoveMemberDialog(
       memberName: member.displayFullName,
       onConfirm: (reason) async {
