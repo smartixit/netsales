@@ -374,18 +374,21 @@ void main() {
       formController.setBalanceUnit(DataSizeUnit.megabytes);
       expect(formController.selectedBalanceUnit.value, DataSizeUnit.megabytes);
       expect(formController.balanceController.text, '1.5');
+      expect(formController.liveBalanceInBytes.value, 1572864);
 
       formController.selectedUptimeUnit.value = TimeDurationUnit.hours;
-      formController.uptimeController.text = '1.5';
+      formController.uptimeController.text = '2.5';
       formController.setUptimeUnit(TimeDurationUnit.minutes);
       expect(formController.selectedUptimeUnit.value, TimeDurationUnit.minutes);
-      expect(formController.uptimeController.text, '1.5');
+      expect(formController.uptimeController.text, '2.5');
+      expect(formController.liveUptimeInMinutes.value, 3);
 
       formController.selectedValidityUnit.value = TimeDurationUnit.months;
       formController.validityController.text = '1.5';
       formController.setValidityUnit(TimeDurationUnit.days);
       expect(formController.selectedValidityUnit.value, TimeDurationUnit.days);
       expect(formController.validityController.text, '1.5');
+      expect(formController.liveValidityInMinutes.value, 2160);
     });
 
     test('empty optional durations remain empty when their units change', () {
