@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
@@ -36,6 +39,11 @@ class NetworkExpenseFormController extends GetxController {
 
   bool get isEditMode => isEditing.value;
 
+  bool get canCreateExpense =>
+      PermissionService.to.can(AppPermissions.expensesCreate);
+  bool get canEditExpense =>
+      PermissionService.to.can(AppPermissions.expensesEdit);
+
   // وحدات التحكم النصية لبنود المصروف (Statement & Amount Controllers)
   final statementControllers = <TextEditingController>[].obs;
   final amountControllers = <TextEditingController>[].obs;
@@ -61,6 +69,7 @@ class NetworkExpenseFormController extends GetxController {
 
   bool get canSubmit {
     if (isSubmitting.value) return false;
+    if (isEditing.value ? !canEditExpense : !canCreateExpense) return false;
     if (activeNetworkId == null) return false;
     if (statementControllers.isEmpty) return false;
     for (int i = 0; i < statementControllers.length; i++) {
@@ -76,9 +85,17 @@ class NetworkExpenseFormController extends GetxController {
     super.onInit();
     final args = Get.arguments;
     if (args is ExpenseEntity) {
+      if (!canEditExpense) {
+        Get.offNamed<void>(AppRoutes.unauthorized);
+        return;
+      }
       _initFromExpense(args);
     } else if (args is Map) {
       if (args['expense'] is ExpenseEntity) {
+        if (!canEditExpense) {
+          Get.offNamed<void>(AppRoutes.unauthorized);
+          return;
+        }
         _initFromExpense(args['expense'] as ExpenseEntity);
       }
     } else {
@@ -167,6 +184,7 @@ class NetworkExpenseFormController extends GetxController {
 
   /// إرسال وحفظ سند المصروف (إنشاء أو تعديل) مع تسوية المحفظة
   Future<void> submitExpense() async {
+    if (isEditing.value ? !canEditExpense : !canCreateExpense) return;
     final networkId = activeNetworkId;
     if (networkId == null) {
       CustomSnackbar.show(
