@@ -40,7 +40,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 subtitle: 'إدارة الكيانات وبياناتها الأساسية ومتابعة دورة حياتها.',
                 icon: Icons.storefront_rounded,
               ),
-              CustomButton.primary(
+              if (controller.canCreate) CustomButton.primary(
                 text: 'إنشاء نقطة بيع',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
