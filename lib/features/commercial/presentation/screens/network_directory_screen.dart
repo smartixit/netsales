@@ -18,12 +18,14 @@ import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 
 class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
-  const NetworkDirectoryScreen({super.key});
+  const NetworkDirectoryScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
-  Widget build(BuildContext context) => CustomAppScaffold(
-    appBarTitle: 'إدارة الشبكات',
-    body: CustomRefreshablePage.slivers(
+  Widget build(BuildContext context) {
+    final content = CustomRefreshablePage.slivers(
+      embedded: embedded,
       onRefresh: controller.refreshDirectory,
       onLoadMore: controller.loadMore,
       hasMorePredicate: () => controller.hasMore,
@@ -137,6 +139,11 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
           )),
         ),
       ],
-    ),
-  );
+    );
+    if (embedded) return content;
+    return CustomAppScaffold(
+      appBarTitle: 'إدارة الشبكات',
+      body: content,
+    );
+  }
 }
