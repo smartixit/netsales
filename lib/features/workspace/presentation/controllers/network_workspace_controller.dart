@@ -170,7 +170,7 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   void openProfile() => onNavItemSelected(3);
-  void openWholesaleInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
+  void openWholesaleInvoices() => Get.toNamed<void>(AppRoutes.wholesaleInvoices);
   void openOperatingExpenses() =>
       Get.toNamed<void>(AppRoutes.operatingExpenses);
   void openPlatformBilling() => onNavItemSelected(6);
