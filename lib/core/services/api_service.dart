@@ -91,7 +91,7 @@ class ApiService {
       // Hosting challenges must be recognized before session invalidation and
       // before the crypto interceptor disposes the request's ephemeral key.
       InfinityFreeChallengeInterceptor(_dio),
-      _SessionAuthInterceptor(),
+      SessionAuthInterceptor(),
       _CryptoInterceptor(_dio),
     ]);
   }
@@ -701,7 +701,7 @@ class ApiService {
 // ============================================================================
 
 /// معترض المصادقة وحقن الترويسات الرسمية (X-Session-Id, X-Device-Uuid)
-class _SessionAuthInterceptor extends Interceptor {
+class SessionAuthInterceptor extends Interceptor {
   @override
   void onRequest(
     RequestOptions options,
@@ -758,9 +758,7 @@ class _SessionAuthInterceptor extends Interceptor {
         err.requestOptions.extra[infinityFreeVerificationProbeFlagKey] == true;
     final isChallengeFailure =
         err.requestOptions.extra[infinityFreeChallengeFailureFlagKey] == true;
-    final isChallengeReplay =
-        err.requestOptions.extra[infinityFreeChallengeReplayFlagKey] == true;
-    if (isVerificationProbe || isChallengeFailure || isChallengeReplay) {
+    if (isVerificationProbe || isChallengeFailure) {
       return handler.next(err);
     }
 
