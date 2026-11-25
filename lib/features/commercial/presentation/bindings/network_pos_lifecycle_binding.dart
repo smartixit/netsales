@@ -4,6 +4,15 @@ import 'package:netsales/features/catalog/data/datasources/package_catalog_remot
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
+import 'package:netsales/features/catalog/data/datasources/package_pos_discount_remote_data_source.dart';
+import 'package:netsales/features/catalog/data/datasources/package_pos_discount_remote_data_source_impl.dart';
+import 'package:netsales/features/catalog/data/repositories/package_pos_discount_repository_impl.dart';
+import 'package:netsales/features/catalog/domain/repositories/package_pos_discount_repository.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_package_pos_discounts_for_pos_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/create_package_pos_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/update_package_pos_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/toggle_package_pos_discount_status_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/delete_package_pos_discount_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_pos_lifecycle_controller.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
@@ -42,12 +51,62 @@ class NetworkPosLifecycleBinding extends Bindings {
       );
     }
 
+    if (!Get.isRegistered<PackagePosDiscountRemoteDataSource>()) {
+      Get.lazyPut<PackagePosDiscountRemoteDataSource>(
+        () => const PackagePosDiscountRemoteDataSourceImpl(),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<PackagePosDiscountRepository>()) {
+      Get.lazyPut<PackagePosDiscountRepository>(
+        () => PackagePosDiscountRepositoryImpl(
+          Get.find<PackagePosDiscountRemoteDataSource>(),
+        ),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<GetPackagePosDiscountsForPosUseCase>()) {
+      Get.lazyPut<GetPackagePosDiscountsForPosUseCase>(
+        () => GetPackagePosDiscountsForPosUseCase(Get.find<PackagePosDiscountRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<CreatePackagePosDiscountUseCase>()) {
+      Get.lazyPut<CreatePackagePosDiscountUseCase>(
+        () => CreatePackagePosDiscountUseCase(Get.find<PackagePosDiscountRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<UpdatePackagePosDiscountUseCase>()) {
+      Get.lazyPut<UpdatePackagePosDiscountUseCase>(
+        () => UpdatePackagePosDiscountUseCase(Get.find<PackagePosDiscountRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<TogglePackagePosDiscountStatusUseCase>()) {
+      Get.lazyPut<TogglePackagePosDiscountStatusUseCase>(
+        () => TogglePackagePosDiscountStatusUseCase(Get.find<PackagePosDiscountRepository>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<DeletePackagePosDiscountUseCase>()) {
+      Get.lazyPut<DeletePackagePosDiscountUseCase>(
+        () => DeletePackagePosDiscountUseCase(Get.find<PackagePosDiscountRepository>()),
+        fenix: true,
+      );
+    }
+
     Get.lazyPut<NetworkPosLifecycleController>(
       () => NetworkPosLifecycleController(
         networkPosId: id,
         networkId: (Get.arguments is Map ? (Get.arguments['network_id'] as num?)?.toInt() : null) ?? 0,
         posId: (Get.arguments is Map ? (Get.arguments['pos_id'] as num?)?.toInt() : null) ?? 0,
         getEffectiveDiscountsUseCase: Get.find<GetEffectivePackageDiscountsForPosUseCase>(),
+        getPackagePosDiscountsUseCase: Get.find<GetPackagePosDiscountsForPosUseCase>(),
+        createPackagePosDiscountUseCase: Get.find<CreatePackagePosDiscountUseCase>(),
+        updatePackagePosDiscountUseCase: Get.find<UpdatePackagePosDiscountUseCase>(),
+        togglePackagePosDiscountStatusUseCase: Get.find<TogglePackagePosDiscountStatusUseCase>(),
+        deletePackagePosDiscountUseCase: Get.find<DeletePackagePosDiscountUseCase>(),
         entityId: (Get.arguments is Map ? (Get.arguments['entity_id'] as num?)?.toInt() : null) ?? 0,
         isNetworkScope: Get.arguments is Map ? Get.arguments['is_network'] == true : true,
         getTrashedLinksUseCase: Get.find<GetTrashedNetworkPosLinksUseCase>(),
