@@ -10,6 +10,7 @@ on:
       - chore/pub-audioplayers-6.8.1
       - chore/pub-compatible-updates
       - fix/infinityfree-two-step-verification
+      - fix/infinityfree-401-two-factor-session-protection
       - fix/date-picker-field-modal
   pull_request:
     branches:

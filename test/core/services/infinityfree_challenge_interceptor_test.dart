@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/services/api_service.dart';
+import 'package:netsales/core/services/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netsales/core/services/api_request_replay_state.dart';
 import 'package:netsales/core/services/infinityfree_challenge_interceptor.dart';
 import 'package:netsales/core/services/infinityfree_challenge_solver.dart';
@@ -368,6 +371,148 @@ void main() {
       dio.close(force: true);
     });
 
+    test('solves an HTTP 401 InfinityFree challenge on two-factor verification before session rejection', () async {
+      final baseUri = Uri.parse('https://two-factor-challenge.example');
+      final verifyUri = baseUri.resolve('/api/v1/auth/2fa/verify');
+      final challenge = _challenge(verifyUri);
+      var verificationPostCount = 0;
+
+      final adapter = _ScriptedAdapter((request, body) async {
+        if (request.uri.path == verifyUri.path && request.method == 'POST') {
+          verificationPostCount++;
+          if (verificationPostCount == 1) {
+            return _html(challenge, 401);
+          }
+          return _json(
+            '{"success":true,"message":"تم التحقق","data":{"session_id":"new-session"},"errors":[]}',
+            200,
+          );
+        }
+
+        if (request.uri.path == verifyUri.path &&
+            request.method == 'GET' &&
+            request.uri.queryParameters['i'] == '1') {
+          expect(body, isNull);
+          expect(
+            _headerValue(request.headers, 'X-Device-Uuid'),
+            'device-after-otp',
+          );
+          return _text('hosting challenge accepted', 200);
+        }
+
+        return _text('unexpected request', 400);
+      });
+
+      SharedPreferences.setMockInitialValues({});
+      await StorageService.instance.init();
+      var unauthorizedCount = 0;
+      ApiService.onUnauthorized = () async {
+        unauthorizedCount++;
+      };
+      addTearDown(() => ApiService.onUnauthorized = null);
+
+      final dio = _dio(baseUri, adapter);
+      dio.interceptors.add(SessionAuthInterceptor());
+      final response = await dio.post<String>(
+        '/api/v1/auth/2fa/verify',
+        data: '{"otp":"123456"}',
+        options: Options(
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.plain,
+          headers: {'X-Device-Uuid': 'device-after-otp'},
+        ),
+      );
+
+      expect(response.statusCode, 200);
+      expect(response.data, contains('"session_id":"new-session"'));
+      expect(unauthorizedCount, 0);
+      expect(verificationPostCount, 2);
+      expect(adapter.requests, hasLength(3));
+      expect(adapter.requests.map((request) => request.method), [
+        'POST',
+        'GET',
+        'POST',
+      ]);
+      expect(adapter.requests[0].options.responseType, ResponseType.plain);
+      expect(adapter.requests[1].uri.queryParameters, {'i': '1'});
+      expect(adapter.requests[1].body, isNull);
+      expect(adapter.requests[2].body, isNotNull);
+      expect(
+        String.fromCharCodes(adapter.requests[2].body!),
+        '{"otp":"123456"}',
+      );
+      expect(adapter.requests[2].header('Cookie'), contains('__test='));
+      dio.close(force: true);
+    });
+
+    test('passes a real Laravel 401 from the two-factor replay to session invalidation', () async {
+      SharedPreferences.setMockInitialValues({});
+      await StorageService.instance.init();
+
+      var unauthorizedCount = 0;
+      ApiService.onUnauthorized = () async {
+        unauthorizedCount++;
+      };
+      addTearDown(() => ApiService.onUnauthorized = null);
+
+      final baseUri = Uri.parse('https://two-factor-real-401.example');
+      final verifyUri = baseUri.resolve('/api/v1/auth/2fa/verify');
+      final challenge = _challenge(verifyUri);
+      var postCount = 0;
+
+      final adapter = _ScriptedAdapter((request, body) async {
+        if (request.uri.path == verifyUri.path && request.method == 'POST') {
+          postCount++;
+          if (postCount == 1) {
+            return _html(challenge, 401);
+          }
+          return _json(
+            '{"success":false,"message":"انتهت صلاحية الجلسة","data":null,"errors":[]}',
+            401,
+          );
+        }
+
+        if (request.uri.path == verifyUri.path &&
+            request.method == 'GET' &&
+            request.uri.queryParameters['i'] == '1') {
+          expect(body, isNull);
+          return _text('hosting challenge accepted', 200);
+        }
+
+        return _text('unexpected request', 400);
+      });
+
+      final dio = _dio(baseUri, adapter);
+      dio.interceptors.add(SessionAuthInterceptor());
+
+      DioException? failure;
+      try {
+        await dio.post<String>(
+          '/api/v1/auth/2fa/verify',
+          data: '{"otp":"123456"}',
+          options: Options(
+            contentType: Headers.jsonContentType,
+            responseType: ResponseType.plain,
+          ),
+        );
+      } on DioException catch (error) {
+        failure = error;
+      }
+
+      expect(failure, isNotNull);
+      expect(failure!.response?.statusCode, 401);
+      expect(unauthorizedCount, 1);
+      expect(postCount, 2);
+      expect(adapter.requests, hasLength(3));
+      expect(adapter.requests.map((request) => request.method), [
+        'POST',
+        'GET',
+        'POST',
+      ]);
+      expect(failure.response?.data, contains('انتهت صلاحية الجلسة'));
+      dio.close(force: true);
+    });
+
     test(
       'does not replay or cache cookie when verification GET is challenged',
       () async {
@@ -496,10 +641,10 @@ location.href="$redirect";
 ''';
 }
 
-ResponseBody _html(String body) {
+ResponseBody _html(String body, [int statusCode = 200]) {
   return ResponseBody.fromString(
     body,
-    200,
+    statusCode,
     headers: {
       Headers.contentTypeHeader: ['text/html; charset=utf-8'],
     },
