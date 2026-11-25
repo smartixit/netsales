@@ -20,14 +20,19 @@ class PermissionService extends GetxService {
   final RxSet<String> _workspacePermissions = <String>{}.obs;
   final RxString _workspaceRoleKey = ''.obs;
   bool _workspaceContextBound = false;
+  RoleScope _workspaceScope = RoleScope.unknown;
+  int _workspaceTenantId = 0;
+
+  bool get hasWorkspaceContext =>
+      _workspaceContextBound &&
+      (_workspaceScope == RoleScope.network || _workspaceScope == RoleScope.pos) &&
+      _workspaceTenantId > 0;
 
   /// قائمة الصلاحيات النشطة (للقراءة فقط)
   Set<String> get permissions => _permissions.toSet();
 
   /// الدور الوظيفي الحالي للمستخدم
-  String get currentRole => _workspaceContextBound
-      ? _workspaceRoleKey.value
-      : _roleKey.value;
+  String get currentRole => hasWorkspaceContext ? _workspaceRoleKey.value : '';
 
   /// تهيئة أو تحديث الصلاحيات والدور
   void updateAccess({
@@ -50,35 +55,41 @@ class PermissionService extends GetxService {
     required Iterable<String> permissions,
   }) {
     _workspaceContextBound = true;
-    _workspaceRoleKey.value = roleKey;
+    _workspaceScope = scope;
+    _workspaceTenantId = tenantId;
+    final isOperationalContext =
+        (scope == RoleScope.network || scope == RoleScope.pos) &&
+        tenantId > 0 &&
+        roleKey.trim().isNotEmpty;
+    _workspaceRoleKey.value = isOperationalContext ? roleKey : '';
     _workspacePermissions
       ..clear()
-      ..addAll(tenantId > 0 ? permissions : const <String>[]);
+      ..addAll(isOperationalContext ? permissions : const <String>[]);
   }
 
   void clearWorkspaceContext() {
     _workspaceContextBound = false;
+    _workspaceScope = RoleScope.unknown;
+    _workspaceTenantId = 0;
     _workspaceRoleKey.value = '';
     _workspacePermissions.clear();
   }
 
   /// فحص امتلاك صلاحية مفردة
   bool can(String permission) {
-    return _workspaceContextBound
-        ? _workspacePermissions.contains(permission)
-        : _permissions.contains(permission);
+    return hasWorkspaceContext && _workspacePermissions.contains(permission);
   }
 
   /// فحص امتلاك أي صلاحية من قائمة معطاة (OR)
   bool canAny(Iterable<String> permissions) {
-    final source = _workspaceContextBound ? _workspacePermissions : _permissions;
-    return permissions.any(source.contains);
+    return hasWorkspaceContext &&
+        permissions.any(_workspacePermissions.contains);
   }
 
   /// فحص امتلاك كافة الصلاحيات المحددة (AND)
   bool canAll(Iterable<String> permissions) {
-    final source = _workspaceContextBound ? _workspacePermissions : _permissions;
-    return permissions.every(source.contains);
+    return hasWorkspaceContext &&
+        permissions.every(_workspacePermissions.contains);
   }
 
   /// التحقق من تطابق الدور الوظيفي
