@@ -1,13 +1,21 @@
-import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
 
 class GetNetworkPosAgreementsUseCase {
   const GetNetworkPosAgreementsUseCase(this._repository);
 
   final CommercialRepository _repository;
 
-  Future<PaginatedList<NetworkPosAgreementEntity>> call({required int networkPosId, String? cursor, int perPage = 15}) {
-    return _repository.getNetworkPosAgreements({required int networkPosId, String? cursor, int perPage = 15});
+  Future<PaginatedList<NetworkPosAgreementEntity>> call({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  }) {
+    return _repository.getNetworkPosAgreements(
+      networkPosId: networkPosId,
+      cursor: cursor,
+      perPage: perPage,
+    );
   }
 }

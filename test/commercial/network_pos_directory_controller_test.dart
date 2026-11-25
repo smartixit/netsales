@@ -6,6 +6,8 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -286,6 +288,64 @@ class _FakeCommercialRepository implements CommercialRepository {
 
   @override
   Future<void> restorePos(int posId) async {}
+
+  @override
+  Future<PaginatedList<NetworkPosAgreementEntity>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<NetworkPosAgreementEntity>(items: const []);
+
+  @override
+  Future<NetworkPosAgreementEntity> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkPosAgreementEntity> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkPosAgreementEntity> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkPosAgreementEntity> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosEventEntity>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  }) async => PaginatedList<NetworkPosEventEntity>(items: const []);
+
+  @override
+  Future<void> restoreNetworkPosLink(int networkPosId) async {}
+
+  @override
+  Future<PaginatedList<NetworkPosLinkEntity>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<NetworkPosLinkEntity>(items: const []);
 
   @override
   Future<NetworkEntity> getNetworkDetails(int networkId) async {
