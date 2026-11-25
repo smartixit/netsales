@@ -221,6 +221,7 @@ class ExpenseDetailsController extends GetxController {
 
   /// تأكيد وحذف المصروف واسترداد مبلغه للمحفظة
   Future<void> confirmDelete(BuildContext context) async {
+    if (!canDeleteExpense) return;
     final exp = expense.value;
     if (exp == null) return;
 
