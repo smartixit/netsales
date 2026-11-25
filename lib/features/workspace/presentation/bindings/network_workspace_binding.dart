@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_network_use_case.dart';
 import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_networks_page_use_case.dart';
@@ -75,7 +77,11 @@ class NetworkWorkspaceBinding extends Bindings {
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     registerLazyIfAbsent<NetworkDirectoryController>(
-      () => NetworkDirectoryController(Get.find<GetNetworksPageUseCase>()),
+      () => NetworkDirectoryController(
+        Get.find<GetNetworksPageUseCase>(),
+        Get.find<GetTrashedNetworksUseCase>(),
+        Get.find<RestoreNetworkUseCase>(),
+      ),
       fenix: true,
     );
     ExpenseBinding().dependencies();
