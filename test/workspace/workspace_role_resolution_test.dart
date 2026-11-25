@@ -170,7 +170,7 @@ void main() {
         'user_phone_number': '700000100',
         'role_key': 'CUSTOM_PLATFORM_ROLE',
         'role_scope': 'PLATFORM',
-        'workspace_roles': const [],
+        'workspace_roles': const <Map<String, dynamic>>[],
       });
 
       expect(user.isPlatformUser, isTrue);
