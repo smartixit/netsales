@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 
 /// ============================================================================
@@ -15,6 +16,18 @@ class PermissionService extends GetxService {
       ? Get.find<PermissionService>()
       : instance;
 
+  static const Set<RoleKey> _networkRoleKeys = {
+    RoleKey.networkOwner,
+    RoleKey.networkUser,
+    RoleKey.networkAccountant,
+  };
+
+  static const Set<RoleKey> _posRoleKeys = {
+    RoleKey.posAgent,
+    RoleKey.posUser,
+    RoleKey.posAccountant,
+  };
+
   final RxSet<String> _permissions = <String>{}.obs;
   final RxString _roleKey = ''.obs;
   final RxSet<String> _workspacePermissions = <String>{}.obs;
@@ -26,7 +39,8 @@ class PermissionService extends GetxService {
   bool get hasWorkspaceContext =>
       _workspaceContextBound &&
       (_workspaceScope == RoleScope.network || _workspaceScope == RoleScope.pos) &&
-      _workspaceTenantId > 0;
+      _workspaceTenantId > 0 &&
+      _workspaceRoleKey.value.isNotEmpty;
 
   /// قائمة الصلاحيات النشطة (للقراءة فقط)
   Set<String> get permissions => _permissions.toSet();
@@ -47,7 +61,8 @@ class PermissionService extends GetxService {
   }
 
   /// Bind UI capabilities to one exact active tenant membership.
-  /// An absent membership is a deny-all context, never a global union fallback.
+  /// Reject mismatched or unknown role/scope pairs instead of trusting malformed
+  /// membership data to create an operational authorization context.
   void setWorkspaceContext({
     required RoleScope scope,
     required int tenantId,
@@ -57,10 +72,16 @@ class PermissionService extends GetxService {
     _workspaceContextBound = true;
     _workspaceScope = scope;
     _workspaceTenantId = tenantId;
+
+    final typedRole = RoleKey.fromWire(roleKey);
+    final roleMatchesScope = switch (scope) {
+      RoleScope.network => _networkRoleKeys.contains(typedRole),
+      RoleScope.pos => _posRoleKeys.contains(typedRole),
+      RoleScope.platform || RoleScope.unknown => false,
+    };
     final isOperationalContext =
-        (scope == RoleScope.network || scope == RoleScope.pos) &&
-        tenantId > 0 &&
-        roleKey.trim().isNotEmpty;
+        roleMatchesScope && tenantId > 0 && roleKey.trim().isNotEmpty;
+
     _workspaceRoleKey.value = isOperationalContext ? roleKey : '';
     _workspacePermissions
       ..clear()
@@ -77,18 +98,19 @@ class PermissionService extends GetxService {
 
   /// فحص امتلاك صلاحية مفردة
   bool can(String permission) {
-    return hasWorkspaceContext && _workspacePermissions.contains(permission);
+    return hasWorkspaceContext && _workspaceRoleKey.value.isNotEmpty &&
+        _workspacePermissions.contains(permission);
   }
 
   /// فحص امتلاك أي صلاحية من قائمة معطاة (OR)
   bool canAny(Iterable<String> permissions) {
-    return hasWorkspaceContext &&
+    return hasWorkspaceContext && _workspaceRoleKey.value.isNotEmpty &&
         permissions.any(_workspacePermissions.contains);
   }
 
   /// فحص امتلاك كافة الصلاحيات المحددة (AND)
   bool canAll(Iterable<String> permissions) {
-    return hasWorkspaceContext &&
+    return hasWorkspaceContext && _workspaceRoleKey.value.isNotEmpty &&
         permissions.every(_workspacePermissions.contains);
   }
 
