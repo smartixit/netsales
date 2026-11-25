@@ -94,7 +94,7 @@ class NetworkDirectoryScreen extends GetView<NetworkDirectoryController> {
           if (controller.errorMessage.value != null && controller.networks.isEmpty) {
             return SliverToBoxAdapter(
               child: CustomErrorState(
-                title: 'تعذر تحميل الشبكات',
+                title: controller.showArchived.value ? 'تعذر تحميل أرشيف الشبكات' : 'تعذر تحميل الشبكات',
                 subtitle: controller.errorMessage.value,
                 onRetry: controller.refreshDirectory,
               ),
