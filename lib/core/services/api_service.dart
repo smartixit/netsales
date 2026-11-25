@@ -61,8 +61,9 @@ class ApiService {
   /// دالة رد نداء تُستدعى تلقائياً عند انتهاء صلاحية الجلسة (401 Unauthorized)
   static Future<void> Function()? onUnauthorized;
 
-  /// Monotonic local generation used to ignore responses from a previous session.
-  /// This value is never sent to the API and is not an authentication credential.
+  /// Monotonic local generation used to ignore responses from a previous
+  /// session. This value is never sent to the API and is not an authentication
+  /// credential.
   static int sessionGeneration = 0;
 
   /// تهيئة عميل الاتصال وضبط تجاوز الشهادات في بيئة التطوير
