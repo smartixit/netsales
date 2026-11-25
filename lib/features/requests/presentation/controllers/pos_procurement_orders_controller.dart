@@ -154,13 +154,13 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
       request: request,
       onDetails: () => openRequestDetails(request),
       isNetworkView: false,
-      onEdit: (request.isPending && canCreateOrder)
+      onEdit: (request.isPending && canEditOrder)
           ? () => openEditOrder(request)
           : null,
       onCancel: (request.isPending && canCancelOrder)
           ? () => promptCancelRequest(request)
           : null,
-      onDelete: (request.isCancelled && canCancelOrder)
+      onDelete: (request.isCancelled && canDeleteOrder)
           ? () => promptDeleteRequest(request)
           : null,
     );
@@ -217,8 +217,14 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   bool get canCreateOrder =>
       PermissionService.to.can(AppPermissions.requestsCreate);
 
-  bool get canCancelOrder =>
+  bool get canEditOrder =>
       PermissionService.to.can(AppPermissions.requestsEdit);
+
+  bool get canCancelOrder =>
+      PermissionService.to.can(AppPermissions.requestsCancel);
+
+  bool get canDeleteOrder =>
+      PermissionService.to.can(AppPermissions.requestsDelete);
 
   @override
   Future<void> refreshOrders() => Future.wait([
@@ -390,6 +396,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> cancelRequest(int requestId) async {
+    if (!canCancelOrder) return;
     try {
       await CustomAnimationOverlay.showLoading(
         message: 'جاري إلغاء طلب التوريد...',
@@ -427,6 +434,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> deleteRequest(int requestId) async {
+    if (!canDeleteOrder) return;
     try {
       await CustomAnimationOverlay.showLoading(
         message: 'جاري حذف طلب التوريد من السجل...',
@@ -472,6 +480,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> navigateToNewOrder() async {
+    if (!canCreateOrder) return;
     if (Get.isRegistered<PosNewProcurementOrderController>()) {
       await Get.delete<PosNewProcurementOrderController>();
     }
@@ -480,6 +489,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> openEditOrder(RequestEntity request) async {
+    if (!canEditOrder || !request.isPending) return;
     if (Get.isRegistered<PosNewProcurementOrderController>()) {
       await Get.delete<PosNewProcurementOrderController>();
     }
@@ -488,6 +498,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> promptCancelRequest(RequestEntity request) async {
+    if (!canCancelOrder || !request.isPending) return;
     await ProcurementActionDialogs.showCancelDialog(
       requestUuid: request.requestUuid ?? '-',
       onConfirm: () => cancelRequest(request.requestId),
@@ -495,6 +506,7 @@ class PosProcurementOrdersController extends BaseProcurementOrdersController {
   }
 
   Future<void> promptDeleteRequest(RequestEntity request) async {
+    if (!canDeleteOrder || !request.isCancelled) return;
     await ProcurementActionDialogs.showDeleteDialog(
       requestUuid: request.requestUuid ?? '-',
       onConfirm: () => deleteRequest(request.requestId),
