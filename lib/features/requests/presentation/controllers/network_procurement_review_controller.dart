@@ -315,7 +315,7 @@ class NetworkProcurementReviewController
   bool get canRejectRequests =>
       PermissionService.to.can(AppPermissions.requestsReject);
   bool get canModifyRequests =>
-      PermissionService.to.can(AppPermissions.requestsEdit);
+      PermissionService.to.can(AppPermissions.requestsPreviewModification);
 
   /// هل توجد تعديلات فعلية على مسودة الباقات مقارنة بالطلب الأصلي
   bool get hasModificationChanges {
@@ -479,7 +479,7 @@ class NetworkProcurementReviewController
   }
 
   Future<void> beginModification(RequestEntity request) async {
-    if (!request.isPending) return;
+    if (!canModifyRequests || !request.isPending) return;
 
     final requestId = request.requestId;
     final loadRevision = ++_editorLoadRevision;
@@ -738,6 +738,7 @@ class NetworkProcurementReviewController
   }
 
   Future<bool> previewModification() async {
+    if (!canModifyRequests) return false;
     final requestId = editingRequestId.value;
     if (requestId == null ||
         modificationLines.isEmpty ||
