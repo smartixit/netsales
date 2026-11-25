@@ -102,7 +102,7 @@ class PermissionGuardMiddleware extends GetMiddleware {
     this.requiredRole,
     this.anyRoles,
     int? priority,
-  }) : _priority = priority ?? 2;
+  }) : _priority = priority ?? 3;
 
   final int _priority;
 
