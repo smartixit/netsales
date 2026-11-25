@@ -370,6 +370,7 @@ class NetworkPosLifecycleController extends GetxController {
       }
       Get.back();
       await loadPackageDiscounts(refresh: true);
+      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ خصم الباقة.', type: SnackType.success);
     } catch (error) {
