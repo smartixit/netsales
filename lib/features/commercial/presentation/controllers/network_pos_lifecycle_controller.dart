@@ -128,7 +128,6 @@ class NetworkPosLifecycleController extends GetxController {
   int _eventsRevision = 0;
   int _archiveRevision = 0;
   int _discountsRevision = 0;
-  int _discountsRevision = 0;
 
   bool get canViewAgreements => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networkViewPosAgreements : AppPermissions.posViewNetworkAgreements,
