@@ -80,6 +80,14 @@ class NetworkDetailsScreen extends GetView<NetworkDetailsController> {
             ),
           ),
           AppSpacing.vMd,
+          if (controller.canViewRelationships) CustomButton.primary(
+            text: 'إدارة العلاقات التجارية',
+            prefix: Icons.hub_rounded,
+            onPressed: () => Get.toNamed(
+              AppRoutes.networkEntityRelationships.replaceFirst(':id', network.networkId.toString()),
+            ),
+          ),
+          AppSpacing.vSm,
           if (controller.canEdit) CustomButton.secondary(
             text: 'تحديث البيانات',
             onPressed: () async {
