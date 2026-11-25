@@ -55,6 +55,8 @@ abstract final class AppRoutes {
   static const String posEntityDetails = '/pos/entities/:id';
   static const String networkEntityCreate = '/network/entities/create';
   static const String networkEntityEdit = '/network/entities/:id/edit';
+  static const String posEntityCreate = '/pos/entities/create';
+  static const String posEntityEdit = '/pos/entities/:id/edit';
   static const String voucherPackagesCatalog = '/network/packages-catalog';
   static const String packageDetails = '/network/packages/details';
   static const String packageForm = '/network/packages/form';
