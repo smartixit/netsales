@@ -242,7 +242,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
                   ),
                 ],
               ),
-            ] else if (agreement.isActive && controller.canManageAgreements) ...[
+            ] else if (agreement.isActive && agreement.validityState != 'EXPIRED' && controller.canManageAgreements) ...[
               AppSpacing.vMd,
               CustomButton.secondary(
                 text: 'إنهاء الاتفاقية',
