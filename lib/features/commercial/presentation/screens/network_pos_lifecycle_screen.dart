@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_pos_lifecycle_controller.dart';
@@ -53,10 +54,50 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               padding: EdgeInsets.all(AppSpacing.md),
               child: CustomPageHeroCard(
                 title: 'إدارة العلاقة #${controller.networkPosId}',
-                subtitle: 'الاتفاقيات التجارية وسجل الأحداث والقرارات المرتبطة بالعلاقة.',
+                subtitle: controller.relationship == null
+                    ? 'الاتفاقيات التجارية وسجل الأحداث والقرارات المرتبطة بالعلاقة.'
+                    : '${controller.relationship!.displayNetworkName}  ↔  ${controller.relationship!.displayPosName}',
                 icon: Icons.hub_rounded,
               ),
             ),
+            if (controller.relationship != null)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: CustomSurfaceCard(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: Text('بيانات العلاقة', style: const TextStyle(fontWeight: FontWeight.w700))),
+                          Chip(
+                            label: Text(controller.relationship!.isActive ? 'نشطة' : 'معطّلة'),
+                          ),
+                        ],
+                      ),
+                      AppSpacing.vXs,
+                      Text('الشبكة: ${controller.relationship!.displayNetworkName}'),
+                      Text('نقطة البيع: ${controller.relationship!.displayPosName}'),
+                      Text('تاريخ الربط: ${controller.relationship!.formattedLinkedDate}'),
+                      if (controller.canViewRelationshipWallet) ...[
+                        AppSpacing.vSm,
+                        CustomButton.secondary(
+                          text: 'دفتر أستاذ العلاقة والالتزامات المالية',
+                          prefix: Icons.account_balance_wallet_outlined,
+                          onPressed: () => Get.toNamed<void>(
+                            AppRoutes.posWalletStatement,
+                            arguments: {
+                              'network_id': controller.networkId,
+                              'pos_id': controller.posId,
+                            },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
             if (tabs.isNotEmpty) TabBar(tabs: tabs),
             Expanded(
               child: tabs.isEmpty
