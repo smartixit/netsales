@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_directory_controller.dart';
@@ -44,7 +45,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 text: 'إنشاء نقطة بيع',
                 prefix: Icons.add_rounded,
                 onPressed: () async {
-                  final saved = await Get.toNamed('/pos/entities/create');
+                  final saved = await Get.toNamed('AppRoutes.posEntityCreate');
                   if (saved == true) await controller.refreshDirectory();
                 },
               ),
@@ -107,7 +108,7 @@ class PosDirectoryScreen extends GetView<PosDirectoryController> {
                 final pos = controller.points[index];
                 return GestureDetector(
                   onTap: () async {
-                    final changed = await Get.toNamed('/pos/entities/${pos.posId}');
+                    final changed = await Get.toNamed(AppRoutes.posEntityDetails.replaceFirst(':id', pos.posId.toString()));
                     if (changed == true) await controller.refreshDirectory();
                   },
                   child: CustomSurfaceCard(
