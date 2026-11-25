@@ -26,7 +26,7 @@ class PosFormScreen extends GetView<PosFormController> {
           title: 'تعذر فتح نموذج نقطة البيع',
           subtitle: controller.errorMessage.value,
           actionLabel: 'العودة',
-          onAction: () => Get.back(),
+          onAction: controller.retryInitialize,
         );
       }
       if (controller.isLoading.value) return const CustomStateView.loading();
