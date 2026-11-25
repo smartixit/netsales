@@ -346,7 +346,7 @@ abstract final class AppPages {
       }),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
         WorkspaceGuard(targetWorkspace: AppWorkspace.network),
       ],
     ),
@@ -361,7 +361,7 @@ abstract final class AppPages {
       }),
       middlewares: [
         AuthGuard(),
-        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
         WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
       ],
     ),
