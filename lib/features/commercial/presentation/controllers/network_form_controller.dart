@@ -58,6 +58,11 @@ class NetworkFormController extends GetxController {
     _initialize();
   }
 
+  Future<void> retryInitialize() async {
+    errorMessage.value = null;
+    await _initialize();
+  }
+
   Future<void> _initialize() async {
     final id = networkId;
     isLoading.value = id != null;
