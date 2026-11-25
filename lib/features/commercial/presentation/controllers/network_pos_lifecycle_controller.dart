@@ -3,8 +3,14 @@ import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/features/catalog/domain/entities/effective_package_discount_entity.dart';
-import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
+import 'package:netsales/features/catalog/domain/entities/package_pos_discount_entity.dart';
+import 'package:netsales/features/catalog/domain/entities/package_entity.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_package_pos_discounts_for_pos_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/create_package_pos_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/update_package_pos_discount_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/toggle_package_pos_discount_status_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/delete_package_pos_discount_use_case.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
@@ -24,7 +30,12 @@ class NetworkPosLifecycleController extends GetxController {
     required this.networkPosId,
     required this.networkId,
     required this.posId,
-    required this.getEffectiveDiscountsUseCase,
+    required this.getNetworkPackagesUseCase,
+    required this.getPackagePosDiscountsUseCase,
+    required this.createPackagePosDiscountUseCase,
+    required this.updatePackagePosDiscountUseCase,
+    required this.togglePackagePosDiscountStatusUseCase,
+    required this.deletePackagePosDiscountUseCase,
     required this.entityId,
     required this.isNetworkScope,
     required this.getTrashedLinksUseCase,
@@ -40,7 +51,12 @@ class NetworkPosLifecycleController extends GetxController {
   final int networkPosId;
   final int networkId;
   final int posId;
-  final GetEffectivePackageDiscountsForPosUseCase getEffectiveDiscountsUseCase;
+  final GetNetworkPackagesUseCase getNetworkPackagesUseCase;
+  final GetPackagePosDiscountsForPosUseCase getPackagePosDiscountsUseCase;
+  final CreatePackagePosDiscountUseCase createPackagePosDiscountUseCase;
+  final UpdatePackagePosDiscountUseCase updatePackagePosDiscountUseCase;
+  final TogglePackagePosDiscountStatusUseCase togglePackagePosDiscountStatusUseCase;
+  final DeletePackagePosDiscountUseCase deletePackagePosDiscountUseCase;
   final int entityId;
   final bool isNetworkScope;
   final GetTrashedNetworkPosLinksUseCase getTrashedLinksUseCase;
@@ -55,11 +71,15 @@ class NetworkPosLifecycleController extends GetxController {
   final agreements = <NetworkPosAgreementEntity>[].obs;
   final events = <NetworkPosEventEntity>[].obs;
   final archivedLinks = <NetworkPosLinkEntity>[].obs;
-  final effectiveDiscounts = <EffectivePackageDiscountEntity>[].obs;
+  final packages = <PackageEntity>[].obs;
+  final packageDiscounts = <PackagePosDiscountEntity>[].obs;
+  final selectedPackageId = RxnInt();
   final isLoadingAgreements = true.obs;
   final isLoadingEvents = true.obs;
   final isLoadingArchive = true.obs;
   final isLoadingDiscounts = true.obs;
+  final isLoadingPackages = true.obs;
+  final isSavingDiscount = false.obs;
   final isLoadingMoreAgreements = false.obs;
   final isLoadingMoreEvents = false.obs;
   final isLoadingMoreArchive = false.obs;
@@ -68,16 +88,22 @@ class NetworkPosLifecycleController extends GetxController {
   final eventsErrorMessage = RxnString();
   final archiveErrorMessage = RxnString();
   final discountsErrorMessage = RxnString();
+  final packagesErrorMessage = RxnString();
 
   final titleController = TextEditingController();
   final referenceController = TextEditingController();
   final termsController = TextEditingController();
   final startsAtController = TextEditingController();
   final endsAtController = TextEditingController();
+  final discountCashController = TextEditingController();
+  final discountCreditController = TextEditingController();
+  final discountStartController = TextEditingController();
+  final discountEndController = TextEditingController();
 
   String? _agreementsCursor;
   String? _eventsCursor;
   String? _archiveCursor;
+  String? _discountsCursor;
   int _agreementsRevision = 0;
   int _eventsRevision = 0;
 
@@ -94,6 +120,10 @@ class NetworkPosLifecycleController extends GetxController {
     isNetworkScope ? AppPermissions.networkRestorePosLink : AppPermissions.posRestoreNetworkLink,
   );
   bool get canViewCatalog => PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+  bool get canCreateDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsCreate);
+  bool get canEditDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsEdit);
+  bool get canToggleDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsToggleStatus);
+  bool get canDeleteDiscount => PermissionService.to.can(AppPermissions.voucherPackageDiscountsDelete);
   bool get canViewArchive => PermissionService.to.can(
     isNetworkScope ? AppPermissions.networksView : AppPermissions.posView,
   );
@@ -108,7 +138,10 @@ class NetworkPosLifecycleController extends GetxController {
     if (canViewAgreements) loadAgreements();
     if (canViewEvents) loadEvents();
     if (canViewArchive) loadArchivedLinks();
-    if (canViewCatalog) loadEffectiveDiscounts();
+    if (canViewCatalog) {
+      loadPackages();
+      loadPackageDiscounts();
+    }
   }
 
   Future<void> loadAgreements({bool refresh = false}) async {
@@ -167,24 +200,186 @@ class NetworkPosLifecycleController extends GetxController {
     }
   }
 
-  Future<void> loadEffectiveDiscounts() async {
+  Future<void> loadPackages() async {
+    isLoadingPackages.value = true;
+    packagesErrorMessage.value = null;
+    try {
+      final result = await getNetworkPackagesUseCase(networkId, status: true, perPage: 50);
+      packages.assignAll(result.items);
+    } catch (error) {
+      packagesErrorMessage.value = error.toString();
+    } finally {
+      isLoadingPackages.value = false;
+    }
+  }
+
+  Future<void> loadPackageDiscounts({bool refresh = false}) async {
     if (networkId <= 0 || posId <= 0) {
       discountsErrorMessage.value = 'بيانات نطاق العلاقة غير مكتملة.';
       isLoadingDiscounts.value = false;
       return;
     }
-    isLoadingDiscounts.value = true;
+    if (refresh) {
+      _discountsCursor = null;
+      packageDiscounts.clear();
+    }
+    isLoadingDiscounts.value = packageDiscounts.isEmpty;
     discountsErrorMessage.value = null;
     try {
-      final result = await getEffectiveDiscountsUseCase(
+      final result = await getPackagePosDiscountsUseCase(
         networkId: networkId,
         posId: posId,
+        perPage: 15,
       );
-      effectiveDiscounts.assignAll(result);
+      packageDiscounts.assignAll(result.items);
+      _discountsCursor = result.nextCursor;
     } catch (error) {
       discountsErrorMessage.value = error.toString();
     } finally {
       isLoadingDiscounts.value = false;
+    }
+  }
+
+  bool get hasMorePackageDiscounts => _discountsCursor?.isNotEmpty == true;
+
+  Future<void> loadMorePackageDiscounts() async {
+    if (!hasMorePackageDiscounts || isLoadingMoreArchive.value) return;
+    isLoadingMoreArchive.value = true;
+    try {
+      final result = await getPackagePosDiscountsUseCase(
+        networkId: networkId,
+        posId: posId,
+        cursor: _discountsCursor,
+        perPage: 15,
+      );
+      packageDiscounts.addAll(result.items);
+      _discountsCursor = result.nextCursor;
+    } catch (error) {
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+    } finally {
+      isLoadingMoreArchive.value = false;
+    }
+  }
+
+  void openDiscountEditor({PackagePosDiscountEntity? discount}) {
+    if (discount == null && !canCreateDiscount) return;
+    if (discount != null && !canEditDiscount) return;
+    selectedPackageId.value = discount?.packageId;
+    discountCashController.text = discount?.discountCash.toString() ?? '';
+    discountCreditController.text = discount?.discountCredit.toString() ?? '';
+    discountStartController.text = discount?.startDate?.toIso8601String() ?? '';
+    discountEndController.text = discount?.endDate?.toIso8601String() ?? '';
+    Get.dialog(CustomDialog(
+      type: DialogType.custom,
+      title: discount == null ? 'تخصيص خصم للباقة' : 'تعديل خصم نقطة البيع',
+      confirmLabel: 'حفظ الخصم',
+      cancelLabel: 'إلغاء',
+      maxWidth: 620,
+      autoCloseOnConfirm: false,
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (discount == null)
+              CustomDropdown<int>(
+                label: 'الباقة',
+                hint: 'اختر الباقة',
+                rxValue: selectedPackageId,
+                items: packages.map((item) => DropdownItem<int>(
+                  value: item.packageId,
+                  child: Text(item.packageName),
+                )).toList(growable: false),
+              )
+            else
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text('الباقة: ${packages.firstWhereOrNull((item) => item.packageId == discount.packageId)?.packageName ?? '#${discount.packageId}'}'),
+              ),
+            _agreementField(discountCashController, 'نسبة الخصم النقدي %'),
+            _agreementField(discountCreditController, 'نسبة الخصم الآجل %'),
+            _agreementField(discountStartController, 'بداية السريان (اختياري)', required: false),
+            _agreementField(discountEndController, 'نهاية السريان (اختياري)', required: false),
+          ],
+        ),
+      ),
+      onConfirm: () => saveDiscount(discount: discount),
+    ));
+  }
+
+  Future<void> saveDiscount({PackagePosDiscountEntity? discount}) async {
+    if (isSavingDiscount.value) return;
+    final cash = double.tryParse(discountCashController.text.trim());
+    final credit = double.tryParse(discountCreditController.text.trim());
+    if (cash == null || credit == null || cash < 0 || cash > 100 || credit < 0 || credit > 100) {
+      CustomSnackbar.show(title: 'بيانات غير صحيحة', message: 'أدخل نسب خصم رقمية بين 0 و100.', type: SnackType.warning);
+      return;
+    }
+    if (discount == null && selectedPackageId.value == null) {
+      CustomSnackbar.show(title: 'اختر الباقة', message: 'يجب تحديد الباقة قبل حفظ الخصم.', type: SnackType.warning);
+      return;
+    }
+    isSavingDiscount.value = true;
+    try {
+      final payload = <String, dynamic>{
+        'discount_cash': cash,
+        'discount_credit': credit,
+        'discount_start_date': discountStartController.text.trim().isEmpty ? null : discountStartController.text.trim(),
+        'discount_end_date': discountEndController.text.trim().isEmpty ? null : discountEndController.text.trim(),
+      };
+      if (discount == null) {
+        payload.addAll({
+          'network_id': networkId,
+          'pos_id': posId,
+          'package_id': selectedPackageId.value,
+          'status': true,
+        });
+        await createPackagePosDiscountUseCase(payload);
+      } else {
+        await updatePackagePosDiscountUseCase(discount.discountId, payload);
+      }
+      Get.back();
+      await loadPackageDiscounts(refresh: true);
+      await loadEvents(refresh: true);
+      CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ خصم الباقة.', type: SnackType.success);
+    } catch (error) {
+      CustomSnackbar.show(title: 'تعذر الحفظ', message: error.toString(), type: SnackType.error);
+    } finally {
+      isSavingDiscount.value = false;
+    }
+  }
+
+  Future<void> toggleDiscount(PackagePosDiscountEntity discount) async {
+    if (!canToggleDiscount || isSavingDiscount.value) return;
+    isSavingDiscount.value = true;
+    try {
+      await togglePackagePosDiscountStatusUseCase(discount.discountId);
+      await loadPackageDiscounts(refresh: true);
+      CustomSnackbar.show(title: 'نجاح', message: 'تم تحديث حالة الخصم.', type: SnackType.success);
+    } catch (error) {
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+    } finally {
+      isSavingDiscount.value = false;
+    }
+  }
+
+  Future<void> deleteDiscount(PackagePosDiscountEntity discount) async {
+    if (!canDeleteDiscount || isSavingDiscount.value) return;
+    final confirmed = await CustomDialog.confirmation(
+      title: 'حذف الخصم',
+      message: 'سيتم حذف الخصم المخصص لهذه الباقة من العلاقة. لن يتم حذف الباقة أو بيانات نقطة البيع.',
+      confirmLabel: 'حذف الخصم',
+      onConfirm: () {},
+    ).showDialog();
+    if (confirmed != true) return;
+    isSavingDiscount.value = true;
+    try {
+      await deletePackagePosDiscountUseCase(discount.discountId);
+      await loadPackageDiscounts(refresh: true);
+      CustomSnackbar.show(title: 'نجاح', message: 'تم حذف الخصم.', type: SnackType.success);
+    } catch (error) {
+      CustomSnackbar.show(title: 'خطأ', message: error.toString(), type: SnackType.error);
+    } finally {
+      isSavingDiscount.value = false;
     }
   }
 
@@ -393,6 +588,10 @@ class NetworkPosLifecycleController extends GetxController {
     termsController.dispose();
     startsAtController.dispose();
     endsAtController.dispose();
+    discountCashController.dispose();
+    discountCreditController.dispose();
+    discountStartController.dispose();
+    discountEndController.dispose();
     super.onClose();
   }
 }
