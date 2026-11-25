@@ -126,7 +126,7 @@ class NetworkPosLifecycleBinding extends Bindings {
         getTrashedPackagePosDiscountsUseCase: Get.find<GetTrashedPackagePosDiscountsForPosUseCase>(),
         restorePackagePosDiscountUseCase: Get.find<RestorePackagePosDiscountUseCase>(),
         entityId: (arguments['entity_id'] as num?)?.toInt() ?? 0,
-        isNetworkScope: arguments['is_network'] == true,
+        isNetworkScope: arguments['is_network'] != false,
         getTrashedLinksUseCase: Get.find<GetTrashedNetworkPosLinksUseCase>(),
         restoreLinkUseCase: Get.find<RestoreNetworkPosLinkUseCase>(),
         getAgreementsUseCase: Get.find<GetNetworkPosAgreementsUseCase>(),
