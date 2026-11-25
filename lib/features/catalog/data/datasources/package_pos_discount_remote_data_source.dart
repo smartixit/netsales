@@ -9,6 +9,14 @@ abstract class PackagePosDiscountRemoteDataSource {
     int perPage = 15,
   });
 
+  Future<ApiResponse<List<PackagePosDiscountModel>>> getTrashedForPos({
+    required int networkId,
+    required int posId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<ApiResponse<dynamic>> restore(int discountId);
   Future<ApiResponse<PackagePosDiscountModel>> create(Map<String, dynamic> payload);
   Future<ApiResponse<PackagePosDiscountModel>> update(int discountId, Map<String, dynamic> payload);
   Future<ApiResponse<PackagePosDiscountModel>> toggleStatus(int discountId);
