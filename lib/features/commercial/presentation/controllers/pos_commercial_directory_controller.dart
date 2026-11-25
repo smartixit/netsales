@@ -105,7 +105,8 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
       PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents) ||
       PermissionService.to.can(AppPermissions.posView) ||
-      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView);
+      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView) ||
+      PermissionService.to.can(AppPermissions.voucherPackagesView);
 
   int? get resolvedPosId {
     return selectedPosId.value ??
