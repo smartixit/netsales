@@ -13,6 +13,22 @@ abstract class CommercialRemoteDataSource {
 
   Future<List<PosModel>> getMyPos();
 
+  Future<PaginatedList<NetworkModel>> getNetworksPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<PaginatedList<PosModel>> getPosPage({
+    String? search,
+    String? status,
+    int? governorateId,
+    String? cursor,
+    int perPage = 15,
+  });
+
   Future<PaginatedList<NetworkPosLinkModel>> getNetworkPosList({
     required int networkId,
     bool? status,
