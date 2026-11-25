@@ -28,11 +28,13 @@ class PosWalletLedgerTile extends StatelessWidget {
     );
     final isDeposit = log.isDeposit;
     final isWithdraw = log.isWithdraw;
-    final amountPrefix = isDeposit
-        ? '+'
-        : isWithdraw
-            ? '−'
-            : '';
+    final amountPrefix = log.amount == 0
+        ? ''
+        : isDeposit
+            ? '+'
+            : isWithdraw
+                ? '−'
+                : '';
     final amountColor = isDeposit
         ? colors.success
         : isWithdraw
