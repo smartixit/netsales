@@ -77,6 +77,7 @@ class NetworkExpensesController extends GetxController {
   }
 
   void onEditExpense(ExpenseEntity expense) {
+    if (!canEditExpense) return;
     Get.toNamed<void>(
       AppRoutes.createOperatingExpense,
       arguments: {'expense': expense},
