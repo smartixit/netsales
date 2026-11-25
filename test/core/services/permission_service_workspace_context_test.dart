@@ -79,6 +79,31 @@ void main() {
     expect(permissions.currentRole, 'NETWORK_ACCOUNTANT');
   });
 
+  test('accepts only the declared operational roles for each scope', () {
+    const cases = <({RoleScope scope, String roleKey})>[
+      (scope: RoleScope.network, roleKey: 'NETWORK_OWNER'),
+      (scope: RoleScope.network, roleKey: 'NETWORK_USER'),
+      (scope: RoleScope.network, roleKey: 'NETWORK_ACCOUNTANT'),
+      (scope: RoleScope.pos, roleKey: 'POS_AGENT'),
+      (scope: RoleScope.pos, roleKey: 'POS_USER'),
+      (scope: RoleScope.pos, roleKey: 'POS_ACCOUNTANT'),
+    ];
+
+    for (final item in cases) {
+      permissions.setWorkspaceContext(
+        scope: item.scope,
+        tenantId: 12,
+        roleKey: item.roleKey,
+        permissions: const ['sales.view'],
+      );
+
+      expect(permissions.hasWorkspaceContext, isTrue,
+          reason: '${item.scope.wireValue} / ${item.roleKey}');
+      expect(permissions.can('sales.view'), isTrue,
+          reason: '${item.scope.wireValue} / ${item.roleKey}');
+    }
+  });
+
   test('rejects a Network role bound to a POS tenant', () {
     permissions.setWorkspaceContext(
       scope: RoleScope.pos,

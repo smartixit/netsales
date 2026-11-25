@@ -22,15 +22,7 @@ class ColorResolver {
       return fallback;
     }
 
-    if (!RegExp(r'^[0-9a-fA-F]{8}) {
-      return fallback;
-    }
-
-    final value = int.tryParse(clean, radix: 16);
-    return value == null ? fallback : Color(value);
-  }
-}
-).hasMatch(clean)) {
+    if (!RegExp(r'^[0-9a-fA-F]{8}$').hasMatch(clean)) {
       return fallback;
     }
 
