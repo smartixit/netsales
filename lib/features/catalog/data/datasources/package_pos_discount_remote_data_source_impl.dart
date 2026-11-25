@@ -21,6 +21,24 @@ class PackagePosDiscountRemoteDataSourceImpl implements PackagePosDiscountRemote
   );
 
   @override
+  Future<ApiResponse<List<PackagePosDiscountModel>>> getTrashedForPos({
+    required int networkId,
+    required int posId,
+    String? cursor,
+    int perPage = 15,
+  }) => ApiService.instance.getList<PackagePosDiscountModel>(
+    ApiConstants.voucherPackageDiscountsTrashed,
+    fromJson: (json) => PackagePosDiscountModel.fromJson(Map<String, dynamic>.from(json as Map)),
+    queryParameters: {'network_id': networkId, 'pos_id': posId},
+    cursor: cursor,
+    perPage: perPage,
+  );
+
+  @override
+  Future<ApiResponse<dynamic>> restore(int discountId) =>
+      ApiService.instance.post<dynamic>(ApiConstants.voucherPackageDiscountRestore(discountId));
+
+  @override
   Future<ApiResponse<PackagePosDiscountModel>> create(Map<String, dynamic> payload) =>
       ApiService.instance.post<PackagePosDiscountModel>(
         ApiConstants.voucherPackageDiscounts,
