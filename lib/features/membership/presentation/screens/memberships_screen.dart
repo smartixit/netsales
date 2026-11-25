@@ -21,18 +21,19 @@ import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 /// - واجهة تصريحية بحتة (Pure Declarative UI) خالية تماماً من منطق الأعمال والشروط المتفرعة.
 /// - تعتمد نمط الاستراتيجية (Strategy Pattern) باستهلاك العقد المعماري الموحد [BaseMembershipsController].
 class MembershipsScreen extends GetView<BaseMembershipsController> {
-  const MembershipsScreen({super.key, this.embedded = false, this.isNetwork});
+  const MembershipsScreen({super.key, this.embedded = false, this.isNetwork, this.controllerTag});
 
   final bool embedded;
   final bool? isNetwork;
+  final String? controllerTag;
 
   @override
   BaseMembershipsController get controller {
     if (isNetwork == true) {
-      return Get.find<NetworkMembershipsController>();
+      return Get.find<NetworkMembershipsController>(tag: controllerTag);
     }
     if (isNetwork == false) {
-      return Get.find<PosMembershipsController>();
+      return Get.find<PosMembershipsController>(tag: controllerTag);
     }
     return super.controller;
   }

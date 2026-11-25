@@ -7,10 +7,22 @@ import 'package:netsales/features/commercial/data/datasources/commercial_remote_
 import 'package:netsales/features/commercial/data/datasources/commercial_remote_data_source_impl.dart';
 import 'package:netsales/features/commercial/data/repositories/commercial_repository_impl.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/delete_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/delete_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_link_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/delete_network_pos_link_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_networks_page_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_pos_page_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_networks_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_network_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_pos_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_network_details_use_case.dart';
@@ -22,6 +34,14 @@ import 'package:netsales/features/commercial/domain/usecases/preview_network_pos
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/search_network_linkable_pos_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_agreements_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/update_network_pos_agreement_draft_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/terminate_network_pos_agreement_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_network_pos_events_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/restore_network_pos_link_use_case.dart';
+import 'package:netsales/features/commercial/domain/usecases/get_trashed_network_pos_links_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/controllers/pos_commercial_directory_controller.dart';
@@ -41,6 +61,31 @@ class CommercialBinding extends Bindings {
     );
 
     // 2. حالات الاستخدام (Use Cases)
+    registerLazyIfAbsent<GetNetworksPageUseCase>(
+      () => GetNetworksPageUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetPosPageUseCase>(
+      () => GetPosPageUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetTrashedNetworksUseCase>(
+      () => GetTrashedNetworksUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<RestoreNetworkUseCase>(
+      () => RestoreNetworkUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetTrashedPosUseCase>(
+      () => GetTrashedPosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<RestorePosUseCase>(
+      () => RestorePosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+
     registerLazyIfAbsent<GetMyNetworksUseCase>(
       () => GetMyNetworksUseCase(Get.find<CommercialRepository>()),
       fenix: true,
@@ -105,12 +150,71 @@ class CommercialBinding extends Bindings {
       ),
       fenix: true,
     );
+    registerLazyIfAbsent<DeleteNetworkUseCase>(
+      () => DeleteNetworkUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<DeletePosUseCase>(
+      () => DeletePosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<CreateNetworkUseCase>(
+      () => CreateNetworkUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<UpdateNetworkUseCase>(
+      () => UpdateNetworkUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<CreatePosUseCase>(
+      () => CreatePosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<UpdatePosUseCase>(
+      () => UpdatePosUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+
     registerLazyIfAbsent<GetNetworkDetailsUseCase>(
       () => GetNetworkDetailsUseCase(Get.find<CommercialRepository>()),
       fenix: true,
     );
     registerLazyIfAbsent<GetPosDetailsUseCase>(
       () => GetPosDetailsUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+
+
+    registerLazyIfAbsent<GetNetworkPosAgreementsUseCase>(
+      () => GetNetworkPosAgreementsUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<CreateNetworkPosAgreementDraftUseCase>(
+      () => CreateNetworkPosAgreementDraftUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<UpdateNetworkPosAgreementDraftUseCase>(
+      () => UpdateNetworkPosAgreementDraftUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<ActivateNetworkPosAgreementUseCase>(
+      () => ActivateNetworkPosAgreementUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<TerminateNetworkPosAgreementUseCase>(
+      () => TerminateNetworkPosAgreementUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetNetworkPosEventsUseCase>(
+      () => GetNetworkPosEventsUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<RestoreNetworkPosLinkUseCase>(
+      () => RestoreNetworkPosLinkUseCase(Get.find<CommercialRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<GetTrashedNetworkPosLinksUseCase>(
+      () => GetTrashedNetworkPosLinksUseCase(Get.find<CommercialRepository>()),
       fenix: true,
     );
 

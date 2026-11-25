@@ -56,6 +56,7 @@ class NetworkCommercialDirectoryController
     this.getMyNetworksUseCase,
     required this.getNetworkPosLinkChallengeStatusUseCase,
     required this.searchNetworkLinkablePosUseCase,
+    this.initialNetworkId,
   });
 
   final GetNetworkPosListUseCase getNetworkPosListUseCase;
@@ -69,6 +70,7 @@ class NetworkCommercialDirectoryController
   final GetNetworkPosLinkChallengeStatusUseCase
   getNetworkPosLinkChallengeStatusUseCase;
   final SearchNetworkLinkablePosUseCase searchNetworkLinkablePosUseCase;
+  final int? initialNetworkId;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -151,6 +153,14 @@ class NetworkCommercialDirectoryController
       PermissionService.to.can(AppPermissions.networkTogglePosLink);
   bool get canDeletePartnerLink =>
       PermissionService.to.can(AppPermissions.networkDeletePosLink);
+  bool get canViewPartnerWallet =>
+      PermissionService.to.can(AppPermissions.posWalletsView);
+  bool get canViewRelationshipLifecycle =>
+      PermissionService.to.can(AppPermissions.networkViewPosAgreements) ||
+      PermissionService.to.can(AppPermissions.networkViewPosLinkEvents) ||
+      PermissionService.to.can(AppPermissions.networksView) ||
+      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView) ||
+      PermissionService.to.can(AppPermissions.voucherPackagesView);
 
   int? get resolvedNetworkId {
     return selectedNetworkId.value ??
@@ -230,9 +240,12 @@ class NetworkCommercialDirectoryController
     try {
       final networks = await getMyNetworksUseCase!();
       authorizedNetworks.assignAll(networks);
-      selectedNetworkId.value = WorkspaceService.to.resolveActiveNetworkId(
-        networks.map((n) => n.networkId).toList(growable: false),
-      );
+      final authorizedIds = networks.map((network) => network.networkId).toSet();
+      selectedNetworkId.value = initialNetworkId != null
+          ? (authorizedIds.contains(initialNetworkId) ? initialNetworkId : null)
+          : WorkspaceService.to.resolveActiveNetworkId(
+              networks.map((network) => network.networkId).toList(growable: false),
+            );
     } catch (error) {
       authorizedNetworks.clear();
       selectedNetworkId.value = null;
@@ -387,7 +400,26 @@ class NetworkCommercialDirectoryController
 
   @override
   void onPartnerCardTap(NetworkPosLinkEntity link) {
-    openPosWalletStatement(link);
+    if (canViewPartnerWallet) {
+      openPosWalletStatement(link);
+      return;
+    }
+    openPartnerDetails(link);
+  }
+
+  void openRelationshipLifecycle(NetworkPosLinkEntity link) {
+    if (!canViewRelationshipLifecycle) return;
+    Get.toNamed<void>(
+      AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
+      arguments: {
+        'entity_id': link.networkId,
+        'is_network': true,
+        'relationship': link,
+        'network_id': link.networkId,
+        'pos_id': link.posId,
+        'relationship': link,
+      },
+    );
   }
 
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
@@ -457,6 +489,7 @@ class NetworkCommercialDirectoryController
 
   @override
   Widget? buildExtraFilters(BuildContext context) {
+    if (initialNetworkId != null) return null;
     final networks = authorizedNetworks;
     if (networks.length <= 1) return null;
 
@@ -485,6 +518,8 @@ class NetworkCommercialDirectoryController
       onViewDetails: () => openPartnerDetails(link),
       onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
       onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
+      onViewWallet: canViewPartnerWallet ? () => openPosWalletStatement(link) : null,
+      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
     );
   }
 

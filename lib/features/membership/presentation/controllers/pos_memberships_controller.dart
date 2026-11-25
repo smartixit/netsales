@@ -39,6 +39,7 @@ class PosMembershipsController extends BaseMembershipsController {
     required this.updatePosMemberRoleUseCase,
     required this.updatePosMemberStatusUseCase,
     required this.removePosMemberUseCase,
+    this.initialPosId,
   });
 
   final GetPosMembersUseCase getPosMembersUseCase;
@@ -47,6 +48,7 @@ class PosMembershipsController extends BaseMembershipsController {
   final UpdatePosMemberRoleUseCase updatePosMemberRoleUseCase;
   final UpdatePosMemberStatusUseCase updatePosMemberStatusUseCase;
   final RemovePosMemberUseCase removePosMemberUseCase;
+  final int? initialPosId;
 
   @override
   String get pageTitle => 'إدارة طاقم نقطة البيع';
@@ -202,7 +204,7 @@ class PosMembershipsController extends BaseMembershipsController {
   bool get canRemoveMember =>
       PermissionService.to.can(AppPermissions.posMembersDelete);
 
-  int? get resolvedPosId => WorkspaceService.to.savedActivePosId;
+  int? get resolvedPosId => initialPosId ?? WorkspaceService.to.savedActivePosId;
 
   @override
   void onInit() {
@@ -273,7 +275,8 @@ class PosMembershipsController extends BaseMembershipsController {
         roles.where(
           (role) =>
               role.typedScope == RoleScope.pos &&
-              role.typedRoleKey == RoleKey.posUser,
+              (role.typedRoleKey == RoleKey.posUser ||
+                  role.typedRoleKey == RoleKey.posAccountant),
         ),
       );
     } catch (_) {

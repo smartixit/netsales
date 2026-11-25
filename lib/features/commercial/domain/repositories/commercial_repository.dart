@@ -4,6 +4,8 @@ import 'package:netsales/features/commercial/domain/entities/network_linkable_po
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_status_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_agreement_entity.dart';
+import 'package:netsales/features/commercial/domain/entities/network_pos_event_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_preview_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 
@@ -14,6 +16,22 @@ abstract class CommercialRepository {
 
   /// استرجاع نقاط البيع المصرح للمستخدم بالوصول إليها
   Future<List<PosEntity>> getMyPos();
+
+  /// دليل الشبكات المصرح بها مع البحث والتصفية والترقيم بالمؤشر.
+  Future<PaginatedList<NetworkEntity>> getNetworksPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  /// دليل نقاط البيع المصرح بها مع البحث والتصفية والترقيم بالمؤشر.
+  Future<PaginatedList<PosEntity>> getPosPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  });
 
   /// استرجاع قائمة نقاط البيع المرتبطة بشبكة محددة مع الفلترة والترقيم بالمؤشر
   Future<PaginatedList<NetworkPosLinkEntity>> getNetworkPosList({
@@ -44,6 +62,48 @@ abstract class CommercialRepository {
 
   /// فك الارتباط التجاري بين الشبكة ونقطة البيع
   Future<void> deleteNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosAgreementEntity>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<NetworkPosAgreementEntity> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementEntity> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<NetworkPosAgreementEntity> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<NetworkPosAgreementEntity> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  });
+
+  Future<PaginatedList<NetworkPosEventEntity>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  });
+
+  Future<void> restoreNetworkPosLink(int networkPosId);
+
+  Future<PaginatedList<NetworkPosLinkEntity>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  });
 
   /// التحقق من نقطة بيع محددة بواسطة المعرف التجاري قبل إصدار الدعوة.
   Future<NetworkLinkablePosEntity> resolveNetworkLinkablePos({
@@ -85,6 +145,41 @@ abstract class CommercialRepository {
 
   /// إلغاء وإبطال دعوة الربط المشفرة
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid);
+
+  /// إنشاء شبكة للمستخدم المصادق عليه. لا يتضمن payload المالك أو الحالة.
+  Future<NetworkEntity> createNetwork(Map<String, dynamic> payload);
+
+  /// تحديث بيانات الشبكة فقط دون تغيير علاقاتها أو عضوياتها أو التزاماتها.
+  Future<NetworkEntity> updateNetwork(int networkId, Map<String, dynamic> payload);
+
+  /// إنشاء نقطة بيع للمستخدم المصادق عليه. لا يتضمن payload المالك أو الحالة.
+  Future<PosEntity> createPos(Map<String, dynamic> payload);
+
+  /// تحديث بيانات نقطة البيع فقط دون تغيير علاقاتها أو عضوياتها أو التزاماتها.
+  Future<PosEntity> updatePos(int posId, Map<String, dynamic> payload);
+
+  /// حذف مؤقت للشبكة دون المساس بسجلاتها المالية أو علاقاتها.
+  Future<void> deleteNetwork(int networkId);
+
+  /// حذف مؤقت لنقطة البيع دون المساس بسجلاتها المالية أو علاقاتها.
+  Future<void> deletePos(int posId);
+
+  Future<PaginatedList<NetworkEntity>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restoreNetwork(int networkId);
+
+  Future<PaginatedList<PosEntity>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  });
+
+  Future<void> restorePos(int posId);
+
 
   /// استرجاع التفاصيل الكاملة لشبكة محددة
   Future<NetworkEntity> getNetworkDetails(int networkId);

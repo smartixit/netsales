@@ -5,6 +5,7 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
@@ -36,6 +37,7 @@ class PosCommercialDirectoryController
     required this.previewNetworkPosLinkChallengeUseCase,
     required this.confirmNetworkPosLinkChallengeUseCase,
     this.getMyPosUseCase,
+    this.initialPosId,
   });
 
   final GetPosNetworksListUseCase getPosNetworksListUseCase;
@@ -44,6 +46,7 @@ class PosCommercialDirectoryController
   final ConfirmNetworkPosLinkChallengeUseCase
   confirmNetworkPosLinkChallengeUseCase;
   final GetMyPosUseCase? getMyPosUseCase;
+  final int? initialPosId;
 
   @override
   final RxList<NetworkPosLinkEntity> links = <NetworkPosLinkEntity>[].obs;
@@ -96,6 +99,14 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
   bool get canLinkNetwork =>
       canPreviewLinkChallenge && canConfirmLinkChallenge;
+  bool get canViewPartnerWallet =>
+      PermissionService.to.can(AppPermissions.posWalletsView);
+  bool get canViewRelationshipLifecycle =>
+      PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
+      PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents) ||
+      PermissionService.to.can(AppPermissions.posView) ||
+      PermissionService.to.can(AppPermissions.voucherPackageDiscountsView) ||
+      PermissionService.to.can(AppPermissions.voucherPackagesView);
 
   int? get resolvedPosId {
     return selectedPosId.value ??
@@ -162,9 +173,12 @@ class PosCommercialDirectoryController
     try {
       final posList = await getMyPosUseCase!();
       authorizedPosList.assignAll(posList);
-      selectedPosId.value = WorkspaceService.to.resolveActivePosId(
-        posList.map((pos) => pos.posId).toList(growable: false),
-      );
+      final authorizedIds = posList.map((pos) => pos.posId).toSet();
+      selectedPosId.value = initialPosId != null
+          ? (authorizedIds.contains(initialPosId) ? initialPosId : null)
+          : WorkspaceService.to.resolveActivePosId(
+              posList.map((pos) => pos.posId).toList(growable: false),
+            );
     } catch (_) {
       authorizedPosList.clear();
       selectedPosId.value = null;
@@ -371,6 +385,7 @@ class PosCommercialDirectoryController
 
   @override
   Widget? buildExtraFilters(BuildContext context) {
+    if (initialPosId != null) return null;
     final posList = authorizedPosList;
     if (posList.length <= 1) return null;
 
@@ -395,10 +410,32 @@ class PosCommercialDirectoryController
       isNetworkView: false,
       onViewDetails: () => openPartnerDetails(link),
       onDelete: null,
+      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
+      onViewWallet: canViewPartnerWallet
+          ? () => Get.toNamed<void>(
+              AppRoutes.posWalletStatement,
+              arguments: {'network_id': link.networkId, 'pos_id': link.posId},
+            )
+          : null,
     );
   }
 
 
+
+  void openRelationshipLifecycle(NetworkPosLinkEntity link) {
+    if (!canViewRelationshipLifecycle) return;
+    Get.toNamed<void>(
+      AppRoutes.networkPosLifecycle.replaceFirst(':id', link.networkPosId.toString()),
+      arguments: {
+        'entity_id': link.posId,
+        'is_network': false,
+        'relationship': link,
+        'network_id': link.networkId,
+        'pos_id': link.posId,
+        'relationship': link,
+      },
+    );
+  }
 
   Future<void> openQrScannerFlow() async {
     if (!canLinkNetwork) return;

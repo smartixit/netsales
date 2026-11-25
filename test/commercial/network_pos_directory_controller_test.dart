@@ -216,6 +216,78 @@ class _FakeCommercialRepository implements CommercialRepository {
   Future<void> revokeNetworkPosLinkChallenge(String challengeUuid) async {}
 
   @override
+  Future<PaginatedList<NetworkEntity>> getNetworksPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<NetworkEntity>(items: const []);
+
+  @override
+  Future<PaginatedList<PosEntity>> getPosPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<PosEntity>(items: const []);
+
+  @override
+  Future<NetworkEntity> createNetwork(Map<String, dynamic> payload) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkEntity> updateNetwork(
+    int networkId,
+    Map<String, dynamic> payload,
+  ) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PosEntity> createPos(Map<String, dynamic> payload) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PosEntity> updatePos(
+    int posId,
+    Map<String, dynamic> payload,
+  ) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteNetwork(int networkId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deletePos(int posId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PaginatedList<NetworkEntity>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<NetworkEntity>(items: const []);
+
+  @override
+  Future<void> restoreNetwork(int networkId) async {}
+
+  @override
+  Future<PaginatedList<PosEntity>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async => PaginatedList<PosEntity>(items: const []);
+
+  @override
+  Future<void> restorePos(int posId) async {}
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) async {
     throw UnimplementedError();
   }

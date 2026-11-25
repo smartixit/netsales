@@ -19,6 +19,8 @@ class CommercialPartnerCardActions extends StatelessWidget {
     required this.onViewDetails,
     this.onToggleStatus,
     this.onDelete,
+    this.onViewWallet,
+    this.onViewLifecycle,
     this.isNetworkView = true,
   });
 
@@ -26,6 +28,8 @@ class CommercialPartnerCardActions extends StatelessWidget {
   final VoidCallback onViewDetails;
   final VoidCallback? onToggleStatus;
   final VoidCallback? onDelete;
+  final VoidCallback? onViewWallet;
+  final VoidCallback? onViewLifecycle;
   final bool isNetworkView;
 
   Future<void> _showMoreActions() async {
@@ -41,21 +45,21 @@ class CommercialPartnerCardActions extends StatelessWidget {
         icon: isNetworkView ? Icons.storefront_outlined : Icons.hub_outlined,
         onTap: onViewDetails,
       ),
-      if (isNetworkView) ...[
+      if (onViewLifecycle != null)
         CustomBottomSheetActionItem(
-          title: 'دفتر أستاذ المحفظة',
-          subtitle: 'عرض الحركات المالية والعمليات لنقطة البيع',
-          icon: Icons.account_balance_wallet_outlined,
-          onTap: () {
-            Get.toNamed<void>(
-              AppRoutes.posWalletStatement,
-              arguments: {
-                'network_id': link.networkId,
-                'pos_id': link.posId,
-              },
-            );
-          },
+          title: 'الاتفاقيات وسجل أحداث العلاقة',
+          subtitle: 'إصدارات الاتفاقيات والتغييرات التاريخية',
+          icon: Icons.history_edu_rounded,
+          onTap: onViewLifecycle!,
         ),
+      if (isNetworkView) ...[
+        if (onViewWallet != null)
+          CustomBottomSheetActionItem(
+            title: 'دفتر أستاذ المحفظة',
+            subtitle: 'عرض الحركات المالية والعمليات لنقطة البيع',
+            icon: Icons.account_balance_wallet_outlined,
+            onTap: onViewWallet!,
+          ),
         if (onToggleStatus != null)
           CustomBottomSheetActionItem(
             title: link.isActive
@@ -74,6 +78,13 @@ class CommercialPartnerCardActions extends StatelessWidget {
             onTap: onDelete!,
           ),
       ] else ...[
+        if (onViewWallet != null)
+          CustomBottomSheetActionItem(
+            title: 'دفتر أستاذ المحفظة',
+            subtitle: 'عرض الرصيد والحركات المالية ضمن هذه العلاقة',
+            icon: Icons.account_balance_wallet_outlined,
+            onTap: onViewWallet!,
+          ),
         if (onDelete != null)
           CustomBottomSheetActionItem(
             title: 'فك الارتباط بمزود الشبكة',

@@ -40,6 +40,32 @@ import 'package:netsales/features/requests/presentation/screens/pos_new_procurem
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_request_details_screen.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_directory_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_details_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_relationships_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/pos_relationships_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_pos_lifecycle_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_pos_lifecycle_screen.dart';
+import 'package:netsales/features/membership/presentation/bindings/membership_binding.dart';
+import 'package:netsales/features/membership/presentation/bindings/network_entity_membership_binding.dart';
+import 'package:netsales/features/membership/presentation/bindings/pos_entity_membership_binding.dart';
+import 'package:netsales/features/membership/presentation/screens/memberships_screen.dart';
+import 'package:netsales/features/commercial/presentation/bindings/network_form_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_form_screen.dart';
+import 'package:netsales/features/commercial/presentation/bindings/pos_details_binding.dart';
+import 'package:netsales/features/commercial/presentation/bindings/pos_form_binding.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_form_screen.dart';
+import 'package:netsales/features/commercial/presentation/controllers/network_details_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/pos_details_controller.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_details_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_details_screen.dart';
+
+import 'package:netsales/features/commercial/presentation/bindings/pos_directory_binding.dart';
+import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/controllers/pos_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/screens/network_directory_screen.dart';
+import 'package:netsales/features/commercial/presentation/screens/pos_directory_screen.dart';
+
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
 import 'package:netsales/features/invoices/presentation/screens/invoice_details_screen.dart';
@@ -232,6 +258,188 @@ abstract final class AppPages {
     // ========================================================================
     // 6. مسارات الكيانات والعلاقات التجارية (Commercial Entities & Relationships)
     // ========================================================================
+    GetPage(
+      name: AppRoutes.networkEntityCreate,
+      page: () => const NetworkFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksCreate),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.networkEntityEdit,
+      page: () => const NetworkFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksEdit),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.networkEntityDetails,
+      page: () => const NetworkDetailsScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkDetailsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityCreate,
+      page: () => const PosFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posCreate),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityEdit,
+      page: () => const PosFormScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosFormBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posEdit),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityDetails,
+      page: () => const PosDetailsScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosDetailsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkEntityRelationships,
+      page: () => CommercialDirectoryScreen(
+        controllerTag: 'network-relationships-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkRelationshipsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityRelationships,
+      page: () => CommercialDirectoryScreen(
+        controllerTag: 'pos-relationships-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosRelationshipsBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkEntityMembers,
+      page: () => MembershipsScreen(
+        isNetwork: true,
+        controllerTag: 'network-members-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        MembershipBinding().dependencies();
+        NetworkEntityMembershipBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networkMembersView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityMembers,
+      page: () => MembershipsScreen(
+        isNetwork: false,
+        controllerTag: 'pos-members-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        MembershipBinding().dependencies();
+        PosEntityMembershipBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posMembersView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkPosLifecycle,
+      page: () => NetworkPosLifecycleScreen(
+        controllerTag: 'network-pos-lifecycle-${Get.parameters['id']}',
+      ),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkPosLifecycleBinding().dependencies();
+      }),
+      middlewares: [AuthGuard()],
+    ),
+
+    GetPage(
+      name: AppRoutes.networkEntityDirectory,
+      page: () => const NetworkDirectoryScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        NetworkDirectoryBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.networksView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.network),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.posEntityDirectory,
+      page: () => const PosDirectoryScreen(),
+      binding: BindingsBuilder(() {
+        CommercialBinding().dependencies();
+        PosDirectoryBinding().dependencies();
+      }),
+      middlewares: [
+        AuthGuard(),
+        PermissionGuardMiddleware(requiredPermission: AppPermissions.posView),
+        WorkspaceGuard(targetWorkspace: AppWorkspace.pos),
+      ],
+    ),
+
     GetPage(
       name: AppRoutes.posDirectory,
       page: () => const CommercialDirectoryScreen(isNetwork: true),

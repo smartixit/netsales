@@ -133,6 +133,19 @@ abstract final class ApiConstants {
   // ==========================================================================
   static const String networkPos = '/network-pos';
   static String networkPosItem(int id) => '/network-pos/$id';
+  static String networkPosAgreements(int id) => '/network-pos/$id/agreements';
+  static String networkPosAgreement(int id, int agreementId) =>
+      '/network-pos/$id/agreements/$agreementId';
+  static String networkPosAgreementActivate(int id, int agreementId) =>
+      '/network-pos/$id/agreements/$agreementId/activate';
+  static String networkPosAgreementTerminate(int id, int agreementId) =>
+      '/network-pos/$id/agreements/$agreementId/terminate';
+  static String networkPosEvents(int id) => '/network-pos/$id/events';
+  static String networkPosRestore(int id) => '/network-pos/$id/restore';
+  static String networkPosNetworkTrashed(int id) =>
+      '/networks/$id/network-pos/trashed';
+  static String networkPosPosTrashed(int id) =>
+      '/pos/$id/network-pos/trashed';
   static String networkPosToggleStatus(int id) =>
       '/network-pos/$id/toggle-status';
   static const String networkPosBatchDelete = '/network-pos/batch-delete';

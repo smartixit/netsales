@@ -8,6 +8,8 @@ import 'package:netsales/features/commercial/data/models/network_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_challenge_status_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_agreement_model.dart';
+import 'package:netsales/features/commercial/data/models/network_pos_event_model.dart';
 import 'package:netsales/features/commercial/data/models/network_pos_link_preview_model.dart';
 import 'package:netsales/features/commercial/data/models/pos_model.dart';
 
@@ -30,6 +32,56 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       },
     );
     return response.data ?? const [];
+  }
+
+  @override
+  Future<PaginatedList<NetworkModel>> getNetworksPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkModel>(
+      ApiConstants.networks,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
+    );
+  }
+
+  @override
+  Future<PaginatedList<PosModel>> getPosPage({
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<PosModel>(
+      ApiConstants.pos,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<PosModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
+    );
   }
 
   @override
@@ -80,8 +132,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkPosLinkModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
       perPage: response.meta?['per_page'] as int? ?? perPage ?? 15,
     );
   }
@@ -117,8 +169,8 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkPosLinkModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
       perPage: response.meta?['per_page'] as int? ?? perPage ?? 15,
     );
   }
@@ -194,9 +246,9 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
 
     return PaginatedList<NetworkLinkablePosModel>(
       items: response.data ?? const [],
-      nextCursor: response.meta?['next_cursor'] as String?,
-      prevCursor: response.meta?['prev_cursor'] as String?,
-      perPage: response.meta?['per_page'] as int? ?? perPage,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: perPage,
     );
   }
 
@@ -326,6 +378,194 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   }
 
   @override
+  Future<NetworkModel> createNetwork(Map<String, dynamic> payload) async {
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_network_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<NetworkModel>(
+            ApiConstants.networks,
+            filePath: logoPath,
+            fileField: 'network_logo',
+            extraFields: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.post<NetworkModel>(
+            ApiConstants.networks,
+            data: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل إنشاء الشبكة.');
+    }
+    return result;
+  }
+
+  @override
+  Future<NetworkModel> updateNetwork(
+    int networkId,
+    Map<String, dynamic> payload,
+  ) async {
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_network_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<NetworkModel>(
+            ApiConstants.network(networkId),
+            filePath: logoPath,
+            fileField: 'network_logo',
+            extraFields: {...fields, '_method': 'PUT'},
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.put<NetworkModel>(
+            ApiConstants.network(networkId),
+            data: fields,
+            fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+          );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل تحديث بيانات الشبكة.');
+    }
+    return result;
+  }
+
+  @override
+  Future<PosModel> createPos(Map<String, dynamic> payload) async {
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_pos_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<PosModel>(
+            ApiConstants.pos,
+            filePath: logoPath,
+            fileField: 'pos_profile_logo',
+            extraFields: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.post<PosModel>(
+            ApiConstants.pos,
+            data: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل إنشاء نقطة البيع.');
+    }
+    return result;
+  }
+
+  @override
+  Future<PosModel> updatePos(
+    int posId,
+    Map<String, dynamic> payload,
+  ) async {
+    final fields = Map<String, dynamic>.from(payload);
+    final logoPath = fields.remove('_pos_logo_path') as String?;
+    final response = logoPath != null
+        ? await ApiService.instance.uploadFile<PosModel>(
+            ApiConstants.posItem(posId),
+            filePath: logoPath,
+            fileField: 'pos_profile_logo',
+            extraFields: {...fields, '_method': 'PUT'},
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          )
+        : await ApiService.instance.put<PosModel>(
+            ApiConstants.posItem(posId),
+            data: fields,
+            fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+          );
+    final result = response.data;
+    if (result == null) {
+      throw AppException('فشل تحديث بيانات نقطة البيع.');
+    }
+    return result;
+  }
+
+  @override
+  Future<void> deleteNetwork(int networkId) async {
+    final response = await ApiService.instance.delete<void>(
+      ApiConstants.network(networkId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف الشبكة.');
+    }
+  }
+
+  @override
+  Future<void> deletePos(int posId) async {
+    final response = await ApiService.instance.delete<void>(
+      ApiConstants.posItem(posId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذر حذف نقطة البيع.');
+    }
+  }
+
+  @override
+  Future<PaginatedList<NetworkModel>> getTrashedNetworks({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkModel>(
+      ApiConstants.networksTrashed,
+      fromJson: (data) => NetworkModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetwork(int networkId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.networkRestore(networkId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة الشبكة.');
+    }
+  }
+
+  @override
+  Future<PaginatedList<PosModel>> getTrashedPos({
+    String? search,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<PosModel>(
+      ApiConstants.posTrashed,
+      fromJson: (data) => PosModel.fromJson(data as Map<String, dynamic>),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<PosModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restorePos(int posId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.posRestore(posId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة نقطة البيع.');
+    }
+  }
+
+  @override
   Future<NetworkModel> getNetworkDetails(int networkId) async {
     final response = await ApiService.instance.get<NetworkModel>(
       ApiConstants.network(networkId),
@@ -352,4 +592,137 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
     }
     return result;
   }
+  @override
+  Future<PaginatedList<NetworkPosAgreementModel>> getNetworkPosAgreements({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreements(networkPosId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosAgreementModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> createNetworkPosAgreementDraft({
+    required int networkPosId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreements(networkPosId),
+      data: payload,
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر إنشاء مسودة الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> updateNetworkPosAgreementDraft({
+    required int networkPosId,
+    required int agreementId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await ApiService.instance.put<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreement(networkPosId, agreementId),
+      data: payload,
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر تحديث مسودة الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> activateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreementActivate(networkPosId, agreementId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر اعتماد الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<NetworkPosAgreementModel> terminateNetworkPosAgreement({
+    required int networkPosId,
+    required int agreementId,
+  }) async {
+    final response = await ApiService.instance.post<NetworkPosAgreementModel>(
+      ApiConstants.networkPosAgreementTerminate(networkPosId, agreementId),
+      fromJson: (data) => NetworkPosAgreementModel.fromJson(data as Map<String, dynamic>),
+    );
+    final result = response.data;
+    if (result == null) throw AppException('تعذر إنهاء الاتفاقية.');
+    return result;
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosEventModel>> getNetworkPosEvents({
+    required int networkPosId,
+    String? cursor,
+    int perPage = 20,
+  }) async {
+    final response = await ApiService.instance.getList<NetworkPosEventModel>(
+      ApiConstants.networkPosEvents(networkPosId),
+      fromJson: (data) => NetworkPosEventModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosEventModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restoreNetworkPosLink(int networkPosId) async {
+    final response = await ApiService.instance.post<dynamic>(
+      ApiConstants.networkPosRestore(networkPosId),
+    );
+    if (!response.success) {
+      throw AppException(response.message.isNotEmpty ? response.message : 'تعذرت استعادة العلاقة التجارية.');
+    }
+  }
+
+  @override
+  Future<PaginatedList<NetworkPosLinkModel>> getTrashedNetworkPosLinks({
+    required int entityId,
+    required bool isNetwork,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final path = isNetwork
+        ? ApiConstants.networkPosNetworkTrashed(entityId)
+        : ApiConstants.networkPosPosTrashed(entityId);
+    final response = await ApiService.instance.getList<NetworkPosLinkModel>(
+      path,
+      fromJson: (data) => NetworkPosLinkModel.fromJson(data as Map<String, dynamic>),
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<NetworkPosLinkModel>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
 }
