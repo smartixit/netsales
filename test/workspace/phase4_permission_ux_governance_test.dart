@@ -93,6 +93,22 @@ void main() {
         ]),
       );
 
+      // Expense form is shared by creation and editing; each submit path has its own permission.
+      final expenseFormPage = AppPages.routes.firstWhere(
+        (p) => p.name == AppRoutes.createOperatingExpense,
+      );
+      final expenseFormPermissions = expenseFormPage.middlewares
+          ?.whereType<PermissionGuardMiddleware>()
+          .expand((m) => m.anyPermissions ?? const <String>[])
+          .toList();
+      expect(
+        expenseFormPermissions,
+        containsAll([
+          AppPermissions.expensesCreate,
+          AppPermissions.expensesEdit,
+        ]),
+      );
+
       // 7. Procurement detail deep links require request visibility.
       final requestDetailsPage = AppPages.routes.firstWhere(
         (p) => p.name == AppRoutes.voucherRequestDetails,
