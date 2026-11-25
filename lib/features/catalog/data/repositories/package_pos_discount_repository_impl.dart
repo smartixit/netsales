@@ -27,6 +27,31 @@ class PackagePosDiscountRepositoryImpl implements PackagePosDiscountRepository {
   }
 
   @override
+  Future<PaginatedList<PackagePosDiscountEntity>> getTrashedForPos({
+    required int networkId,
+    required int posId,
+    String? cursor,
+    int perPage = 15,
+  }) async {
+    final response = await remote.getTrashedForPos(
+      networkId: networkId, posId: posId, cursor: cursor, perPage: perPage,
+    );
+    if (!response.success || response.data == null) throw AppException(response.message);
+    return PaginatedList<PackagePosDiscountEntity>(
+      items: response.data!,
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: response.meta?['per_page'] as int? ?? perPage,
+    );
+  }
+
+  @override
+  Future<void> restore(int discountId) async {
+    final response = await remote.restore(discountId);
+    if (!response.success) throw AppException(response.message);
+  }
+
+  @override
   Future<PackagePosDiscountEntity> create(Map<String, dynamic> payload) async {
     final response = await remote.create(payload);
     if (!response.success || response.data == null) throw AppException(response.message);
