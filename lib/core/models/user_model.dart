@@ -49,6 +49,16 @@ class UserModel {
       role?.roleKey == AppRoles.superAdmin ||
       generalRoleKey == AppRoles.superAdmin;
 
+  /// Platform identities belong to the separate desktop administration surface.
+  /// They must never enter operational mobile workspaces.
+  bool get isPlatformUser =>
+      rawIsSuperAdmin ||
+      const {
+        AppRoles.superAdmin,
+        AppRoles.supportAgent,
+        AppRoles.accountant,
+      }.contains(role?.roleKey ?? generalRoleKey);
+
   bool get isNetworkOwner =>
       role?.roleKey == AppRoles.networkOwner ||
       workspaceMemberships.any(
