@@ -26,7 +26,13 @@ class CommercialDirectoryScreen
     super.key,
     this.embedded = false,
     this.isNetwork,
+    this.controllerTag,
   });
+
+  final String? controllerTag;
+
+  @override
+  String? get tag => controllerTag;
 
   final bool embedded;
   final bool? isNetwork;
