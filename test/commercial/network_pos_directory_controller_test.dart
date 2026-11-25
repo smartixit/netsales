@@ -258,6 +258,16 @@ class _FakeCommercialRepository implements CommercialRepository {
   }
 
   @override
+  Future<void> deleteNetwork(int networkId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deletePos(int posId) async {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<NetworkEntity> getNetworkDetails(int networkId) async {
     throw UnimplementedError();
   }
