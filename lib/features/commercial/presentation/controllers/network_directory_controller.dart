@@ -72,7 +72,9 @@ class NetworkDirectoryController extends GetxController {
     isRestoring.value = true;
     try {
       await _restoreUseCase(network.networkId);
-      networks.removeWhere((item) => item.networkId == network.networkId);
+      if (showArchived.value) {
+        networks.removeWhere((item) => item.networkId == network.networkId);
+      }
       CustomSnackbar.show(
         title: 'تمت الاستعادة',
         message: 'أعيدت الشبكة إلى دليل الكيانات النشطة.',
