@@ -4,6 +4,7 @@ import 'package:netsales/features/catalog/data/datasources/package_catalog_remot
 import 'package:netsales/features/catalog/data/repositories/package_catalog_repository_impl.dart';
 import 'package:netsales/features/catalog/domain/repositories/package_catalog_repository.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_effective_package_discounts_for_pos_use_case.dart';
+import 'package:netsales/features/catalog/domain/usecases/get_network_packages_use_case.dart';
 import 'package:netsales/features/catalog/data/datasources/package_pos_discount_remote_data_source.dart';
 import 'package:netsales/features/catalog/data/datasources/package_pos_discount_remote_data_source_impl.dart';
 import 'package:netsales/features/catalog/data/repositories/package_pos_discount_repository_impl.dart';
@@ -51,6 +52,12 @@ class NetworkPosLifecycleBinding extends Bindings {
       );
     }
 
+    if (!Get.isRegistered<GetNetworkPackagesUseCase>()) {
+      Get.lazyPut<GetNetworkPackagesUseCase>(
+        () => GetNetworkPackagesUseCase(Get.find<PackageCatalogRepository>()),
+        fenix: true,
+      );
+    }
     if (!Get.isRegistered<PackagePosDiscountRemoteDataSource>()) {
       Get.lazyPut<PackagePosDiscountRemoteDataSource>(
         () => const PackagePosDiscountRemoteDataSourceImpl(),
