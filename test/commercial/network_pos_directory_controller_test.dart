@@ -382,7 +382,6 @@ void main() {
 
       controller = PosCommercialDirectoryController(
         getPosNetworksListUseCase: GetPosNetworksListUseCase(repo),
-        deleteNetworkPosLinkUseCase: DeleteNetworkPosLinkUseCase(repo),
         previewNetworkPosLinkChallengeUseCase:
             PreviewNetworkPosLinkChallengeUseCase(repo),
         confirmNetworkPosLinkChallengeUseCase:
