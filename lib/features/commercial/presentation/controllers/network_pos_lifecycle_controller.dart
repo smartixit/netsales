@@ -370,7 +370,6 @@ class NetworkPosLifecycleController extends GetxController {
       }
       Get.back();
       await loadPackageDiscounts(refresh: true);
-      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حفظ خصم الباقة.', type: SnackType.success);
     } catch (error) {
@@ -408,7 +407,6 @@ class NetworkPosLifecycleController extends GetxController {
     try {
       await deletePackagePosDiscountUseCase(discount.discountId);
       await loadPackageDiscounts(refresh: true);
-      await loadEffectivePackageDiscounts();
       await loadEvents(refresh: true);
       CustomSnackbar.show(title: 'نجاح', message: 'تم حذف الخصم.', type: SnackType.success);
     } catch (error) {
