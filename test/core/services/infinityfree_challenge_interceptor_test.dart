@@ -463,7 +463,10 @@ void main() {
           401,
         ),
       );
-      final dio = _dio(Uri.parse('https://missing-session-code.example'), adapter);
+      final dio = _dio(
+        Uri.parse('https://missing-session-code.example'),
+        adapter,
+      );
       dio.interceptors.add(SessionAuthInterceptor());
 
       DioException? failure;
@@ -500,7 +503,10 @@ void main() {
           401,
         );
       });
-      final dio = _dio(Uri.parse('https://stale-session-response.example'), adapter);
+      final dio = _dio(
+        Uri.parse('https://stale-session-response.example'),
+        adapter,
+      );
       dio.interceptors.add(SessionAuthInterceptor());
 
       DioException? failure;
