@@ -16,7 +16,6 @@ import 'package:netsales/features/catalog/domain/usecases/toggle_package_pos_dis
 import 'package:netsales/features/catalog/domain/usecases/delete_package_pos_discount_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/get_trashed_package_pos_discounts_for_pos_use_case.dart';
 import 'package:netsales/features/catalog/domain/usecases/restore_package_pos_discount_use_case.dart';
-import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_pos_lifecycle_controller.dart';
 import 'package:netsales/features/commercial/domain/usecases/activate_network_pos_agreement_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/create_network_pos_agreement_draft_use_case.dart';
@@ -115,9 +114,6 @@ class NetworkPosLifecycleBinding extends Bindings {
         networkPosId: id,
         relationship: arguments['relationship'] is NetworkPosLinkEntity
             ? arguments['relationship'] as NetworkPosLinkEntity
-            : null,
-        relationship: Get.arguments is Map && Get.arguments['relationship'] is NetworkPosLinkEntity
-            ? Get.arguments['relationship'] as NetworkPosLinkEntity
             : null,
         networkId: (Get.arguments is Map ? (Get.arguments['network_id'] as num?)?.toInt() : null) ?? 0,
         posId: (Get.arguments is Map ? (Get.arguments['pos_id'] as num?)?.toInt() : null) ?? 0,
