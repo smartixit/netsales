@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/membership/domain/entities/member_user_entity.dart';
@@ -190,6 +192,45 @@ void main() {
       expect(controller.expandedMemberId.value, 3);
       controller.toggleAccordion(4);
       expect(controller.expandedMemberId.value, 4);
+    });
+  });
+
+  group('Backend RBAC contract alignment', () {
+    test('uses granular Network membership capabilities independently', () {
+      PermissionService.to.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 5,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [
+          AppPermissions.networkMembersView,
+          AppPermissions.networkMembersCreate,
+          AppPermissions.networkMembersChangeRole,
+        ],
+      );
+
+      expect(controller.canViewMembers, isTrue);
+      expect(controller.canAddMember, isTrue);
+      expect(controller.canChangeMemberRole, isTrue);
+      expect(controller.canChangeMemberStatus, isFalse);
+      expect(controller.canRemoveMember, isFalse);
+    });
+
+    test('exposes only NETWORK_USER and NETWORK_ACCOUNTANT for Network', () async {
+      repository.networkRoles.add(
+        const MembershipRoleEntity(
+          roleId: 4,
+          roleKey: 'POS_ACCOUNTANT',
+          roleName: 'محاسب نقطة بيع',
+          scope: 'POS',
+        ),
+      );
+
+      await controller.loadAssignableRoles();
+
+      expect(
+        controller.assignableRoles.map((role) => role.roleKey).toSet(),
+        {'NETWORK_USER', 'NETWORK_ACCOUNTANT'},
+      );
     });
   });
 
