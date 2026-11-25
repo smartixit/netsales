@@ -368,68 +368,24 @@ void main() {
       );
     });
 
-    test('Live unit switch handles fractional inputs accurately without precision loss', () {
-      // 1. تجربة 1.5 جيجابايت -> التحويل إلى ميجابايت -> 1536 MB
+    test('unit changes preserve the entered quantities without conversion', () {
       formController.selectedBalanceUnit.value = DataSizeUnit.gigabytes;
       formController.balanceController.text = '1.5';
       formController.setBalanceUnit(DataSizeUnit.megabytes);
       expect(formController.selectedBalanceUnit.value, DataSizeUnit.megabytes);
-      expect(formController.balanceController.text, '1536');
-
-      // 2. التحويل العكسي من 1536 ميجابايت -> إلى جيجابايت -> 1.5 GB
-      formController.setBalanceUnit(DataSizeUnit.gigabytes);
-      expect(formController.selectedBalanceUnit.value, DataSizeUnit.gigabytes);
       expect(formController.balanceController.text, '1.5');
 
-      // 3. تجربة 1.65 جيجابايت -> إلى ميجابايت ثم العودة
-      formController.balanceController.text = '1.65';
-      formController.setBalanceUnit(DataSizeUnit.megabytes);
-      expect(formController.balanceController.text, '1689.6');
-      formController.setBalanceUnit(DataSizeUnit.gigabytes);
-      expect(formController.balanceController.text, '1.65');
-
-      // 4. تجربة 1.5 ساعة -> التحويل إلى دقائق -> 90 دقيقة
       formController.selectedUptimeUnit.value = TimeDurationUnit.hours;
       formController.uptimeController.text = '1.5';
       formController.setUptimeUnit(TimeDurationUnit.minutes);
       expect(formController.selectedUptimeUnit.value, TimeDurationUnit.minutes);
-      expect(formController.uptimeController.text, '90');
-
-      // 5. التحويل العكسي من 90 دقيقة -> إلى ساعات -> 1.5 ساعة
-      formController.setUptimeUnit(TimeDurationUnit.hours);
-      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.hours);
       expect(formController.uptimeController.text, '1.5');
 
-      // 6. تجربة 1.5 شهر -> التحويل إلى أيام -> 45 يوماً
       formController.selectedValidityUnit.value = TimeDurationUnit.months;
       formController.validityController.text = '1.5';
       formController.setValidityUnit(TimeDurationUnit.days);
       expect(formController.selectedValidityUnit.value, TimeDurationUnit.days);
-      expect(formController.validityController.text, '45');
-
-      // 7. تجربة 1.5 يوم -> التحويل إلى ساعات -> 36 ساعة
-      formController.selectedUptimeUnit.value = TimeDurationUnit.days;
-      formController.uptimeController.text = '1.5';
-      formController.setUptimeUnit(TimeDurationUnit.hours);
-      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.hours);
-      expect(formController.uptimeController.text, '36');
-
-      // 8. التحويل العكسي من 36 ساعة -> إلى أيام -> 1.5 يوم
-      formController.setUptimeUnit(TimeDurationUnit.days);
-      expect(formController.selectedUptimeUnit.value, TimeDurationUnit.days);
-      expect(formController.uptimeController.text, '1.5');
-
-      // 9. تجربة 2 أسبوع -> التحويل إلى أيام -> 14 يوماً
-      formController.selectedValidityUnit.value = TimeDurationUnit.weeks;
-      formController.validityController.text = '2';
-      formController.setValidityUnit(TimeDurationUnit.days);
-      expect(formController.selectedValidityUnit.value, TimeDurationUnit.days);
-      expect(formController.validityController.text, '14');
-
-      // 10. التحويل العكسي من 14 يوماً -> إلى أسابيع -> 2 أسبوع
-      formController.setValidityUnit(TimeDurationUnit.weeks);
-      expect(formController.selectedValidityUnit.value, TimeDurationUnit.weeks);
-      expect(formController.validityController.text, '2');
+      expect(formController.validityController.text, '1.5');
     });
 
     test('empty optional durations remain empty when their units change', () {
@@ -457,6 +413,12 @@ void main() {
       expect(formController.balanceController.text, '0');
       expect(formController.uptimeController.text, '0');
       expect(formController.validityController.text, '0');
+    });
+
+    test('live preview retains the selected package color', () {
+      formController.selectedColor.value = '0xFF0D7A5F';
+
+      expect(formController.livePreviewPackage.packageColor, '0xFF0D7A5F');
     });
 
     test('live pricing preview follows server two-decimal rounding', () {
