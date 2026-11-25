@@ -112,6 +112,7 @@ abstract final class AppPermissions {
   static const String requestsEdit = 'requests.edit';
   static const String requestsDelete = 'requests.delete';
   static const String requestsApprove = 'requests.approve';
+  static const String requestsPreviewModification = 'requests.preview_modification';
   static const String requestsReject = 'requests.reject';
   static const String requestsReport = 'requests.report';
 
