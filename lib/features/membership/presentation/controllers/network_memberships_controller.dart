@@ -39,6 +39,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
     required this.updateNetworkMemberRoleUseCase,
     required this.updateNetworkMemberStatusUseCase,
     required this.removeNetworkMemberUseCase,
+    this.initialNetworkId,
   });
 
   final GetNetworkMembersUseCase getNetworkMembersUseCase;
@@ -47,6 +48,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
   final UpdateNetworkMemberRoleUseCase updateNetworkMemberRoleUseCase;
   final UpdateNetworkMemberStatusUseCase updateNetworkMemberStatusUseCase;
   final RemoveNetworkMemberUseCase removeNetworkMemberUseCase;
+  final int? initialNetworkId;
 
   @override
   String get pageTitle => 'إدارة أعضاء الشبكة';
@@ -202,7 +204,7 @@ class NetworkMembershipsController extends BaseMembershipsController {
   bool get canRemoveMember =>
       PermissionService.to.can(AppPermissions.networkMembersDelete);
 
-  int? get resolvedNetworkId => WorkspaceService.to.savedActiveNetworkId;
+  int? get resolvedNetworkId => initialNetworkId ?? WorkspaceService.to.savedActiveNetworkId;
 
   @override
   void onInit() {
