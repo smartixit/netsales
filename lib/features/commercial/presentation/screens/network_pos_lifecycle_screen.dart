@@ -476,6 +476,7 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
     'DISCOUNT_DEACTIVATED' => 'تعطيل خصم مخصص',
     'DISCOUNT_ARCHIVED' => 'أرشفة خصم مخصص',
     'DISCOUNT_RESTORED' => 'استعادة خصم مخصص',
+    'DISCOUNT_FORCE_DELETED' => 'حذف خصم مخصص نهائياً',
     _ => type,
   };
 }
