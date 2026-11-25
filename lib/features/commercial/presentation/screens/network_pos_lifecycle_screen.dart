@@ -394,6 +394,22 @@ class NetworkPosLifecycleScreen extends GetView<NetworkPosLifecycleController> {
               ),
             ),
           )),
+          if (controller.isLoadingMorePackages.value)
+            const CustomStateSkeletonView(
+              recipe: CustomStateSkeleton(
+                layout: CustomStateSkeletonLayout.list,
+                itemCount: 2,
+                cardHeight: 108,
+              ),
+            )
+          else if (controller.hasMorePackages)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: CustomButton.secondary(
+                text: 'تحميل المزيد من الباقات',
+                onPressed: controller.loadMorePackages,
+              ),
+            ),
         ],
         if (controller.canViewDiscounts) ...[
           AppSpacing.vLg,
