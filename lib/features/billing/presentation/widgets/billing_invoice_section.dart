@@ -87,6 +87,12 @@ class BillingInvoiceSection extends StatelessWidget {
               enableTooltip: false,
               trailingText: currencyCode,
             ),
+            if (invoiceId != null)
+              CustomButton.text(
+                text: 'التفاصيل',
+                onPressed: () =>
+                    BillingDialogs.invoiceDetails(controller, invoiceId),
+              ),
             if (canPay)
               CustomButton.primary(
                 text: 'تسجيل دفعة',
