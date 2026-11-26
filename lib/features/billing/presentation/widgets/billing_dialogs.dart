@@ -3,7 +3,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
-import 'package:netsales/features/billing/domain/value_objects/billing_amount_parser.dart';
+import 'package:netsales/features/billing/domain/entities/billing_amount_parser.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_trial_policy_summary.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_invoice_details_content.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
