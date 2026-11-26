@@ -700,8 +700,8 @@ class _RoyalPriceTrack extends StatelessWidget {
         AppSpacing.vXxs,
 
         // ── السطر 4: إجمالي الحزمة ──
-        Wrap(
-          children: [
+      
+       
             Text(
               'إجمالي الحزمة:\n${AmountFormatter.formatValue(totalPrice)} ر.ي',
               style: TextStyle(
@@ -722,8 +722,7 @@ class _RoyalPriceTrack extends StatelessWidget {
                 color: totalSavings > 0 ? themeColor : Colors.white60,
               ),
             ),
-          ],
-        ),
+        
       ],
     );
   }

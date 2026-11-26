@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
@@ -124,65 +125,6 @@ class PackageFormScreen extends GetView<PackageFormController> {
   }
 }
 
-class _PackageFormIntroduction extends StatelessWidget {
-  const _PackageFormIntroduction({required this.isEditing});
-
-  final bool isEditing;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 46.r,
-            height: 46.r,
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: .10),
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Icon(
-              isEditing ? Icons.edit_note_rounded : Icons.add_card_rounded,
-              color: colors.primary,
-              size: 25.r,
-            ),
-          ),
-          SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isEditing ? 'تحديث إعدادات الباقة' : 'إعداد باقة جديدة',
-                  style: AppTypography.titleMedium.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xxs),
-                Text(
-                  'أدخل بيانات الباقة ومواصفاتها ثم راجع إعدادات التسعير قبل الحفظ.',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CompactPreviewDisclosure extends StatelessWidget {
   const _CompactPreviewDisclosure();
 
@@ -193,17 +135,18 @@ class _CompactPreviewDisclosure extends StatelessWidget {
       clipBehavior: Clip.antiAliasWithSaveLayer,
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: colors.outlineVariant.withValues(alpha: .6)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
+          splashColor: colors.primary.withValues(alpha: 0.08),
           initiallyExpanded: true,
           tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
           childrenPadding: EdgeInsetsDirectional.fromSTEB(
             AppSpacing.sm,
-            0,
+            AppSpacing.sm,
             AppSpacing.sm,
             AppSpacing.md,
           ),
