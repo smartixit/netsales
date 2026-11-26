@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/features/billing/domain/value_objects/billing_amount_parser.dart';
+import 'package:netsales/features/billing/domain/entities/billing_amount_parser.dart';
 
 void main() {
   group('BillingAmountParser', () {
