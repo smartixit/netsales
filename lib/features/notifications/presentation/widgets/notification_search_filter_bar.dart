@@ -4,8 +4,7 @@ import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 import 'package:netsales/widgets/badges/custom_filter_chip.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 
 /// شريط البحث والتصفية المتقدم لمركز الإشعارات (NotificationSearchFilterBar)
 ///
@@ -25,23 +24,10 @@ class NotificationSearchFilterBar extends StatelessWidget {
         children: [
           // ── حقل البحث ──
           Obx(
-            () => CustomTextField(
+            () => CustomSearchField(
               controller: controller.searchController,
-              hint: 'بحث في الإشعارات والتنبيهات...',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: controller.searchQuery.value.isNotEmpty
-                  ? CustomButton.icon(
-                      icon: Icons.clear_rounded,
-                      iconSize: 18,
-                      dimension: 36,
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: colors.onSurfaceVariant,
-                      onPressed: () {
-                        controller.searchController.clear();
-                      },
-                    )
-                  : null,
-              label: 'بحث في الإشعارات...',
+              searchQuery: controller.searchQuery.value,
+              hintText: 'بحث في الإشعارات والتنبيهات...',
             ),
           ),
 

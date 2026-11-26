@@ -12,7 +12,7 @@ import 'package:netsales/features/requests/domain/usecases/create_request_use_ca
 import 'package:netsales/features/requests/presentation/controllers/pos_new_procurement_order_controller.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_package_selection_section.dart';
 import 'package:netsales/features/requests/presentation/widgets/procurement_sale_type_selector.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
 import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
 
@@ -115,7 +115,7 @@ void main() {
     await tester.pumpWidget(buildTestableWidget());
     await tester.pumpAndSettle();
 
-    final searchField = find.byType(CustomTextField).first;
+    final searchField = find.byType(CustomSearchField).first;
     final counter = find.byType(CustomResultsCounterBar);
 
     expect(counter, findsOneWidget);
@@ -123,8 +123,7 @@ void main() {
       tester.getTopLeft(counter).dy,
       greaterThan(tester.getBottomLeft(searchField).dy),
     );
-    expect(find.text('0 باقة محمّلة'), findsOneWidget);
-    expect(find.text('الإجمالي: '), findsOneWidget);
+    expect(find.text('النتائج: 0 باقة محمّلة'), findsOneWidget);
 
     controller.packageSearchQuery.value = 'الاختبار';
     await tester.pump();
@@ -132,8 +131,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump();
 
-    expect(find.text('نتائج البحث: '), findsOneWidget);
-    expect(find.text('0 باقة محمّلة'), findsOneWidget);
+    expect(find.text('مفلترة'), findsOneWidget);
+    expect(find.text('النتائج: 0 باقة محمّلة'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

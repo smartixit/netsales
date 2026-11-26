@@ -62,9 +62,10 @@ class CustomResultsCounterBar extends StatelessWidget {
       child: Column(
         key: ValueKey('$count-$totalCount-$isFiltered-$recordLabel'),
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // كبسولة عدد النتائج
               Container(
@@ -123,9 +124,8 @@ class CustomResultsCounterBar extends StatelessWidget {
                 ),
               ],
 
-              const Spacer(),
-
-              if (showClearButton)
+              if (showClearButton) ...[
+                AppSpacing.hXs,
                 CustomButton.text(
                   text: 'مسح الكل',
                   icon: Icons.filter_alt_off_rounded,
@@ -133,6 +133,7 @@ class CustomResultsCounterBar extends StatelessWidget {
                   foregroundColor: colors.error,
                   onPressed: onClear,
                 ),
+              ],
             ],
           ),
 

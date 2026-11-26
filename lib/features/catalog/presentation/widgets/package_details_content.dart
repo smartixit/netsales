@@ -14,8 +14,8 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
 import 'package:netsales/widgets/containers/custom_section_container.dart';
 import 'package:netsales/widgets/document_details/custom_document_metrics_strip.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
@@ -251,12 +251,9 @@ class PackageDetailsContent extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CustomTextField(
+        CustomSearchField(
           controller: controller.posDiscountSearchController,
-          label: 'البحث عن نقطة بيع',
-          hint: 'اكتب اسم نقطة البيع...',
-          isRequired: false,
-          prefixIcon: const Icon(Icons.search_rounded),
+          hintText: 'ابحث عن نقطة بيع بالاسم...',
           onChanged: controller.onPosDiscountSearchChanged,
         ),
         AppSpacing.vMd,

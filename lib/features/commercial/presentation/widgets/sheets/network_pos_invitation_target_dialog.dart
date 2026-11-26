@@ -7,7 +7,7 @@ import 'package:netsales/features/commercial/domain/entities/network_linkable_po
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/skeletons/custom_state_skeleton_view.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 
 /// Search and selection surface; all query state and pagination belong to GetX.
 class NetworkPosInvitationTargetDialog extends StatelessWidget {
@@ -58,13 +58,9 @@ class NetworkPosInvitationTargetDialog extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.md),
-          CustomTextField(
+          CustomSearchField(
             controller: codeController,
-            label: 'اسم نقطة البيع أو المعرف التجاري',
-            hint: 'اكتب اسم نقطة البيع أو رمزها...',
-            prefixIcon: const Icon(Icons.search_rounded),
-            keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.search,
+            hintText: 'اكتب اسم نقطة البيع أو رمزها...',
             onChanged: onChanged,
           ),
           SizedBox(height: AppSpacing.sm),

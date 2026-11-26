@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_report_date_range_section.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
 class BillingReportFilterSection extends StatelessWidget {
@@ -30,12 +31,11 @@ class BillingReportFilterSection extends StatelessWidget {
     final searchFilter = definition.filter('search');
     if (searchFilter != null) {
       widgets.add(
-        CustomTextField(
+        CustomSearchField(
           controller: controller.searchController,
-          label: resolveLabel(context, searchFilter.labelKey),
-          hint: english ? 'Search report records' : 'ابحث في سجلات التقرير',
-          prefixIcon: const Icon(Icons.search),
-          isRequired: searchFilter.required,
+          hintText: english
+              ? 'Search report records'
+              : 'ابحث في سجلات التقرير',
           onChanged: (value) {
             final next = Map<String, ReportFilterValue>.from(criteria.filters);
             if (value.trim().isEmpty) {

@@ -9,8 +9,7 @@ import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
-import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 
 /// كتالوج باقات الفاتورة المباشرة: استعراض وتكوين السلة مباشرة مع بحث وترقيم خادمي
 /// مطابق بنسبة 100% لبنية وتجربة [ProcurementPackageSelectionSection] في وحدة الطلبات
@@ -27,29 +26,15 @@ class DirectInvoicePackageSelectionSection
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomTextField(
-                controller: controller.packageSearchController,
-                label: 'البحث في الباقات',
-                hint: 'اكتب اسم الباقة للبحث...',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: controller.packageSearchQuery.value.isNotEmpty
-                    ? CustomButton.icon(
-                        icon: Icons.close_rounded,
-                        tooltip: 'مسح البحث',
-                        dimension: 36,
-                        backgroundColor: Colors.transparent,
-                        onPressed: controller.clearPackageSearch,
-                      )
-                    : null,
-                isRequired: false,
-                onChanged: controller.onPackageSearchChanged,
-              ),
-              AppSpacing.vXs,
-              CustomResultsCounterBar(
-                count: controller.availablePackages.length,
+              CustomSearchFilterBar<void>(
+                searchController: controller.packageSearchController,
+                searchQuery: controller.packageSearchQuery.value,
+                searchHint: 'اكتب اسم الباقة للبحث...',
+                onSearchChanged: controller.onPackageSearchChanged,
+                onClearSearch: controller.clearPackageSearch,
+                resultsCount: controller.availablePackages.length,
                 recordLabel: 'باقة محمّلة',
-                isFiltered: controller.packageSearchQuery.value.isNotEmpty,
-                isLoading: controller.isLoadingPackages.value,
+                isLoadingResults: controller.isLoadingPackages.value,
               ),
               AppSpacing.vSm,
               if (controller.isLoadingPackages.value)
