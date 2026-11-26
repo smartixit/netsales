@@ -4,7 +4,14 @@ abstract final class BillingAmountParser {
   static int? toMinor(String input, int decimalPlaces) {
     if (decimalPlaces < 0 || decimalPlaces > 9) return null;
 
-    final value = input.trim();
+    final value = input
+        .trim()
+        .replaceAll('٫', '.')
+        .replaceAllMapped(RegExp('[٠-٩۰-۹]'), (match) {
+          final digit = match.group(0)!.runes.single;
+          final zero = digit >= 0x06F0 ? 0x06F0 : 0x0660;
+          return (digit - zero).toString();
+        });
     if (value.isEmpty || !RegExp(r'^\d+(?:\.\d*)?$').hasMatch(value)) {
       return null;
     }
