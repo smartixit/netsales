@@ -872,10 +872,14 @@ class BillingController extends GetxController {
   Future<void> purchase(int priceId) async {
     final id = selectedAccountId.value;
     if (id == null || isMutating.value) return;
+    final subscriptionsWereLoaded = subscriptionsPage.revision > 0;
+    final invoicesWereLoaded = invoicesPage.revision > 0;
     isMutating.value = true;
     try {
       await useCases.purchase(id, priceId);
       await loadAccountData();
+      if (subscriptionsWereLoaded) await refreshSubscriptions();
+      if (invoicesWereLoaded) await refreshInvoices();
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
@@ -894,6 +898,7 @@ class BillingController extends GetxController {
     String? proofPath,
   ) async {
     if (isMutating.value) return;
+    final paymentsWereLoaded = paymentsPage.revision > 0;
     isMutating.value = true;
     try {
       final random = Random.secure();
@@ -910,6 +915,8 @@ class BillingController extends GetxController {
         proofPath,
       );
       await loadAccountData();
+      await refreshInvoices();
+      if (paymentsWereLoaded) await refreshPayments();
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
@@ -921,6 +928,23 @@ class BillingController extends GetxController {
   }
 
   Future<void> cancel(int id, {required bool atPeriodEnd}) async {
+    if (isMutating.value) return;
+    final subscriptionsWereLoaded = subscriptionsPage.revision > 0;
+    isMutating.value = true;
+    try {
+      await useCases.cancel(id, atPeriodEnd);
+      await loadAccountData();
+      if (subscriptionsWereLoaded) await refreshSubscriptions();
+    } catch (error) {
+      errorMessage.value = AppException.sanitizeMessage(
+        error,
+        fallback: 'تعذر جدولة الإلغاء.',
+      );
+    } finally {
+      isMutating.value = false;
+    }
+  }
+}) async {
     if (isMutating.value) return;
     isMutating.value = true;
     try {
