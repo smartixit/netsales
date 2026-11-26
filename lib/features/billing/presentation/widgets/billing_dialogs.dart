@@ -265,8 +265,12 @@ class BillingDialogs {
                       )
                       .toList(),
                   rxValue: controller.selectedPaymentMethodId,
-                  onChanged: (id) =>
-                      controller.selectedPaymentMethodId.value = id,
+                  onChanged: (id) {
+                    if (id != controller.selectedPaymentMethodId.value) {
+                      controller.paymentProof.value = null;
+                    }
+                    controller.selectedPaymentMethodId.value = id;
+                  },
                   label: 'وسيلة الدفع',
                   hint: 'اختر وسيلة الدفع',
                 ),
