@@ -311,6 +311,7 @@ class BillingController extends GetxController {
     invoiceDetails.value = null;
     invoiceDetailsError.value = null;
     _invoiceDetailsRevision++;
+    isInvoiceDetailsLoading.value = false;
     statementData.value = null;
     statementError.value = null;
     _statementRevision++;
@@ -419,6 +420,7 @@ class BillingController extends GetxController {
     invoiceDetails.value = null;
     invoiceDetailsError.value = null;
     _invoiceDetailsRevision++;
+    isInvoiceDetailsLoading.value = false;
     account.value = null;
     _invalidateAccountPages(clearItems: true);
     _clearSubscriptionDetails();
@@ -489,8 +491,12 @@ class BillingController extends GetxController {
   );
 
   Future<void> _loadTabData(int index, {bool forceRefresh = false}) async {
-    bool shouldLoad(BillingCursorPageState page) =>
-        forceRefresh || !page.hasLoadedFirstPage || page.firstPageError.value != null;
+    bool shouldLoad(BillingCursorPageState page) {
+      if (page.isLoadingFirstPage.value) return false;
+      return forceRefresh ||
+          !page.hasLoadedFirstPage ||
+          page.firstPageError.value != null;
+    }
 
     switch (index) {
       case 1:
