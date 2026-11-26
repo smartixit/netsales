@@ -91,7 +91,7 @@ class BillingWorkspaceContent extends StatelessWidget {
                     label: 'الفواتير',
                   ),
                   CustomSegmentItem(
-                    label: 'النشاط المالي',
+                    label: 'النشاط',
                   ),
                   CustomSegmentItem(
                     label: 'حسابي',
