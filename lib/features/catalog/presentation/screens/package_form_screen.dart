@@ -124,65 +124,6 @@ class PackageFormScreen extends GetView<PackageFormController> {
   }
 }
 
-class _PackageFormIntroduction extends StatelessWidget {
-  const _PackageFormIntroduction({required this.isEditing});
-
-  final bool isEditing;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 46.r,
-            height: 46.r,
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: .10),
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Icon(
-              isEditing ? Icons.edit_note_rounded : Icons.add_card_rounded,
-              color: colors.primary,
-              size: 25.r,
-            ),
-          ),
-          SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isEditing ? 'تحديث إعدادات الباقة' : 'إعداد باقة جديدة',
-                  style: AppTypography.titleMedium.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xxs),
-                Text(
-                  'أدخل بيانات الباقة ومواصفاتها ثم راجع إعدادات التسعير قبل الحفظ.',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CompactPreviewDisclosure extends StatelessWidget {
   const _CompactPreviewDisclosure();
 
