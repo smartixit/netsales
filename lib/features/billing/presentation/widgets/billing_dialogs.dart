@@ -5,6 +5,7 @@ import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/features/billing/domain/value_objects/billing_amount_parser.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_trial_policy_summary.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_invoice_details_content.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
@@ -206,6 +207,34 @@ class BillingDialogs {
       cancelLabel: 'إلغاء',
     );
     if (accepted == true) await controller.deleteContact(id);
+  }
+
+  static Future<void> invoiceDetails(
+    BillingController controller,
+    int invoiceId,
+  ) async {
+    await controller.loadInvoiceDetails(invoiceId);
+    final invoice = controller.invoiceDetails.value;
+    if (invoice == null) {
+      await CustomDialog.show(
+        type: DialogType.error,
+        title: 'تعذر تحميل تفاصيل الفاتورة',
+        message: controller.invoiceDetailsError.value ??
+            'لم يتمكن الخادم من إرجاع بيانات الفاتورة.',
+        confirmLabel: 'حسناً',
+      );
+      return;
+    }
+
+    await CustomDialog.show(
+      type: DialogType.info,
+      title: 'تفاصيل الفاتورة',
+      confirmLabel: 'إغلاق',
+      maxWidth: 680,
+      content: SingleChildScrollView(
+        child: BillingInvoiceDetailsContent(invoice: invoice),
+      ),
+    );
   }
 
   static Future<void> payInvoice(
