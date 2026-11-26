@@ -3,6 +3,7 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:netsales/features/billing/domain/value_objects/billing_amount_parser.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_trial_policy_summary.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
 import 'package:netsales/widgets/inputs/custom_dropdown.dart';
@@ -212,15 +213,25 @@ class BillingDialogs {
     Map<String, dynamic> invoice,
   ) async {
     final invoiceId = (invoice['invoice_id'] as num?)?.toInt();
-    final remaining =
-        int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
+    final availableMinor =
+        int.tryParse(invoice['available_to_submit_minor']?.toString() ?? '0') ??
+        0;
+    final availableAmount = invoice['available_to_submit']?.toString() ?? '';
+    final rawCurrency = invoice['currency'];
+    final currency = rawCurrency is Map
+        ? Map<String, dynamic>.from(rawCurrency)
+        : const <String, dynamic>{};
+    final currencyCode = currency['code']?.toString() ?? '';
+    final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
+
     if (invoiceId == null ||
-        remaining <= 0 ||
+        invoice['can_submit_payment'] != true ||
+        availableMinor <= 0 ||
         controller.paymentMethods.isEmpty) {
       return;
     }
 
-    final amount = TextEditingController(text: remaining.toString());
+    final amount = TextEditingController(text: availableAmount);
     final reference = TextEditingController();
     controller.paymentProof.value = null;
     try {
@@ -234,8 +245,11 @@ class BillingDialogs {
             children: [
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: Text('المبلغ المتبقي: $remaining وحدة صغرى'),
+                child: Text(
+                  'المتاح لتسجيل طلب دفع: $availableAmount $currencyCode',
+                ),
               ),
+              const SizedBox(height: 10),
               Obx(
                 () => CustomDropdown<int>(
                   items: controller.paymentMethods
@@ -244,7 +258,7 @@ class BillingDialogs {
                           value: (method['payment_method_id'] as num).toInt(),
                           child: Text(
                             method['name']?.toString() ??
-                                method['code']?.toString() ??
+                                method['method_key']?.toString() ??
                                 'وسيلة دفع',
                           ),
                         ),
@@ -259,8 +273,10 @@ class BillingDialogs {
               ),
               CustomTextField(
                 controller: amount,
-                label: 'المبلغ بالوحدة الصغرى',
-                keyboardType: TextInputType.number,
+                label: 'المبلغ ($currencyCode)',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
               CustomTextField(
                 controller: reference,
@@ -268,21 +284,36 @@ class BillingDialogs {
                 isRequired: false,
               ),
               const SizedBox(height: 8),
-              Obx(
-                () => CustomFilePicker.single(
+              Obx(() {
+                final selectedId = controller.selectedPaymentMethodId.value;
+                final selectedMethod = controller.paymentMethods.firstWhereOrNull(
+                  (method) =>
+                      (method['payment_method_id'] as num?)?.toInt() ==
+                      selectedId,
+                );
+                final requiresProof = selectedMethod?['requires_proof'] == true;
+                if (!requiresProof) return const SizedBox.shrink();
+
+                return CustomFilePicker.single(
                   initialFile: controller.paymentProof.value,
                   onFileChanged: (file) => controller.paymentProof.value = file,
                   preset: FileTypePreset.custom,
-                  allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
-                  maxFileSizeBytes: 5 * 1024 * 1024,
-                  label: 'إثبات الدفع',
-                  hint: 'PDF أو JPG أو PNG، بحد أقصى 5MB',
+                  allowedExtensions: const [
+                    'pdf',
+                    'jpg',
+                    'jpeg',
+                    'png',
+                    'webp',
+                  ],
+                  maxFileSizeBytes: 8 * 1024 * 1024,
+                  label: 'إثبات الدفع (مطلوب)',
+                  hint: 'PDF أو JPG أو PNG أو WEBP، بحد أقصى 8MB',
                   displayMode: FilePickerDisplayMode.button,
-                ),
-              ),
+                );
+              }),
               const SizedBox(height: 8),
               const Text(
-                'سيُسجل الطلب بانتظار مراجعة المنصة. لن يتفعل الاشتراك قبل اعتماد الدفع.',
+                'يُسجل الطلب للمراجعة أولاً. لا يُعد المبلغ مدفوعاً ولا تتفعل الاستحقاقات المرتبطة به قبل اعتماد المنصة.',
               ),
             ],
           ),
@@ -290,21 +321,48 @@ class BillingDialogs {
         confirmLabel: 'إرسال طلب الدفع',
         cancelLabel: 'إلغاء',
       );
-      final amountMinor = int.tryParse(amount.text.trim());
+
+      final amountMinor = BillingAmountParser.toMinor(
+        amount.text,
+        decimalPlaces,
+      );
       final methodId = controller.selectedPaymentMethodId.value;
-      if (accepted == true &&
-          amountMinor != null &&
-          amountMinor > 0 &&
-          amountMinor <= remaining &&
-          methodId != null) {
-        await controller.recordPayment(
-          invoiceId,
-          methodId,
-          amountMinor,
-          reference.text.trim().isEmpty ? null : reference.text.trim(),
-          controller.paymentProof.value?.path,
+      final selectedMethod = controller.paymentMethods.firstWhereOrNull(
+        (method) =>
+            (method['payment_method_id'] as num?)?.toInt() == methodId,
+      );
+      final requiresProof = selectedMethod?['requires_proof'] == true;
+      final proofPath = controller.paymentProof.value?.path;
+
+      if (accepted != true) return;
+      if (amountMinor == null || amountMinor > availableMinor) {
+        await CustomDialog.show(
+          type: DialogType.error,
+          title: 'قيمة الدفعة غير صالحة',
+          message:
+              'أدخل مبلغاً موجباً بدقة لا تتجاوز ${decimalPlaces} منازل عشرية، وألا يتجاوز الرصيد المتاح ${availableAmount} ${currencyCode}.',
+          confirmLabel: 'حسناً',
         );
+        return;
       }
+      if (methodId == null || selectedMethod == null) return;
+      if (requiresProof && (proofPath == null || proofPath.isEmpty)) {
+        await CustomDialog.show(
+          type: DialogType.error,
+          title: 'إثبات الدفع مطلوب',
+          message: 'وسيلة الدفع المختارة تشترط إرفاق إثبات قبل إرسال الطلب.',
+          confirmLabel: 'حسناً',
+        );
+        return;
+      }
+
+      await controller.recordPayment(
+        invoiceId,
+        methodId,
+        amountMinor,
+        reference.text.trim().isEmpty ? null : reference.text.trim(),
+        requiresProof ? proofPath : null,
+      );
     } finally {
       controller.paymentProof.value = null;
       amount.dispose();
