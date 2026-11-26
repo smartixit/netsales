@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/enums/notification_type.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 
 void main() {
   group('Billing notification wire contract', () {
@@ -21,6 +22,28 @@ void main() {
         final type = NotificationType.fromWire(value);
         expect(type.isKnown, isTrue, reason: value);
         expect(type.category, 'FINANCIAL', reason: value);
+      }
+    });
+
+    test('provides a known centralized presentation for every Billing event', () {
+      const values = <NotificationType>[
+        NotificationType.billingInvoicePaymentReminder,
+        NotificationType.billingSubscriptionRenewalReminder,
+        NotificationType.billingInvoiceIssued,
+        NotificationType.billingPaymentVerified,
+        NotificationType.billingPaymentRejected,
+        NotificationType.billingSubscriptionActivated,
+        NotificationType.billingSubscriptionCanceled,
+        NotificationType.billingSubscriptionCancellationScheduled,
+        NotificationType.billingCreditNoteIssued,
+        NotificationType.billingRefundCompleted,
+      ];
+
+      for (final value in values) {
+        final presentation =
+            EnumPresentationRegistry.resolveNotificationType(value);
+        expect(presentation.isKnown, isTrue, reason: value.name);
+        expect(presentation.label.trim(), isNotEmpty, reason: value.name);
       }
     });
 
