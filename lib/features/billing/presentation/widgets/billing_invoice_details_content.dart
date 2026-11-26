@@ -24,14 +24,14 @@ class BillingInvoiceDetailsContent extends StatelessWidget {
     final rawLines = invoice['lines'];
     final lines = rawLines is List
         ? rawLines
-              .whereType<Map>()
+              .whereType<Map<String, dynamic>>()
               .map((row) => Map<String, dynamic>.from(row))
               .toList(growable: false)
         : const <Map<String, dynamic>>[];
     final rawCreditNotes = invoice['credit_notes'];
     final creditNotes = rawCreditNotes is List
         ? rawCreditNotes
-              .whereType<Map>()
+              .whereType<Map<String, dynamic>>()
               .map((row) => Map<String, dynamic>.from(row))
               .toList(growable: false)
         : const <Map<String, dynamic>>[];
