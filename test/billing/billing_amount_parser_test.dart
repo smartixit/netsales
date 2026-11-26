@@ -7,6 +7,11 @@ void main() {
       expect(BillingAmountParser.toMinor('125.40', 2), 12540);
     });
 
+    test('normalizes Arabic digits and decimal separator', () {
+      expect(BillingAmountParser.toMinor('١٢٣٫٤٥', 2), 12345);
+      expect(BillingAmountParser.toMinor('۱۲۳٫۴۵', 2), 12345);
+    });
+
     test('converts currencies without fractional minor units', () {
       expect(BillingAmountParser.toMinor('125', 0), 125);
     });
