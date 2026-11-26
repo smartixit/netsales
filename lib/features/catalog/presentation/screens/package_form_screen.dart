@@ -10,8 +10,7 @@ import 'package:netsales/features/catalog/presentation/widgets/forms/package_for
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_general_info_section.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_pricing_form_section.dart';
 import 'package:netsales/features/catalog/presentation/widgets/forms/package_specs_form_section.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
+import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 
 /// مساحة عمل إنشاء وتعديل الباقة.
@@ -86,39 +85,15 @@ class PackageFormScreen extends GetView<PackageFormController> {
             );
           },
         ),
-        bottomNavigationBar: CustomDocumentActionBar(
-          child: Align(
-            alignment: Alignment.center,
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 760.w),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomButton.outline(
-                      text: 'إلغاء',
-                      icon: Icons.close_rounded,
-                      shape: AppButtonShape.rounded,
-                      size: AppButtonSize.medium,
-                      onPressed: () => Get.back<void>(),
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 2,
-                    child: CustomButton.primary(
-                      text: isEditing ? 'حفظ التعديلات' : 'إنشاء الباقة',
-                      icon: isEditing ? Icons.check_rounded : Icons.add_rounded,
-                      shape: AppButtonShape.rounded,
-                      size: AppButtonSize.medium,
-                      loading: isSaving,
-                      onPressed: controller.submitForm,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        bottomNavigationBar: CustomCheckoutBar(
+          maxContentWidth: 760.w,
+          secondaryActionLabel: 'إلغاء',
+          secondaryActionIcon: Icons.close_rounded,
+          onSecondaryAction: () => Get.back<void>(),
+          actionLabel: isEditing ? 'حفظ التعديلات' : 'إنشاء الباقة',
+          actionIcon: isEditing ? Icons.check_rounded : Icons.add_rounded,
+          isLoading: isSaving,
+          onAction: controller.submitForm,
         ),
       );
     });

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/permission_service.dart';
-import 'package:netsales/core/models/app_picked_file_model.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_attachment_entity.dart';
@@ -15,12 +15,13 @@ import 'package:netsales/features/expenses/domain/usecases/update_expense_use_ca
 import 'package:netsales/features/expenses/presentation/controllers/expense_details_controller.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_expenses_controller.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/pickers/models/custom_existing_file_item.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم نموذج تسجيل وتعديل المصروفات التشغيلية (NetworkExpenseFormController)
 ///
-/// يدير بنود المصروف ومرفقاته مباشرة عبر وحدات التحكم النصية [statementControllers] و [amountControllers]
-/// بدون أي كلاسات إضافية، متوافقاً تماماً مع أسلوب متحكمات الطلبات والفواتير.
+/// يدير قائمة بنود المصروف التفاعلية [items] عبر ورقة الإضافة/التعديل السفلية،
+/// والمرفقات الموجودة والجديدة، وحساب الإجمالي، وإرسال الطلب للخادم.
 class NetworkExpenseFormController extends GetxController {
   NetworkExpenseFormController({
     required this.createExpenseUseCase,
@@ -31,6 +32,11 @@ class NetworkExpenseFormController extends GetxController {
   final UpdateExpenseUseCase updateExpenseUseCase;
 
   final formKey = GlobalKey<FormState>();
+  final sheetFormKey = GlobalKey<FormState>();
+
+  final sheetStatementController = TextEditingController();
+  final sheetAmountController = TextEditingController();
+  final editingItemIndex = RxnInt();
 
   // حالة وضع التعديل (Edit Mode)
   final isEditing = false.obs;
@@ -38,19 +44,18 @@ class NetworkExpenseFormController extends GetxController {
   final initialExpense = Rxn<ExpenseEntity>();
 
   bool get isEditMode => isEditing.value;
+  bool get isEditingSheetItem => editingItemIndex.value != null;
 
   bool get canCreateExpense =>
       PermissionService.to.can(AppPermissions.expensesCreate);
   bool get canEditExpense =>
       PermissionService.to.can(AppPermissions.expensesEdit);
 
-  // وحدات التحكم النصية لبنود المصروف (Statement & Amount Controllers)
-  final statementControllers = <TextEditingController>[].obs;
-  final amountControllers = <TextEditingController>[].obs;
+  // بنود المصروف التفاعلية
+  final items = <NewExpenseItemInputEntity>[].obs;
 
   // المرفقات والتاريخ وحالة الإرسال والإجمالي
   final attachments = <AppPickedFileModel>[].obs;
-  // المرفقات المسجلة مسبقاً في وضع التعديل والمعرفات المطلوب حذفها (Pattern 1)
   final existingAttachments = <ExpenseAttachmentEntity>[].obs;
   final deletedAttachmentIds = <int>[].obs;
   final selectedDate = DateTime.now().obs;
@@ -67,15 +72,29 @@ class NetworkExpenseFormController extends GetxController {
     return null;
   }
 
+  List<CustomExistingFileItem> get existingAttachmentItems =>
+      existingAttachments
+          .map(
+            (att) => CustomExistingFileItem(
+              id: att.attachmentId,
+              name: att.attachmentName,
+              url: att.fileUrl?? '',
+              isImage: att.isImage,
+              isPdf: att.isPdf,
+              sizeLabel: att.formattedSize,
+            ),
+          )
+          .toList();
+
   bool get canSubmit {
     if (isSubmitting.value) return false;
     if (isEditing.value ? !canEditExpense : !canCreateExpense) return false;
     if (activeNetworkId == null) return false;
-    if (statementControllers.isEmpty) return false;
-    for (int i = 0; i < statementControllers.length; i++) {
-      if (statementControllers[i].text.trim().isEmpty) return false;
-      final amt = double.tryParse(amountControllers[i].text.trim()) ?? 0.0;
-      if (amt <= 0) return false;
+    if (items.isEmpty) return false;
+    for (final item in items) {
+      if (item.itemStatement.trim().isEmpty || item.itemAmount <= 0) {
+        return false;
+      }
     }
     return true;
   }
@@ -90,16 +109,12 @@ class NetworkExpenseFormController extends GetxController {
         return;
       }
       _initFromExpense(args);
-    } else if (args is Map) {
-      if (args['expense'] is ExpenseEntity) {
-        if (!canEditExpense) {
-          Get.offNamed<void>(AppRoutes.unauthorized);
-          return;
-        }
-        _initFromExpense(args['expense'] as ExpenseEntity);
+    } else if (args is Map && args['expense'] is ExpenseEntity) {
+      if (!canEditExpense) {
+        Get.offNamed<void>(AppRoutes.unauthorized);
+        return;
       }
-    } else {
-      addItemRow();
+      _initFromExpense(args['expense'] as ExpenseEntity);
     }
   }
 
@@ -112,56 +127,82 @@ class NetworkExpenseFormController extends GetxController {
     if (exp.expenseDate != null) {
       selectedDate.value = exp.expenseDate!;
     }
-    if (exp.items.isNotEmpty) {
-      for (final item in exp.items) {
-        addItemRow(
-          statement: item.itemStatement,
-          amount: item.itemAmount.toString(),
-        );
-      }
-    } else {
-      addItemRow();
-    }
+    items.assignAll(
+      exp.items.map(
+        (item) => NewExpenseItemInputEntity(
+          itemStatement: item.itemStatement,
+          itemAmount: item.itemAmount,
+        ),
+      ),
+    );
+    recalculateTotal();
   }
 
   @override
   void onClose() {
-    for (final ctrl in statementControllers) {
-      ctrl.dispose();
-    }
-    for (final ctrl in amountControllers) {
-      ctrl.dispose();
-    }
+    sheetStatementController.dispose();
+    sheetAmountController.dispose();
     super.onClose();
   }
 
-  /// إضافة سطر بند جديد للنموذج
-  void addItemRow({String statement = '', String amount = ''}) {
-    final sCtrl = TextEditingController(text: statement);
-    final aCtrl = TextEditingController(text: amount);
-    sCtrl.addListener(() => statementControllers.refresh());
-    aCtrl.addListener(recalculateTotal);
-    statementControllers.add(sCtrl);
-    amountControllers.add(aCtrl);
-    recalculateTotal();
+  /// تهيئة حقول الورقة السفلية لإضافة بند جديد
+  void prepareAddItemSheet() {
+    editingItemIndex.value = null;
+    sheetStatementController.clear();
+    sheetAmountController.clear();
   }
 
-  /// إزالة سطر بند محدد
-  void removeItemRow(int index) {
-    if (statementControllers.length <= 1) return;
-    statementControllers.removeAt(index).dispose();
-    amountControllers.removeAt(index).dispose();
+  /// تهيئة حقول الورقة السفلية لتعديل بند موجود
+  void prepareEditItemSheet(int index) {
+    if (index < 0 || index >= items.length) return;
+    final item = items[index];
+    editingItemIndex.value = index;
+    sheetStatementController.text = item.itemStatement;
+    sheetAmountController.text = item.itemAmount.toString();
+  }
+
+  /// التحقق وحفظ البند من الورقة السفلية
+  bool saveSheetItem() {
+    if (!(sheetFormKey.currentState?.validate() ?? false)) {
+      return false;
+    }
+
+    final statement = sheetStatementController.text.trim();
+    final amount = double.tryParse(sheetAmountController.text.trim()) ?? 0.0;
+    if (statement.isEmpty || amount <= 0) {
+      return false;
+    }
+
+    final newItem = NewExpenseItemInputEntity(
+      itemStatement: statement,
+      itemAmount: amount,
+    );
+
+    final editIndex = editingItemIndex.value;
+    if (editIndex != null && editIndex >= 0 && editIndex < items.length) {
+      items[editIndex] = newItem;
+    } else {
+      items.add(newItem);
+    }
+
+    recalculateTotal();
+    return true;
+  }
+
+  /// إزالة بند محدد
+  void removeItem(int index) {
+    if (index < 0 || index >= items.length) return;
+    items.removeAt(index);
     recalculateTotal();
   }
 
   /// إعادة احتساب إجمالي مبلغ المصروف
   void recalculateTotal() {
     double sum = 0.0;
-    for (final ctrl in amountControllers) {
-      sum += double.tryParse(ctrl.text.trim()) ?? 0.0;
+    for (final item in items) {
+      sum += item.itemAmount;
     }
     totalAmount.value = sum;
-    statementControllers.refresh();
   }
 
   /// تحديث قائمة المرفقات من منتقي الملفات
@@ -198,7 +239,7 @@ class NetworkExpenseFormController extends GetxController {
     if (!canSubmit) {
       CustomSnackbar.show(
         title: 'بيانات غير مكتملة',
-        message: 'يرجى التأكد من ملء بيان ومبلغ صحيح لكافة بنود المصروف.',
+        message: 'يرجى إضافة بند واحد على الأقل بمبلغ وبيان صحيحين.',
         type: SnackType.warning,
       );
       return;
@@ -207,19 +248,9 @@ class NetworkExpenseFormController extends GetxController {
     isSubmitting.value = true;
 
     try {
-      final inputItems = <NewExpenseItemInputEntity>[];
-      for (int i = 0; i < statementControllers.length; i++) {
-        inputItems.add(
-          NewExpenseItemInputEntity(
-            itemStatement: statementControllers[i].text.trim(),
-            itemAmount:
-                double.tryParse(amountControllers[i].text.trim()) ?? 0.0,
-          ),
-        );
-      }
+      final inputItems = items.toList();
 
       if (isEditing.value) {
-        // وضع التعديل (Update Expense)
         final targetId =
             editingExpenseId.value ?? initialExpense.value!.expenseId;
         final updatedExpense = await updateExpenseUseCase(
@@ -251,7 +282,6 @@ class NetworkExpenseFormController extends GetxController {
 
         Get.back(result: true);
       } else {
-        // وضع الإنشاء الجديد (Create Expense)
         final idempotencyKey = IdempotencyHelper.forExpense(networkId);
 
         final createdExpense = await createExpenseUseCase(

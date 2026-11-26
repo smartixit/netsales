@@ -258,7 +258,7 @@ void main() {
   });
 
   group('NetworkExpenseFormController Tests', () {
-    test('Manages item rows and recalculates total accurately', () {
+    test('Manages item rows via BottomSheet flow and recalculates total accurately', () {
       final controller = NetworkExpenseFormController(
         createExpenseUseCase: CreateExpenseUseCase(mockRepo),
         updateExpenseUseCase: UpdateExpenseUseCase(mockRepo),
@@ -266,25 +266,38 @@ void main() {
 
       Get.put(controller);
 
-      expect(controller.statementControllers.length, 1);
+      expect(controller.items.length, 0);
 
-      controller.statementControllers.first.text = 'إيجار المقر';
-      controller.amountControllers.first.text = '5000.0';
+      controller.prepareAddItemSheet();
+      controller.sheetStatementController.text = 'إيجار المقر';
+      controller.sheetAmountController.text = '5000.0';
+      controller.items.add(
+        const NewExpenseItemInputEntity(
+          itemStatement: 'إيجار المقر',
+          itemAmount: 5000.0,
+        ),
+      );
       controller.recalculateTotal();
 
       expect(controller.totalAmount.value, 5000.0);
 
-      controller.addItemRow();
-      expect(controller.statementControllers.length, 2);
-
-      controller.statementControllers[1].text = 'فاتورة كهرباء';
-      controller.amountControllers[1].text = '1200.0';
+      controller.items.add(
+        const NewExpenseItemInputEntity(
+          itemStatement: 'فاتورة كهرباء',
+          itemAmount: 1200.0,
+        ),
+      );
       controller.recalculateTotal();
 
+      expect(controller.items.length, 2);
       expect(controller.totalAmount.value, 6200.0);
 
-      controller.removeItemRow(1);
-      expect(controller.statementControllers.length, 1);
+      controller.prepareEditItemSheet(1);
+      expect(controller.isEditingSheetItem, isTrue);
+      expect(controller.sheetStatementController.text, 'فاتورة كهرباء');
+
+      controller.removeItem(1);
+      expect(controller.items.length, 1);
       expect(controller.totalAmount.value, 5000.0);
     });
 

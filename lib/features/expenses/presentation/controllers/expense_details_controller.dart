@@ -37,6 +37,9 @@ class ExpenseDetailsController extends GetxController {
   final isExporting = false.obs;
   final isDeleting = false.obs;
   final isSaving = false.obs;
+  final isAuditExpanded = false.obs;
+
+  void toggleAuditExpanded() => isAuditExpanded.toggle();
 
   int? _expenseId;
 

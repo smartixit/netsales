@@ -7,10 +7,15 @@ import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
+import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 import 'package:netsales/features/expenses/presentation/controllers/expense_details_controller.dart';
 import 'package:netsales/features/expenses/presentation/widgets/expense_attachment_tile.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_card_accordion.dart';
+import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_metric_card_data.dart';
+import 'package:netsales/widgets/containers/custom_section_container.dart';
 import 'package:netsales/widgets/document_details/custom_document_action_bar.dart';
 import 'package:netsales/widgets/document_details/custom_document_details_hero.dart';
 import 'package:netsales/widgets/document_details/custom_document_item_card.dart';
@@ -23,9 +28,12 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 /// شاشة تفاصيل سند المصروف التشغيلي ومرفقاته بالمعايير العالمية (ExpenseDetailsScreen)
 ///
 /// تجسد المعمارية المؤسسية النظيفة لشاشات التفاصيل المستندية:
-/// - استهلاك مباشر وموحد للمكونات القيادية العامة [CustomDocumentDetailsHero],
-///   [CustomDocumentMetricsStrip], [CustomDocumentPartiesCard], [CustomDocumentItemCard], [CustomDocumentActionBar].
-/// - دمج المعرض التفاعلي الموحد [MediaGalleryViewer] لعرض ومعاينة الصور ومستندات الـ PDF المرفقة.
+/// - [CustomDocumentDetailsHero] للترويسة القيادية والمرجع والشارات.
+/// - [CustomDocumentMetricsStrip] للمؤشرات المالية مع تفعيل التفقيط [amountForWords].
+/// - [CustomDocumentPartiesCard] لبيانات الصرف والاعتماد.
+/// - [CustomSectionContainer] لبنود المصروف والمستندات والمرفقات.
+/// - [CustomCardAccordion] لسجل التواريخ والتدقيق القابل للطي بأسلوب قيد.
+/// - [CustomDocumentActionBar] للإجراءات السفلية السريعة.
 class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
   const ExpenseDetailsScreen({super.key});
 
@@ -34,7 +42,6 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
     final colors = context.colors;
 
     return Obx(() {
-      // 1. حالة التحميل الهيكلي (Skeleton State)
       if (controller.isLoading.value && controller.expense.value == null) {
         return CustomAppScaffold(
           appBarTitle: 'تفاصيل المصروف',
@@ -54,7 +61,6 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
 
       final expense = controller.expense.value;
 
-      // 2. حالة عدم العثور على المصروف
       if (expense == null) {
         return CustomAppScaffold(
           appBarTitle: 'تفاصيل المصروف',
@@ -77,7 +83,6 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
         icon: Icons.receipt_long_rounded,
       );
 
-      // 3. عرض صفحة التفاصيل المتكاملة
       return CustomAppScaffold(
         appBarTitle: displayReference,
         showBackButton: true,
@@ -99,7 +104,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                       onPressed: controller.printCurrentExpense,
                     ),
                   ),
-                  SizedBox(width: AppSpacing.sm),
+                  AppSpacing.hSm,
                   Expanded(
                     child: CustomButton.secondary(
                       text: 'مشاركة PDF',
@@ -110,7 +115,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                       onPressed: controller.shareCurrentExpense,
                     ),
                   ),
-                  SizedBox(width: AppSpacing.sm),
+                  AppSpacing.hSm,
                   CustomButton.icon(
                     icon: Icons.download_rounded,
                     size: AppButtonSize.medium,
@@ -120,7 +125,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                     onPressed: controller.saveCurrentExpense,
                   ),
                   if (controller.canEditExpense) ...[
-                    SizedBox(width: AppSpacing.xs),
+                    AppSpacing.hXs,
                     CustomButton.icon(
                       icon: Icons.edit_outlined,
                       size: AppButtonSize.medium,
@@ -130,7 +135,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                     ),
                   ],
                   if (controller.canDeleteExpense) ...[
-                    SizedBox(width: AppSpacing.xs),
+                    AppSpacing.hXs,
                     CustomButton.icon(
                       icon: Icons.delete_outline_rounded,
                       size: AppButtonSize.medium,
@@ -153,7 +158,6 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
             AppSpacing.cardPadding,
             AppSpacing.appBarHeight + AppSpacing.md,
             AppSpacing.cardPadding,
-
             AppSpacing.xl,
           ),
           child: Align(
@@ -161,9 +165,9 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. الترويسة القيادية بالعمق اللوني المتكيف (CustomDocumentDetailsHero)
+                  // 1. الترويسة القيادية
                   CustomDocumentDetailsHero(
                     reference: displayReference,
                     statusPresentation: statusPres,
@@ -179,8 +183,9 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                   ),
                   AppSpacing.vMd,
 
-                  // 2. شريط المؤشرات المالية والتشغيلية الموحد (CustomDocumentMetricsStrip)
+                  // 2. شريط المؤشرات المالية والتفقيط
                   CustomDocumentMetricsStrip(
+                    amountForWords: expense.expenseTotalAmount,
                     metrics: [
                       CustomMetricCardData(
                         label: 'إجمالي المصروف',
@@ -213,7 +218,7 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                   ),
                   AppSpacing.vMd,
 
-                  // 3. بطاقة بيانات أطراف سند المصروف (CustomDocumentPartiesCard)
+                  // 3. بطاقة أطراف السند والاعتماد
                   CustomDocumentPartiesCard(
                     title: 'بيانات الصرف والاعتماد',
                     firstParty: DocumentPartyData(
@@ -232,90 +237,77 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
                   ),
                   AppSpacing.vLg,
 
-                  // 4. جدول بنود المصروف التفصيلية (CustomDocumentItemCard)
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.list_alt_rounded,
-                        size: 18.r,
+                  // 4. بنود المصروف التفصيلية داخل CustomSectionContainer
+                  CustomSectionContainer(
+                    icon: Icons.list_alt_rounded,
+                    title: 'بنود المصروف (${expense.items.length})',
+                    trailing: Text(
+                      '${AmountFormatter.formatValue(expense.expenseTotalAmount)} ر.ي',
+                      style: AppTypography.titleSmall.copyWith(
                         color: colors.primary,
+                        fontWeight: FontWeight.w800,
                       ),
-                      SizedBox(width: 6.w),
-                      Expanded(
-                        child: Text(
-                          'بنود المصروف التفصيلية (${expense.items.length})',
-                          style: AppTypography.titleSmall.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w800,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        AmountFormatter.formatValue(expense.expenseTotalAmount),
-                        style: AppTypography.titleSmall.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  AppSpacing.vSm,
-
-                  for (int i = 0; i < expense.items.length; i++) ...[
-                    if (i > 0) AppSpacing.vSm,
-                    CustomDocumentItemCard(
-                      index: i,
-                      title: expense.items[i].itemStatement,
-                      subtitle: 'بند صرف تشغيلي',
-                      totalAmountFormatted: AmountFormatter.formatValue(
-                        expense.items[i].itemAmount,
-                      ),
-                      totalAmountSubtitle: 'المبلغ المخصوم',
                     ),
-                  ],
-                  AppSpacing.vLg,
-
-                  // 5. المرفقات والمستندات مع تكامل MediaGalleryViewer
-                  if (expense.attachments.isNotEmpty) ...[
-                    Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(
-                          Icons.attach_file_rounded,
-                          size: 18.r,
-                          color: colors.primary,
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          child: Text(
-                            'المستندات والمرفقات (${expense.attachments.length})',
-                            style: AppTypography.titleSmall.copyWith(
-                              color: colors.onSurface,
-                              fontWeight: FontWeight.w800,
+                        for (int i = 0; i < expense.items.length; i++) ...[
+                          if (i > 0) AppSpacing.vSm,
+                          CustomDocumentItemCard(
+                            index: i,
+                            title: expense.items[i].itemStatement,
+                            subtitle: 'بند صرف تشغيلي',
+                            totalAmountFormatted: AmountFormatter.formatValue(
+                              expense.items[i].itemAmount,
                             ),
+                            totalAmountSubtitle: 'المبلغ المخصوم',
                           ),
-                        ),
-                        Text(
-                          'اضغط للمعاينة',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
+                        ],
                       ],
                     ),
-                    AppSpacing.vSm,
+                  ),
 
-                    for (int j = 0; j < expense.attachments.length; j++) ...[
-                      if (j > 0) AppSpacing.vSm,
-                      ExpenseAttachmentTile(
-                        attachment: expense.attachments[j],
-                        onTap: () => controller.openAttachment(context, j),
+                  // 5. المرفقات والمستندات داخل CustomSectionContainer
+                  if (expense.attachments.isNotEmpty) ...[
+                    AppSpacing.vLg,
+                    CustomSectionContainer(
+                      icon: Icons.attach_file_rounded,
+                      title:
+                          'المستندات والمرفقات (${expense.attachments.length})',
+                      trailing: Text(
+                        'اضغط للمعاينة',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
                       ),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (
+                            int j = 0;
+                            j < expense.attachments.length;
+                            j++
+                          ) ...[
+                            if (j > 0) AppSpacing.vSm,
+                            ExpenseAttachmentTile(
+                              attachment: expense.attachments[j],
+                              onTap: () => controller.openAttachment(context, j),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
 
-                  SizedBox(height: 80.h),
+                  // 6. سجل التواريخ والتدقيق القابل للطي بأسلوب قيد
+                  AppSpacing.vLg,
+                  _ExpenseAuditAccordion(
+                    expense: expense,
+                    isExpanded: controller.isAuditExpanded.value,
+                    onToggle: controller.toggleAuditExpanded,
+                  ),
+
+                  AppSpacing.vGiant,
                 ],
               ),
             ),
@@ -323,5 +315,106 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
         ),
       );
     });
+  }
+}
+
+/// قسم سجل التواريخ والتدقيق القابل للطي في تفاصيل المصروف
+class _ExpenseAuditAccordion extends StatelessWidget {
+  const _ExpenseAuditAccordion({
+    required this.expense,
+    required this.isExpanded,
+    required this.onToggle,
+  });
+
+  final ExpenseEntity expense;
+  final bool isExpanded;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return CustomCardAccordion(
+      title: 'سجل التواريخ والتدقيق',
+      icon: Icons.history_rounded,
+      isExpanded: isExpanded,
+      onToggle: onToggle,
+      expandLabel: 'عرض السجل',
+      collapseLabel: 'إخفاء السجل',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomInfoListTile(
+            leading: Icon(
+              Icons.event_available_rounded,
+              size: 18.r,
+              color: colors.primary,
+            ),
+            title: Text(
+              'تاريخ استحقاق المصروف',
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            subtitle: Text(
+              expense.formattedExpenseDate,
+              style: AppTypography.titleSmall.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (expense.createdAt != null) ...[
+            Divider(
+              height: AppSpacing.md,
+              color: colors.outlineVariant.withValues(alpha: 0.35),
+            ),
+            CustomInfoListTile(
+              leading: Icon(
+                Icons.calendar_today_outlined,
+                size: 18.r,
+                color: colors.primary,
+              ),
+              title: Text(
+                'تاريخ الإنشاء في النظام',
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              subtitle: Text(
+                DateFormatter.dateTime(expense.createdAt!),
+                style: AppTypography.titleSmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+          if (expense.updatedAt != null) ...[
+            Divider(
+              height: AppSpacing.md,
+              color: colors.outlineVariant.withValues(alpha: 0.35),
+            ),
+            CustomInfoListTile(
+              leading: Icon(
+                Icons.update_rounded,
+                size: 18.r,
+                color: colors.primary,
+              ),
+              title: Text(
+                'آخر تحديث',
+                style: AppTypography.bodySmall.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              subtitle: Text(
+                DateFormatter.dateTime(expense.updatedAt!),
+                style: AppTypography.titleSmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

@@ -5,38 +5,35 @@ import 'package:netsales/core/services/file_picker_service.dart';
 import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/presentation/controllers/network_expense_form_controller.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_form_existing_attachments.dart';
-import 'package:netsales/features/expenses/presentation/widgets/expense_form_item_row.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/features/expenses/presentation/widgets/expense_form_items_section.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
+import 'package:netsales/widgets/containers/custom_section_container.dart';
 import 'package:netsales/widgets/forms/custom_checkout_bar.dart';
-import 'package:netsales/widgets/forms/custom_section_heading.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/pickers/custom_date_picker_field.dart';
 import 'package:netsales/widgets/pickers/custom_file_picker.dart';
 
 /// شاشة تسجيل وتعديل سند المصروف التشغيلي (NetworkExpenseFormScreen)
 ///
-/// تجسد المعمارية المؤسسية النظيفة لشاشات النماذج والطلبات:
-/// - استهلاك مباشر للمكونات العامة [CustomPageHeroCard], [CustomCheckoutBar], [CustomSectionHeading], [CustomFilePicker].
-/// - تفويض كامل لحالة الحقول والإرسال والتحقق للمتحكم [NetworkExpenseFormController].
-/// - تفريغ بنود الإدخال في ودجت منفصل [ExpenseFormItemRow] التزاماً بميثاق Clean Architecture وخلو تام من Helper Methods.
-/// - استخدام [CustomDatePickerField.single] الموحد في النظام.
+/// مبنية على المكونات الموحدة ونمط المقاطع النظيف:
+/// - [CustomPageHeroCard] للترويسة القيادية.
+/// - [CustomSectionContainer] لتجميع التاريخ، البنود، والمرفقات.
+/// - [ExpenseFormItemsSection] لإدارة البنود عبر الورقة السفلية [CustomBottomSheet].
+/// - [CustomFilePicker] المطور لعرض المرفقات الموجودة والجديدة بأسلوب قيد.
+/// - [CustomCheckoutBar] الموحد مع التفقيط الفوري للمبلغ.
 class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
   const NetworkExpenseFormScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return Obx(() {
       final total = controller.totalAmount.value;
-      final itemsCount = controller.statementControllers.length;
+      final itemsCount = controller.items.length;
 
       return CustomAppScaffold(
         appBarTitle: controller.isEditMode
             ? 'تعديل المصروف التشغيلي'
             : 'تسجيل مصروف تشغيلي جديد',
-
         bottomNavigationBar: CustomCheckoutBar(
           metrics: [
             CheckoutMetricData(
@@ -45,6 +42,7 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
               isNet: true,
             ),
           ],
+          amountForWords: total,
           itemCount: itemsCount,
           itemCountLabel: 'بند مصروف',
           actionLabel: controller.isEditMode
@@ -80,93 +78,57 @@ class NetworkExpenseFormScreen extends GetView<NetworkExpenseFormController> {
                   child: Form(
                     key: controller.formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // 1. ترويسة الصفحة القيادية (CustomPageHeroCard)
+                        // 1. ترويسة الصفحة القيادية
                         CustomPageHeroCard(
                           title: controller.isEditMode
                               ? 'تعديل بيانات المصروف التشغيلي'
                               : 'مساحة تسجيل المصروفات التشغيلية',
                           subtitle: controller.isEditMode
                               ? 'عدّل بنود المصروف أو المرفقات؛ سيتم تسوية فارق الرصيد تلقائياً في محفظة الشبكة.'
-                              : 'أدخل بنود المصروف والمبالغ والمرفقات؛ سيتم الخصم تلقائياً وبشكل فوري من محفظة الشبكة.',
+                              : 'أضف بنود المصروف والمرفقات؛ سيتم الخصم تلقائياً وبشكل فوري من محفظة الشبكة.',
                           icon: Icons.receipt_long_rounded,
                         ),
-                        AppSpacing.vMd,
+                        AppSpacing.vLg,
 
-                        // 2. تاريخ وتوقيت المصروف
-                        const CustomSectionHeading(
-                          title: 'تاريخ استحقاق المصروف',
-                          subtitle: 'حدد تاريخ صرف النفقات التشغيلية',
+                        // 2. مقطع تاريخ وتوقيت الاستحقاق
+                        CustomSectionContainer(
                           icon: Icons.calendar_today_rounded,
-                        ),
-                        AppSpacing.vXs,
-                        CustomDatePickerField.single(
-                          label: 'تاريخ ووقت استحقاق المصروف',
-                          hint: 'اختر تاريخ استحقاق المصروف...',
-                          value: controller.selectedDate.value,
-                          enableTime: true,
-                          isRequired: true,
-                          dialogTitle: 'اختر تاريخ استحقاق المصروف',
-                          onChanged: (picked) {
-                            if (picked != null) {
-                              controller.setDate(picked);
-                            }
-                          },
+                          title: 'تاريخ استحقاق المصروف',
+                          child: CustomDatePickerField.single(
+                            label: 'تاريخ ووقت استحقاق المصروف',
+                            hint: 'اختر تاريخ استحقاق المصروف...',
+                            value: controller.selectedDate.value,
+                            enableTime: true,
+                            isRequired: true,
+                            dialogTitle: 'اختر تاريخ استحقاق المصروف',
+                            onChanged: (picked) {
+                              if (picked != null) {
+                                controller.setDate(picked);
+                              }
+                            },
+                          ),
                         ),
                         AppSpacing.vLg,
 
-                        // 3. بنود المصروف التفصيلية (مستقلة في ExpenseFormItemRow)
-                        CustomSectionHeading(
-                          title: 'بنود المصروف التفصيلية ($itemsCount)',
-                          subtitle:
-                              'أضف بياناً ومبلغاً لكل بند من بنود المصروف',
-                          icon: Icons.list_alt_rounded,
-                          trailing: CustomButton.secondary(
-                            text: 'إضافة بند',
-                            icon: Icons.add_rounded,
-                            size: AppButtonSize.small,
-                            shape: AppButtonShape.rounded,
-                            onPressed: controller.addItemRow,
-                          ),
-                        ),
-                        AppSpacing.vXs,
-
-                        for (int i = 0; i < itemsCount; i++) ...[
-                          if (i > 0) AppSpacing.vSm,
-                          ExpenseFormItemRow(
-                            statementController:
-                                controller.statementControllers[i],
-                            amountController: controller.amountControllers[i],
-                            index: i,
-                            onRemove: itemsCount > 1
-                                ? () => controller.removeItemRow(i)
-                                : null,
-                          ),
-                        ],
+                        // 3. مقطع بنود المصروف التفاعلي
+                        const ExpenseFormItemsSection(),
                         AppSpacing.vLg,
 
-                        // 4. المرفقات الحالية المسجلة مسبقاً (في وضع التعديل)
-                        const ExpenseFormExistingAttachments(),
-
-                        // 5. المرفقات الجديدة عبر المكون الموحد CustomFilePicker
-                        CustomSectionHeading(
-                          title: controller.isEditMode
-                              ? 'إضافة مرفقات ومستندات جديدة (${controller.attachments.length})'
-                              : 'المرفقات والمستندات (${controller.attachments.length})',
-                          subtitle: controller.isEditMode
-                              ? 'أرفق مستندات إضافية للمصروف (سيتم رفعها مع حفظ التعديلات)'
-                              : 'أرفق صور الفواتير أو الإيصالات أو مستندات الصرف الرسمية',
+                        // 4. مقطع المرفقات والمستندات الموحد (موجودة + جديدة)
+                        CustomSectionContainer(
                           icon: Icons.attach_file_rounded,
-                        ),
-                        AppSpacing.vXs,
-
-                        CustomFilePicker(
-                          maxFiles: 8,
-                          preset: FileTypePreset.anySafe,
-                          displayMode: FilePickerDisplayMode.dropzone,
-                          hint: 'اسحب المستندات هنا أو اضغط لاختيار الملفات (PDF / صور)',
-                          onFilesChanged: controller.onAttachmentsChanged,
+                          title: 'المرفقات والمستندات',
+                          child: CustomFilePicker(
+                            maxFiles: 8,
+                            preset: FileTypePreset.anySafe,
+                            displayMode: FilePickerDisplayMode.dropzone,
+                            existingFiles: controller.existingAttachmentItems,
+                            onExistingFileRemoved: (item) =>
+                                controller.removeExistingAttachment(item.id),
+                            onFilesChanged: controller.onAttachmentsChanged,
+                          ),
                         ),
                         AppSpacing.vXxl,
                       ],
