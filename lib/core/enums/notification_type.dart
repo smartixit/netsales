@@ -27,6 +27,15 @@ enum NotificationType {
   securityPasswordChanged('SECURITY_PASSWORD_CHANGED'),
   systemAnnouncement('SYSTEM_ANNOUNCEMENT'),
   generalInfo('GENERAL_INFO'),
+  billingInvoicePaymentReminder('BILLING_INVOICE_PAYMENT_REMINDER'),
+  billingSubscriptionRenewalReminder('BILLING_SUBSCRIPTION_RENEWAL_REMINDER'),
+  billingInvoiceIssued('BILLING_INVOICE_ISSUED'),
+  billingPaymentVerified('BILLING_PAYMENT_VERIFIED'),
+  billingPaymentRejected('BILLING_PAYMENT_REJECTED'),
+  billingSubscriptionActivated('BILLING_SUBSCRIPTION_ACTIVATED'),
+  billingSubscriptionCanceled('BILLING_SUBSCRIPTION_CANCELED'),
+  billingCreditNoteIssued('BILLING_CREDIT_NOTE_ISSUED'),
+  billingRefundCompleted('BILLING_REFUND_COMPLETED'),
   unknown('UNKNOWN');
 
   final String value;
@@ -56,6 +65,15 @@ enum NotificationType {
       case NotificationType.walletDeposit:
       case NotificationType.walletWithdrawal:
       case NotificationType.walletTransfer:
+      case NotificationType.billingInvoicePaymentReminder:
+      case NotificationType.billingSubscriptionRenewalReminder:
+      case NotificationType.billingInvoiceIssued:
+      case NotificationType.billingPaymentVerified:
+      case NotificationType.billingPaymentRejected:
+      case NotificationType.billingSubscriptionActivated:
+      case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingCreditNoteIssued:
+      case NotificationType.billingRefundCompleted:
         return 'FINANCIAL';
 
       case NotificationType.voucherRequestCreated:
@@ -78,6 +96,16 @@ enum NotificationType {
       case NotificationType.securityPasswordChanged:
         return 'SECURITY';
 
+      case NotificationType.billingInvoicePaymentReminder:
+      case NotificationType.billingSubscriptionRenewalReminder:
+      case NotificationType.billingInvoiceIssued:
+      case NotificationType.billingPaymentVerified:
+      case NotificationType.billingPaymentRejected:
+      case NotificationType.billingSubscriptionActivated:
+      case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingCreditNoteIssued:
+      case NotificationType.billingRefundCompleted:
+        return ''; // Billing deep links are resolved from entity metadata by the notification router.
       case NotificationType.systemAnnouncement:
       case NotificationType.generalInfo:
       case NotificationType.unknown:
