@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/user_status.dart';
@@ -50,9 +51,12 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      GetMaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(child: ProfileBody()),
+      ScreenUtilInit(
+        designSize: const Size(375, 812),
+        builder: (context, child) => GetMaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: ProfileBody()),
+          ),
         ),
       ),
     );
