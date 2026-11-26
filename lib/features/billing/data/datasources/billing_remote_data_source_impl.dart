@@ -228,6 +228,13 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
   );
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> getInvoice(int invoiceId) =>
+      ApiService.instance.get(
+        ApiConstants.billingInvoice(invoiceId),
+        fromJson: _map,
+      );
+
+  @override
   Future<ApiResponse<Map<String, dynamic>>> getInvoices(
     int accountId,
     Map<String, dynamic> query,
