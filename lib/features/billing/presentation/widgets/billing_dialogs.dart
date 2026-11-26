@@ -373,7 +373,7 @@ class BillingDialogs {
           type: DialogType.error,
           title: 'قيمة الدفعة غير صالحة',
           message:
-              'أدخل مبلغاً موجباً بدقة لا تتجاوز ${decimalPlaces} منازل عشرية، وألا يتجاوز الرصيد المتاح ${availableAmount} ${currencyCode}.',
+              'أدخل مبلغاً موجباً بدقة لا تتجاوز $decimalPlaces منازل عشرية، وألا يتجاوز الرصيد المتاح $availableAmount $currencyCode.',
           confirmLabel: 'حسناً',
         );
         return;
