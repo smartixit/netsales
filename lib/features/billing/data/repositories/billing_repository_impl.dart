@@ -105,6 +105,9 @@ class BillingRepositoryImpl implements BillingRepository {
   Future<BillingPayload> cancelSubscription(int id, bool atPeriodEnd) async =>
       _unwrap(await remote.cancelSubscription(id, atPeriodEnd));
   @override
+  Future<BillingPayload> getInvoice(int id) async =>
+      _unwrap(await remote.getInvoice(id));
+  @override
   Future<BillingPayload> getInvoices(
     int id,
     Map<String, dynamic> query,
@@ -138,6 +141,11 @@ class BillingRepositoryImpl implements BillingRepository {
       proofPath,
     ),
   );
+  @override
+  Future<BillingPayload> getStatement(
+    int id,
+    Map<String, dynamic> query,
+  ) async => _unwrap(await remote.getStatement(id, query));
   @override
   Future<BillingPayload> getPayments(
     int id,

@@ -19,6 +19,7 @@ void main() {
       expect(state.items.map((row) => row['invoice_id']), [1, 2]);
       expect(state.nextCursor, 'cursor-one');
       expect(state.hasMore, isTrue);
+      expect(state.hasLoadedFirstPage, isTrue);
     });
 
     test('tracks first-page errors without discarding the prior rows', () {
@@ -153,6 +154,7 @@ void main() {
 
       expect(state.items, isEmpty);
       expect(state.hasMore, isFalse);
+      expect(state.hasLoadedFirstPage, isFalse);
     });
 
     test('extracts rows and cursor from a nested resource payload', () {
