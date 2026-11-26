@@ -1,69 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/presentation/enums/semantic_tone.dart';
 import 'package:netsales/core/themes/app_colors.dart';
-import 'package:netsales/core/themes/app_typography.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
+import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
+import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
+import 'package:netsales/widgets/inputs/custom_filter_chips_strip.dart';
+import 'package:netsales/widgets/inputs/custom_search_field.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
-import 'package:netsales/widgets/inputs/custom_text_field.dart';
-import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// مكوّن البحث والفلترة الموحد العام لكافة شاشات وقوائم النظام (Enterprise Search & Filter Bar)
+export 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
+export 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
+export 'package:netsales/widgets/inputs/custom_filter_chips_strip.dart';
+export 'package:netsales/widgets/inputs/custom_search_field.dart';
+export 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
+
+/// أنماط عرض خيارات الفلترة في [CustomSearchFilterBar]
+enum SearchFilterDisplayMode {
+  /// شرائح فلترة أفقية مباشرة أسفل حقل البحث (أسلوب قيد المعتمد)
+  inlineChips,
+
+  /// زر فلترة يفتح ورقة خيارات سفلية
+  bottomSheet,
+
+  /// الجمع بين الشرائح الأفقية وزر الورقة السفلية
+  both,
+}
+
+/// مكوّن البحث والفلترة ومؤشرات الإحصائيات الموحد العام (CustomSearchFilterBar)
 ///
-/// مستقل تماماً وخالٍ من أي مفاهيم مرتبطة بمجال محدد (Domain-Agnostic)،
-// ignore: unintended_html_in_doc_comment
-/// يدعم نمط Generic <T> لاستخدامه مع أي نوع بيانات للتصفية.
+/// مصمم ليكون مستقلاً تماماً وقابلاً للتخصيص الكامل وإعادة الاستخدام في أي مشروع:
+/// 1. شريط بطاقات إحصائيات الفلترة (KPIs) الاختياري عبر [CustomStatusSummaryStrip].
+/// 2. حقل البحث الكبسولي النظيف [CustomSearchField] مع دعم مسح QR والإجراءات الإضافية.
+/// 3. شرائح الفلترة الأفقية [CustomFilterChipsStrip] أو شيت التصفية المنبثق.
+/// 4. شريط عداد النتائج والشارات النشطة [CustomResultsCounterBar].
 class CustomSearchFilterBar<T> extends StatelessWidget {
   const CustomSearchFilterBar({
     super.key,
     required this.searchController,
     this.searchHint = 'بحث بالاسم أو الرقم المرجعي...',
     this.searchQuery = '',
+    this.onSearchChanged,
+    this.onSearchSubmitted,
     this.onClearSearch,
+    this.showSearchField = true,
+    this.showScanner = false,
+    this.onScanPressed,
+    this.trailingActions = const [],
     this.filterOptions = const [],
     this.selectedFilter,
     this.onFilterChanged,
+    this.filterDisplayMode = SearchFilterDisplayMode.inlineChips,
     this.filterSheetTitle = 'تصفية النتائج',
     this.filterSheetSubtitle = 'اختر الحالة التي ترغب في عرضها',
     this.filterButtonTooltip = 'تصفية النتائج',
     this.showActiveFilterChip = true,
+    this.hasActiveFilters,
+    this.onClearAll,
+    this.kpiCards = const [],
+    this.selectedKpiKey,
+    this.isKpiLoading = false,
+    this.onKpiSelected,
+    this.resultsCount,
+    this.totalCount,
+    this.recordLabel = 'سجل',
+    this.customResultsText,
+    this.activeFilters = const [],
+    this.isLoadingResults = false,
+    this.padding,
   });
 
-  /// وحدة التحكم النصية بحقل البحث
+  // ── البحث ──
   final TextEditingController searchController;
-
-  /// تلميح حقل البحث
   final String searchHint;
-
-  /// النص الحالي المستعلم عنه (لإظهار زر مسح البحث)
   final String searchQuery;
-
-  /// دالة استدعاء عند تفريغ نص البحث
+  final ValueChanged<String>? onSearchChanged;
+  final ValueChanged<String>? onSearchSubmitted;
   final VoidCallback? onClearSearch;
+  final bool showSearchField;
 
-  /// قائمة خيارات التصفية العامة
+  // ── أزرار جانبية للبحث (QR أو إجراءات مخصصة) ──
+  final bool showScanner;
+  final VoidCallback? onScanPressed;
+  final List<Widget> trailingActions;
+
+  // ── الفلترة ──
   final List<CustomSearchFilterOption<T>> filterOptions;
-
-  /// القيمة الحالية المختارة للتصفية
   final T? selectedFilter;
-
-  /// دالة استدعاء عند تغيير خيار التصفية
   final ValueChanged<T?>? onFilterChanged;
-
-  /// عنوان شيت التصفية المنبثق
+  final SearchFilterDisplayMode filterDisplayMode;
   final String filterSheetTitle;
-
-  /// الوصف التوضيحي لشيت التصفية
   final String filterSheetSubtitle;
-
-  /// تلميح زر التصفية
   final String filterButtonTooltip;
-
-  /// هل تظهر شارة توضيح الفلتر النشط أسفل شريط البحث
   final bool showActiveFilterChip;
+  final bool? hasActiveFilters;
+  final VoidCallback? onClearAll;
+
+  // ── كروت KPI إحصائيات الفلترة ──
+  final List<CustomKpiCardData> kpiCards;
+  final String? selectedKpiKey;
+  final bool isKpiLoading;
+  final ValueChanged<String?>? onKpiSelected;
+
+  // ── عداد النتائج ──
+  final int? resultsCount;
+  final int? totalCount;
+  final String recordLabel;
+  final String? customResultsText;
+  final List<ActiveFilterItem> activeFilters;
+  final bool isLoadingResults;
+
+  final EdgeInsetsGeometry? padding;
+
+  bool get _hasActiveFilters =>
+      hasActiveFilters ??
+      (selectedFilter != null ||
+          selectedKpiKey != null ||
+          searchQuery.trim().isNotEmpty ||
+          activeFilters.isNotEmpty);
 
   Future<void> _openFilterSheet(BuildContext context) async {
     if (filterOptions.isEmpty || onFilterChanged == null) return;
@@ -95,153 +151,119 @@ class CustomSearchFilterBar<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasActiveFilter = selectedFilter != null;
-    final hasSearchQuery = searchQuery.trim().isNotEmpty;
+    final showChips =
+        filterOptions.isNotEmpty &&
+        (filterDisplayMode == SearchFilterDisplayMode.inlineChips ||
+            filterDisplayMode == SearchFilterDisplayMode.both);
+    final showFilterButton =
+        filterOptions.isNotEmpty &&
+        onFilterChanged != null &&
+        (filterDisplayMode == SearchFilterDisplayMode.bottomSheet ||
+            filterDisplayMode == SearchFilterDisplayMode.both);
+    final showResultsBar = resultsCount != null || customResultsText != null;
 
-    // استخراج اسم الخيار النشط للعرض في الشارة
-    final activeOption = filterOptions
-        .cast<CustomSearchFilterOption<T>?>()
-        .firstWhere((opt) => opt?.value == selectedFilter, orElse: () => null);
-
-    return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
+    return Padding(
+      padding: padding ?? EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              // حقل البحث النصي الموحد
-              Expanded(
-                child: CustomTextField(
-                  controller: searchController,
-                  label: '',
-                  hint: searchHint,
-                  isRequired: false,
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: hasSearchQuery
-                        ? colors.primary
-                        : colors.onSurfaceVariant,
-                    size: 20.r,
-                  ),
-                  suffixIcon: hasSearchQuery && onClearSearch != null
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.close_rounded,
-                            size: 18.r,
-                            color: colors.onSurfaceVariant,
-                          ),
-                          onPressed: () {
-                            searchController.clear();
-                            onClearSearch!();
-                          },
-                          tooltip: 'مسح نص البحث',
-                        )
-                      : null,
-                ),
-              ),
+          // 1. كروت KPI إحصائيات الفلترة
+          if (kpiCards.isNotEmpty)
+            CustomStatusSummaryStrip(
+              cards: kpiCards,
+              selectedKey: selectedKpiKey,
+              isLoading: isKpiLoading,
+              onSelectKey: onKpiSelected,
+            ),
 
-              // زر فتح شيت التصفية
-              if (filterOptions.isNotEmpty && onFilterChanged != null) ...[
-                AppSpacing.hXs,
-                CustomInteractiveBounce(
-                  onTap: () => _openFilterSheet(context),
-                  child: Container(
-                    width: 48.r,
-                    height: 48.r,
-                    decoration: BoxDecoration(
-                      color: hasActiveFilter
-                          ? colors.primary.withValues(alpha: .12)
-                          : colors.surfaceContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.input),
-                      border: Border.all(
-                        color: hasActiveFilter
-                            ? colors.primary
-                            : colors.outlineVariant.withValues(alpha: .5),
-                        width: hasActiveFilter ? 1.5 : 1.0,
-                      ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Icon(
-                          Icons.tune_rounded,
-                          size: 20.r,
-                          color: hasActiveFilter
-                              ? colors.primary
-                              : colors.onSurface,
-                        ),
-                        if (hasActiveFilter)
-                          Positioned(
-                            top: 8.r,
-                            right: 8.r,
-                            child: Container(
-                              width: 8.r,
-                              height: 8.r,
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: colors.surface,
-                                  width: 1.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-
-          // شريط توضيح الفلتر النشط إن وجد
-          if (showActiveFilterChip &&
-              hasActiveFilter &&
-              activeOption != null) ...[
-            AppSpacing.vXs,
+          // 2. شريط حقل البحث والأزرار الجانبية
+          if (showSearchField)
             Row(
               children: [
-                CustomStatusBadge(
-                  label: activeOption.label,
-                  icon: activeOption.icon,
-                  tone: SemanticTone.primary,
-                  isCompact: true,
-                ),
-                AppSpacing.hXxs,
-                CustomInteractiveBounce(
-                  onTap: () => onFilterChanged?.call(null),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.r,
-                      vertical: 3.r,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.close_rounded,
-                          size: 13.r,
-                          color: colors.onSurfaceVariant,
-                        ),
-                        AppSpacing.hXxs,
-                        Text(
-                          'إلغاء التصفية',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 10.sp,
-                          ),
-                        ),
-                      ],
-                    ),
+                Expanded(
+                  child: CustomSearchField(
+                    controller: searchController,
+                    hintText: searchHint,
+                    searchQuery: searchQuery,
+                    onChanged: onSearchChanged,
+                    onSubmitted: onSearchSubmitted,
+                    onClear: onClearSearch,
                   ),
                 ),
+                if (showScanner && onScanPressed != null) ...[
+                  AppSpacing.hSm,
+                  CustomButton.icon(
+                    icon: Icons.qr_code_scanner_rounded,
+                    tooltip: 'مسح رمز QR',
+                    backgroundColor: colors.primaryContainer.withValues(
+                      alpha: 0.7,
+                    ),
+                    foregroundColor: colors.onPrimaryContainer,
+                    shape: AppButtonShape.rounded,
+                    onPressed: onScanPressed,
+                  ),
+                ],
+                if (showFilterButton) ...[
+                  AppSpacing.hSm,
+                  CustomButton.icon(
+                    icon: Icons.tune_rounded,
+                    tooltip: filterButtonTooltip,
+                    backgroundColor: selectedFilter != null
+                        ? colors.primaryContainer
+                        : colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                    foregroundColor: selectedFilter != null
+                        ? colors.primary
+                        : colors.onSurfaceVariant,
+                    shape: AppButtonShape.rounded,
+                    onPressed: () => _openFilterSheet(context),
+                  ),
+                ],
+                for (final action in trailingActions) ...[
+                  AppSpacing.hSm,
+                  action,
+                ],
               ],
+            ),
+
+          // 3. شرائح الفلترة الأفقية (بأسلوب قيد)
+          if (showChips) ...[
+            if (showSearchField) AppSpacing.vMd,
+            CustomFilterChipsStrip<T>(
+              options: filterOptions,
+              selectedValue: selectedFilter,
+              onSelected: onFilterChanged,
+              hasActiveFilters: _hasActiveFilters,
+              onClearAll:
+                  onClearAll ??
+                  () {
+                    searchController.clear();
+                    onClearSearch?.call();
+                    onFilterChanged?.call(null);
+                    onKpiSelected?.call(null);
+                  },
+            ),
+          ],
+
+          // 4. شريط عداد النتائج والفلاتر النشطة
+          if (showResultsBar) ...[
+            SizedBox(height: showChips ? AppSpacing.sm : AppSpacing.xs),
+            CustomResultsCounterBar(
+              count: resultsCount ?? 0,
+              totalCount: totalCount,
+              recordLabel: recordLabel,
+              customResultsText: customResultsText,
+              isFiltered: _hasActiveFilters,
+              isLoading: isLoadingResults,
+              activeFilters: activeFilters,
+              onClear:
+                  onClearAll ??
+                  () {
+                    searchController.clear();
+                    onClearSearch?.call();
+                    onFilterChanged?.call(null);
+                    onKpiSelected?.call(null);
+                  },
             ),
           ],
         ],

@@ -8,7 +8,6 @@ import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
@@ -47,20 +46,18 @@ class ExpensesScreen extends GetView<NetworkExpensesController> {
               ),
 
               Obx(
-                () => CustomStatusSummaryStrip(
-                  cards: controller.buildKpiCards(context),
-                  isLoading:
-                      controller.isLoading.value && controller.expenses.isEmpty,
-                ),
-              ),
-
-              Obx(
                 () => CustomSearchFilterBar<String?>(
+                  kpiCards: controller.buildKpiCards(context),
+                  isKpiLoading:
+                      controller.isLoading.value && controller.expenses.isEmpty,
                   searchController: controller.searchController,
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   filterOptions: controller.buildFilterOptions(context),
                   onClearSearch: controller.searchController.clear,
+                  resultsCount: controller.expenses.length,
+                  recordLabel: 'مصروف',
+                  isLoadingResults: controller.isLoading.value,
                 ),
               ),
               SizedBox(height: AppSpacing.sm),
