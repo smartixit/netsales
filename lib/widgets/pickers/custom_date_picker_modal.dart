@@ -368,15 +368,32 @@ class _DatePickerContainerView extends StatelessWidget {
         color: colors.onSurface,
         fontWeight: FontWeight.bold,
       ),
-      weekdayLabels: DatePickerService.weekdayShortLabels,
+      weekdayLabels: const [
+        'الأحد',
+        'الاثنين',
+        'الثلاثاء',
+        'الأربعاء',
+        'الخميس',
+        'الجمعة',
+        'السبت',
+      ],
+      firstDayOfWeek: 6,
+      lastMonthIcon: Icon(
+        Icons.chevron_right_rounded,
+        color: colors.onSurface,
+        size: 24.sp,
+      ),
+      nextMonthIcon: Icon(
+        Icons.chevron_left_rounded,
+        color: colors.onSurface,
+        size: 24.sp,
+      ),
       centerAlignModePicker: true,
-      // Keep the month/year header as one compact control. Year selection
-      // remains available, while month navigation stays on the calendar arrows.
       disableModePicker: false,
       disableMonthPicker: true,
       useAbbrLabelForMonthModePicker: true,
       modePickersGap: 0,
-      controlsHeight: 44.h,
+      controlsHeight: 46.h,
       dayBorderRadius: BorderRadius.circular(AppRadius.md.r),
     );
 
@@ -396,13 +413,18 @@ class _DatePickerContainerView extends StatelessWidget {
         ),
         if (controller.mode == DatePickerSelectionMode.range &&
             showQuickPresets) ...[
+          AppSpacing.vSm,
           _QuickPresetsBar(
             referenceDate: controller.effectiveCurrentDate,
             isPresetSelectable: controller.isPresetSelectable,
             onPresetSelected: controller.selectPreset,
           ),
-          AppSpacing.vXs,
         ],
+        AppSpacing.vSm,
+        Divider(
+          height: 1,
+          color: colors.outlineVariant.withValues(alpha: 0.3),
+        ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: CalendarDatePicker2(
@@ -411,19 +433,24 @@ class _DatePickerContainerView extends StatelessWidget {
             onValueChanged: controller.updateDates,
           ),
         ),
+        Divider(
+          height: 1,
+          color: colors.outlineVariant.withValues(alpha: 0.3),
+        ),
         if (controller.enableTime) ...[
+          AppSpacing.vSm,
           _TimePickerSection(
             selectedTime: controller.selectedTime,
             onTimeChanged: controller.updateTime,
           ),
         ],
-        AppSpacing.vSm,
+        AppSpacing.vMd,
         _DatePickerActions(
           onConfirm: () => controller.confirm(onConfirm),
           onCancel: onCancel,
           canConfirm: controller.canConfirm,
         ),
-        AppSpacing.vXs,
+        AppSpacing.vSm,
       ],
     );
   }
@@ -666,32 +693,30 @@ class _DatePickerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppRadius.lg.r),
-        ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.xs,
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(AppSpacing.xs),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.sm.r),
+              color: colors.primaryContainer.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
-              Icons.calendar_month_rounded,
+              mode == DatePickerSelectionMode.range
+                  ? Icons.date_range_rounded
+                  : Icons.calendar_today_rounded,
               color: colors.primary,
-              size: 20.r,
+              size: 22.sp,
             ),
           ),
-          AppSpacing.hSm,
+          AppSpacing.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -699,16 +724,17 @@ class _DatePickerHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: colors.onSurfaceVariant,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 AppSpacing.vXxs,
                 Text(
                   _formatDisplayText(),
-                  style: AppTypography.titleSmall.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -718,10 +744,10 @@ class _DatePickerHeader extends StatelessWidget {
           ),
           if (onClear != null)
             CustomButton.icon(
-              icon: Icons.clear_rounded,
-              tooltip: 'مسح',
-              iconSize: 18.r,
-              dimension: 44.r,
+              icon: Icons.refresh_rounded,
+              tooltip: 'مسح التحديد',
+              iconSize: 20.sp,
+              dimension: 40.r,
               enableFeedback: false,
               foregroundColor: colors.onSurfaceVariant,
               backgroundColor: Colors.transparent,
@@ -1128,18 +1154,19 @@ class _DatePickerActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
+            flex: 1,
             child: CustomButton.outline(
               text: 'إلغاء',
-              icon: Icons.close_rounded,
               onPressed: onCancel ?? () => Navigator.of(context).pop(),
             ),
           ),
-          AppSpacing.hSm,
+          AppSpacing.hMd,
           Expanded(
+            flex: 2,
             child: CustomButton.primary(
               text: 'تأكيد',
               icon: Icons.check_rounded,

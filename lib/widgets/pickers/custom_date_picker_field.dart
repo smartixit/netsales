@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/services/date_picker_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
@@ -455,45 +456,7 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
     return Row(mainAxisSize: MainAxisSize.min, children: actions);
   }
 
-  final decoration = InputDecoration(
-    label: Text.rich(
-      TextSpan(
-        text: field.label,
-        children: [
-          if (field.isRequired)
-            TextSpan(
-              text: ' *',
-              style: AppTypography.inputLabel.copyWith(
-                color: colors.error,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-        ],
-      ),
-      style: AppTypography.inputLabel.copyWith(
-        color: field.enabled ? colors.onSurfaceVariant : colors.onDisabled,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    ),
-    hintText: field.hint ?? _defaultDatePickerHint(field.pickerType),
-    hintMaxLines: 2,
-    prefixIcon:
-        field.prefixIcon ??
-        Icon(
-          field.enableTime
-              ? Icons.event_available_rounded
-              : Icons.calendar_month_rounded,
-          size: 20.r,
-          color: hasError ? colors.error : colors.onSurfaceVariant,
-        ),
-    suffixIcon: buildSuffix(),
-    prefixIconConstraints: BoxConstraints(minWidth: 48.r, minHeight: 48.r),
-    suffixIconConstraints: BoxConstraints(minWidth: 48.r, minHeight: 48.r),
-    errorText: fieldState.errorText,
-    errorMaxLines: 3,
-    enabled: field.enabled,
-  );
+  final hintText = field.hint ?? _defaultDatePickerHint(field.pickerType);
 
   return FocusableActionDetector(
     enabled: canInteract,
@@ -515,9 +478,7 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
     child: Builder(
       builder: (focusContext) {
         final isFocused = Focus.of(focusContext).hasFocus;
-        final semanticsValue = hasValue
-            ? displayText
-            : (field.hint ?? _defaultDatePickerHint(field.pickerType));
+        final semanticsValue = hasValue ? displayText : hintText;
 
         void handleTap() {
           if (!canInteract) return;
@@ -538,27 +499,123 @@ Widget _buildCustomDatePickerField(FormFieldState<List<DateTime?>> fieldState) {
               ? 'اضغط لاختيار ${_selectionName(field.pickerType)}'
               : (field.readOnly ? 'حقل للعرض فقط' : null),
           onTap: canInteract ? handleTap : null,
-          child: CustomInteractiveBounce(
-            onTap: canInteract ? handleTap : null,
-            enableHaptic: false,
-            child: InputDecorator(
-              isFocused: isFocused,
-              isEmpty: !hasValue,
-              decoration: decoration,
-              child: SizedBox(
-                width: double.infinity,
-                child: Text(
-                  hasValue ? displayText : '',
-                  textAlign: TextAlign.start,
-                  maxLines: field.maxDisplayLines,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inputText.copyWith(
-                    color: field.enabled ? colors.onSurface : colors.onDisabled,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text.rich(
+                TextSpan(
+                  text: field.label,
+                  children: [
+                    if (field.isRequired)
+                      TextSpan(
+                        text: ' *',
+                        style: AppTypography.inputLabel.copyWith(
+                          color: colors.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: field.enabled ? colors.onSurface : colors.onDisabled,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              AppSpacing.vXs,
+              CustomInteractiveBounce(
+                onTap: canInteract ? handleTap : null,
+                enableHaptic: false,
+                child: Material(
+                  color: field.enabled
+                      ? colors.surfaceContainerHighest.withValues(alpha: 0.45)
+                      : colors.surfaceContainerHighest.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppRadius.input),
+                  child: Container(
+                    constraints: BoxConstraints(minHeight: 56.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm + AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.input),
+                      border: Border.all(
+                        color: hasError
+                            ? colors.error
+                            : isFocused
+                            ? colors.primary
+                            : colors.outlineVariant.withValues(alpha: 0.5),
+                        width: (hasError || isFocused) ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        field.prefixIcon ??
+                            Icon(
+                              field.enableTime
+                                  ? Icons.access_time_rounded
+                                  : (field.pickerType ==
+                                            DatePickerSelectionMode.range
+                                        ? Icons.date_range_rounded
+                                        : Icons.calendar_today_rounded),
+                              size: 20.sp,
+                              color: hasError
+                                  ? colors.error
+                                  : hasValue
+                                  ? colors.primary
+                                  : colors.onSurfaceVariant,
+                            ),
+                        AppSpacing.hMd,
+                        Expanded(
+                          child: Text(
+                            hasValue ? displayText : hintText,
+                            textAlign: TextAlign.start,
+                            maxLines: field.maxDisplayLines,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: !field.enabled
+                                  ? colors.onDisabled
+                                  : hasValue
+                                  ? colors.onSurface
+                                  : colors.onSurfaceVariant.withValues(
+                                      alpha: 0.8,
+                                    ),
+                              fontWeight: hasValue
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                        buildSuffix(),
+                        if (!hasValue &&
+                            field.suffixIcon == null &&
+                            canInteract)
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 22.sp,
+                            color: colors.onSurfaceVariant,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              if (hasError) ...[
+                AppSpacing.vXs,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  child: Text(
+                    fieldState.errorText!,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.error,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         );
       },
