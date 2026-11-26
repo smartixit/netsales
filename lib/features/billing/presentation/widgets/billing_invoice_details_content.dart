@@ -83,6 +83,24 @@ class BillingInvoiceDetailsContent extends StatelessWidget {
           child: Column(
             children: [
               _InvoiceAmountRow(
+                label: 'الإجمالي قبل الخصم والضريبة',
+                amount: invoice['subtotal'] ?? '—',
+                currencyCode: currencyCode,
+                decimalPlaces: decimalPlaces,
+              ),
+              _InvoiceAmountRow(
+                label: 'الخصم',
+                amount: invoice['discount'] ?? '—',
+                currencyCode: currencyCode,
+                decimalPlaces: decimalPlaces,
+              ),
+              _InvoiceAmountRow(
+                label: 'الضريبة',
+                amount: invoice['tax'] ?? '—',
+                currencyCode: currencyCode,
+                decimalPlaces: decimalPlaces,
+              ),
+              _InvoiceAmountRow(
                 label: 'إجمالي الفاتورة',
                 amount: invoice['total'] ?? '—',
                 currencyCode: currencyCode,
@@ -169,7 +187,25 @@ class BillingInvoiceDetailsContent extends StatelessWidget {
                   children: [
                     Text(note['status']?.toString() ?? '—'),
                     if (note['issued_at'] != null)
-                      Text(note['issued_at'].toString()),
+                      Text('تاريخ الإصدار: ${note['issued_at']}'),
+                    _InvoiceCreditAmount(
+                      label: 'المطبق على الذمم',
+                      amount: note['applied_to_receivable'] ?? '—',
+                      currencyCode: currencyCode,
+                      decimalPlaces: decimalPlaces,
+                    ),
+                    _InvoiceCreditAmount(
+                      label: 'القابل للاسترداد',
+                      amount: note['refundable'] ?? '—',
+                      currencyCode: currencyCode,
+                      decimalPlaces: decimalPlaces,
+                    ),
+                    _InvoiceCreditAmount(
+                      label: 'المسترد',
+                      amount: note['refunded'] ?? '—',
+                      currencyCode: currencyCode,
+                      decimalPlaces: decimalPlaces,
+                    ),
                   ],
                 ),
                 trailing: CustomInteractiveAmountText(
@@ -183,6 +219,40 @@ class BillingInvoiceDetailsContent extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _InvoiceCreditAmount extends StatelessWidget {
+  const _InvoiceCreditAmount({
+    required this.label,
+    required this.amount,
+    required this.currencyCode,
+    required this.decimalPlaces,
+  });
+
+  final String label;
+  final dynamic amount;
+  final String? currencyCode;
+  final int decimalPlaces;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$label: '),
+          CustomInteractiveAmountText(
+            amount: amount,
+            currencyCode: currencyCode,
+            decimalPlaces: decimalPlaces,
+            enableTooltip: false,
+            trailingText: currencyCode,
+          ),
+        ],
+      ),
     );
   }
 }
