@@ -421,10 +421,7 @@ class _DatePickerContainerView extends StatelessWidget {
           ),
         ],
         AppSpacing.vSm,
-        Divider(
-          height: 1,
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.3)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: CalendarDatePicker2(
@@ -433,10 +430,7 @@ class _DatePickerContainerView extends StatelessWidget {
             onValueChanged: controller.updateDates,
           ),
         ),
-        Divider(
-          height: 1,
-          color: colors.outlineVariant.withValues(alpha: 0.3),
-        ),
+        Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.3)),
         if (controller.enableTime) ...[
           AppSpacing.vSm,
           _TimePickerSection(
