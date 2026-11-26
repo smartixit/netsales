@@ -490,7 +490,7 @@ class BillingController extends GetxController {
 
   Future<void> _loadTabData(int index, {bool forceRefresh = false}) async {
     bool shouldLoad(BillingCursorPageState page) =>
-        forceRefresh || page.revision == 0 || page.firstPageError.value != null;
+        forceRefresh || !page.hasLoadedFirstPage || page.firstPageError.value != null;
 
     switch (index) {
       case 1:
@@ -872,8 +872,8 @@ class BillingController extends GetxController {
   Future<void> purchase(int priceId) async {
     final id = selectedAccountId.value;
     if (id == null || isMutating.value) return;
-    final subscriptionsWereLoaded = subscriptionsPage.revision > 0;
-    final invoicesWereLoaded = invoicesPage.revision > 0;
+    final subscriptionsWereLoaded = subscriptionsPage.hasLoadedFirstPage;
+    final invoicesWereLoaded = invoicesPage.hasLoadedFirstPage;
     isMutating.value = true;
     try {
       await useCases.purchase(id, priceId);
@@ -898,7 +898,7 @@ class BillingController extends GetxController {
     String? proofPath,
   ) async {
     if (isMutating.value) return;
-    final paymentsWereLoaded = paymentsPage.revision > 0;
+    final paymentsWereLoaded = paymentsPage.hasLoadedFirstPage;
     isMutating.value = true;
     try {
       final random = Random.secure();
