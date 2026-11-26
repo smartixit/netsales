@@ -8,7 +8,6 @@ import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/wallet/domain/entities/wallet_log_entry.dart';
-import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
 
 /// عنصر سجل حركة الحساب، مع إظهار أثر الحركة على الرصيد.
