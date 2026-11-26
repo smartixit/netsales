@@ -3,7 +3,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 
-/// أنواع الإشعارات الرسمية المعتمدة لنظام NetSales (22 نوعاً مطابقاً لـ NotificationType في netsales_api)
+/// أنواع الإشعارات الرسمية المعتمدة لنظام NetSales والمتوافقة مع NotificationType في netsales_api
 enum NotificationType {
   saleInvoiceCreated('SALE_INVOICE_CREATED'),
   saleInvoiceCompleted('SALE_INVOICE_COMPLETED'),
