@@ -6,6 +6,7 @@ import 'package:netsales/features/billing/presentation/widgets/billing_status_ba
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
+import 'package:netsales/widgets/dividers/custom_divider.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 
 class BillingHomeOverviewSection extends StatelessWidget {
@@ -108,7 +109,7 @@ class BillingHomeOverviewSection extends StatelessWidget {
                         ),
                   trailing: const Icon(Icons.workspace_premium_outlined),
                 ),
-                const Divider(height: 1),
+                const CustomDivider(extent: 1),
                 CustomInfoListTile(
                   title: const Text('أحدث فاتورة'),
                   subtitle: latestInvoice == null
