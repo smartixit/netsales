@@ -23,6 +23,12 @@ class BillingController extends GetxController {
   Worker? _networkWorker;
   int? _loadedNetworkId;
 
+  final activeTabIndex = 0.obs;
+  final statementData = Rxn<Map<String, dynamic>>();
+  final statementError = RxnString();
+  final isStatementLoading = false.obs;
+  int _statementRevision = 0;
+
   final accounts = <Map<String, dynamic>>[].obs;
   final currencies = <Map<String, dynamic>>[].obs;
   final selectedCurrencyId = RxnInt();
@@ -297,6 +303,10 @@ class BillingController extends GetxController {
 
   void _clearWorkspaceData() {
     _resetCollectionFilters();
+    activeTabIndex.value = 0;
+    statementData.value = null;
+    statementError.value = null;
+    _statementRevision++;
     accounts.clear();
     selectedAccountId.value = null;
     account.value = null;
@@ -411,17 +421,6 @@ class BillingController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    // Each growing collection owns its first-page request and error state.
-    // A failure in one list must not discard successful data from another.
-    final collectionLoads = <Future<void>>[
-      refreshPlans(),
-      refreshSubscriptions(),
-      refreshInvoices(),
-      refreshPayments(),
-      refreshCreditNotes(),
-      refreshRefunds(),
-    ];
-
     try {
       final results = await Future.wait([
         useCases.account(id),
@@ -450,7 +449,7 @@ class BillingController extends GetxController {
             : (paymentMethods.first['payment_method_id'] as num).toInt();
       }
 
-      await Future.wait(collectionLoads);
+      await _loadTabData(activeTabIndex.value);
     } catch (error) {
       if (currentRevision == _revision &&
           id == selectedAccountId.value &&
@@ -460,9 +459,74 @@ class BillingController extends GetxController {
           fallback: 'تعذر تحميل بيانات حساب الفوترة.',
         );
       }
-      await Future.wait(collectionLoads);
+      await _loadTabData(activeTabIndex.value);
     } finally {
       if (currentRevision == _revision) isLoading.value = false;
+    }
+  }
+
+  Future<void> selectWorkspaceTab(int index) async {
+    if (index < 0 || index > 4 || index == activeTabIndex.value) return;
+    activeTabIndex.value = index;
+    await _loadTabData(index);
+  }
+
+  Future<void> refreshActiveTab() => _loadTabData(
+    activeTabIndex.value,
+    forceRefresh: true,
+  );
+
+  Future<void> _loadTabData(int index, {bool forceRefresh = false}) async {
+    bool shouldLoad(BillingCursorPageState page) =>
+        forceRefresh || page.revision == 0 || page.firstPageError.value != null;
+
+    switch (index) {
+      case 1:
+        await Future.wait([
+          if (shouldLoad(plansPage)) refreshPlans(),
+          if (shouldLoad(subscriptionsPage)) refreshSubscriptions(),
+        ]);
+      case 2:
+        if (shouldLoad(invoicesPage)) await refreshInvoices();
+      case 3:
+        await Future.wait([
+          if (shouldLoad(paymentsPage)) refreshPayments(),
+          if (shouldLoad(creditNotesPage)) refreshCreditNotes(),
+          if (shouldLoad(refundsPage)) refreshRefunds(),
+          loadStatement(),
+        ]);
+      default:
+        return;
+    }
+  }
+
+  Future<void> loadStatement() async {
+    final id = selectedAccountId.value;
+    final requestNetworkId = networkId();
+    if (id == null || requestNetworkId == null) return;
+
+    final revision = ++_statementRevision;
+    statementError.value = null;
+    isStatementLoading.value = true;
+    try {
+      final payload = await useCases.statement(id, const {});
+      if (revision != _statementRevision ||
+          id != selectedAccountId.value ||
+          requestNetworkId != networkId()) {
+        return;
+      }
+      statementData.value = _object(payload);
+    } catch (error) {
+      if (revision == _statementRevision &&
+          id == selectedAccountId.value &&
+          requestNetworkId == networkId()) {
+        statementError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل كشف النشاط المالي.',
+        );
+      }
+    } finally {
+      if (revision == _statementRevision) isStatementLoading.value = false;
     }
   }
 
