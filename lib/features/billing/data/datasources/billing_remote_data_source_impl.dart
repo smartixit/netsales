@@ -228,6 +228,13 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
   );
 
   @override
+  Future<ApiResponse<Map<String, dynamic>>> getInvoice(int invoiceId) =>
+      ApiService.instance.get(
+        ApiConstants.billingInvoice(invoiceId),
+        fromJson: _map,
+      );
+
+  @override
   Future<ApiResponse<Map<String, dynamic>>> getInvoices(
     int accountId,
     Map<String, dynamic> query,
@@ -288,6 +295,16 @@ class BillingRemoteDataSourceImpl implements BillingRemoteDataSource {
       idempotencyKey: idempotencyKey,
     );
   }
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getStatement(
+    int accountId,
+    Map<String, dynamic> query,
+  ) => ApiService.instance.get(
+    ApiConstants.billingAccountStatement(accountId),
+    queryParameters: query,
+    fromJson: _map,
+  );
 
   @override
   Future<ApiResponse<Map<String, dynamic>>> getPayments(

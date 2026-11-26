@@ -3,7 +3,7 @@ import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 
-/// أنواع الإشعارات الرسمية المعتمدة لنظام NetSales (22 نوعاً مطابقاً لـ NotificationType في netsales_api)
+/// أنواع الإشعارات الرسمية المعتمدة لنظام NetSales والمتوافقة مع NotificationType في netsales_api
 enum NotificationType {
   saleInvoiceCreated('SALE_INVOICE_CREATED'),
   saleInvoiceCompleted('SALE_INVOICE_COMPLETED'),
@@ -27,6 +27,16 @@ enum NotificationType {
   securityPasswordChanged('SECURITY_PASSWORD_CHANGED'),
   systemAnnouncement('SYSTEM_ANNOUNCEMENT'),
   generalInfo('GENERAL_INFO'),
+  billingInvoicePaymentReminder('BILLING_INVOICE_PAYMENT_REMINDER'),
+  billingSubscriptionRenewalReminder('BILLING_SUBSCRIPTION_RENEWAL_REMINDER'),
+  billingInvoiceIssued('BILLING_INVOICE_ISSUED'),
+  billingPaymentVerified('BILLING_PAYMENT_VERIFIED'),
+  billingPaymentRejected('BILLING_PAYMENT_REJECTED'),
+  billingSubscriptionActivated('BILLING_SUBSCRIPTION_ACTIVATED'),
+  billingSubscriptionCanceled('BILLING_SUBSCRIPTION_CANCELED'),
+  billingSubscriptionCancellationScheduled('BILLING_SUBSCRIPTION_CANCELLATION_SCHEDULED'),
+  billingCreditNoteIssued('BILLING_CREDIT_NOTE_ISSUED'),
+  billingRefundCompleted('BILLING_REFUND_COMPLETED'),
   unknown('UNKNOWN');
 
   final String value;
@@ -56,6 +66,16 @@ enum NotificationType {
       case NotificationType.walletDeposit:
       case NotificationType.walletWithdrawal:
       case NotificationType.walletTransfer:
+      case NotificationType.billingInvoicePaymentReminder:
+      case NotificationType.billingSubscriptionRenewalReminder:
+      case NotificationType.billingInvoiceIssued:
+      case NotificationType.billingPaymentVerified:
+      case NotificationType.billingPaymentRejected:
+      case NotificationType.billingSubscriptionActivated:
+      case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingSubscriptionCancellationScheduled:
+      case NotificationType.billingCreditNoteIssued:
+      case NotificationType.billingRefundCompleted:
         return 'FINANCIAL';
 
       case NotificationType.voucherRequestCreated:
@@ -133,6 +153,16 @@ enum NotificationType {
       case NotificationType.supportTicketCreated:
       case NotificationType.supportTicketReplied:
       case NotificationType.supportTicketClosed:
+      case NotificationType.billingInvoicePaymentReminder:
+      case NotificationType.billingSubscriptionRenewalReminder:
+      case NotificationType.billingInvoiceIssued:
+      case NotificationType.billingPaymentVerified:
+      case NotificationType.billingPaymentRejected:
+      case NotificationType.billingSubscriptionActivated:
+      case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingSubscriptionCancellationScheduled:
+      case NotificationType.billingCreditNoteIssued:
+      case NotificationType.billingRefundCompleted:
       case NotificationType.unknown:
         return '';
     }

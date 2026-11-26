@@ -12,13 +12,19 @@ class BillingCursorPageState {
   final RxnString firstPageError = RxnString();
   String? nextCursor;
   int _revision = 0;
+  bool _hasLoadedFirstPage = false;
   final Set<String> _seenCursors = <String>{};
 
   bool get hasMore => nextCursor != null && nextCursor!.isNotEmpty;
 
+  bool get hasLoadedFirstPage => _hasLoadedFirstPage;
+
   int beginRefresh({bool clearItems = false, bool clearCursor = false}) {
     _revision++;
-    if (clearItems) items.clear();
+    if (clearItems) {
+      items.clear();
+      _hasLoadedFirstPage = false;
+    }
     if (clearCursor || clearItems) {
       nextCursor = null;
       _seenCursors.clear();
@@ -50,6 +56,7 @@ class BillingCursorPageState {
     if (nextCursor != null) _seenCursors.add(nextCursor!);
     isLoadingFirstPage.value = false;
     firstPageError.value = null;
+    _hasLoadedFirstPage = true;
     return revision;
   }
 
