@@ -499,6 +499,12 @@ class BillingController extends GetxController {
     }
 
     switch (index) {
+      case 0:
+        await Future.wait([
+          if (shouldLoad(invoicesPage)) refreshInvoices(),
+          if (shouldLoad(subscriptionsPage)) refreshSubscriptions(),
+        ]);
+        return;
       case 1:
         await Future.wait([
           if (shouldLoad(plansPage)) refreshPlans(),
