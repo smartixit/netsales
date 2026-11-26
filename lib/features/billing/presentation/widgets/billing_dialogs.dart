@@ -328,6 +328,7 @@ class BillingDialogs {
                 if (!requiresProof) return const SizedBox.shrink();
 
                 return CustomFilePicker.single(
+                  key: ValueKey(selectedId),
                   initialFile: controller.paymentProof.value,
                   onFileChanged: (file) => controller.paymentProof.value = file,
                   preset: FileTypePreset.custom,
