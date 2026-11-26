@@ -139,6 +139,11 @@ class BillingRepositoryImpl implements BillingRepository {
     ),
   );
   @override
+  Future<BillingPayload> getStatement(
+    int id,
+    Map<String, dynamic> query,
+  ) async => _unwrap(await remote.getStatement(id, query));
+  @override
   Future<BillingPayload> getPayments(
     int id,
     Map<String, dynamic> query,
