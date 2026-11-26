@@ -11,8 +11,6 @@ import 'package:netsales/features/profile/presentation/controllers/profile_contr
 import 'package:netsales/features/profile/presentation/widgets/profile_seetings_tile.dart';
 import 'package:netsales/features/profile/presentation/widgets/profile_settings_group.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
-import 'package:netsales/widgets/containers/custom_section_container.dart';
-import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
