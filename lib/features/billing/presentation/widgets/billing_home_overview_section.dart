@@ -21,12 +21,13 @@ class BillingHomeOverviewSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rawCurrency = account['default_currency'];
-    final currency = rawCurrency is Map
-        ? Map<String, dynamic>.from(rawCurrency)
+    final rawAccountCurrency = account['default_currency'];
+    final accountCurrency = rawAccountCurrency is Map
+        ? Map<String, dynamic>.from(rawAccountCurrency)
         : const <String, dynamic>{};
-    final currencyCode = currency['code']?.toString() ?? '—';
-    final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
+    final accountCurrencyCode = accountCurrency['code']?.toString() ?? '—';
+    final accountDecimalPlaces =
+        (accountCurrency['decimal_places'] as num?)?.toInt() ?? 2;
 
     return Obx(() {
       final latestInvoice = controller.invoices.isEmpty
@@ -39,6 +40,15 @@ class BillingHomeOverviewSection extends StatelessWidget {
       final plan = rawPlan is Map
           ? Map<String, dynamic>.from(rawPlan)
           : const <String, dynamic>{};
+      final rawInvoiceCurrency = latestInvoice?['currency'];
+      final invoiceCurrency = rawInvoiceCurrency is Map
+          ? Map<String, dynamic>.from(rawInvoiceCurrency)
+          : const <String, dynamic>{};
+      final invoiceCurrencyCode =
+          invoiceCurrency['code']?.toString() ?? accountCurrencyCode;
+      final invoiceDecimalPlaces =
+          (invoiceCurrency['decimal_places'] as num?)?.toInt() ??
+          accountDecimalPlaces;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,7 +78,7 @@ class BillingHomeOverviewSection extends StatelessWidget {
                     ),
                     _BillingAccountFact(
                       label: 'عملة الحساب',
-                      value: currencyCode,
+                      value: accountCurrencyCode,
                     ),
                     _BillingAccountFact(
                       label: 'شروط السداد',
@@ -128,10 +138,10 @@ class BillingHomeOverviewSection extends StatelessWidget {
                             ),
                             CustomInteractiveAmountText(
                               amount: latestInvoice['remaining'] ?? '—',
-                              currencyCode: currencyCode,
-                              decimalPlaces: decimalPlaces,
+                              currencyCode: invoiceCurrencyCode,
+                              decimalPlaces: invoiceDecimalPlaces,
                               enableTooltip: false,
-                              trailingText: currencyCode,
+                              trailingText: invoiceCurrencyCode,
                             ),
                           ],
                         ),
