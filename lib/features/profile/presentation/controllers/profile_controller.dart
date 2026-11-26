@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -10,10 +9,13 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/theme_service.dart';
+import 'package:netsales/core/services/url_launcher_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/profile/domain/entities/profile_entity.dart';
 import 'package:netsales/features/profile/domain/entities/profile_membership_entity.dart';
 import 'package:netsales/features/profile/domain/usecases/get_profile_use_case.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:netsales/widgets/toasts/custom_toast.dart';
 
 /// Coordinates profile presentation and account-centre navigation.
@@ -26,6 +28,7 @@ class ProfileController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final RxBool isUpdatingAvatar = false.obs;
+  final RxBool isTwoFactorEnabled = false.obs;
   final ValueNotifier<File?> avatar = ValueNotifier<File?>(null);
 
   int _loadRevision = 0;
@@ -36,6 +39,29 @@ class ProfileController extends GetxController {
         SessionService.to.currentUser?.userFullName.trim() ??
         '';
     return name.isEmpty ? 'المستخدم' : name;
+  }
+
+  Future<void> updateTwoFactor() async {
+    try {
+      await CustomAnimationOverlay.showLoading();
+      return;
+    } on AppException catch (e) {
+      CustomSnackbar.show(
+        title: 'حدث خطأ ما!',
+        message: e.message,
+        type: SnackType.error,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'خطأ غير متوقع',
+        message: 'تعذر تسجيل رفض الطلب: $e',
+        type: SnackType.error,
+      );
+    } finally {
+      if (CustomAnimationOverlay.isShowing) {
+        await CustomAnimationOverlay.hide();
+      }
+    }
   }
 
   /// التسمية الرسمية لبيئة ومساحة العمل النشطة حالياً
@@ -89,11 +115,7 @@ class ProfileController extends GetxController {
 
   /// نسخ نص إلى الحافظة مع تغذية حسية وإشعار عائم
   Future<void> copyToClipboard(String text, String successMessage) async {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return;
-    await Clipboard.setData(ClipboardData(text: trimmed));
-    await HapticFeedback.lightImpact();
-    CustomToast.show(message: successMessage);
+    await UrlLauncherService.copyToClipboard(text);
   }
 
   /// معالجة تغيير الصورة الشخصية عبر منتقي الصور الموحد

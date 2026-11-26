@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_motion.dart';
 
 /// صف إعدادات احترافي بأسلوب تطبيقات الشركات العالمية.
@@ -31,8 +32,8 @@ class ProfileSettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final tint = color ?? scheme.primary;
+    final colors = context.colors;
+    final tint = color ?? colors.primary;
 
     return Opacity(
       opacity: enabled ? 1 : 0.45,
@@ -65,7 +66,7 @@ class ProfileSettingsTile extends StatelessWidget {
                         title,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: scheme.onSurface,
+                          color: colors.onSurface,
                         ),
                       ),
                       if (subtitle != null && subtitle!.isNotEmpty) ...[
@@ -73,7 +74,7 @@ class ProfileSettingsTile extends StatelessWidget {
                         Text(
                           subtitle!,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -82,13 +83,17 @@ class ProfileSettingsTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (trailing != null) ...[
-                  AppSpacing.hMd,
-                  AnimatedSwitcher(
-                    duration: AppMotion.duration(context, AppMotion.fast),
-                    child: trailing!,
-                  ),
-                ],
+
+                AppSpacing.hMd,
+                AnimatedSwitcher(
+                  duration: AppMotion.duration(context, AppMotion.fast),
+                  child:
+                      trailing ??
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: colors.onSurfaceVariant,
+                      ),
+                ),
               ],
             ),
           ),
