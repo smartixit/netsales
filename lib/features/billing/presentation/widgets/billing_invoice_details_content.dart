@@ -95,13 +95,16 @@ class BillingInvoiceDetailsContent extends StatelessWidget {
                 decimalPlaces: decimalPlaces,
               ),
               _InvoiceAmountRow(
-                label: 'الإشعارات المطبقة',
-                amount: invoice['credited_minor'] == null
-                    ? '—'
-                    : invoice['credited_minor'].toString(),
+                label: 'طلبات دفع قيد المراجعة',
+                amount: invoice['pending_payment'] ?? '—',
                 currencyCode: currencyCode,
                 decimalPlaces: decimalPlaces,
-                minorAmount: true,
+              ),
+              _InvoiceAmountRow(
+                label: 'الإشعارات المطبقة',
+                amount: invoice['credited'] ?? '—',
+                currencyCode: currencyCode,
+                decimalPlaces: decimalPlaces,
               ),
               _InvoiceAmountRow(
                 label: 'الرصيد المتبقي',
@@ -214,14 +217,12 @@ class _InvoiceAmountRow extends StatelessWidget {
     required this.amount,
     required this.currencyCode,
     required this.decimalPlaces,
-    this.minorAmount = false,
   });
 
   final String label;
   final dynamic amount;
   final String? currencyCode;
   final int decimalPlaces;
-  final bool minorAmount;
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +234,6 @@ class _InvoiceAmountRow extends StatelessWidget {
         decimalPlaces: decimalPlaces,
         enableTooltip: false,
         trailingText: currencyCode,
-        isMinorUnit: minorAmount,
       ),
     );
   }
