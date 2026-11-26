@@ -5,13 +5,7 @@ import 'package:netsales/core/di/register_lazy_if_absent.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_my_networks_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/get_networks_page_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/network_directory_controller.dart';
-import 'package:netsales/features/billing/data/datasources/billing_remote_data_source.dart';
-import 'package:netsales/features/billing/data/datasources/billing_remote_data_source_impl.dart';
-import 'package:netsales/features/billing/data/repositories/billing_repository_impl.dart';
-import 'package:netsales/features/billing/domain/repositories/billing_repository.dart';
-import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
-import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
-import 'package:netsales/features/billing/presentation/controllers/billing_reports_controller.dart';
+import 'package:netsales/features/billing/presentation/bindings/billing_binding.dart';
 import 'package:netsales/features/commercial/presentation/bindings/commercial_binding.dart';
 import 'package:netsales/features/expenses/presentation/bindings/expense_binding.dart';
 import 'package:netsales/features/invoices/presentation/bindings/invoice_binding.dart';
@@ -32,48 +26,7 @@ import 'package:netsales/features/workspace/presentation/controllers/network_wor
 class NetworkWorkspaceBinding extends Bindings {
   @override
   void dependencies() {
-    if (!Get.isRegistered<BillingRemoteDataSource>()) {
-      registerLazyIfAbsent<BillingRemoteDataSource>(
-        () => const BillingRemoteDataSourceImpl(),
-        fenix: true,
-      );
-    }
-    if (!Get.isRegistered<BillingRepository>()) {
-      registerLazyIfAbsent<BillingRepository>(
-        () => BillingRepositoryImpl(Get.find<BillingRemoteDataSource>()),
-        fenix: true,
-      );
-    }
-    if (!Get.isRegistered<BillingUseCases>()) {
-      registerLazyIfAbsent<BillingUseCases>(
-        () => BillingUseCases(Get.find<BillingRepository>()),
-        fenix: true,
-      );
-    }
-    if (!Get.isRegistered<BillingReportsController>()) {
-      registerLazyIfAbsent<BillingReportsController>(
-        () => BillingReportsController(
-          useCases: Get.find<BillingUseCases>(),
-          networkId: () =>
-              Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-          networkIdSignal:
-              Get.find<NetworkWorkspaceController>().selectedNetworkId,
-        ),
-        fenix: true,
-      );
-    }
-    if (!Get.isRegistered<BillingController>()) {
-      registerLazyIfAbsent<BillingController>(
-        () => BillingController(
-          useCases: Get.find<BillingUseCases>(),
-          networkId: () =>
-              Get.find<NetworkWorkspaceController>().selectedNetworkId.value,
-          networkIdSignal:
-              Get.find<NetworkWorkspaceController>().selectedNetworkId,
-        ),
-        fenix: true,
-      );
-    }
+    BillingBinding().dependencies();
     WorkspaceCoordinatorBinding().dependencies();
     CommercialBinding().dependencies();
     registerLazyIfAbsent<NetworkDirectoryController>(

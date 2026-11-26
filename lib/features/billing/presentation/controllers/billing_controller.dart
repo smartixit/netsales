@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
@@ -22,6 +22,12 @@ class BillingController extends GetxController {
   final RxnInt? networkIdSignal;
   Worker? _networkWorker;
   int? _loadedNetworkId;
+
+  final activeTabIndex = 0.obs;
+  final statementData = Rxn<Map<String, dynamic>>();
+  final statementError = RxnString();
+  final isStatementLoading = false.obs;
+  int _statementRevision = 0;
 
   final accounts = <Map<String, dynamic>>[].obs;
   final currencies = <Map<String, dynamic>>[].obs;
@@ -112,6 +118,10 @@ class BillingController extends GetxController {
   final selectedAccountId = RxnInt();
 
   final subscriptionDetails = Rxn<Map<String, dynamic>>();
+  final invoiceDetails = Rxn<Map<String, dynamic>>();
+  final invoiceDetailsError = RxnString();
+  final isInvoiceDetailsLoading = false.obs;
+  int _invoiceDetailsRevision = 0;
   final eventsPage = BillingCursorPageState(identityKey: 'event_id');
   final usagePage = BillingCursorPageState(identityKey: 'usage_aggregate_id');
   RxList<Map<String, dynamic>> get eventRows => eventsPage.items;
@@ -297,6 +307,15 @@ class BillingController extends GetxController {
 
   void _clearWorkspaceData() {
     _resetCollectionFilters();
+    activeTabIndex.value = 0;
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    _invoiceDetailsRevision++;
+    isInvoiceDetailsLoading.value = false;
+    statementData.value = null;
+    statementError.value = null;
+    _statementRevision++;
+    isStatementLoading.value = false;
     accounts.clear();
     selectedAccountId.value = null;
     account.value = null;
@@ -342,6 +361,14 @@ class BillingController extends GetxController {
         _resetCollectionFilters();
         selectedAccountId.value = null;
         account.value = null;
+        statementData.value = null;
+        statementError.value = null;
+        _statementRevision++;
+        isStatementLoading.value = false;
+        invoiceDetails.value = null;
+        invoiceDetailsError.value = null;
+        _invoiceDetailsRevision++;
+        isInvoiceDetailsLoading.value = false;
         _invalidateAccountPages(clearItems: true);
         _clearSubscriptionDetails();
         return;
@@ -396,6 +423,14 @@ class BillingController extends GetxController {
     if (id == null || id == selectedAccountId.value) return;
     _resetCollectionFilters();
     selectedAccountId.value = id;
+    statementData.value = null;
+    statementError.value = null;
+    _statementRevision++;
+    isStatementLoading.value = false;
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    _invoiceDetailsRevision++;
+    isInvoiceDetailsLoading.value = false;
     account.value = null;
     _invalidateAccountPages(clearItems: true);
     _clearSubscriptionDetails();
@@ -410,17 +445,6 @@ class BillingController extends GetxController {
     final currentRevision = revision ?? ++_revision;
     isLoading.value = true;
     errorMessage.value = null;
-
-    // Each growing collection owns its first-page request and error state.
-    // A failure in one list must not discard successful data from another.
-    final collectionLoads = <Future<void>>[
-      refreshPlans(),
-      refreshSubscriptions(),
-      refreshInvoices(),
-      refreshPayments(),
-      refreshCreditNotes(),
-      refreshRefunds(),
-    ];
 
     try {
       final results = await Future.wait([
@@ -450,7 +474,7 @@ class BillingController extends GetxController {
             : (paymentMethods.first['payment_method_id'] as num).toInt();
       }
 
-      await Future.wait(collectionLoads);
+      await _loadTabData(activeTabIndex.value);
     } catch (error) {
       if (currentRevision == _revision &&
           id == selectedAccountId.value &&
@@ -460,9 +484,86 @@ class BillingController extends GetxController {
           fallback: 'تعذر تحميل بيانات حساب الفوترة.',
         );
       }
-      await Future.wait(collectionLoads);
     } finally {
       if (currentRevision == _revision) isLoading.value = false;
+    }
+  }
+
+  Future<void> selectWorkspaceTab(int index) async {
+    if (index < 0 || index > 4 || index == activeTabIndex.value) return;
+    activeTabIndex.value = index;
+    await _loadTabData(index);
+  }
+
+  Future<void> refreshActiveTab() => _loadTabData(
+    activeTabIndex.value,
+    forceRefresh: true,
+  );
+
+  Future<void> _loadTabData(int index, {bool forceRefresh = false}) async {
+    bool shouldLoad(BillingCursorPageState page) {
+      if (page.isLoadingFirstPage.value) return false;
+      return forceRefresh ||
+          !page.hasLoadedFirstPage ||
+          page.firstPageError.value != null;
+    }
+
+    switch (index) {
+      case 0:
+        await Future.wait([
+          if (shouldLoad(invoicesPage)) refreshInvoices(),
+          if (shouldLoad(subscriptionsPage)) refreshSubscriptions(),
+        ]);
+        return;
+      case 1:
+        await Future.wait([
+          if (shouldLoad(plansPage)) refreshPlans(),
+          if (shouldLoad(subscriptionsPage)) refreshSubscriptions(),
+        ]);
+        return;
+      case 2:
+        if (shouldLoad(invoicesPage)) await refreshInvoices();
+        return;
+      case 3:
+        await Future.wait([
+          if (shouldLoad(paymentsPage)) refreshPayments(),
+          if (shouldLoad(creditNotesPage)) refreshCreditNotes(),
+          if (shouldLoad(refundsPage)) refreshRefunds(),
+          loadStatement(),
+        ]);
+        return;
+      default:
+        return;
+    }
+  }
+
+  Future<void> loadStatement() async {
+    final id = selectedAccountId.value;
+    final requestNetworkId = networkId();
+    if (id == null || requestNetworkId == null) return;
+
+    final revision = ++_statementRevision;
+    statementError.value = null;
+    isStatementLoading.value = true;
+    try {
+      final payload = await useCases.statement(id, const {});
+      if (revision != _statementRevision ||
+          id != selectedAccountId.value ||
+          requestNetworkId != networkId()) {
+        return;
+      }
+      statementData.value = _object(payload);
+    } catch (error) {
+      if (revision == _statementRevision &&
+          id == selectedAccountId.value &&
+          requestNetworkId == networkId()) {
+        statementError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل كشف النشاط المالي.',
+        );
+      }
+    } finally {
+      if (revision == _statementRevision) isStatementLoading.value = false;
     }
   }
 
@@ -623,6 +724,39 @@ class BillingController extends GetxController {
     }
   }
 
+  Future<void> loadInvoiceDetails(int id) async {
+    final revision = ++_invoiceDetailsRevision;
+    final accountId = selectedAccountId.value;
+    final requestNetworkId = networkId();
+    if (accountId == null || requestNetworkId == null) return;
+
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    isInvoiceDetailsLoading.value = true;
+    try {
+      final payload = await useCases.invoice(id);
+      if (revision != _invoiceDetailsRevision ||
+          accountId != selectedAccountId.value ||
+          requestNetworkId != networkId()) {
+        return;
+      }
+      invoiceDetails.value = _object(payload);
+    } catch (error) {
+      if (revision == _invoiceDetailsRevision &&
+          accountId == selectedAccountId.value &&
+          requestNetworkId == networkId()) {
+        invoiceDetailsError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل تفاصيل الفاتورة.',
+        );
+      }
+    } finally {
+      if (revision == _invoiceDetailsRevision) {
+        isInvoiceDetailsLoading.value = false;
+      }
+    }
+  }
+
   Future<void> loadSubscriptionDetails(int id) async {
     final detailsRevision = ++_detailsRevision;
     _detailsSubscriptionId = id;
@@ -760,10 +894,14 @@ class BillingController extends GetxController {
   Future<void> purchase(int priceId) async {
     final id = selectedAccountId.value;
     if (id == null || isMutating.value) return;
+    final subscriptionsWereLoaded = subscriptionsPage.hasLoadedFirstPage;
+    final invoicesWereLoaded = invoicesPage.hasLoadedFirstPage;
     isMutating.value = true;
     try {
       await useCases.purchase(id, priceId);
       await loadAccountData();
+      if (subscriptionsWereLoaded) await refreshSubscriptions();
+      if (invoicesWereLoaded) await refreshInvoices();
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
@@ -782,13 +920,10 @@ class BillingController extends GetxController {
     String? proofPath,
   ) async {
     if (isMutating.value) return;
+    final paymentsWereLoaded = paymentsPage.hasLoadedFirstPage;
     isMutating.value = true;
     try {
-      final random = Random.secure();
-      final key = List<int>.generate(
-        16,
-        (_) => random.nextInt(256),
-      ).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+      final key = IdempotencyHelper.generate('billing-payment');
       await useCases.recordPayment(
         invoiceId,
         paymentMethodId,
@@ -798,6 +933,8 @@ class BillingController extends GetxController {
         proofPath,
       );
       await loadAccountData();
+      await refreshInvoices();
+      if (paymentsWereLoaded) await refreshPayments();
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
@@ -810,10 +947,12 @@ class BillingController extends GetxController {
 
   Future<void> cancel(int id, {required bool atPeriodEnd}) async {
     if (isMutating.value) return;
+    final subscriptionsWereLoaded = subscriptionsPage.revision > 0;
     isMutating.value = true;
     try {
       await useCases.cancel(id, atPeriodEnd);
       await loadAccountData();
+      if (subscriptionsWereLoaded) await refreshSubscriptions();
     } catch (error) {
       errorMessage.value = AppException.sanitizeMessage(
         error,
