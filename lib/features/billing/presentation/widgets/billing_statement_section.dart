@@ -16,17 +16,21 @@ class BillingStatementSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statement = controller.statementData.value;
-    final rawBalances = statement?['balances_by_currency'];
-    final balances = rawBalances is List
-        ? rawBalances.whereType<Map>().map((row) => Map<String, dynamic>.from(row)).toList()
-        : const <Map<String, dynamic>>[];
-    final period = statement?['period'];
-    final periodData = period is Map
-        ? Map<String, dynamic>.from(period)
-        : const <String, dynamic>{};
+    return Obx(() {
+      final statement = controller.statementData.value;
+      final rawBalances = statement?['balances_by_currency'];
+      final balances = rawBalances is List
+          ? rawBalances
+                .whereType<Map>()
+                .map((row) => Map<String, dynamic>.from(row))
+                .toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      final period = statement?['period'];
+      final periodData = period is Map
+          ? Map<String, dynamic>.from(period)
+          : const <String, dynamic>{};
 
-    return Obx(() => Column(
+      return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
@@ -157,6 +161,7 @@ class BillingStatementSection extends StatelessWidget {
           }),
         ],
       ],
-    ));
+      );
+    });
   }
 }
