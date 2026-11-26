@@ -81,70 +81,63 @@ class PackageDetailsScreen extends GetView<PackageDetailsController> {
       return CustomAppScaffold(
         appBarTitle: package.packageName,
         bottomNavigationBar: CustomDocumentActionBar(
-          child: Align(
-            alignment: Alignment.center,
-            heightFactor: 1.0,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 760.w),
-              child: Row(
-                children: [
-                  if (controller.canEditPackage) ...[
-                    Expanded(
-                      child: CustomButton.primary(
-                        text: 'تعديل الباقة',
-                        icon: Icons.edit_outlined,
-                        size: AppButtonSize.medium,
-                        shape: AppButtonShape.rounded,
-                        onPressed: controller.navigateToEdit,
-                      ),
-                    ),
-                    SizedBox(width: AppSpacing.sm),
-                  ],
-                  CustomButton.icon(
-                    tooltip: package.isActive ? 'تعطيل الباقة' : 'تفعيل الباقة',
-                    icon: package.isActive
-                        ? Icons.pause_circle_outline_rounded
-                        : Icons.check_circle_outline_rounded,
+          child: Row(
+            children: [
+              if (controller.canEditPackage) ...[
+                Expanded(
+                  child: CustomButton.primary(
+                    text: 'تعديل الباقة',
+                    icon: Icons.edit_outlined,
                     size: AppButtonSize.medium,
                     shape: AppButtonShape.rounded,
-                    backgroundColor: package.isActive
-                        ? colors.warning.withValues(alpha: .08)
-                        : colors.success.withValues(alpha: .08),
-                    foregroundColor: package.isActive
-                        ? colors.warning
-                        : colors.success,
-                    borderColor: package.isActive
-                        ? colors.warning.withValues(alpha: .25)
-                        : colors.success.withValues(alpha: .25),
-                    loading: controller.isTogglingStatus.value,
-                    onPressed: () =>
-                        PackageActionDialogs.showToggleStatusConfirmation(
-                          context,
-                          package: package,
-                          onConfirm: controller.toggleStatus,
-                        ),
+                    onPressed: controller.navigateToEdit,
                   ),
-                  if (controller.canDeletePackage) ...[
-                    SizedBox(width: AppSpacing.sm),
-                    CustomButton.icon(
-                      icon: Icons.delete_outline_rounded,
-                      tooltip: 'حذف الباقة',
-                      shape: AppButtonShape.rounded,
-                      size: AppButtonSize.medium,
-                      backgroundColor: colors.error.withValues(alpha: .08),
-                      foregroundColor: colors.error,
-                      borderColor: colors.error.withValues(alpha: .25),
-                      onPressed: () =>
-                          PackageActionDialogs.showDeleteConfirmation(
-                            context,
-                            package: package,
-                            onConfirm: controller.deletePackage,
-                          ),
+                ),
+                SizedBox(width: AppSpacing.sm),
+              ],
+              CustomButton.icon(
+                tooltip: package.isActive ? 'تعطيل الباقة' : 'تفعيل الباقة',
+                icon: package.isActive
+                    ? Icons.pause_circle_outline_rounded
+                    : Icons.check_circle_outline_rounded,
+                size: AppButtonSize.medium,
+                shape: AppButtonShape.rounded,
+                backgroundColor: package.isActive
+                    ? colors.warning.withValues(alpha: .08)
+                    : colors.success.withValues(alpha: .08),
+                foregroundColor: package.isActive
+                    ? colors.warning
+                    : colors.success,
+                borderColor: package.isActive
+                    ? colors.warning.withValues(alpha: .25)
+                    : colors.success.withValues(alpha: .25),
+                loading: controller.isTogglingStatus.value,
+                onPressed: () =>
+                    PackageActionDialogs.showToggleStatusConfirmation(
+                      context,
+                      package: package,
+                      onConfirm: controller.toggleStatus,
                     ),
-                  ],
-                ],
               ),
-            ),
+              if (controller.canDeletePackage) ...[
+                SizedBox(width: AppSpacing.sm),
+                CustomButton.icon(
+                  icon: Icons.delete_outline_rounded,
+                  tooltip: 'حذف الباقة',
+                  shape: AppButtonShape.rounded,
+                  size: AppButtonSize.medium,
+                  backgroundColor: colors.error.withValues(alpha: .08),
+                  foregroundColor: colors.error,
+                  borderColor: colors.error.withValues(alpha: .25),
+                  onPressed: () =>
+                      PackageActionDialogs.showDeleteConfirmation(
+                        context,
+                        package: package,
+                        onConfirm: controller.deletePackage,
+                      ),
+                ),
+              ],
+            ],
           ),
         ),
         body: PackageDetailsContent(package: package, controller: controller),

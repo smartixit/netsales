@@ -7,6 +7,7 @@ import 'package:netsales/core/themes/app_colors.dart';
 ///
 /// المرجع المعتمد للشريط الثابت أسفل شاشات التفاصيل:
 /// - حماية كاملة عبر [SafeArea].
+/// - تقييد العرض الأقصى للمحتوى [maxWidth] وتوسيطه تلقائياً على الشاشات الواسعة.
 /// - إطار علوي دقيق مع خلفية سطحية وظلال علوية ناعمة.
 /// - مرونة تامة في استقبال قائمة أزرار أو ويدجيت مخصص.
 class CustomDocumentActionBar extends StatelessWidget {
@@ -15,6 +16,7 @@ class CustomDocumentActionBar extends StatelessWidget {
     this.child,
     this.actions,
     this.padding,
+    this.maxWidth = 760,
   }) : assert(
          child != null || actions != null,
          'يجب تمرير child أو actions للشريط.',
@@ -23,20 +25,33 @@ class CustomDocumentActionBar extends StatelessWidget {
   final Widget? child;
   final List<Widget>? actions;
   final EdgeInsetsGeometry? padding;
+  final double? maxWidth;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final content =
+        child ??
+        Row(
+          children: [
+            for (var i = 0; i < actions!.length; i++) ...[
+              if (i > 0) AppSpacing.hSm,
+              Expanded(child: actions![i]),
+            ],
+          ],
+        );
 
     return SafeArea(
       top: false,
       child: Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.cardPadding,
-          AppSpacing.sm,
-          AppSpacing.cardPadding,
-          AppSpacing.sm,
-        ),
+        padding:
+            padding ??
+            EdgeInsets.fromLTRB(
+              AppSpacing.cardPadding,
+              AppSpacing.sm,
+              AppSpacing.cardPadding,
+              AppSpacing.sm,
+            ),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.vertical(
@@ -45,22 +60,22 @@ class CustomDocumentActionBar extends StatelessWidget {
           border: Border(top: BorderSide(color: colors.outlineVariant)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: .10),
+              color: Colors.black.withValues(alpha: 0.10),
               blurRadius: 22,
               offset: const Offset(0, -7),
             ),
           ],
         ),
-        child:
-            child ??
-            Row(
-              children: [
-                for (var i = 0; i < actions!.length; i++) ...[
-                  if (i > 0) AppSpacing.hSm,
-                  Expanded(child: actions![i]),
-                ],
-              ],
-            ),
+        child: maxWidth != null
+            ? Align(
+                alignment: Alignment.center,
+                heightFactor: 1.0,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth!),
+                  child: content,
+                ),
+              )
+            : content,
       ),
     );
   }

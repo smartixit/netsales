@@ -96,17 +96,10 @@ class ProcurementRequestDetailsScreen
         showBackButton: true,
         bottomNavigationBar: (hasPendingActions || hasInvoiceAction)
             ? CustomDocumentActionBar(
-                child: Align(
-                  alignment: Alignment.center,
-                  heightFactor: 1.0,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 760),
-                    child: ProcurementDetailsActionRow(
-                      request: request,
-                      controller: controller,
-                      isNetwork: controller.isNetworkWorkspace,
-                    ),
-                  ),
+                child: ProcurementDetailsActionRow(
+                  request: request,
+                  controller: controller,
+                  isNetwork: controller.isNetworkWorkspace,
                 ),
               )
             : null,

@@ -87,69 +87,62 @@ class ExpenseDetailsScreen extends GetView<ExpenseDetailsController> {
         appBarTitle: displayReference,
         showBackButton: true,
         bottomNavigationBar: CustomDocumentActionBar(
-          child: Align(
-            alignment: Alignment.center,
-            heightFactor: 1.0,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomButton.primary(
-                      text: 'طباعة السند',
-                      icon: Icons.print_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.rounded,
-                      loading: controller.isPrinting.value,
-                      onPressed: controller.printCurrentExpense,
-                    ),
-                  ),
-                  AppSpacing.hSm,
-                  Expanded(
-                    child: CustomButton.secondary(
-                      text: 'مشاركة PDF',
-                      icon: Icons.share_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.rounded,
-                      loading: controller.isSharing.value,
-                      onPressed: controller.shareCurrentExpense,
-                    ),
-                  ),
-                  AppSpacing.hSm,
-                  CustomButton.icon(
-                    icon: Icons.download_rounded,
-                    size: AppButtonSize.medium,
-                    shape: AppButtonShape.circle,
-                    tooltip: 'حفظ PDF في الجهاز',
-                    loading: controller.isExporting.value,
-                    onPressed: controller.saveCurrentExpense,
-                  ),
-                  if (controller.canEditExpense) ...[
-                    AppSpacing.hXs,
-                    CustomButton.icon(
-                      icon: Icons.edit_outlined,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.circle,
-                      tooltip: 'تعديل المصروف',
-                      onPressed: controller.onEditCurrentExpense,
-                    ),
-                  ],
-                  if (controller.canDeleteExpense) ...[
-                    AppSpacing.hXs,
-                    CustomButton.icon(
-                      icon: Icons.delete_outline_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.circle,
-                      backgroundColor: colors.error.withValues(alpha: 0.1),
-                      foregroundColor: colors.error,
-                      tooltip: 'حذف واسترداد',
-                      loading: controller.isDeleting.value,
-                      onPressed: () => controller.confirmDelete(context),
-                    ),
-                  ],
-                ],
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomButton.primary(
+                  text: 'طباعة السند',
+                  icon: Icons.print_rounded,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.rounded,
+                  loading: controller.isPrinting.value,
+                  onPressed: controller.printCurrentExpense,
+                ),
               ),
-            ),
+              AppSpacing.hSm,
+              Expanded(
+                child: CustomButton.secondary(
+                  text: 'مشاركة PDF',
+                  icon: Icons.share_rounded,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.rounded,
+                  loading: controller.isSharing.value,
+                  onPressed: controller.shareCurrentExpense,
+                ),
+              ),
+              AppSpacing.hSm,
+              CustomButton.icon(
+                icon: Icons.download_rounded,
+                size: AppButtonSize.medium,
+                shape: AppButtonShape.circle,
+                tooltip: 'حفظ PDF في الجهاز',
+                loading: controller.isExporting.value,
+                onPressed: controller.saveCurrentExpense,
+              ),
+              if (controller.canEditExpense) ...[
+                AppSpacing.hXs,
+                CustomButton.icon(
+                  icon: Icons.edit_outlined,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.circle,
+                  tooltip: 'تعديل المصروف',
+                  onPressed: controller.onEditCurrentExpense,
+                ),
+              ],
+              if (controller.canDeleteExpense) ...[
+                AppSpacing.hXs,
+                CustomButton.icon(
+                  icon: Icons.delete_outline_rounded,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.circle,
+                  backgroundColor: colors.error.withValues(alpha: 0.1),
+                  foregroundColor: colors.error,
+                  tooltip: 'حذف واسترداد',
+                  loading: controller.isDeleting.value,
+                  onPressed: () => controller.confirmDelete(context),
+                ),
+              ],
+            ],
           ),
         ),
         body: SingleChildScrollView(

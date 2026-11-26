@@ -85,37 +85,30 @@ class InvoiceDetailsScreen extends GetView<InvoiceDetailsController> {
       return CustomAppScaffold(
         appBarTitle: displayReference,
         bottomNavigationBar: CustomDocumentActionBar(
-          child: Align(
-            alignment: Alignment.center,
-            heightFactor: 1.0,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomButton.primary(
-                      text: 'طباعة الفاتورة',
-                      icon: Icons.print_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.rounded,
-                      loading: controller.isPrinting.value,
-                      onPressed: controller.printCurrentInvoice,
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: CustomButton.secondary(
-                      text: 'مشاركة PDF',
-                      icon: Icons.share_rounded,
-                      size: AppButtonSize.medium,
-                      shape: AppButtonShape.rounded,
-                      loading: controller.isSharing.value,
-                      onPressed: controller.shareCurrentInvoice,
-                    ),
-                  ),
-                ],
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomButton.primary(
+                  text: 'طباعة الفاتورة',
+                  icon: Icons.print_rounded,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.rounded,
+                  loading: controller.isPrinting.value,
+                  onPressed: controller.printCurrentInvoice,
+                ),
               ),
-            ),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: CustomButton.secondary(
+                  text: 'مشاركة PDF',
+                  icon: Icons.share_rounded,
+                  size: AppButtonSize.medium,
+                  shape: AppButtonShape.rounded,
+                  loading: controller.isSharing.value,
+                  onPressed: controller.shareCurrentInvoice,
+                ),
+              ),
+            ],
           ),
         ),
         body: SingleChildScrollView(
