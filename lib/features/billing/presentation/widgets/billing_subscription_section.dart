@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_cursor_collection_section.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_dialogs.dart';
 import 'package:netsales/features/billing/presentation/widgets/billing_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
-import 'package:netsales/features/billing/presentation/widgets/billing_collection_status_options.dart';
+import 'package:netsales/widgets/dividers/custom_divider.dart';
 
 class BillingSubscriptionSection extends StatelessWidget {
   const BillingSubscriptionSection({required this.controller, super.key});
@@ -35,44 +36,56 @@ class BillingSubscriptionSection extends StatelessWidget {
 
   Widget _tile(Map<String, dynamic> subscription) {
     final id = (subscription['billing_subscription_id'] as num?)?.toInt();
+    final rawPlan = subscription['plan'];
+    final plan = rawPlan is Map
+        ? Map<String, dynamic>.from(rawPlan)
+        : const <String, dynamic>{};
+
     return CustomSurfaceCard(
       margin: const EdgeInsets.all(4),
       padding: EdgeInsets.zero,
-      child: CustomInfoListTile(
-        title: Text(
-          subscription['plan'] is Map<String, dynamic>
-              ? subscription['plan']['name']?.toString() ?? 'اشتراك'
-              : 'اشتراك',
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BillingStatusBadge(
-              status: subscription['status']?.toString(),
-              serverLabel: subscription['status_label']?.toString(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CustomInfoListTile(
+            title: Text(plan['name']?.toString() ?? 'اشتراك'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BillingStatusBadge(
+                  status: subscription['status']?.toString(),
+                  serverLabel: subscription['status_label']?.toString(),
+                ),
+                Text(
+                  'نهاية الفترة: ${subscription['current_period_end']?.toString() ?? '—'}',
+                ),
+              ],
             ),
-            Text(
-              'نهاية الفترة: ${subscription['current_period_end']?.toString() ?? '—'}',
+          ),
+          const CustomDivider(extent: 1),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 6, 14, 8),
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                CustomButton.text(
+                  text: 'التفاصيل',
+                  onPressed: id == null
+                      ? null
+                      : () => BillingDialogs.subscriptionDetails(controller, id),
+                ),
+                CustomButton.outline(
+                  text: 'إلغاء',
+                  onPressed: id == null
+                      ? null
+                      : () => BillingDialogs.cancelSubscription(controller, id),
+                ),
+              ],
             ),
-          ],
-        ),
-        trailing: Wrap(
-          spacing: 6,
-          children: [
-            CustomButton.text(
-              text: 'التفاصيل',
-              onPressed: id == null
-                  ? null
-                  : () => BillingDialogs.subscriptionDetails(controller, id),
-            ),
-            CustomButton.outline(
-              text: 'إلغاء',
-              onPressed: id == null
-                  ? null
-                  : () => BillingDialogs.cancelSubscription(controller, id),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
