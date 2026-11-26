@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/enums/billing_status.dart';
 import 'package:netsales/core/models/app_picked_file_model.dart';
+import 'package:netsales/core/utils/idempotency_helper.dart';
 import 'package:netsales/features/billing/domain/entities/billing_payload.dart';
 import 'package:netsales/features/billing/domain/usecases/billing_use_cases.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_cursor_page_state.dart';
@@ -923,11 +923,7 @@ class BillingController extends GetxController {
     final paymentsWereLoaded = paymentsPage.hasLoadedFirstPage;
     isMutating.value = true;
     try {
-      final random = Random.secure();
-      final key = List<int>.generate(
-        16,
-        (_) => random.nextInt(256),
-      ).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+      final key = IdempotencyHelper.generate('billing-payment');
       await useCases.recordPayment(
         invoiceId,
         paymentMethodId,
