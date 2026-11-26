@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:netsales/widgets/cards/custom_info_list_tile.dart';
 import 'package:netsales/widgets/cards/custom_surface_card.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/indicators/custom_interactive_amount_text.dart';
 
@@ -17,14 +19,14 @@ class BillingStatementSection extends StatelessWidget {
     final statement = controller.statementData.value;
     final rawBalances = statement?['balances_by_currency'];
     final balances = rawBalances is List
-        ? rawBalances.whereType<Map>().map(Map<String, dynamic>.from).toList()
+        ? rawBalances.whereType<Map>().map((row) => Map<String, dynamic>.from(row)).toList()
         : const <Map<String, dynamic>>[];
     final period = statement?['period'];
     final periodData = period is Map
         ? Map<String, dynamic>.from(period)
         : const <String, dynamic>{};
 
-    return Column(
+    return Obx(() => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
@@ -32,10 +34,13 @@ class BillingStatementSection extends StatelessWidget {
           child: Text('ملخص الذمم والأرصدة', style: AppTypography.titleMedium),
         ),
         if (controller.isStatementLoading.value && statement == null)
-          const CustomSurfaceCard(
-            margin: EdgeInsets.all(4),
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator.adaptive()),
+          const CustomStateView.loading(
+            presentation: CustomStatePresentation.skeletonOnly,
+            skeleton: CustomStateSkeleton(
+              layout: CustomStateSkeletonLayout.list,
+              itemCount: 2,
+              cardHeight: 112,
+            ),
           )
         else if (controller.statementError.value != null && statement == null)
           CustomErrorState.compact(
@@ -152,6 +157,6 @@ class BillingStatementSection extends StatelessWidget {
           }),
         ],
       ],
-    );
+    ));
   }
 }
