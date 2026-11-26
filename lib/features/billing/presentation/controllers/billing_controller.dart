@@ -944,19 +944,4 @@ class BillingController extends GetxController {
       isMutating.value = false;
     }
   }
-}) async {
-    if (isMutating.value) return;
-    isMutating.value = true;
-    try {
-      await useCases.cancel(id, atPeriodEnd);
-      await loadAccountData();
-    } catch (error) {
-      errorMessage.value = AppException.sanitizeMessage(
-        error,
-        fallback: 'تعذر جدولة الإلغاء.',
-      );
-    } finally {
-      isMutating.value = false;
-    }
-  }
 }
