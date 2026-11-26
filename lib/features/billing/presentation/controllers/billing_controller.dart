@@ -406,6 +406,9 @@ class BillingController extends GetxController {
     if (id == null || id == selectedAccountId.value) return;
     _resetCollectionFilters();
     selectedAccountId.value = id;
+    statementData.value = null;
+    statementError.value = null;
+    _statementRevision++;
     account.value = null;
     _invalidateAccountPages(clearItems: true);
     _clearSubscriptionDetails();
@@ -459,7 +462,6 @@ class BillingController extends GetxController {
           fallback: 'تعذر تحميل بيانات حساب الفوترة.',
         );
       }
-      await _loadTabData(activeTabIndex.value);
     } finally {
       if (currentRevision == _revision) isLoading.value = false;
     }
@@ -486,8 +488,10 @@ class BillingController extends GetxController {
           if (shouldLoad(plansPage)) refreshPlans(),
           if (shouldLoad(subscriptionsPage)) refreshSubscriptions(),
         ]);
+        return;
       case 2:
         if (shouldLoad(invoicesPage)) await refreshInvoices();
+        return;
       case 3:
         await Future.wait([
           if (shouldLoad(paymentsPage)) refreshPayments(),
@@ -495,6 +499,7 @@ class BillingController extends GetxController {
           if (shouldLoad(refundsPage)) refreshRefunds(),
           loadStatement(),
         ]);
+        return;
       default:
         return;
     }
