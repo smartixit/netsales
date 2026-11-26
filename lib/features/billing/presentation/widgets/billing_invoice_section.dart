@@ -36,8 +36,6 @@ class BillingInvoiceSection extends StatelessWidget {
 
   Widget _tile(Map<String, dynamic> invoice) {
     final invoiceId = (invoice['invoice_id'] as num?)?.toInt();
-    final remainingMinor =
-        int.tryParse(invoice['remaining_minor']?.toString() ?? '0') ?? 0;
     final rawCurrency = invoice['currency'];
     final currency = rawCurrency is Map
         ? Map<String, dynamic>.from(rawCurrency)
