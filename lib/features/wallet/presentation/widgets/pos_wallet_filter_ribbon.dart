@@ -7,7 +7,7 @@ import 'package:netsales/features/wallet/presentation/controllers/wallet_filter_
 import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_filter_chip.dart';
 import 'package:netsales/widgets/inputs/custom_text_field.dart';
 
-/// شريط البحث والفلترة لدفتر أستاذ المحفظة (PosWalletFilterRibbon)
+/// البحث والتصفية في سجل حركات المحفظة.
 class PosWalletFilterRibbon extends StatelessWidget {
   const PosWalletFilterRibbon({super.key, required this.controller});
 
@@ -17,36 +17,33 @@ class PosWalletFilterRibbon extends StatelessWidget {
   Widget build(BuildContext context) {
     final depositPresentation =
         EnumPresentationRegistry.resolveWalletOperationType(
-          WalletOperationType.deposit,
-        );
+      WalletOperationType.deposit,
+    );
     final withdrawPresentation =
         EnumPresentationRegistry.resolveWalletOperationType(
-          WalletOperationType.withdraw,
-        );
+      WalletOperationType.withdraw,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. حقل البحث النصي الموحد
         CustomTextField(
           controller: controller.searchController,
-          label: 'بحث',
-          hint: 'البحث في بيان الحركة أو القيد...',
+          label: 'البحث في الحركات',
+          hint: 'ابحث في بيان الحركة...',
           prefixIcon: const Icon(Icons.search_rounded),
           isRequired: false,
           onChanged: controller.onSearchChanged,
         ),
         SizedBox(height: AppSpacing.sm),
-
-        // 2. رقاقات تصفية نوع الحركة المعتمدة على الـ EnumPresentation الموحد
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Obx(
             () => Row(
               children: [
                 PosWalletFilterChip(
-                  label: 'كافة العمليات',
+                  label: 'كل الحركات',
                   isSelected: controller.selectedOperationType.value == null,
                   onTap: () => controller.setOperationFilter(null),
                 ),

@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
+import 'package:netsales/core/presentation/enums/semantic_tone.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/wallet/domain/entities/pos_wallet_entity.dart';
-import 'package:netsales/features/wallet/presentation/widgets/pos_wallet_purchasing_power_gauge.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 
-/// بطاقة المحفظة المالية التنفيذية الفاخرة (POS Wallet Executive Hero Card)
-///
-/// تستخدم كائن العرض الدلالي الموحد [EnumPresentation] المستخرج عبر [EnumPresentationRegistry].
+/// الملخص المالي الرئيسي لحساب نقطة البيع.
 class PosWalletHeroCard extends StatelessWidget {
   const PosWalletHeroCard({super.key, required this.wallet, this.onRefresh});
 
@@ -22,135 +20,170 @@ class PosWalletHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
     final accountingPresentation =
         EnumPresentationRegistry.resolveAccountingStatus(
-          wallet.typedAccountingStatus,
-          serverLabel: wallet.accountingStatusLabel,
-        );
+      wallet.typedAccountingStatus,
+      serverLabel: wallet.accountingStatusLabel,
+    );
     final balanceFormatted = AmountFormatter.format(
       wallet.walletBalance.toStringAsFixed(2),
     );
+    final openingBalanceFormatted = AmountFormatter.format(
+      wallet.openingBalance.toStringAsFixed(2),
+    );
 
     return Container(
-      constraints: BoxConstraints(minHeight: 180.h),
-      padding: EdgeInsets.all(AppSpacing.cardPadding),
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        gradient: colors.executiveHeroGradient,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.55),
+        ),
         boxShadow: [
           BoxShadow(
-            color: colors.primary.withValues(alpha: 0.28),
-            blurRadius: 24.r,
-            offset: const Offset(0, 10),
+            color: colors.shadow.withValues(alpha: 0.045),
+            blurRadius: 22.r,
+            offset: Offset(0, 7.h),
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. التوهج الضوئي الخلفي المحيطي
-          Positioned(
-            left: -AppSpacing.xxl,
-            bottom: -AppSpacing.giant,
-            child: IgnorePointer(
-              child: Container(
-                width: 170.w,
-                height: 100.h,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42.r,
+                height: 42.r,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.secondary.withValues(alpha: 0.12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.secondary.withValues(alpha: 0.16),
-                      blurRadius: AppSpacing.huge,
-                      spreadRadius: AppSpacing.md,
+                  color: colors.primaryContainer.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: colors.primary,
+                  size: 21.r,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      wallet.posName?.trim().isNotEmpty == true
+                          ? wallet.posName!
+                          : 'حساب نقطة البيع',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: AppTypography.bold,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      wallet.networkName?.trim().isNotEmpty == true
+                          ? 'ضمن شبكة ${wallet.networkName}'
+                          : 'الحساب التشغيلي لنقطة البيع',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-
-          // 2. المحتوى القيادي الرئيسي
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // الرأس: المعرف وشارة المركز المحاسبي الموحدة
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SizedBox(width: AppSpacing.xs),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 18.r,
-                        color: colors.executiveGoldIcon,
-                      ),
-                      SizedBox(width: AppSpacing.xs),
-                      Text(
-                        'محفظة نقطة البيع',
-                        style: AppTypography.titleSmall.copyWith(
-                          color: colors.executiveGoldAccent,
-                          fontWeight: AppTypography.medium,
-                        ),
-                      ),
-                    ],
+                  CustomStatusBadge(
+                    label: wallet.status ? 'الحساب نشط' : 'الحساب موقوف',
+                    tone: wallet.status ? SemanticTone.success : SemanticTone.danger,
+                    isCompact: true,
+                    showDot: true,
                   ),
+                  SizedBox(height: AppSpacing.xs),
                   CustomStatusBadge.fromPresentation(
                     accountingPresentation,
-                    showDot: true,
                     isCompact: true,
                   ),
                 ],
               ),
-              SizedBox(height: AppSpacing.sm),
-
-              // كتلة الرصيد المالي المعتمد
-              Text(
-                'الرصيد المالي المتاح',
-                style: AppTypography.bodySmall.copyWith(
-                  color: Colors.white.withValues(alpha: 0.78),
-                  fontWeight: AppTypography.regular,
+            ],
+          ),
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'الرصيد الحالي',
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: AppTypography.medium,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    balanceFormatted,
+                    maxLines: 1,
+                    style: AppTypography.displaySmall.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: AppTypography.bold,
+                      letterSpacing: -0.6,
+                    ),
+                  ),
                 ),
               ),
-              SizedBox(height: AppSpacing.xxs),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    balanceFormatted,
-                    style: AppTypography.headlineLarge.copyWith(
-                      color: Colors.white,
-                      fontWeight: AppTypography.bold,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.xs),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
-                      vertical: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
-                    ),
-                    child: Text(
-                      wallet.currencyCode,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: colors.executiveGoldAccent,
-                        fontWeight: AppTypography.bold,
-                      ),
-                    ),
-                  ),
-                ],
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                wallet.currencyCode,
+                style: AppTypography.labelMedium.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: AppTypography.semiBold,
+                ),
               ),
-              SizedBox(height: AppSpacing.md),
-
-              // 3. شريط مؤشر القدرة الائتمانية والشرائية
-              PosWalletPurchasingPowerGauge(wallet: wallet),
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.55),
+          ),
+          SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance_outlined,
+                size: 16.r,
+                color: colors.onSurfaceVariant,
+              ),
+              SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  'الرصيد الافتتاحي',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Text(
+                '$openingBalanceFormatted ${wallet.currencyCode}',
+                style: AppTypography.titleSmall.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: AppTypography.semiBold,
+                ),
+              ),
             ],
           ),
         ],
