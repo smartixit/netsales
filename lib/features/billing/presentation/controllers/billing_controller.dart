@@ -118,6 +118,10 @@ class BillingController extends GetxController {
   final selectedAccountId = RxnInt();
 
   final subscriptionDetails = Rxn<Map<String, dynamic>>();
+  final invoiceDetails = Rxn<Map<String, dynamic>>();
+  final invoiceDetailsError = RxnString();
+  final isInvoiceDetailsLoading = false.obs;
+  int _invoiceDetailsRevision = 0;
   final eventsPage = BillingCursorPageState(identityKey: 'event_id');
   final usagePage = BillingCursorPageState(identityKey: 'usage_aggregate_id');
   RxList<Map<String, dynamic>> get eventRows => eventsPage.items;
@@ -304,6 +308,9 @@ class BillingController extends GetxController {
   void _clearWorkspaceData() {
     _resetCollectionFilters();
     activeTabIndex.value = 0;
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    _invoiceDetailsRevision++;
     statementData.value = null;
     statementError.value = null;
     _statementRevision++;
@@ -409,6 +416,9 @@ class BillingController extends GetxController {
     statementData.value = null;
     statementError.value = null;
     _statementRevision++;
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    _invoiceDetailsRevision++;
     account.value = null;
     _invalidateAccountPages(clearItems: true);
     _clearSubscriptionDetails();
@@ -689,6 +699,39 @@ class BillingController extends GetxController {
         fallback: 'تعذر التحقق من أهلية الفترة التجريبية.',
       );
       return null;
+    }
+  }
+
+  Future<void> loadInvoiceDetails(int id) async {
+    final revision = ++_invoiceDetailsRevision;
+    final accountId = selectedAccountId.value;
+    final requestNetworkId = networkId();
+    if (accountId == null || requestNetworkId == null) return;
+
+    invoiceDetails.value = null;
+    invoiceDetailsError.value = null;
+    isInvoiceDetailsLoading.value = true;
+    try {
+      final payload = await useCases.invoice(id);
+      if (revision != _invoiceDetailsRevision ||
+          accountId != selectedAccountId.value ||
+          requestNetworkId != networkId()) {
+        return;
+      }
+      invoiceDetails.value = _object(payload);
+    } catch (error) {
+      if (revision == _invoiceDetailsRevision &&
+          accountId == selectedAccountId.value &&
+          requestNetworkId == networkId()) {
+        invoiceDetailsError.value = AppException.sanitizeMessage(
+          error,
+          fallback: 'تعذر تحميل تفاصيل الفاتورة.',
+        );
+      }
+    } finally {
+      if (revision == _invoiceDetailsRevision) {
+        isInvoiceDetailsLoading.value = false;
+      }
     }
   }
 
