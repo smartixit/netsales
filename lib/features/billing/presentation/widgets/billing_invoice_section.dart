@@ -44,10 +44,11 @@ class BillingInvoiceSection extends StatelessWidget {
         : const <String, dynamic>{};
     final currencyCode = currency['code']?.toString();
     final decimalPlaces = (currency['decimal_places'] as num?)?.toInt() ?? 2;
-    final canPay =
-        remainingMinor > 0 &&
-        invoice['status'] != 'PAID' &&
-        invoice['status'] != 'VOID' &&
+    final availableMinor =
+        int.tryParse(invoice['available_to_submit_minor']?.toString() ?? '0') ??
+        0;
+    final canPay = invoice['can_submit_payment'] == true &&
+        availableMinor > 0 &&
         invoiceId != null;
 
     return CustomSurfaceCard(
