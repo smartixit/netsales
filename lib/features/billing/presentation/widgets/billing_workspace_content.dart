@@ -83,23 +83,18 @@ class BillingWorkspaceContent extends StatelessWidget {
                 items: const [
                   CustomSegmentItem(
                     label: 'الرئيسية',
-                    icon: Icons.home_outlined,
                   ),
                   CustomSegmentItem(
                     label: 'اشتراكي',
-                    icon: Icons.workspace_premium_outlined,
                   ),
                   CustomSegmentItem(
                     label: 'الفواتير',
-                    icon: Icons.receipt_long_outlined,
                   ),
                   CustomSegmentItem(
-                    label: 'النشاط',
-                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'النشاط المالي',
                   ),
                   CustomSegmentItem(
                     label: 'حسابي',
-                    icon: Icons.business_outlined,
                   ),
                 ],
               ),
