@@ -34,6 +34,7 @@ enum NotificationType {
   billingPaymentRejected('BILLING_PAYMENT_REJECTED'),
   billingSubscriptionActivated('BILLING_SUBSCRIPTION_ACTIVATED'),
   billingSubscriptionCanceled('BILLING_SUBSCRIPTION_CANCELED'),
+  billingSubscriptionCancellationScheduled('BILLING_SUBSCRIPTION_CANCELLATION_SCHEDULED'),
   billingCreditNoteIssued('BILLING_CREDIT_NOTE_ISSUED'),
   billingRefundCompleted('BILLING_REFUND_COMPLETED'),
   unknown('UNKNOWN');
@@ -72,6 +73,7 @@ enum NotificationType {
       case NotificationType.billingPaymentRejected:
       case NotificationType.billingSubscriptionActivated:
       case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingSubscriptionCancellationScheduled:
       case NotificationType.billingCreditNoteIssued:
       case NotificationType.billingRefundCompleted:
         return 'FINANCIAL';
@@ -158,6 +160,7 @@ enum NotificationType {
       case NotificationType.billingPaymentRejected:
       case NotificationType.billingSubscriptionActivated:
       case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingSubscriptionCancellationScheduled:
       case NotificationType.billingCreditNoteIssued:
       case NotificationType.billingRefundCompleted:
       case NotificationType.unknown:
