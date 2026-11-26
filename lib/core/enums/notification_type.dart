@@ -96,16 +96,6 @@ enum NotificationType {
       case NotificationType.securityPasswordChanged:
         return 'SECURITY';
 
-      case NotificationType.billingInvoicePaymentReminder:
-      case NotificationType.billingSubscriptionRenewalReminder:
-      case NotificationType.billingInvoiceIssued:
-      case NotificationType.billingPaymentVerified:
-      case NotificationType.billingPaymentRejected:
-      case NotificationType.billingSubscriptionActivated:
-      case NotificationType.billingSubscriptionCanceled:
-      case NotificationType.billingCreditNoteIssued:
-      case NotificationType.billingRefundCompleted:
-        return ''; // Billing deep links are resolved from entity metadata by the notification router.
       case NotificationType.systemAnnouncement:
       case NotificationType.generalInfo:
       case NotificationType.unknown:
@@ -161,6 +151,15 @@ enum NotificationType {
       case NotificationType.supportTicketCreated:
       case NotificationType.supportTicketReplied:
       case NotificationType.supportTicketClosed:
+      case NotificationType.billingInvoicePaymentReminder:
+      case NotificationType.billingSubscriptionRenewalReminder:
+      case NotificationType.billingInvoiceIssued:
+      case NotificationType.billingPaymentVerified:
+      case NotificationType.billingPaymentRejected:
+      case NotificationType.billingSubscriptionActivated:
+      case NotificationType.billingSubscriptionCanceled:
+      case NotificationType.billingCreditNoteIssued:
+      case NotificationType.billingRefundCompleted:
       case NotificationType.unknown:
         return '';
     }
