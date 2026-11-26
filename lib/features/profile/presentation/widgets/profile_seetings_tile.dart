@@ -7,7 +7,7 @@ import 'package:netsales/core/themes/app_motion.dart';
 
 /// صف إعدادات احترافي بأسلوب تطبيقات الشركات العالمية.
 ///
-/// يتكوّن من: أيقونة داخل مربع تلوّن حسب `color` → عنوان (+ وصف اختياري)
+/// يتكوّن من: أيقونة داخل مربع تلوّن حسب `color` ← عنوان (+ وصف اختياري)
 /// ← طفل خلفي أيمن (سهم/سويتش/قيمة). يدعم حلقة التركيز والاهتمام.
 class ProfileSettingsTile extends StatelessWidget {
   final IconData icon;
@@ -83,7 +83,6 @@ class ProfileSettingsTile extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 AppSpacing.hMd,
                 AnimatedSwitcher(
                   duration: AppMotion.duration(context, AppMotion.fast),

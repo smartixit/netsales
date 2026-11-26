@@ -39,6 +39,38 @@ class ProfileEntity extends Equatable {
 
   bool get hasOperationalMemberships => memberships.isNotEmpty;
 
+  ProfileEntity copyWith({
+    int? userId,
+    String? fullName,
+    String? phoneNumber,
+    String? email,
+    String? avatarUrl,
+    UserStatus? status,
+    String? statusLabel,
+    String? lastLoginAt,
+    bool? twoFactorEnabled,
+    bool? mustChangePassword,
+    RoleKey? primaryRoleKey,
+    String? primaryRoleName,
+    List<ProfileMembershipEntity>? memberships,
+  }) {
+    return ProfileEntity(
+      userId: userId ?? this.userId,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      status: status ?? this.status,
+      statusLabel: statusLabel ?? this.statusLabel,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
+      mustChangePassword: mustChangePassword ?? this.mustChangePassword,
+      primaryRoleKey: primaryRoleKey ?? this.primaryRoleKey,
+      primaryRoleName: primaryRoleName ?? this.primaryRoleName,
+      memberships: memberships ?? this.memberships,
+    );
+  }
+
   @override
   List<Object?> get props => [
     userId,

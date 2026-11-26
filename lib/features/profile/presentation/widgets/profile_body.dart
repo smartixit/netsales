@@ -1,59 +1,42 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
-import 'package:netsales/features/profile/presentation/widgets/profile_seetings_tile.dart';
-import 'package:netsales/features/profile/presentation/widgets/profile_settings_group.dart';
-import 'package:netsales/widgets/inputs/custom_switch.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_appearance_card.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_identity_card.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_logout_tile.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_security_card.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_workspaces_card.dart';
 
+/// جسم صفحة الملف الشخصي — يُركّب البطاقات المعيارية دون أي منطق.
 class ProfileBody extends GetView<ProfileController> {
   const ProfileBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final profile = controller.profile.value;
-
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ProfileSettingsGroup(
-          title: 'معلوماتك الشخصية',
-          children: [
-            ProfileSettingsTile(
-              icon: Icons.edit,
-              title: 'تعديل الملف الشخصي',
-              subtitle: 'تعديل بيانات الحساب الشخصي',
-            ),
-            ProfileSettingsTile(
-              icon: Icons.password,
-              title: 'تغيير كلمة المرور',
-              subtitle: 'تغيير كلمة مرور الحساب',
-              onTap: () {
-                CustomBottomSheet.showActions<void>(
-                  title: 'تغيير كلمة المرور',
-                  items: [],
-                );
-              },
-            ),
-            Obx(
-              () => ProfileSettingsTile(
-                icon: Icons.lock_outline,
-                title: profile!.twoFactorEnabled
-                    ? 'تعطيل التحقق بخطوتين'
-                    : 'تفعيل التحقق بخطوتين',
-                subtitle: 'تأمين الحساب بخطوتين',
-                trailing: CustomSwitch(
-                  value: controller.isTwoFactorEnabled.value,
-                  onChanged: (value) => controller.updateTwoFactor,
-                ),
-                onTap: controller.updateTwoFactor,
-              ),
-            ),
-          ],
-        ),
-
+        const ProfileIdentityCard(),
         AppSpacing.vLg,
+        const ProfileSecurityCard(),
+        AppSpacing.vLg,
+        Obx(() {
+          final hasMemberships =
+              controller.profile.value?.hasOperationalMemberships ?? false;
+          if (!hasMemberships) return const SizedBox.shrink();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const ProfileWorkspacesCard(),
+              AppSpacing.vLg,
+            ],
+          );
+        }),
+        const ProfileAppearanceCard(),
+        AppSpacing.vLg,
+        const ProfileLogoutTile(),
+        AppSpacing.vXxl,
       ],
     );
   }

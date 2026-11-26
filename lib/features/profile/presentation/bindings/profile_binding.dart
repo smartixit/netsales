@@ -7,13 +7,21 @@ import 'package:netsales/features/profile/data/datasources/profile_remote_data_s
 import 'package:netsales/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:netsales/features/profile/domain/repositories/profile_repository.dart';
 import 'package:netsales/features/profile/domain/usecases/get_profile_use_case.dart';
+import 'package:netsales/features/profile/domain/usecases/profile_security_use_cases.dart';
+import 'package:netsales/features/profile/domain/usecases/update_profile_use_case.dart';
+import 'package:netsales/features/profile/presentation/controllers/change_password_controller.dart';
+import 'package:netsales/features/profile/presentation/controllers/profile_2fa_controller.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:netsales/features/profile/presentation/controllers/profile_edit_form_controller.dart';
 
-/// Registers profile dependencies using the application's shared auth source.
+/// تسجيل تبعيات وحدة الملف الشخصي عبر الطبقات المعمارية المعتمدة.
 class ProfileBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<AuthRemoteDataSource>(AuthRemoteDataSourceImpl());
+    registerLazyIfAbsent<AuthRemoteDataSource>(
+      AuthRemoteDataSourceImpl.new,
+      fenix: true,
+    );
 
     registerLazyIfAbsent<ProfileRemoteDataSource>(
       () => ProfileRemoteDataSourceImpl(Get.find<AuthRemoteDataSource>()),
@@ -29,9 +37,56 @@ class ProfileBinding extends Bindings {
       () => GetProfileUseCase(Get.find<ProfileRepository>()),
       fenix: true,
     );
+    registerLazyIfAbsent<UpdateProfileUseCase>(
+      () => UpdateProfileUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<UpdateAvatarUseCase>(
+      () => UpdateAvatarUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<ChangePasswordUseCase>(
+      () => ChangePasswordUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<RequestTwoFactorOtpUseCase>(
+      () => RequestTwoFactorOtpUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
+    registerLazyIfAbsent<ToggleTwoFactorUseCase>(
+      () => ToggleTwoFactorUseCase(Get.find<ProfileRepository>()),
+      fenix: true,
+    );
 
-    Get.lazyPut<ProfileController>(
-      () => ProfileController(getProfileUseCase: Get.find<GetProfileUseCase>()),
+    registerLazyIfAbsent<ProfileController>(
+      () => ProfileController(
+        getProfileUseCase: Get.find<GetProfileUseCase>(),
+        updateProfileUseCase: Get.find<UpdateProfileUseCase>(),
+        updateAvatarUseCase: Get.find<UpdateAvatarUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    registerLazyIfAbsent<ProfileEditFormController>(
+      () => ProfileEditFormController(
+        profileController: Get.find<ProfileController>(),
+      ),
+      fenix: true,
+    );
+
+    registerLazyIfAbsent<Profile2faController>(
+      () => Profile2faController(
+        requestTwoFactorOtpUseCase: Get.find<RequestTwoFactorOtpUseCase>(),
+        toggleTwoFactorUseCase: Get.find<ToggleTwoFactorUseCase>(),
+      ),
+      fenix: true,
+    );
+
+    registerLazyIfAbsent<ChangePasswordController>(
+      () => ChangePasswordController(
+        changePasswordUseCase: Get.find<ChangePasswordUseCase>(),
+      ),
+      fenix: true,
     );
   }
 }
