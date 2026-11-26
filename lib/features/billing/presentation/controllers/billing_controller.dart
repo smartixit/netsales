@@ -315,6 +315,7 @@ class BillingController extends GetxController {
     statementData.value = null;
     statementError.value = null;
     _statementRevision++;
+    isStatementLoading.value = false;
     accounts.clear();
     selectedAccountId.value = null;
     account.value = null;
@@ -360,6 +361,14 @@ class BillingController extends GetxController {
         _resetCollectionFilters();
         selectedAccountId.value = null;
         account.value = null;
+        statementData.value = null;
+        statementError.value = null;
+        _statementRevision++;
+        isStatementLoading.value = false;
+        invoiceDetails.value = null;
+        invoiceDetailsError.value = null;
+        _invoiceDetailsRevision++;
+        isInvoiceDetailsLoading.value = false;
         _invalidateAccountPages(clearItems: true);
         _clearSubscriptionDetails();
         return;
@@ -417,6 +426,7 @@ class BillingController extends GetxController {
     statementData.value = null;
     statementError.value = null;
     _statementRevision++;
+    isStatementLoading.value = false;
     invoiceDetails.value = null;
     invoiceDetailsError.value = null;
     _invoiceDetailsRevision++;
