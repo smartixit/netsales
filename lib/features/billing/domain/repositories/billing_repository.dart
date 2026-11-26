@@ -59,6 +59,10 @@ abstract interface class BillingRepository {
     bool atPeriodEnd,
   );
   Future<BillingPayload> getInvoices(int accountId, Map<String, dynamic> query);
+  Future<BillingPayload> getStatement(
+    int accountId,
+    Map<String, dynamic> query,
+  );
   Future<BillingPayload> getPayments(int accountId, Map<String, dynamic> query);
   Future<BillingPayload> getCreditNotes(
     int accountId,
