@@ -21,7 +21,7 @@ class BillingStatementSection extends StatelessWidget {
       final rawBalances = statement?['balances_by_currency'];
       final balances = rawBalances is List
           ? rawBalances
-                .whereType<Map>()
+                .whereType<Map<String, dynamic>>()
                 .map((row) => Map<String, dynamic>.from(row))
                 .toList(growable: false)
           : const <Map<String, dynamic>>[];
