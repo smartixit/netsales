@@ -379,7 +379,15 @@ class BillingDialogs {
         );
         return;
       }
-      if (methodId == null || selectedMethod == null) return;
+      if (methodId == null || selectedMethod == null) {
+        await CustomDialog.show(
+          type: DialogType.error,
+          title: 'وسيلة الدفع مطلوبة',
+          message: 'اختر وسيلة الدفع التي تم استخدامها قبل إرسال طلب الدفع.',
+          confirmLabel: 'حسناً',
+        );
+        return;
+      }
       if (requiresProof && (proofPath == null || proofPath.isEmpty)) {
         await CustomDialog.show(
           type: DialogType.error,
