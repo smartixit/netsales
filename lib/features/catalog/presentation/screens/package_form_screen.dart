@@ -35,8 +35,8 @@ class PackageFormScreen extends GetView<PackageFormController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _PackageFormIntroduction(isEditing: isEditing),
-                  SizedBox(height: AppSpacing.lg),
+                  // _PackageFormIntroduction(isEditing: isEditing),
+                  // SizedBox(height: AppSpacing.lg),
                   if (!isWideLayout) ...[
                     const _CompactPreviewDisclosure(),
                     SizedBox(height: AppSpacing.lg),

@@ -43,16 +43,16 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         content: NetworkDirectoryScreen(embedded: true),
       ),
       const WorkspaceNavItem(
-        label: 'نقاط البيع',
-        icon: Icons.storefront_outlined,
-        activeIcon: Icons.storefront_rounded,
-        content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
-      ),
-      const WorkspaceNavItem(
         label: 'البروفايل',
         icon: Icons.account_circle_outlined,
         activeIcon: Icons.account_circle_rounded,
         content: ProfileScreen(embedded: true),
+      ),
+      const WorkspaceNavItem(
+        label: 'نقاط البيع',
+        icon: Icons.storefront_outlined,
+        activeIcon: Icons.storefront_rounded,
+        content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
       ),
       const WorkspaceNavItem(
         label: 'فواتير المبيعات',

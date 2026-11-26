@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -6,11 +8,16 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_seetings_tile.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_settings_group.dart';
+import 'package:netsales/widgets/badges/custom_chip.dart';
+import 'package:netsales/widgets/containers/custom_section_container.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/pickers/custom_image_picker.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// مركز الحساب والسيادة الرقمية (Account & Identity Centre)
 /// مكوّن عرض نقي خاضع بالكامل لعقد الخادم ومطابق للتصميم التنفيذي المعتمد
@@ -33,6 +40,8 @@ class ProfileScreen extends GetView<ProfileController> {
     final colors = context.colors;
 
     final content = CustomRefreshablePage.slivers(
+      padding: EdgeInsets.zero,
+      physics: NeverScrollableScrollPhysics(),
       embedded: embedded,
       maxContentWidth: 680,
       onRefresh: controller.loadProfile,
@@ -41,19 +50,19 @@ class ProfileScreen extends GetView<ProfileController> {
         Obx(() {
           final profile = controller.profile.value;
 
-          if (controller.isLoading.value && profile == null) {
-            return const SliverToBoxAdapter(
-              child: CustomStateView.loading(
-                presentation: CustomStatePresentation.skeletonOnly,
-                skeleton: CustomStateSkeleton(
-                  layout: CustomStateSkeletonLayout.cards,
-                  itemCount: 3,
-                  cardHeight: 132,
-                  hasLeading: true,
-                ),
-              ),
-            );
-          }
+          // if (controller.isLoading.value && profile == null) {
+          //   return const SliverToBoxAdapter(
+          //     child: CustomStateView.loading(
+          //       presentation: CustomStatePresentation.skeletonOnly,
+          //       skeleton: CustomStateSkeleton(
+          //         layout: CustomStateSkeletonLayout.cards,
+          //         itemCount: 3,
+          //         cardHeight: 132,
+          //         hasLeading: true,
+          //       ),
+          //     ),
+          //   );
+          // }
 
           if (controller.errorMessage.value != null && profile == null) {
             return SliverToBoxAdapter(
@@ -75,25 +84,58 @@ class ProfileScreen extends GetView<ProfileController> {
             );
           }
 
-          return SliverToBoxAdapter(
+          return SliverFillRemaining(
+            hasScrollBody: false,
             child: Container(
-              width: double.infinity,
-              height: double.infinity,
               decoration: BoxDecoration(
                 gradient: AppColors.of(context).executiveHeroGradient,
               ),
               child: Stack(
                 children: [
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.30,
-                    right: -35.r,
+                    top: -20,
+                    left: -40.r,
                     child: IgnorePointer(
                       child: Container(
                         width: 150.r,
                         height: 150.r,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colors.primary.withValues(alpha: 0.05),
+                          color: colors.executiveGoldAccent.withValues(
+                            alpha: 0.05,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.20,
+                    right: -40.r,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 150.r,
+                        height: 150.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.executiveGoldAccent.withValues(
+                            alpha: 0.05,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.16,
+                    left: 80.r,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 80.r,
+                        height: 80.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.executiveGoldAccent.withValues(
+                            alpha: 0.05,
+                          ),
                         ),
                       ),
                     ),
@@ -106,9 +148,9 @@ class ProfileScreen extends GetView<ProfileController> {
                     left: 0,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: colors.background,
+                        color: colors.surfaceContainerLow,
                         borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(AppRadius.lg),
+                          top: Radius.circular(AppRadius.xxxl),
                         ),
                         border: Border(
                           top: BorderSide(color: colors.outlineVariant),
@@ -122,14 +164,86 @@ class ProfileScreen extends GetView<ProfileController> {
                         ],
                       ),
                       child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          AppSpacing.cardPadding,
-                          AppSpacing.lg,
-                          AppSpacing.cardPadding,
-                          AppSpacing.lg,
+                        padding: EdgeInsetsDirectional.only(
+                          top:
+                              AppSpacing.appBarHeight +
+                              AppSpacing.sectionXl +
+                              AppSpacing.huge,
+                          start: AppSpacing.cardPadding,
+                          end: AppSpacing.cardPadding,
+                          bottom:
+                              AppSpacing.appBarHeight + AppSpacing.sectionXl,
                         ),
-                        child: Column(children: [
-                            
+                        physics: BouncingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            ProfileSettingsGroup(
+                              title: 'معلوماتك الشخصية',
+                              children: [
+                                ProfileSettingsTile(
+                                  icon: Icons.edit,
+                                  title: 'تعديل الملف الشخصي',
+                                  subtitle: 'تعديل بيانات الحساب الشخصي',
+                                  trailing: Icon(Icons.chevron_right_rounded),
+                                ),
+                                ProfileSettingsTile(
+                                  icon: Icons.password,
+                                  title: 'تغيير كلمة المرور',
+                                  subtitle: 'تغيير كلمة مرور الحساب',
+                                  trailing: Icon(Icons.chevron_right_rounded),
+                                  onTap: () {
+                                    CustomBottomSheet.actions(
+                                      title: 'تغيير كلمة المرور',
+                                      items: [],
+                                    );
+                                  },
+                                ),
+                                ProfileSettingsTile(
+                                  icon: Icons.lock_outline,
+                                  title: profile.twoFactorEnabled
+                                      ? 'تعطيل التحقق بخطوتين'
+                                      : 'تفعيل التحقق بخطوتين',
+                                  subtitle: 'تأمين الحساب بخطوتين',
+                                  onTap: () {
+                                    log('message');
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            ProfileSettingsGroup(
+                              title: 'معلوماتك الشخصية',
+                              children: [
+                                ProfileSettingsTile(
+                                  icon: Icons.edit,
+                                  title: 'تعديل الملف الشخصي',
+                                  subtitle: 'تعديل بيانات الحساب الشخصي',
+                                  trailing: Icon(Icons.chevron_right_rounded),
+                                ),
+                                ProfileSettingsTile(
+                                  icon: Icons.password,
+                                  title: 'تغيير كلمة المرور',
+                                  subtitle: 'تغيير كلمة مرور الحساب',
+                                  trailing: Icon(Icons.chevron_right_rounded),
+                                  onTap: () {
+                                    CustomBottomSheet.actions(
+                                      title: 'تغيير كلمة المرور',
+                                      items: [],
+                                    );
+                                  },
+                                ),
+                                ProfileSettingsTile(
+                                  icon: Icons.lock_outline,
+                                  title: profile.twoFactorEnabled
+                                      ? 'تعطيل التحقق بخطوتين'
+                                      : 'تفعيل التحقق بخطوتين',
+                                  subtitle: 'تأمين الحساب بخطوتين',
+                                  onTap: () {
+                                    log('message');
+                                  },
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -137,18 +251,17 @@ class ProfileScreen extends GetView<ProfileController> {
                   ),
 
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.15,
+                    top: MediaQuery.of(context).size.height * 0.22,
                     right: 0,
                     left: 0,
                     child: Column(
                       children: [
                         Container(
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: AppColors.of(context).executiveGoldAccent,
-                              width: 2,
+                              width: 6,
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -161,6 +274,7 @@ class ProfileScreen extends GetView<ProfileController> {
                           child: CustomImagePicker.avatar(
                             label: '',
                             hint: '',
+                            size: 130.r,
                             existingImageUrl: profile.avatarUrl,
                             valueListenable: controller.avatar,
                           ),
@@ -168,12 +282,29 @@ class ProfileScreen extends GetView<ProfileController> {
                         AppSpacing.vMd,
                         Text(
                           profile.fullName,
-                          style: AppTypography.bodyMedium.copyWith(
+                          style: AppTypography.bodyLarge.copyWith(
                             fontWeight: FontWeight.w900,
+                            fontSize: 20.sp,
                           ),
                         ),
                         AppSpacing.vSm,
-                        Text(profile.phoneNumber),
+                        CustomChip(
+                          label: profile.phoneNumber,
+                          icon: Icons.phone_android_rounded,
+                          backgroundColor: colors.primary.withValues(
+                            alpha: .10,
+                          ),
+                          foregroundColor: colors.primary,
+                        ),
+                        AppSpacing.vSm,
+
+                        Divider(
+                          color: colors.outlineVariant,
+                          indent: MediaQuery.of(context).size.width * 0.3,
+                          endIndent: MediaQuery.of(context).size.width * 0.3,
+                          thickness: 3,
+                          radius: BorderRadius.circular(AppRadius.full),
+                        ),
                       ],
                     ),
                   ),
