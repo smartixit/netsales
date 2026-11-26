@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,14 +7,14 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/profile/presentation/controllers/profile_controller.dart';
-import 'package:netsales/features/profile/presentation/widgets/profile_seetings_tile.dart';
-import 'package:netsales/features/profile/presentation/widgets/profile_settings_group.dart';
+import 'package:netsales/features/profile/presentation/widgets/profile_body.dart';
 import 'package:netsales/widgets/badges/custom_chip.dart';
+import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/pickers/custom_image_picker.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
+import 'package:netsales/widgets/shapes/custom_circle_shape.dart';
 
 /// مركز الحساب والسيادة الرقمية (Account & Identity Centre)
 /// مكوّن عرض نقي خاضع بالكامل لعقد الخادم ومطابق للتصميم التنفيذي المعتمد
@@ -23,15 +22,6 @@ class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key, this.embedded = false});
 
   final bool embedded;
-
-  // void _openAccountDetailsSheet(BuildContext context, ProfileEntity profile) {
-  //   CustomBottomSheet.show<void>(
-  //     title: 'تفاصيل الحساب والهوية',
-  //     subtitle: 'البيانات المسجلة رسمياً لدى المنصة',
-  //     leadingIcon: Icons.badge_outlined,
-  //     child: ProfileDetailsSection(profile: profile),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -42,25 +32,30 @@ class ProfileScreen extends GetView<ProfileController> {
       physics: NeverScrollableScrollPhysics(),
       embedded: embedded,
       maxContentWidth: 680,
-      onRefresh: controller.loadProfile,
+      onRefresh: () => Future.value(),
       scrollKey: const PageStorageKey<String>('profile-account-centre-scroll'),
       slivers: [
         Obx(() {
           final profile = controller.profile.value;
 
-          // if (controller.isLoading.value && profile == null) {
-          //   return const SliverToBoxAdapter(
-          //     child: CustomStateView.loading(
-          //       presentation: CustomStatePresentation.skeletonOnly,
-          //       skeleton: CustomStateSkeleton(
-          //         layout: CustomStateSkeletonLayout.cards,
-          //         itemCount: 3,
-          //         cardHeight: 132,
-          //         hasLeading: true,
-          //       ),
-          //     ),
-          //   );
-          // }
+          if (controller.isLoading.value && profile == null) {
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: AppSpacing.appBarHeight + AppSpacing.md,
+                ),
+                child: CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.cards,
+                    itemCount: 3,
+                    cardHeight: 132,
+                    hasLeading: true,
+                  ),
+                ),
+              ),
+            );
+          }
 
           if (controller.errorMessage.value != null && profile == null) {
             return SliverToBoxAdapter(
@@ -89,54 +84,18 @@ class ProfileScreen extends GetView<ProfileController> {
                 gradient: AppColors.of(context).executiveHeroGradient,
               ),
               child: Stack(
+                clipBehavior: Clip.antiAliasWithSaveLayer,
                 children: [
-                  Positioned(
-                    top: -20,
-                    left: -40.r,
-                    child: IgnorePointer(
-                      child: Container(
-                        width: 150.r,
-                        height: 150.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.executiveGoldAccent.withValues(
-                            alpha: 0.05,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.20,
+                  CustomCircleShape(left: -40.r, top: -20.r, size: 150.r),
+                  CustomCircleShape(
                     right: -40.r,
-                    child: IgnorePointer(
-                      child: Container(
-                        width: 150.r,
-                        height: 150.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.executiveGoldAccent.withValues(
-                            alpha: 0.05,
-                          ),
-                        ),
-                      ),
-                    ),
+                    top: MediaQuery.of(context).size.height * 0.20,
+                    size: 150.r,
                   ),
-                  Positioned(
+                  CustomCircleShape(
+                    left: MediaQuery.of(context).size.width * 0.10,
                     top: MediaQuery.of(context).size.height * 0.16,
-                    left: 80.r,
-                    child: IgnorePointer(
-                      child: Container(
-                        width: 80.r,
-                        height: 80.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.executiveGoldAccent.withValues(
-                            alpha: 0.05,
-                          ),
-                        ),
-                      ),
-                    ),
+                    size: 150.r,
                   ),
 
                   Positioned(
@@ -145,6 +104,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     right: 0,
                     left: 0,
                     child: Container(
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerLow,
                         borderRadius: BorderRadius.vertical(
@@ -162,10 +122,11 @@ class ProfileScreen extends GetView<ProfileController> {
                         ],
                       ),
                       child: SingleChildScrollView(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
                         padding: EdgeInsetsDirectional.only(
                           top:
                               AppSpacing.appBarHeight +
-                              AppSpacing.sectionXl +
+                              AppSpacing.appBarHeight +
                               AppSpacing.huge,
                           start: AppSpacing.cardPadding,
                           end: AppSpacing.cardPadding,
@@ -173,76 +134,58 @@ class ProfileScreen extends GetView<ProfileController> {
                               AppSpacing.appBarHeight + AppSpacing.sectionXl,
                         ),
                         physics: BouncingScrollPhysics(),
-                        child: Column(
-                          children: [
-                            ProfileSettingsGroup(
-                              title: 'معلوماتك الشخصية',
-                              children: [
-                                ProfileSettingsTile(
-                                  icon: Icons.edit,
-                                  title: 'تعديل الملف الشخصي',
-                                  subtitle: 'تعديل بيانات الحساب الشخصي',
-                                  trailing: Icon(Icons.chevron_right_rounded),
-                                ),
-                                ProfileSettingsTile(
-                                  icon: Icons.password,
-                                  title: 'تغيير كلمة المرور',
-                                  subtitle: 'تغيير كلمة مرور الحساب',
-                                  trailing: Icon(Icons.chevron_right_rounded),
-                                  onTap: () {
-                                    CustomBottomSheet.actions(
-                                      title: 'تغيير كلمة المرور',
-                                      items: [],
-                                    );
-                                  },
-                                ),
-                                ProfileSettingsTile(
-                                  icon: Icons.lock_outline,
-                                  title: profile.twoFactorEnabled
-                                      ? 'تعطيل التحقق بخطوتين'
-                                      : 'تفعيل التحقق بخطوتين',
-                                  subtitle: 'تأمين الحساب بخطوتين',
-                                  onTap: () {
-                                    log('message');
-                                  },
-                                ),
-                              ],
-                            ),
+                        child: ProfileBody(),
+                      ),
+                    ),
+                  ),
 
-                            ProfileSettingsGroup(
-                              title: 'معلوماتك الشخصية',
-                              children: [
-                                ProfileSettingsTile(
-                                  icon: Icons.edit,
-                                  title: 'تعديل الملف الشخصي',
-                                  subtitle: 'تعديل بيانات الحساب الشخصي',
-                                  trailing: Icon(Icons.chevron_right_rounded),
-                                ),
-                                ProfileSettingsTile(
-                                  icon: Icons.password,
-                                  title: 'تغيير كلمة المرور',
-                                  subtitle: 'تغيير كلمة مرور الحساب',
-                                  trailing: Icon(Icons.chevron_right_rounded),
-                                  onTap: () {
-                                    CustomBottomSheet.actions(
-                                      title: 'تغيير كلمة المرور',
-                                      items: [],
-                                    );
-                                  },
-                                ),
-                                ProfileSettingsTile(
-                                  icon: Icons.lock_outline,
-                                  title: profile.twoFactorEnabled
-                                      ? 'تعطيل التحقق بخطوتين'
-                                      : 'تفعيل التحقق بخطوتين',
-                                  subtitle: 'تأمين الحساب بخطوتين',
-                                  onTap: () {
-                                    log('message');
-                                  },
-                                ),
-                              ],
-                            ),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.30,
+                    right: 0,
+                    left: 0,
+                    child: Container(
+                      height: 220.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(AppRadius.xxxl),
+                        ),
+                        border: Border(
+                          top: BorderSide(color: colors.outlineVariant),
+                        ),
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.surfaceContainerLow,
+                            colors.surfaceContainerLow.withValues(alpha: 0.01),
                           ],
+                          stops: [0.80, 20],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.30,
+                    right: 0,
+                    left: 0,
+                    child: Container(
+                      height: 220.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(AppRadius.xxxl),
+                        ),
+                        border: Border(
+                          top: BorderSide(color: colors.outlineVariant),
+                        ),
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.primary.withValues(alpha: 0.18),
+                            colors.surfaceContainerLow.withValues(alpha: 0.01),
+                          ],
+                          stops: [0, 60],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
                       ),
                     ),
