@@ -745,7 +745,7 @@ class _DatePickerHeader extends StatelessWidget {
           if (onClear != null)
             CustomButton.icon(
               icon: Icons.refresh_rounded,
-              tooltip: 'مسح التحديد',
+              tooltip: 'مسح',
               iconSize: 20.sp,
               dimension: 40.r,
               enableFeedback: false,
