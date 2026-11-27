@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
