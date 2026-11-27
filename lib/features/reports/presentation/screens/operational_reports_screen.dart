@@ -98,10 +98,11 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                     selectedIndex: controller.activeReportPane.value,
                     onSegmentChanged: controller.selectReportPane,
                     items: const [
-                      CustomSegmentItem(label: 'الإعدادات', icon: Icons.tune_rounded),
-                      CustomSegmentItem(label: 'الملخص', icon: Icons.insights_rounded),
-                      CustomSegmentItem(label: 'السجلات', icon: Icons.receipt_long_rounded),
+                      CustomSegmentItem(label: 'إعداد', icon: Icons.tune_rounded),
+                      CustomSegmentItem(label: 'ملخص', icon: Icons.insights_rounded),
+                      CustomSegmentItem(label: 'سجلات', icon: Icons.receipt_long_rounded),
                     ],
+                    compact: true,
                   ),
                   AppSpacing.vMd,
                   Expanded(
