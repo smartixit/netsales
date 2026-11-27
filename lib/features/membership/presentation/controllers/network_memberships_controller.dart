@@ -7,6 +7,7 @@ import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
