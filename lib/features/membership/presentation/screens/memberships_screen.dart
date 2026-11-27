@@ -16,6 +16,7 @@ import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 /// واجهة استعراض وإدارة أعضاء مساحة العمل الموحدة (MembershipsScreen)
 ///
@@ -47,6 +48,9 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshMembers,
+      onLoadMore: controller.loadMoreMembers,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('memberships-screen-scroll'),
       slivers: [
         // 1. ترويسة الصفحة وبطاقات المؤشرات والبحث والتصفية
@@ -77,7 +81,7 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   selectedFilter: controller.statusFilter.value,
-                  filterOptions: controller.buildFilterOptions(),
+                  filterOptions: controller.filterOptions,
                   onFilterChanged: controller.setStatusFilter,
                   onClearSearch: controller.searchController.clear,
                 ),
@@ -178,6 +182,17 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
             }, childCount: memberCount == 0 ? 0 : memberCount * 2 - 1),
           );
         }),
+
+        SliverToBoxAdapter(
+          child: Obx(
+            () => CustomCursorLoadMore(
+              hasMore: controller.hasMore,
+              isLoading: controller.isLoadingMore.value,
+              error: controller.loadMoreError.value,
+              onPressed: controller.loadMoreMembers,
+            ),
+          ),
+        ),
       ],
     );
 
