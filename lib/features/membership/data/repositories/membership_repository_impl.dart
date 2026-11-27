@@ -1,3 +1,4 @@
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/membership/data/datasources/membership_remote_data_source.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
@@ -12,9 +13,27 @@ class MembershipRepositoryImpl implements MembershipRepository {
   // ── مساحة عمل الشبكة (Network Workspace) ──
 
   @override
-  Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId) async {
-    final response = await _remoteDataSource.getNetworkMembers(networkId);
-    return response.data ?? [];
+  Future<PaginatedList<WorkspaceMemberEntity>> getNetworkMembers(
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) async {
+    final response = await _remoteDataSource.getNetworkMembers(
+      networkId,
+      search: search,
+      status: status,
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<WorkspaceMemberEntity>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: (response.meta?['per_page'] as num?)?.toInt() ?? perPage,
+      meta: response.meta,
+    );
   }
 
   @override
@@ -99,9 +118,27 @@ class MembershipRepositoryImpl implements MembershipRepository {
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
 
   @override
-  Future<List<WorkspaceMemberEntity>> getPosMembers(int posId) async {
-    final response = await _remoteDataSource.getPosMembers(posId);
-    return response.data ?? [];
+  Future<PaginatedList<WorkspaceMemberEntity>> getPosMembers(
+    int posId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) async {
+    final response = await _remoteDataSource.getPosMembers(
+      posId,
+      search: search,
+      status: status,
+      cursor: cursor,
+      perPage: perPage,
+    );
+    return PaginatedList<WorkspaceMemberEntity>(
+      items: response.data ?? const [],
+      nextCursor: response.nextCursor,
+      prevCursor: response.prevCursor,
+      perPage: (response.meta?['per_page'] as num?)?.toInt() ?? perPage,
+      meta: response.meta,
+    );
   }
 
   @override

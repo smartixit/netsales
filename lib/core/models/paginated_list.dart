@@ -14,11 +14,15 @@ class PaginatedList<T> {
   /// عدد العناصر في الصفحة الواحدة
   final int? perPage;
 
+  /// Additional server metadata (for example, scope-wide membership summaries).
+  final Map<String, dynamic>? meta;
+
   const PaginatedList({
     required this.items,
     this.nextCursor,
     this.prevCursor,
     this.perPage,
+    this.meta,
   });
 
   /// هل تتوفر صفحات أخرى تالية يمكن تحميلها

@@ -1,10 +1,17 @@
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 
 /// واجهة مستودع إدارة أعضاء مساحات العمل الموحد
 abstract interface class MembershipRepository {
   // ── مساحة عمل الشبكة (Network Workspace) ──
-  Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId);
+  Future<PaginatedList<WorkspaceMemberEntity>> getNetworkMembers(
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  });
 
   Future<List<MembershipRoleEntity>> getNetworkAssignableRoles(int networkId);
 
@@ -36,7 +43,13 @@ abstract interface class MembershipRepository {
   });
 
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
-  Future<List<WorkspaceMemberEntity>> getPosMembers(int posId);
+  Future<PaginatedList<WorkspaceMemberEntity>> getPosMembers(
+    int posId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  });
 
   Future<List<MembershipRoleEntity>> getPosAssignableRoles(int posId);
 
