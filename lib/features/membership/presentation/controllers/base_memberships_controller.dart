@@ -155,7 +155,9 @@ abstract class BaseMembershipsController extends GetxController {
       if (revision != _listRevision ||
           tenantId != resolvedTenantId ||
           search != _currentSearchQuery ||
-          status != statusFilter.value) return;
+          status != statusFilter.value) {
+        return;
+      }
       if (members.isEmpty) {
         errorMessage.value = error.toString();
       } else {
