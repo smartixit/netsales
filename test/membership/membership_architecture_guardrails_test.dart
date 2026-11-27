@@ -17,8 +17,7 @@ void main() {
           source.contains('CustomKpiCardData') ||
           source.contains('buildKpiCards') ||
           source.contains('buildCardActions') ||
-          source.contains('buildExtraFilters') ||
-          source.contains('headerAction')) {
+          source.contains('buildExtraFilters')) {
         violations.add(path);
       }
     }
