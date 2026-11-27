@@ -197,14 +197,14 @@ class CommercialDirectoryScreen
                   actions: CommercialPartnerCardActions(
                     link: link,
                     isNetworkView: controller.isNetworkView,
-                    onViewDetails: () => controller.openPartnerDetails(link),
+                    onViewDetails: () => presentation.openPartnerDetails(link),
+                    onMoreActions: () => presentation.showPartnerActions(link),
                     onToggleStatus: controller.canTogglePartnerLink
                         ? () => presentation.togglePartnerStatus(link)
                         : null,
                     onDelete: controller.canDeletePartnerLink
                         ? () => presentation.unlinkPartner(link)
                         : null,
-                  ),
                   ),
                 );
               });
