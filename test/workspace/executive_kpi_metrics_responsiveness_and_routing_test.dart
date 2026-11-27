@@ -234,7 +234,7 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
-            child: const WorkspaceAppBar(
+            child: WorkspaceAppBar(
               title: 'مساحة العمل',
               workspace: AppWorkspace.network,
               onProfileTap: () {},
@@ -253,7 +253,7 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
-            child: const WorkspaceAppBar(
+            child: WorkspaceAppBar(
               title: 'نقطة بيع الأمل',
               workspace: AppWorkspace.pos,
               onProfileTap: () {},
