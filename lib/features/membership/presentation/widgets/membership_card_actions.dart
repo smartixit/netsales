@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_card_network_actions.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_card_pos_actions.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_card_action_bar.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// شريط الإجراءات التفاعلية الموحد لبطاقة العضو (Membership Card Actions)
@@ -64,18 +63,8 @@ class MembershipCardActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isNetworkView) {
-      return MembershipCardNetworkActions(
-        isActive: member.isActive,
-        isOwner: member.isOwner,
-        onDetails: onDetails,
-        onChangeRole: onChangeRole,
-        onToggleStatus: onToggleStatus,
-        onRemove: onRemove,
-        onMoreActions: _showMoreActions,
-      );
-    }
-    return MembershipCardPosActions(
+    return MembershipCardActionBar(
+      isNetworkView: isNetworkView,
       isActive: member.isActive,
       isOwner: member.isOwner,
       onDetails: onDetails,
