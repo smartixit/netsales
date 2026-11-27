@@ -75,6 +75,6 @@ void main() {
     expect(find.text('معلوماتك الشخصية'), findsOneWidget);
     expect(find.text('تعديل الملف الشخصي'), findsOneWidget);
     expect(find.text('تغيير كلمة المرور'), findsOneWidget);
-    expect(find.text('تعطيل التحقق بخطوتين'), findsOneWidget);
+    expect(find.text('التحقق بخطوتين'), findsOneWidget);
   });
 }
