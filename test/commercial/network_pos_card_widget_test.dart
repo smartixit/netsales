@@ -43,7 +43,6 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () {},
             onTap: () {},
             actions: CommercialPartnerCardActions(
               link: link,
@@ -72,7 +71,6 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () => detailsTapped = true,
             onTap: () {},
             actions: CommercialPartnerCardActions(
               link: link,
@@ -100,7 +98,6 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () {},
             onTap: () => cardBodyTapped = true,
             actions: CommercialPartnerCardActions(
               link: link,
