@@ -85,7 +85,7 @@ abstract class BaseMembershipsController extends GetxController {
   void onInit() {
     super.onInit();
     searchController.addListener(_syncSearchQuery);
-    _searchWorker = debounce(searchQuery, (_) => unawaited(loadMembers()), time: const Duration(milliseconds: 350));
+    _startSearchDebounce();
     unawaited(loadInitialData());
   }
 
@@ -112,7 +112,7 @@ abstract class BaseMembershipsController extends GetxController {
       _nextCursor.value = null;
       _resetSummary();
       isLoading.value = false;
-      errorMessage.value = 'لم يتم تحديد \${isNetworkView ? 'شبكة' : 'نقطة بيع'} نشطة لعرض أعضائها.';
+      errorMessage.value = 'لم يتم تحديد ${isNetworkView ? 'شبكة' : 'نقطة بيع'} نشطة لعرض أعضائها.';
       return;
     }
 
@@ -208,11 +208,11 @@ abstract class BaseMembershipsController extends GetxController {
   }
 
   void resetFilters() {
+    _searchWorker?.dispose();
     statusFilter.value = null;
-    searchController.removeListener(_syncSearchQuery);
     searchController.clear();
     searchQuery.value = '';
-    searchController.addListener(_syncSearchQuery);
+    _startSearchDebounce();
     unawaited(loadMembers());
   }
 
@@ -222,7 +222,7 @@ abstract class BaseMembershipsController extends GetxController {
 
   Future<void> addMember({required String phoneNumber, required int roleId, String? status}) async {
     if (!canAddMember) {
-      throw AppException('لا تملك صلاحية إضافة أعضاء إلى \${isNetworkView ? 'الشبكة' : 'نقطة البيع'}.');
+      throw AppException('لا تملك صلاحية إضافة أعضاء إلى ${isNetworkView ? 'الشبكة' : 'نقطة البيع'}.');
     }
     await addMemberToTenant(_requireTenantId(), phoneNumber: phoneNumber, roleId: roleId, status: status);
     await loadMembers();
@@ -249,9 +249,17 @@ abstract class BaseMembershipsController extends GetxController {
   int _requireTenantId() {
     final tenantId = resolvedTenantId;
     if (tenantId == null) {
-      throw AppException('تعذر تحديد \${isNetworkView ? 'الشبكة' : 'نقطة البيع'} النشطة.');
+      throw AppException('تعذر تحديد ${isNetworkView ? 'الشبكة' : 'نقطة البيع'} النشطة.');
     }
     return tenantId;
+  }
+
+  void _startSearchDebounce() {
+    _searchWorker = debounce(
+      searchQuery,
+      (_) => unawaited(loadMembers()),
+      time: const Duration(milliseconds: 350),
+    );
   }
 
   void _syncSearchQuery() => searchQuery.value = searchController.text;
