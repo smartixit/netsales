@@ -124,7 +124,7 @@ class PosCommercialDirectoryController
   bool get hasHeaderAction => canLinkNetwork;
 
   @override
-  void onHeaderAction() => openQrScannerFlow;
+  void onHeaderAction() => openQrScannerFlow();
 
   @override
   void onInit() {
