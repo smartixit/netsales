@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -439,8 +440,14 @@ void main() {
       expect(controller.canDeletePartnerLink, isFalse);
       expect(controller.canRevokeInvitation, isFalse);
 
-      controller.onToggleStatus(controller.links.first);
-      controller.onDeleteLink(controller.links.first);
+      await expectLater(
+        controller.togglePartnerLink(controller.links.first),
+        throwsA(isA<AppException>()),
+      );
+      await expectLater(
+        controller.deletePartnerLink(controller.links.first),
+        throwsA(isA<AppException>()),
+      );
       expect(repo.links, hasLength(2));
 
       PermissionService.instance.setWorkspaceContext(
@@ -535,7 +542,7 @@ void main() {
       await controller.loadInitialData();
       final link = controller.links.first;
 
-      controller.onPartnerCardTap(link);
+      controller.openPosWalletStatement(link);
       await tester.pumpAndSettle();
 
       expect(Get.currentRoute, AppRoutes.posWalletStatement);

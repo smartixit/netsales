@@ -99,20 +99,28 @@ class NetworkMembershipsController extends BaseMembershipsController {
 
   int _listRevision = 0;
 
+  @override
   int get totalMembersCount => _allMembers.length;
+  @override
   int get activeMembersCount => _allMembers.where((m) => m.isActive).length;
+  @override
   int get suspendedMembersCount =>
       _allMembers.where((m) => m.isSuspended).length;
+  @override
   int get invitedMembersCount => _allMembers.where((m) => m.isInvited).length;
 
   bool get canViewMembers =>
       PermissionService.to.can(AppPermissions.networkMembersView);
+  @override
   bool get canAddMember =>
       PermissionService.to.can(AppPermissions.networkMembersCreate);
+  @override
   bool get canChangeMemberRole =>
       PermissionService.to.can(AppPermissions.networkMembersChangeRole);
+  @override
   bool get canChangeMemberStatus =>
       PermissionService.to.can(AppPermissions.networkMembersChangeStatus);
+  @override
   bool get canRemoveMember =>
       PermissionService.to.can(AppPermissions.networkMembersDelete);
 

@@ -132,22 +132,29 @@ class NetworkCommercialDirectoryController
   @override
   bool get isNetworkView => true;
 
+  @override
   int get totalPartnersCount => links.length;
 
+  @override
   int get activePartnersCount => links.where((link) => link.isActive).length;
 
+  @override
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
   bool get canCreateInvitation =>
       PermissionService.to.can(AppPermissions.networkCreateLinkChallenge);
   bool get canRevokeInvitation =>
       PermissionService.to.can(AppPermissions.networkRevokeLinkChallenge);
+  @override
   bool get canTogglePartnerLink =>
       PermissionService.to.can(AppPermissions.networkTogglePosLink);
+  @override
   bool get canDeletePartnerLink =>
       PermissionService.to.can(AppPermissions.networkDeletePosLink);
+  @override
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  @override
   bool get canViewRelationshipLifecycle =>
       PermissionService.to.can(AppPermissions.networkViewPosAgreements) ||
       PermissionService.to.can(AppPermissions.networkViewPosLinkEvents) ||
@@ -420,6 +427,7 @@ class NetworkCommercialDirectoryController
     }
   }
 
+  @override
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
@@ -435,6 +443,7 @@ class NetworkCommercialDirectoryController
   }
 
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
+  @override
   void openPosWalletStatement(NetworkPosLinkEntity link) {
     Get.toNamed<void>(
       AppRoutes.posWalletStatement,

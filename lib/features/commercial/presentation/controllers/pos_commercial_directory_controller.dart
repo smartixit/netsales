@@ -80,10 +80,13 @@ class PosCommercialDirectoryController
   @override
   bool get isNetworkView => false;
 
+  @override
   int get totalPartnersCount => links.length;
 
+  @override
   int get activePartnersCount => links.where((link) => link.isActive).length;
 
+  @override
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
   bool get canPreviewLinkChallenge =>
@@ -92,8 +95,10 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
   bool get canLinkNetwork =>
       canPreviewLinkChallenge && canConfirmLinkChallenge;
+  @override
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  @override
   bool get canViewRelationshipLifecycle =>
       PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
       PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents) ||
@@ -392,6 +397,7 @@ class PosCommercialDirectoryController
     );
   }
 
+  @override
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
