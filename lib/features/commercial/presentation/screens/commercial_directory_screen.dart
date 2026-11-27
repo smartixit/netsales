@@ -76,7 +76,7 @@ class CommercialDirectoryScreen
                 ),
               ),
 
-              const CommercialKpiStrip(),
+              CommercialKpiStrip(controller: controller),
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
