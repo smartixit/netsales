@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
 import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 
 /// بطاقة عضو مساحة العمل بنظام الأكورديون القيادي (Membership Card - Executive Edition)
@@ -81,17 +80,7 @@ class MembershipCard extends StatelessWidget {
           textColor: status.tone.color(context),
         ),
       ],
-      actions:
-          actions ??
-          MembershipCardActions(
-            member: member,
-            onDetails: onDetails,
-            isNetworkView: isNetworkView,
-            onChangeRole: onChangeRole,
-            onToggleStatus: onToggleStatus,
-            onRemove: onRemove,
-            onMoreActions: onMoreActions ?? onDetails,
-          ),
+      actions: actions,
       onTap: onDetails,
       isExpanded: isExpanded,
       onToggleExpand: onToggleExpand,
