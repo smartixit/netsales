@@ -25,6 +25,7 @@ class CommercialPartnerCard extends StatelessWidget {
     this.onToggleExpand,
     this.onToggleStatus,
     this.onDelete,
+    this.onMoreActions,
     this.actions,
   });
 
@@ -36,6 +37,7 @@ class CommercialPartnerCard extends StatelessWidget {
   final VoidCallback? onToggleExpand;
   final VoidCallback? onToggleStatus;
   final VoidCallback? onDelete;
+  final VoidCallback? onMoreActions;
   final Widget? actions;
 
   @override
@@ -106,6 +108,7 @@ class CommercialPartnerCard extends StatelessWidget {
             onViewDetails: onDetails,
             onToggleStatus: onToggleStatus,
             onDelete: onDelete,
+            onMoreActions: onMoreActions ?? onDetails,
           ),
       onTap: onTap ?? onDetails,
       isExpanded: isExpanded,
