@@ -210,6 +210,22 @@ class CommercialDirectoryScreen
                     onViewLifecycle: controller.canViewRelationshipLifecycle
                         ? () => controller.openRelationshipLifecycle(link)
                         : null,
+                    onMoreActions: () => presentation.showPartnerActions(
+                      link: link,
+                      onViewDetails: () => presentation.openPartnerDetails(link),
+                      onToggleStatus: controller.canTogglePartnerLink
+                          ? () => presentation.togglePartnerStatus(link)
+                          : null,
+                      onDelete: controller.canDeletePartnerLink
+                          ? () => presentation.unlinkPartner(link)
+                          : null,
+                      onViewWallet: controller.canViewPartnerWallet
+                          ? () => controller.openPosWalletStatement(link)
+                          : null,
+                      onViewLifecycle: controller.canViewRelationshipLifecycle
+                          ? () => controller.openRelationshipLifecycle(link)
+                          : null,
+                    ),
                   ),
                 );
               });
