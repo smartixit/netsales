@@ -1,15 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
@@ -17,13 +14,9 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
@@ -128,18 +121,10 @@ class PosCommercialDirectoryController
   String get searchHint => 'البحث باسم الشبكة المزودة أو المعرف أو الهاتف...';
 
   @override
-  Widget? get headerAction {
-    if (!canLinkNetwork) return null;
-    return CustomButton.icon(
-      tooltip: 'ربط مزود شبكة',
-      icon: Icons.qr_code_scanner_rounded,
-      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
-      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
-      shape: AppButtonShape.rounded,
-      size: AppButtonSize.small,
-      onPressed: openQrScannerFlow,
-    );
-  }
+  bool get hasHeaderAction => canLinkNetwork;
+
+  @override
+  void onHeaderAction() => openQrScannerFlow;
 
   @override
   void onInit() {
@@ -353,100 +338,43 @@ class PosCommercialDirectoryController
   }
 
   @override
-  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
-    final colors = context.colors;
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      CustomKpiCardData(
-        label: 'الكل',
-        count: totalPartnersCount,
-        icon: Icons.all_inbox_rounded,
-        accentColor: colors.primary,
-        statusKey: null,
-      ),
-      CustomKpiCardData(
-        label: activePres.label,
-        count: activePartnersCount,
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-        accentColor: activePres.tone.color(context),
-        statusKey: '1',
-      ),
-      CustomKpiCardData(
-        label: inactivePres.label,
-        count: inactivePartnersCount,
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-        accentColor: inactivePres.tone.color(context),
-        statusKey: '0',
-      ),
-    ];
-  }
+  RxnInt get selectedScopeId => selectedPosId;
 
   @override
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  ) {
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      const CustomSearchFilterOption<String?>(
-        label: 'جميع المزودين',
-        value: null,
-        icon: Icons.all_inbox_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: activePres.label,
-        value: '1',
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: inactivePres.label,
-        value: '0',
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-      ),
-    ];
-  }
+  String get scopeFilterLabel => 'تصفية بحسب نقطة البيع';
 
   @override
-  Widget? buildExtraFilters(BuildContext context) {
-    if (initialPosId != null) return null;
-    final posList = authorizedPosList;
-    if (posList.length <= 1) return null;
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions =>
+      initialPosId != null || authorizedPosList.length <= 1
+          ? const []
+          : authorizedPosList.map((pos) => CustomSearchFilterOption<int?>(
+                label: pos.posName,
+                value: pos.posId,
+                icon: Icons.storefront_rounded,
+              )).toList(growable: false);
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: CustomDropdown<int>(
-        label: 'تصفية بحسب نقطة البيع',
-        searchEnabled: false,
-        rxValue: selectedPosId,
-        items: posList.map((pos) {
-          return DropdownItem<int>(value: pos.posId, child: Text(pos.posName));
-        }).toList(),
-        onChanged: onPosFilterChanged,
-      ),
+  @override
+  void onScopeFilterChanged(int? id) => onPosFilterChanged(id);
+
+  @override
+  bool get canTogglePartnerLink => false;
+
+  @override
+  bool get canDeletePartnerLink => false;
+
+  @override
+  void onToggleStatus(NetworkPosLinkEntity link) {}
+
+  @override
+  void onDeleteLink(NetworkPosLinkEntity link) {}
+
+  @override
+  void openPosWalletStatement(NetworkPosLinkEntity link) {
+    Get.toNamed<void>(
+      AppRoutes.posWalletStatement,
+      arguments: {'network_id': link.networkId, 'pos_id': link.posId},
     );
   }
-
-  @override
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link) {
-    return CommercialPartnerCardActions(
-      link: link,
-      isNetworkView: false,
-      onViewDetails: () => openPartnerDetails(link),
-      onDelete: null,
-      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
-      onViewWallet: canViewPartnerWallet
-          ? () => Get.toNamed<void>(
-              AppRoutes.posWalletStatement,
-              arguments: {'network_id': link.networkId, 'pos_id': link.posId},
-            )
-          : null,
-    );
-  }
-
-
 
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
