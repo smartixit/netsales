@@ -17,11 +17,7 @@ class MembershipCard extends StatelessWidget {
     this.isNetworkView = false,
     this.isExpanded = false,
     this.onToggleExpand,
-    this.onChangeRole,
-    this.onToggleStatus,
-    this.onRemove,
-    this.onMoreActions,
-    this.actions,
+    required this.actions,
   });
 
   final WorkspaceMemberEntity member;
@@ -29,11 +25,7 @@ class MembershipCard extends StatelessWidget {
   final bool isNetworkView;
   final bool isExpanded;
   final VoidCallback? onToggleExpand;
-  final VoidCallback? onChangeRole;
-  final VoidCallback? onToggleStatus;
-  final VoidCallback? onRemove;
-  final VoidCallback? onMoreActions;
-  final Widget? actions;
+  final Widget actions;
 
   @override
   Widget build(BuildContext context) {
