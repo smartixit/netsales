@@ -118,6 +118,29 @@ class PosCommercialDirectoryController
   IconData get pageIcon => Icons.hub_rounded;
 
   @override
+  List<CustomSearchFilterOption<String?>> buildFilterOptions() {
+    final active = EnumPresentationRegistry.resolveLinkStatus(true);
+    final inactive = EnumPresentationRegistry.resolveLinkStatus(false);
+    return [
+      const CustomSearchFilterOption<String?>(
+        label: 'الكل',
+        value: null,
+        icon: Icons.all_inbox_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: active.label,
+        value: '1',
+        icon: active.icon ?? Icons.check_circle_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: inactive.label,
+        value: '0',
+        icon: inactive.icon ?? Icons.pause_circle_rounded,
+      ),
+    ];
+  }
+
+  @override
   String get searchHint => 'البحث باسم الشبكة المزودة أو المعرف أو الهاتف...';
 
   @override
