@@ -94,9 +94,7 @@ abstract class BaseMembershipsController extends GetxController {
   void toggleAccordion(int memberId);
 
 
-  /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
-  /// بناء خيارات التصفية لشيت البحث الموحد
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-  );
+  /// خيارات تصفية العضويات المعروضة في شريط البحث الموحد.
+  List<CustomSearchFilterOption<String?>> buildFilterOptions();
 
 }
