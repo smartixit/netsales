@@ -5,12 +5,14 @@ import 'package:netsales/features/membership/presentation/controllers/base_membe
 import 'package:netsales/features/membership/presentation/controllers/network_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/controllers/pos_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_kpi_strip.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 
@@ -54,18 +56,18 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                 title: controller.pageTitle,
                 subtitle: controller.pageSubtitle,
                 icon: controller.pageIcon,
-                action: controller.headerAction,
+                action: controller.canAddMember
+                    ? CustomButton.primary(
+                        text: 'إضافة عضو',
+                        icon: Icons.person_add_alt_1_rounded,
+                        shape: AppButtonShape.rounded,
+                        size: AppButtonSize.small,
+                        onPressed: controller.openAddMemberSheet,
+                      )
+                    : null,
               ),
 
-              Obx(
-                () => CustomStatusSummaryStrip(
-                  cards: controller.buildKpiCards(context),
-                  isLoading:
-                      controller.isLoading.value && controller.members.isEmpty,
-                  selectedKey: controller.statusFilter.value,
-                  onSelectKey: controller.setStatusFilter,
-                ),
-              ),
+              const MembershipKpiStrip(),
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
@@ -73,17 +75,12 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   selectedFilter: controller.statusFilter.value,
-                  filterOptions: controller.buildFilterOptions(context),
+                  filterOptions: controller.buildFilterOptions(),
                   onFilterChanged: controller.setStatusFilter,
                   onClearSearch: controller.searchController.clear,
                 ),
               ),
 
-              Obx(
-                () =>
-                    controller.buildExtraFilters(context) ??
-                    const SizedBox.shrink(),
-              ),
               SizedBox(height: AppSpacing.sm),
             ],
           ),
@@ -159,7 +156,20 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   isExpanded: isExpanded,
                   onToggleExpand: () => controller.toggleAccordion(member.id),
                   onDetails: () => controller.openMemberDetails(member),
-                  actions: controller.buildCardActions(context, member),
+                  actions: MembershipCardActions(
+                    member: member,
+                    isNetworkView: controller.isNetworkView,
+                    onDetails: () => controller.openMemberDetails(member),
+                    onChangeRole: controller.canChangeMemberRole && !member.isOwner
+                        ? () => controller.openChangeRoleSheet(member)
+                        : null,
+                    onToggleStatus: controller.canChangeMemberStatus && !member.isOwner
+                        ? () => controller.promptToggleMemberStatus(member)
+                        : null,
+                    onRemove: controller.canRemoveMember && !member.isOwner
+                        ? () => controller.promptRemoveMember(member)
+                        : null,
+                  ),
                 );
               });
             }, childCount: memberCount == 0 ? 0 : memberCount * 2 - 1),
