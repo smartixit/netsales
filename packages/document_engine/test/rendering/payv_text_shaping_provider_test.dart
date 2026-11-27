@@ -90,10 +90,13 @@ void main() {
     final glyphs = visualRuns.expand((run) => run.glyphs);
     expect(glyphs, isNotEmpty);
     expect(line.advance, greaterThan(0));
+
+    // Whitespace glyphs may legitimately have no outline. Validate the
+    // outlines that are present, and ensure shaping produced drawable glyphs.
+    final outlinedGlyphs = glyphs.where((glyph) => glyph.outline != null);
+    expect(outlinedGlyphs, isNotEmpty);
     expect(
-      glyphs.every(
-        (glyph) => glyph.outline.isNotEmpty,
-      ),
+      outlinedGlyphs.every((glyph) => glyph.outline?.isNotEmpty ?? false),
       isTrue,
     );
   });
