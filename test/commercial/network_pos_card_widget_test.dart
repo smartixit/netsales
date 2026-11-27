@@ -45,8 +45,6 @@ void main() {
             isNetworkView: true,
             onDetails: () {},
             onTap: () {},
-            onToggleStatus: () {},
-            onDelete: () {},
             actions: CommercialPartnerCardActions(
               link: link,
               isNetworkView: true,
