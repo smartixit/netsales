@@ -116,7 +116,8 @@ void main() {
     );
 
     controller.onMetricTap('pos');
-    expect(controller.selectedNavIndex.value, 4);
+    expect(controller.selectedNavIndex.value, 2);
+    expect(controller.selectedMobileNavIndex.value, 2);
 
     controller.openWholesaleInvoices();
     expect(controller.selectedNavIndex.value, 5);
