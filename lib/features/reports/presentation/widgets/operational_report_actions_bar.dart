@@ -119,31 +119,7 @@ class OperationalReportActionsBar extends StatelessWidget {
             ),
           ],
         ),
-        Obx(() {
-          if (controller.savedPresets.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          return Padding(
-            padding: EdgeInsets.only(top: AppSpacing.sm),
-            child: SizedBox(
-              height: 44,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: controller.savedPresets.length,
-                separatorBuilder: (_, __) => AppSpacing.hXs,
-                itemBuilder: (context, index) {
-                  final preset = controller.savedPresets[index];
-                  return CustomButton.outline(
-                    text: preset.name,
-                    prefix: Icons.bookmark_outline_rounded,
-                    size: AppButtonSize.small,
-                    onPressed: () => controller.applyPreset(preset),
-                  );
-                },
-              ),
-            ),
-          );
-        }),
+
       ],
     );
   }
