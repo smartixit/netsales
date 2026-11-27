@@ -15,8 +15,6 @@ class CommercialPartnerCardActions extends StatelessWidget {
     required this.onViewDetails,
     this.onToggleStatus,
     this.onDelete,
-    this.onViewWallet,
-    this.onViewLifecycle,
     required this.onMoreActions,
     this.isNetworkView = true,
   });
@@ -25,8 +23,6 @@ class CommercialPartnerCardActions extends StatelessWidget {
   final VoidCallback onViewDetails;
   final VoidCallback? onToggleStatus;
   final VoidCallback? onDelete;
-  final VoidCallback? onViewWallet;
-  final VoidCallback? onViewLifecycle;
   final VoidCallback onMoreActions;
   final bool isNetworkView;
 
