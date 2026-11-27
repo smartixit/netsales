@@ -14,6 +14,83 @@ class CommercialPresentationCoordinator {
 
   final BaseCommercialDirectoryController controller;
 
+  void showPartnerActions({
+    required NetworkPosLinkEntity link,
+    required VoidCallback onViewDetails,
+    VoidCallback? onToggleStatus,
+    VoidCallback? onDelete,
+    VoidCallback? onViewWallet,
+    VoidCallback? onViewLifecycle,
+  }) {
+    final isNetworkView = controller.isNetworkView;
+    final partnerName = isNetworkView
+        ? link.displayPosName
+        : link.displayNetworkName;
+    final actions = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: isNetworkView
+            ? 'عرض ملف نقطة البيع المعتمد'
+            : 'عرض ملف مزود الشبكة المعتمد',
+        icon: isNetworkView ? Icons.storefront_outlined : Icons.hub_outlined,
+        onTap: onViewDetails,
+      ),
+      if (onViewLifecycle != null)
+        CustomBottomSheetActionItem(
+          title: 'الاتفاقيات وسجل أحداث العلاقة',
+          subtitle: 'إصدارات الاتفاقيات والتغييرات التاريخية',
+          icon: Icons.history_edu_rounded,
+          onTap: onViewLifecycle,
+        ),
+      if (isNetworkView) ...[
+        if (onViewWallet != null)
+          CustomBottomSheetActionItem(
+            title: 'دفتر أستاذ المحفظة',
+            subtitle: 'عرض الحركات المالية والعمليات لنقطة البيع',
+            icon: Icons.account_balance_wallet_outlined,
+            onTap: onViewWallet,
+          ),
+        if (onToggleStatus != null)
+          CustomBottomSheetActionItem(
+            title: link.isActive
+                ? 'تجميد الارتباط التجاري'
+                : 'تنشيط الارتباط التجاري',
+            icon: link.isActive
+                ? Icons.pause_circle_outline_rounded
+                : Icons.play_circle_outline_rounded,
+            onTap: onToggleStatus,
+          ),
+        if (onDelete != null)
+          CustomBottomSheetActionItem(
+            title: 'فك الارتباط التجاري',
+            icon: Icons.link_off_rounded,
+            isDestructive: true,
+            onTap: onDelete,
+          ),
+      ] else ...[
+        if (onViewWallet != null)
+          CustomBottomSheetActionItem(
+            title: 'دفتر أستاذ المحفظة',
+            subtitle: 'عرض الرصيد والحركات المالية ضمن هذه العلاقة',
+            icon: Icons.account_balance_wallet_outlined,
+            onTap: onViewWallet,
+          ),
+        if (onDelete != null)
+          CustomBottomSheetActionItem(
+            title: 'فك الارتباط بمزود الشبكة',
+            icon: Icons.link_off_rounded,
+            isDestructive: true,
+            onTap: onDelete,
+          ),
+      ],
+    ];
+
+    CustomBottomSheet.showActions<void>(
+      title: 'إجراءات الشريك: $partnerName',
+      leadingIcon: isNetworkView ? Icons.storefront_rounded : Icons.hub_rounded,
+      items: actions,
+    );
+  }
+
   void openPartnerDetails(NetworkPosLinkEntity link) {
     CustomBottomSheet.show<void>(
       title: controller.isNetworkView ? 'ملف نقطة البيع' : 'ملف مزود الشبكة',
