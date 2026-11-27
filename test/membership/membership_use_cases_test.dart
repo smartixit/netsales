@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -26,12 +27,51 @@ class MockMembershipRepository implements MembershipRepository {
 
   String? lastAction;
   Map<String, dynamic> lastArgs = {};
+  String? networkNextCursor;
+  String? posNextCursor;
+  List<WorkspaceMemberEntity> networkNextPage = [];
+  List<WorkspaceMemberEntity> posNextPage = [];
 
   @override
-  Future<List<WorkspaceMemberEntity>> getNetworkMembers(int networkId) async {
+  Future<PaginatedList<WorkspaceMemberEntity>> getNetworkMembers(
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) async {
     lastAction = 'getNetworkMembers';
-    lastArgs = {'networkId': networkId};
-    return networkMembers;
+    lastArgs = {
+      'networkId': networkId,
+      'search': search,
+      'status': status,
+      'cursor': cursor,
+      'perPage': perPage,
+    };
+    final source = cursor == null ? networkMembers : networkNextPage;
+    final filtered = source.where((member) {
+      final matchesStatus = status == null || member.status.wireValue == status;
+      final query = search?.trim().toLowerCase() ?? '';
+      final matchesSearch = query.isEmpty ||
+          member.displayFullName.toLowerCase().contains(query) ||
+          member.displayPhoneNumber.contains(query) ||
+          member.displayReference.toLowerCase().contains(query) ||
+          member.displayRoleName.toLowerCase().contains(query);
+      return matchesStatus && matchesSearch;
+    }).toList(growable: false);
+    return PaginatedList<WorkspaceMemberEntity>(
+      items: filtered,
+      nextCursor: cursor == null ? networkNextCursor : null,
+      perPage: perPage,
+      meta: {
+        'summary': {
+          'total': networkMembers.length,
+          'active': networkMembers.where((m) => m.isActive).length,
+          'suspended': networkMembers.where((m) => m.isSuspended).length,
+          'invited': networkMembers.where((m) => m.isInvited).length,
+        },
+      },
+    );
   }
 
   @override
@@ -134,10 +174,45 @@ class MockMembershipRepository implements MembershipRepository {
   }
 
   @override
-  Future<List<WorkspaceMemberEntity>> getPosMembers(int posId) async {
+  Future<PaginatedList<WorkspaceMemberEntity>> getPosMembers(
+    int posId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) async {
     lastAction = 'getPosMembers';
-    lastArgs = {'posId': posId};
-    return posMembers;
+    lastArgs = {
+      'posId': posId,
+      'search': search,
+      'status': status,
+      'cursor': cursor,
+      'perPage': perPage,
+    };
+    final source = cursor == null ? posMembers : posNextPage;
+    final filtered = source.where((member) {
+      final matchesStatus = status == null || member.status.wireValue == status;
+      final query = search?.trim().toLowerCase() ?? '';
+      final matchesSearch = query.isEmpty ||
+          member.displayFullName.toLowerCase().contains(query) ||
+          member.displayPhoneNumber.contains(query) ||
+          member.displayReference.toLowerCase().contains(query) ||
+          member.displayRoleName.toLowerCase().contains(query);
+      return matchesStatus && matchesSearch;
+    }).toList(growable: false);
+    return PaginatedList<WorkspaceMemberEntity>(
+      items: filtered,
+      nextCursor: cursor == null ? posNextCursor : null,
+      perPage: perPage,
+      meta: {
+        'summary': {
+          'total': posMembers.length,
+          'active': posMembers.where((m) => m.isActive).length,
+          'suspended': posMembers.where((m) => m.isSuspended).length,
+          'invited': posMembers.where((m) => m.isInvited).length,
+        },
+      },
+    );
   }
 
   @override
@@ -265,7 +340,7 @@ void main() {
       final result = await useCase(5);
 
       expect(result.length, 1);
-      expect(result.first.userId, 1);
+      expect(result.items.first.userId, 1);
       expect(repository.lastAction, 'getNetworkMembers');
       expect(repository.lastArgs['networkId'], 5);
     });
@@ -375,7 +450,7 @@ void main() {
       final result = await useCase(12);
 
       expect(result.length, 1);
-      expect(result.first.userId, 2);
+      expect(result.items.first.userId, 2);
       expect(repository.lastAction, 'getPosMembers');
       expect(repository.lastArgs['posId'], 12);
     });

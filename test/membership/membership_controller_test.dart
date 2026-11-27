@@ -149,37 +149,73 @@ void main() {
   group('NetworkMembershipsController KPI & Filtering', () {
     test('Calculates KPI metrics accurately from members list', () async {
       await controller.loadMembers();
-      // Directly assign for synchronous assertion
-      controller.members.assignAll(repository.networkMembers);
 
       expect(controller.pageTitle, 'إدارة أعضاء الشبكة');
       expect(controller.isNetworkView, isTrue);
       expect(controller.expandedMemberId.value, isNull);
+      expect(controller.totalMembersCount, 4);
+      expect(controller.activeMembersCount, 2);
+      expect(controller.suspendedMembersCount, 1);
+      expect(controller.invitedMembersCount, 1);
     });
 
-    test('Filters members by status filter', () {
-      controller.members.assignAll(repository.networkMembers);
-
-      controller.setStatusFilter('ACTIVE');
-      expect(controller.statusFilter.value, 'ACTIVE');
+    test('Filters members on the server when status changes', () async {
+      await controller.loadMembers();
 
       controller.setStatusFilter('SUSPENDED');
+      await Future<void>.delayed(Duration.zero);
+
       expect(controller.statusFilter.value, 'SUSPENDED');
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.status.wireValue, 'SUSPENDED');
+      expect(repository.lastArgs['status'], 'SUSPENDED');
 
       controller.setStatusFilter(null);
+      await Future<void>.delayed(Duration.zero);
       expect(controller.statusFilter.value, isNull);
+      expect(controller.members, hasLength(4));
     });
 
-    test('Resets all filters', () {
-      controller.members.assignAll(repository.networkMembers);
-
+    test('Resets all server-side filters', () async {
+      await controller.loadMembers();
       controller.setStatusFilter('SUSPENDED');
+      await Future<void>.delayed(Duration.zero);
       controller.searchController.text = 'محمد';
-      expect(controller.statusFilter.value, 'SUSPENDED');
+      await Future<void>.delayed(const Duration(milliseconds: 400));
 
       controller.resetFilters();
+      await Future<void>.delayed(Duration.zero);
       expect(controller.statusFilter.value, isNull);
       expect(controller.searchQuery.value, isEmpty);
+      expect(repository.lastArgs['search'], isNull);
+      expect(repository.lastArgs['status'], isNull);
+      expect(controller.members, hasLength(4));
+    });
+
+    test('Loads subsequent member pages without duplicates', () async {
+      repository.networkNextCursor = 'next-members';
+      repository.networkNextPage = [
+        const WorkspaceMemberEntity(
+          id: 5,
+          tenantId: 5,
+          userId: 5,
+          roleId: 2,
+          statusRaw: 'ACTIVE',
+          statusLabel: 'نشط',
+          isOwner: false,
+        ),
+      ];
+
+      await controller.loadMembers();
+      expect(controller.hasMore, isTrue);
+      expect(controller.members, hasLength(4));
+
+      await controller.loadMoreMembers();
+
+      expect(controller.members, hasLength(5));
+      expect(controller.members.map((member) => member.id).toSet(), hasLength(5));
+      expect(repository.lastArgs['cursor'], 'next-members');
+      expect(controller.hasMore, isFalse);
     });
 
     test('Accordion expansion works exclusively for single member', () {
