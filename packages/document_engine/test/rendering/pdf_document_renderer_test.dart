@@ -7,7 +7,7 @@ import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=';
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=';
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late PayvTextShapingProvider shapingProvider;
