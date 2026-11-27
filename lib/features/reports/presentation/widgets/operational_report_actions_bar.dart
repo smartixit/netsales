@@ -47,14 +47,24 @@ class OperationalReportActionsBar extends StatelessWidget {
     ];
 
     for (final preset in controller.savedPresets) {
-      items.add(
-        CustomBottomSheetActionItem(
-          title: 'تطبيق: ${preset.name}',
-          subtitle: 'استعادة عوامل التصفية وتنسيق التقرير المحفوظ.',
-          icon: Icons.bookmark_outline_rounded,
-          onTap: () => controller.applyPreset(preset),
-        ),
-      );
+      items
+        ..add(
+          CustomBottomSheetActionItem(
+            title: 'تطبيق: ${preset.name}',
+            subtitle: 'استعادة عوامل التصفية وتنسيق التقرير المحفوظ.',
+            icon: Icons.bookmark_outline_rounded,
+            onTap: () => controller.applyPreset(preset),
+          ),
+        )
+        ..add(
+          CustomBottomSheetActionItem(
+            title: 'حذف: ${preset.name}',
+            subtitle: 'حذف هذا الإعداد المحفوظ نهائياً.',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+            onTap: () => controller.deletePreset(preset),
+          ),
+        );
     }
 
     await CustomBottomSheet.showActions<void>(
