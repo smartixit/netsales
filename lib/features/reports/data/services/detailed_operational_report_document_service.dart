@@ -268,8 +268,7 @@ class DetailedOperationalReportDocumentService {
       ],
     );
 
-    final result =
-        await DocumentEnginePdfService.instance.render(
+    final bytes = await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
@@ -301,13 +300,8 @@ class DetailedOperationalReportDocumentService {
           ),
         );
 
-    if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess) {
-      throw StateError('تعذر إنشاء التقرير التفصيلي بصيغة PDF.');
-    }
-
     return FileExportService.instance.saveFile(
-      bytes: result.artifact.bytes,
+      bytes: bytes,
       fileName: 'تقرير_تفصيلي_${type.wireValue}',
       extension: 'pdf',
       folderName: 'Reports',

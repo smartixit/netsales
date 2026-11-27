@@ -46,8 +46,7 @@ class OperationalReportDocumentService {
       generatedAt: generatedAt,
     );
 
-    final result =
-        await DocumentEnginePdfService.instance.render(
+    return DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: _template(type),
           options: DocumentRenderOptions(
@@ -78,11 +77,7 @@ class OperationalReportDocumentService {
           ),
         );
 
-    if (result is DocumentRenderSuccess) return result.artifact.bytes;
-    if (result is DocumentRenderFailure) {
-      throw StateError(result.message);
-    }
-    throw StateError('تعذر إنشاء ملخص التقرير بصيغة PDF.');
+
   }
 
   Future<FileExportResult> exportAndSaveSummary({

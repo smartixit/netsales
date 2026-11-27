@@ -279,8 +279,7 @@ class BillingReportDocumentService {
       isDefault: true,
       layout: DocumentTemplateLayout.executive,
     );
-    final result =
-        await DocumentEnginePdfService.instance.render(
+    final bytes = await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
@@ -315,17 +314,13 @@ class BillingReportDocumentService {
             maxPages: 100,
           ),
         );
-    if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess) {
-      throw StateError('تعذر إنشاء PDF لتقرير الفوترة.');
-    }
     if (!isCurrent()) {
       throw StateError(
         'تغير نطاق التقرير أثناء تجهيز PDF؛ لم يتم حفظ المستند القديم.',
       );
     }
     return FileExportService.instance.saveFile(
-      bytes: result.artifact.bytes,
+      bytes: bytes,
       fileName: 'Billing-$reportType-Summary',
       extension: 'pdf',
       folderName: 'Reports',
