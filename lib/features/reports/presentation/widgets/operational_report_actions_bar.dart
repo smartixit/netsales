@@ -12,6 +12,17 @@ class OperationalReportActionsBar extends StatelessWidget {
 
   final OperationalReportsController controller;
 
+  Future<void> _confirmDeletePreset(SavedReportPreset preset) async {
+    await CustomBottomSheet.showConfirmation<void>(
+      title: 'حذف إعداد التقرير',
+      message: 'سيتم حذف إعداد «${preset.name}» نهائياً. لا يمكن التراجع عن هذه العملية.',
+      leadingIcon: Icons.delete_outline_rounded,
+      confirmLabel: 'حذف الإعداد',
+      isDestructive: true,
+      onConfirm: () => controller.deletePreset(preset),
+    );
+  }
+
   Future<void> _showMoreActions() async {
     final items = <CustomBottomSheetActionItem>[
       CustomBottomSheetActionItem(
@@ -62,7 +73,7 @@ class OperationalReportActionsBar extends StatelessWidget {
             subtitle: 'حذف هذا الإعداد المحفوظ نهائياً.',
             icon: Icons.delete_outline_rounded,
             isDestructive: true,
-            onTap: () => controller.deletePreset(preset),
+            onTap: () => _confirmDeletePreset(preset),
           ),
         );
     }
