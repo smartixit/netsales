@@ -3,6 +3,22 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('commercial widgets do not declare private helper methods', () {
+    final directory = Directory('lib/features/commercial/presentation/widgets');
+    final helper = RegExp(
+      r'^\\s*(?:Future<[^>]+>|Future<void>|void|bool|int|String|Widget|List<[^>]+>|Map<[^>]+>)\\s+_\\w+\\s*\\(',
+      multiLine: true,
+    );
+    final violations = <String>[];
+
+    for (final entity in directory.listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      if (helper.hasMatch(entity.readAsStringSync())) violations.add(entity.path);
+    }
+
+    expect(violations, isEmpty, reason: 'Move reusable behavior out of widgets into a presentation flow or service.');
+  });
+
   test('commercial directory controllers expose data and actions, not widget factories', () {
     final paths = [
       'lib/features/commercial/presentation/controllers/base_commercial_directory_controller.dart',
