@@ -143,6 +143,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   icon: Icons.inventory_2_rounded,
                   onTap: controller.openPackagesCatalog,
                 ),
+                if (controller.canViewMembers)
                 WorkspaceFunctionAccessItem(
                   title: 'فريق العمل',
                   icon: Icons.groups_outlined,
