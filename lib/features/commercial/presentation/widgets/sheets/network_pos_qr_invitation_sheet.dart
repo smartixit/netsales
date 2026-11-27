@@ -241,7 +241,11 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     loading: isExporting,
                     onPressed: isActive && !isExporting && !isRevoking
                         ? () => onSave(
-                            () => _captureShareCard(context),
+                            () => RepaintBoundaryCaptureService.capture(
+                              context: context,
+                              boundaryKey: _shareCardKey,
+                              preloadAsset: 'assets/images/brand_icon.png',
+                            ),
                           )
                         : null,
                   ),
