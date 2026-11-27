@@ -5,7 +5,6 @@ import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
@@ -17,7 +16,6 @@ import 'package:netsales/features/commercial/domain/usecases/preview_network_pos
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
-import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
