@@ -80,6 +80,7 @@ class PosCommercialDirectoryController
 
   String? _nextCursor;
   int _listRevision = 0;
+  int _loadMoreRevision = 0;
 
   @override
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
@@ -157,6 +158,7 @@ class PosCommercialDirectoryController
   @override
   void onClose() {
     _listRevision++;
+    _loadMoreRevision++;
     searchController.dispose();
     super.onClose();
   }
@@ -200,6 +202,7 @@ class PosCommercialDirectoryController
     bool clearOnStart = false,
   }) async {
     final currentRevision = ++_listRevision;
+    _loadMoreRevision++;
     final posId = resolvedPosId;
 
     if (posId == null) {
@@ -260,6 +263,7 @@ class PosCommercialDirectoryController
     // A response from an older workspace/search/filter must never contaminate the
     // currently visible result set.
     final requestRevision = _listRevision;
+    final requestToken = ++_loadMoreRevision;
     final requestSearch = searchQuery.value.trim();
     final requestStatus = statusFilter.value;
     final requestCursor = _nextCursor;
@@ -296,7 +300,6 @@ class PosCommercialDirectoryController
 
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
-      isLoadingMore.value = false;
     } catch (e) {
       if (requestRevision != _listRevision ||
           resolvedPosId != posId ||
@@ -304,8 +307,11 @@ class PosCommercialDirectoryController
           statusFilter.value != requestStatus) {
         return;
       }
-      isLoadingMore.value = false;
       loadMoreError.value = AppException.sanitizeMessage(e.toString());
+    } finally {
+      if (requestToken == _loadMoreRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
