@@ -12,12 +12,11 @@ import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 /// - ترويسة بهوية الشريك وشعاره الرسمي، الهاتف، وشارات الحالة والنوع المعتمدة عبر [EnumPresentationRegistry].
 /// - سكة قياسات ثلاثية محمية بـ FittedBox (الموقع الجغرافي، المسؤول، حالة الارتباط).
 /// - أزرار إجراءات ذكية تتكيف مع مساحة العمل (شبكة التوزيع أو نقطة البيع).
-/// - النقر المباشر على الكرت يوجه تلقائياً إلى دفتر أستاذ محفظة نقطة البيع في سياق مساحة عمل الشبكة.
+/// - يمرر النقر المباشر على الكرت إلى تدفق العرض الذي تحدده شاشة الدليل.
 class CommercialPartnerCard extends StatelessWidget {
   const CommercialPartnerCard({
     super.key,
     required this.link,
-    required this.onDetails,
     required this.onTap,
     this.isNetworkView = true,
     this.isExpanded = false,
@@ -26,7 +25,6 @@ class CommercialPartnerCard extends StatelessWidget {
   });
 
   final NetworkPosLinkEntity link;
-  final VoidCallback onDetails;
   final VoidCallback onTap;
   final bool isNetworkView;
   final bool isExpanded;
