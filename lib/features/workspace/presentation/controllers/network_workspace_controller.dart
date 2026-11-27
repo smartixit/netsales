@@ -159,7 +159,7 @@ class NetworkWorkspaceController extends GetxController {
       case 'requests':
         onNavItemSelected(1);
       case 'pos':
-        onNavItemSelected(2);
+        onNavItemSelected(4);
       case 'packages':
         openPackagesCatalog();
     }
@@ -172,15 +172,17 @@ class NetworkWorkspaceController extends GetxController {
   }
 
   void openProfile() => onNavItemSelected(3);
-  void openWholesaleInvoices() => Get.toNamed<void>(AppRoutes.wholesaleInvoices);
-  void openOperatingExpenses() =>
-      Get.toNamed<void>(AppRoutes.operatingExpenses);
-  void openPlatformBilling() => onNavItemSelected(6);
-  void openBillingReports() => Get.toNamed<void>(AppRoutes.operatingExpenses);
-  void openTeamManagement() =>
-      Get.toNamed<void>(AppRoutes.networkTeamManagement);
+  void openWholesaleInvoices() => onNavItemSelected(5);
+  void openOperatingExpenses() => onNavItemSelected(6);
+  void openPlatformBilling() => onNavItemSelected(7);
+  void openBillingReports() => onNavItemSelected(8);
+
+  void openTeamManagement() {
+    if (canViewMembers) onNavItemSelected(9);
+  }
+
   void openOperationalReports() =>
-      Get.toNamed<void>(AppRoutes.operatingExpenses);
+      onNavItemSelected(canViewMembers ? 10 : 9);
 
   Future<void> loadWorkspace() async {
     final revision = ++_revision;
