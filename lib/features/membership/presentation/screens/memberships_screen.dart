@@ -172,20 +172,6 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                     onRemove: controller.canRemoveMember && !member.isOwner
                         ? () => actions.promptRemoveMember(member)
                         : null,
-                    onMoreActions: () => actions.showMemberActions(
-                      member: member,
-                      isNetworkView: controller.isNetworkView,
-                      onDetails: () => actions.openMemberDetails(member),
-                      onChangeRole: controller.canChangeMemberRole && !member.isOwner
-                          ? () => actions.openChangeRoleSheet(member)
-                          : null,
-                      onToggleStatus: controller.canChangeMemberStatus && !member.isOwner
-                          ? () => actions.promptToggleMemberStatus(member)
-                          : null,
-                      onRemove: controller.canRemoveMember && !member.isOwner
-                          ? () => actions.promptRemoveMember(member)
-                          : null,
-                    ),
                   ),
                 );
               });
