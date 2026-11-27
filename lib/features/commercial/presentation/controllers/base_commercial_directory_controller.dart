@@ -38,7 +38,27 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   int get inactivePartnersCount;
 
   /// تلميح حقل البحث النصي
-  List<CustomSearchFilterOption<String?>> buildFilterOptions();
+  List<CustomSearchFilterOption<String?>> get filterOptions {
+    final active = EnumPresentationRegistry.resolveLinkStatus(true);
+    final inactive = EnumPresentationRegistry.resolveLinkStatus(false);
+    return [
+      const CustomSearchFilterOption<String?>(
+        label: 'الكل',
+        value: null,
+        icon: Icons.all_inbox_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: active.label,
+        value: '1',
+        icon: active.icon ?? Icons.check_circle_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: inactive.label,
+        value: '0',
+        icon: inactive.icon ?? Icons.pause_circle_rounded,
+      ),
+    ];
+  }
 
   String get searchHint;
 
