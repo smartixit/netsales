@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/enums/membership_status.dart';
@@ -31,6 +33,7 @@ class MockMembershipRepository implements MembershipRepository {
   String? posNextCursor;
   List<WorkspaceMemberEntity> networkNextPage = [];
   List<WorkspaceMemberEntity> posNextPage = [];
+  Completer<PaginatedList<WorkspaceMemberEntity>>? networkMembersCompleter;
 
   @override
   Future<PaginatedList<WorkspaceMemberEntity>> getNetworkMembers(
@@ -48,6 +51,9 @@ class MockMembershipRepository implements MembershipRepository {
       'cursor': cursor,
       'perPage': perPage,
     };
+    final pendingResponse = networkMembersCompleter;
+    networkMembersCompleter = null;
+    if (pendingResponse != null) return pendingResponse.future;
     final source = cursor == null ? networkMembers : networkNextPage;
     final filtered = source.where((member) {
       final matchesStatus = status == null || member.status.wireValue == status;
