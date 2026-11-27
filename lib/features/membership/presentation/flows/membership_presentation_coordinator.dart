@@ -16,6 +16,52 @@ class MembershipPresentationCoordinator {
 
   final BaseMembershipsController controller;
 
+  void showMemberActions({
+    required WorkspaceMemberEntity member,
+    required bool isNetworkView,
+    required VoidCallback onDetails,
+    VoidCallback? onChangeRole,
+    VoidCallback? onToggleStatus,
+    VoidCallback? onRemove,
+  }) {
+    final actions = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: 'عرض الملف التعريفي للعضو',
+        icon: Icons.badge_outlined,
+        onTap: onDetails,
+      ),
+      if (!member.isOwner) ...[
+        if (onChangeRole != null)
+          CustomBottomSheetActionItem(
+            title: 'تغيير الدور والمسؤوليات',
+            icon: Icons.manage_accounts_outlined,
+            onTap: onChangeRole,
+          ),
+        if (onToggleStatus != null)
+          CustomBottomSheetActionItem(
+            title: member.isActive ? 'تجميد حساب العضو' : 'تنشيط حساب العضو',
+            icon: member.isActive
+                ? Icons.pause_circle_outline_rounded
+                : Icons.play_circle_outline_rounded,
+            onTap: onToggleStatus,
+          ),
+        if (onRemove != null)
+          CustomBottomSheetActionItem(
+            title: 'إنهاء العضوية وإزالة المستخدم',
+            icon: Icons.person_remove_outlined,
+            isDestructive: true,
+            onTap: onRemove,
+          ),
+      ],
+    ];
+
+    CustomBottomSheet.showActions<void>(
+      title: 'خيارات العضو ${member.displayFullName}',
+      leadingIcon: Icons.account_circle_outlined,
+      items: actions,
+    );
+  }
+
   void openMemberDetails(WorkspaceMemberEntity member) {
     CustomBottomSheet.show<void>(
       title: 'الملف التعريفي للعضو',
