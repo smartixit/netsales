@@ -211,7 +211,7 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
-            child: const WorkspaceAppBar(
+            child: WorkspaceAppBar(
               title: 'شبكة يمن واي فاي',
               workspace: AppWorkspace.network,
               onProfileTap: () {},
