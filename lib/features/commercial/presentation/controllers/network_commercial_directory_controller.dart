@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
