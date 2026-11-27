@@ -166,7 +166,9 @@ void main() {
 
         // Enter search query with no matches
         controller.searchQuery.value = 'كلمة غير موجودة بتاتا';
-        await controller.loadNotifications();
+        // Let the controller's production debounce interval elapse so its
+        // scheduled search completes before the widget test is torn down.
+        await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
 
         expect(find.byType(CustomEmptyState), findsOneWidget);
