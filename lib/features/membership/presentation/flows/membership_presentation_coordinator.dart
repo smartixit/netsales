@@ -217,6 +217,43 @@ class MembershipPresentationCoordinator {
     });
   }
 
+  void showMemberActions(WorkspaceMemberEntity member) {
+    final items = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: 'عرض الملف التعريفي',
+        icon: Icons.person_outline_rounded,
+        onTap: () => openMemberDetails(member),
+      ),
+      if (controller.canChangeMemberRole && !member.isOwner)
+        CustomBottomSheetActionItem(
+          title: 'تغيير الدور الوظيفي',
+          icon: Icons.manage_accounts_outlined,
+          onTap: () => openChangeRoleSheet(member),
+        ),
+      if (controller.canChangeMemberStatus && !member.isOwner)
+        CustomBottomSheetActionItem(
+          title: member.isActive ? 'تجميد العضوية' : 'تنشيط العضوية',
+          icon: member.isActive
+              ? Icons.pause_circle_outline_rounded
+              : Icons.play_circle_outline_rounded,
+          onTap: () => promptToggleMemberStatus(member),
+        ),
+      if (controller.canRemoveMember && !member.isOwner)
+        CustomBottomSheetActionItem(
+          title: 'إزالة العضو',
+          icon: Icons.person_remove_outlined,
+          isDestructive: true,
+          onTap: () => promptRemoveMember(member),
+        ),
+    ];
+
+    CustomBottomSheet.showActions<void>(
+      title: 'إجراءات العضو: ${member.displayFullName}',
+      leadingIcon: Icons.badge_outlined,
+      items: items,
+    );
+  }
+
   void promptToggleMemberStatus(WorkspaceMemberEntity member) {
     if (!controller.canChangeMemberStatus || member.isOwner) return;
     final nextStatus = member.isActive ? 'SUSPENDED' : 'ACTIVE';
