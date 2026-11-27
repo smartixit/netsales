@@ -17,14 +17,21 @@ class OperationalReportChartsSection extends StatelessWidget {
         .toList(growable: false);
     if (slots.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 338,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: slots.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final slot = slots[index];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 440.0;
+        final cardWidth = availableWidth.clamp(0.0, 440.0).toDouble();
+
+        return SizedBox(
+          height: 338,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: slots.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final slot = slots[index];
           final rawPoints = chartValues[slot.id]!;
           final points = rawPoints
               .map((point) {
@@ -61,17 +68,19 @@ class OperationalReportChartsSection extends StatelessWidget {
             ),
           );
 
-          return SizedBox(
-            width: 440,
-            child: ChartCard(
+              return SizedBox(
+                width: cardWidth,
+                child: ChartCard(
               title: slot.label,
-              height: 260,
-              chart: ChartRenderer(definition: definition),
-              series: [series],
-            ),
-          );
-        },
-      ),
+                  height: 260,
+                  chart: ChartRenderer(definition: definition),
+                  series: [series],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

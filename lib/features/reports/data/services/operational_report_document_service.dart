@@ -1,13 +1,10 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 
 import 'dart:typed_data';
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:printing/printing.dart';
@@ -30,24 +27,12 @@ class OperationalReportDocumentService {
     String? scopeLabel,
   }) async {
     final normalizedOrganization = _display(organizationName, 'NetSales');
-    final logoBytes = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(logoUrl);
-    final fontService = DocumentEngineFontService.instance;
-    final brandingFonts = await fontService.loadArabicBrandingFonts();
-    final shapingProvider = await fontService.arabicTextShapingProvider();
-
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: normalizedOrganization,
       tagline: 'التقارير التشغيلية — NetSales',
-      primaryColor: _colorHex(AppColors.lightColors.primary),
-      secondaryColor: _colorHex(AppColors.lightColors.secondary),
-      accentColor: _colorHex(AppColors.lightColors.tertiary),
-      surfaceColor: _colorHex(AppColors.lightColors.surface),
-      textColor: _colorHex(AppColors.lightColors.onSurface),
-      mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logoBytes,
-      fonts: brandingFonts,
+      logoUrl: logoUrl,
     );
+    final logoBytes = branding.logoBytes!;
 
     final pageProfile = _resolvePageProfile(pageProfileId);
 
@@ -61,13 +46,20 @@ class OperationalReportDocumentService {
       generatedAt: generatedAt,
     );
 
-    final result =
-        await PdfDocumentRenderer(textShapingProvider: shapingProvider).render(
+    return DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: _template(type),
           options: DocumentRenderOptions(
             pageProfile: pageProfile,
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: 'التقرير التنفيذي',
+            coverSubtitle: _reportTitle(summary, type),
+            coverMetadata: {
+              'الجهة': normalizedOrganization,
+              if (_hasText(scopeLabel)) 'النطاق': scopeLabel!.trim(),
+              'تاريخ الإصدار': _date(generatedAt),
+            },
             showPageNumbers: true,
             headerText:
                 '$normalizedOrganization · ${_reportTitle(summary, type)}',
@@ -85,11 +77,7 @@ class OperationalReportDocumentService {
           ),
         );
 
-    if (result is DocumentRenderSuccess) return result.artifact.bytes;
-    if (result is DocumentRenderFailure) {
-      throw StateError(result.message);
-    }
-    throw StateError('تعذر إنشاء ملخص التقرير بصيغة PDF.');
+
   }
 
   Future<FileExportResult> exportAndSaveSummary({
@@ -214,27 +202,6 @@ class OperationalReportDocumentService {
       currencyCode = rawCurrencyCode.trim();
     }
 
-    final rows = metrics
-        .map((metric) {
-          final value = metric.isCurrency
-              ? '${metric.value} $currencyCode'
-              : metric.value;
-          return DocumentTableRow(
-            id: 'report-metric-${metric.id}',
-            cells: [
-              DocumentTableCell(
-                value: DocumentTextValue(metric.label),
-                direction: DocumentTextDirection.rightToLeft,
-              ),
-              DocumentTableCell(
-                value: DocumentTextValue(value),
-                direction: DocumentTextDirection.leftToRight,
-              ),
-            ],
-          );
-        })
-        .toList(growable: false);
-
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: 'الجهة',
@@ -308,31 +275,24 @@ class OperationalReportDocumentService {
               level: 2,
               direction: DocumentTextDirection.rightToLeft,
             ),
-            if (rows.isEmpty)
+            if (metrics.isEmpty)
               DocumentCallout(
                 title: 'لا توجد مؤشرات',
                 body: 'لم يرسل الخادم مؤشرات قابلة للعرض لهذا التقرير.',
                 tone: DocumentStatusTone.neutral,
               )
             else
-              DocumentTable(
-                columns: [
-                  DocumentTableColumn(id: 'metric', label: 'المؤشر'),
-                  DocumentTableColumn(
-                    id: 'value',
-                    label: 'القيمة',
-                    alignment: DocumentCellAlignment.decimal,
+              DocumentMetricGrid(
+                columns: 3,
+                metrics: metrics.map((metric) => DocumentMetric(
+                  label: metric.label,
+                  value: DocumentTextValue(
+                    metric.isCurrency
+                        ? '${metric.value} ${currencyCode ?? ''}'
+                        : metric.value,
                   ),
-                ],
-                rows: rows,
-                style: DocumentTableStyle(
-                  stripedRows: true,
-                  compact: true,
-                  showBorders: true,
-                  headerColor: 'E8F3EF',
-                  alternateRowColor: 'F7FAF9',
-                  columnWeights: const [2.4, 1.1],
-                ),
+                  caption: metric.isCurrency ? 'قيمة معتمدة من الخادم' : null,
+                )),
               ),
             DocumentCallout(
               title: 'نطاق هذا المستند',
@@ -362,6 +322,8 @@ class OperationalReportDocumentService {
           TemplateCapability.repeatingHeader,
           TemplateCapability.repeatingFooter,
           TemplateCapability.tables,
+          TemplateCapability.metrics,
+          TemplateCapability.coverPage,
           TemplateCapability.watermark,
           TemplateCapability.portraitPage,
           TemplateCapability.landscapePage,
@@ -377,11 +339,6 @@ class OperationalReportDocumentService {
     final value = summary.reportTitle.trim();
     return value.isEmpty ? type.wireValue : value;
   }
-
-  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
-      .toRadixString(16)
-      .padLeft(6, '0')
-      .toUpperCase();
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;

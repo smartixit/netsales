@@ -85,11 +85,13 @@ void main() {
     );
 
     expect(line.isRightToLeft, isTrue);
-    expect(line.visualRuns, isNotEmpty);
-    expect(line.visualRuns.expand((run) => run.glyphs), isNotEmpty);
+    final visualRuns = line.visualRuns;
+    expect(visualRuns, isNotEmpty);
+    final glyphs = visualRuns.expand((run) => run.glyphs);
+    expect(glyphs, isNotEmpty);
     expect(line.advance, greaterThan(0));
     expect(
-      line.visualRuns.expand((run) => run.glyphs).every(
+      glyphs.every(
         (glyph) => glyph.outline.isNotEmpty,
       ),
       isTrue,

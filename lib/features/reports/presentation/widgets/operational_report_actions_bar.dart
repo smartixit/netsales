@@ -1,127 +1,125 @@
+import 'package:document_engine/document_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
-/// Saved presets and report exports for the selected operational report.
+/// Compact mobile-first report actions; secondary operations are progressively
+/// disclosed in the shared action sheet rather than stacked on the report view.
 class OperationalReportActionsBar extends StatelessWidget {
   const OperationalReportActionsBar({required this.controller, super.key});
 
   final OperationalReportsController controller;
+
+  Future<void> _confirmDeletePreset(SavedReportPreset preset) async {
+    await CustomBottomSheet.showConfirmation<void>(
+      title: 'حذف إعداد التقرير',
+      message: 'سيتم حذف إعداد «${preset.name}» نهائياً. لا يمكن التراجع عن هذه العملية.',
+      leadingIcon: Icons.delete_outline_rounded,
+      confirmLabel: 'حذف الإعداد',
+      isDestructive: true,
+      onConfirm: () => controller.deletePreset(preset),
+    );
+  }
+
+  Future<void> _showMoreActions() async {
+    final items = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: 'تصدير PDF تفصيلي',
+        subtitle: 'إنشاء مستند يتضمن السجلات والأعمدة المختارة.',
+        icon: Icons.picture_as_pdf_outlined,
+        onTap: controller.exportDetailedPdf,
+      ),
+      CustomBottomSheetActionItem(
+        title: 'حفظ ملخص PDF',
+        subtitle: 'حفظ الملخص التنفيذي في مجلد التقارير.',
+        icon: Icons.save_alt_rounded,
+        onTap: controller.exportSummaryPdf,
+      ),
+      CustomBottomSheetActionItem(
+        title: 'مشاركة ملخص PDF',
+        subtitle: 'فتح خيارات مشاركة المستند.',
+        icon: Icons.share_outlined,
+        onTap: controller.shareSummaryPdf,
+      ),
+      CustomBottomSheetActionItem(
+        title: 'طباعة ملخص PDF',
+        subtitle: 'إرسال المستند إلى خدمة الطباعة.',
+        icon: Icons.print_outlined,
+        onTap: controller.printSummaryPdf,
+      ),
+      CustomBottomSheetActionItem(
+        title: 'مسح عوامل التصفية',
+        subtitle: 'إعادة معايير التقرير إلى حالتها الافتراضية.',
+        icon: Icons.filter_alt_off_outlined,
+        onTap: controller.clearFilters,
+      ),
+    ];
+
+    for (final preset in controller.savedPresets) {
+      items
+        ..add(
+          CustomBottomSheetActionItem(
+            title: 'تطبيق: ${preset.name}',
+            subtitle: 'استعادة عوامل التصفية وتنسيق التقرير المحفوظ.',
+            icon: Icons.bookmark_outline_rounded,
+            onTap: () => controller.applyPreset(preset),
+          ),
+        )
+        ..add(
+          CustomBottomSheetActionItem(
+            title: 'حذف: ${preset.name}',
+            subtitle: 'حذف هذا الإعداد المحفوظ نهائياً.',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+            onTap: () => _confirmDeletePreset(preset),
+          ),
+        );
+    }
+
+    await CustomBottomSheet.showActions<void>(
+      title: 'إجراءات التقرير',
+      subtitle: 'اختر الإجراء المطلوب. ستظهر حالة التحميل أثناء العمليات الطويلة.',
+      leadingIcon: Icons.more_horiz_rounded,
+      items: items,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Obx(() {
-          if (controller.savedPresets.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.savedPresets
-                  .map((preset) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomButton.outline(
-                          text: preset.name,
-                          onPressed: () => controller.applyPreset(preset),
-                        ),
-                        CustomButton.icon(
-                          icon: Icons.delete_outline,
-                          tooltip: 'حذف الإعداد',
-                          onPressed: controller.isDeletingPreset.value
-                              ? null
-                              : () => controller.deletePreset(preset),
-                        ),
-                      ],
-                    );
-                  })
-                  .toList(growable: false),
-            ),
-          );
-        }),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              CustomButton.outline(
-                text: 'مسح عوامل التصفية',
-                prefix: Icons.filter_alt_off_outlined,
-                onPressed: controller.clearFilters,
-              ),
-              Obx(
+        Row(
+          children: [
+            Expanded(
+              child: Obx(
                 () => CustomButton.primary(
                   text: 'تصدير CSV',
                   prefix: Icons.table_view_outlined,
-                  onPressed:
-                      controller.canExport &&
+                  size: AppButtonSize.medium,
+                  onPressed: controller.canExport &&
                           !controller.isExportActionRunning.value
                       ? controller.requestExport
                       : null,
                   loading: controller.isExportActionRunning.value,
                 ),
               ),
-              Obx(
-                () => CustomButton.outline(
-                  text: 'تصدير PDF تفصيلي',
-                  prefix: Icons.picture_as_pdf_outlined,
-                  onPressed:
-                      controller.canExport &&
-                          controller.summary.value != null &&
-                          !controller.isPdfActionRunning.value
-                      ? controller.exportDetailedPdf
-                      : null,
-                  loading: controller.isPdfActionRunning.value,
-                ),
+            ),
+            AppSpacing.hSm,
+            Expanded(
+              child: CustomButton.outline(
+                text: 'إجراءات أخرى',
+                prefix: Icons.tune_rounded,
+                size: AppButtonSize.medium,
+                onPressed: _showMoreActions,
               ),
-              Obx(
-                () => CustomButton.outline(
-                  text: 'حفظ ملخص PDF',
-                  prefix: Icons.picture_as_pdf_outlined,
-                  onPressed:
-                      controller.canExport &&
-                          controller.summary.value != null &&
-                          !controller.isPdfActionRunning.value
-                      ? controller.exportSummaryPdf
-                      : null,
-                  loading: controller.isPdfActionRunning.value,
-                ),
-              ),
-              Obx(
-                () => CustomButton.outline(
-                  text: 'مشاركة PDF',
-                  prefix: Icons.share_outlined,
-                  onPressed:
-                      controller.canExport &&
-                          controller.summary.value != null &&
-                          !controller.isPdfActionRunning.value
-                      ? controller.shareSummaryPdf
-                      : null,
-                ),
-              ),
-              Obx(
-                () => CustomButton.outline(
-                  text: 'طباعة PDF',
-                  prefix: Icons.print_outlined,
-                  onPressed:
-                      controller.canExport &&
-                          controller.summary.value != null &&
-                          !controller.isPdfActionRunning.value
-                      ? controller.printSummaryPdf
-                      : null,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
+
       ],
     );
   }

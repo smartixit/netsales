@@ -95,45 +95,46 @@ final class ShapedPdfTextLine extends pw.StatelessWidget {
         final baseline = (boxHeight - fontSize) / 2;
         for (final run in shaped.visualRuns) {
           for (final glyph in run.glyphs) {
-            final originX = penX + glyph.xOffset * scale;
-            final originY = baseline + glyph.yOffset * scale;
-            canvas.setFillColor(color);
+            final outline = glyph.outline;
+            if (outline != null && outline.isNotEmpty) {
+              final originX = penX + glyph.xOffset * scale;
+              final originY = baseline + glyph.yOffset * scale;
+              canvas.setFillColor(color);
 
-            for (final command in glyph.outline.cubicCommands) {
-              final dynamic pathCommand = command;
-              switch (command.runtimeType.toString()) {
-                case 'MoveTo':
-                  canvas.moveTo(
-                    originX + _pathCoordinate(pathCommand.x) * scale,
-                    originY + _pathCoordinate(pathCommand.y) * scale,
-                  );
-                case 'LineTo':
-                  canvas.lineTo(
-                    originX + _pathCoordinate(pathCommand.x) * scale,
-                    originY + _pathCoordinate(pathCommand.y) * scale,
-                  );
-                case 'CubicTo':
-                  canvas.curveTo(
-                    originX + _pathCoordinate(pathCommand.c1x) * scale,
-                    originY + _pathCoordinate(pathCommand.c1y) * scale,
-                    originX + _pathCoordinate(pathCommand.c2x) * scale,
-                    originY + _pathCoordinate(pathCommand.c2y) * scale,
-                    originX + _pathCoordinate(pathCommand.x) * scale,
-                    originY + _pathCoordinate(pathCommand.y) * scale,
-                  );
-                case 'QuadTo':
-                  // cubicCommands converts every quadratic exactly. Keep this
-                  // defensive branch so a future Payv API change fails loudly.
-                  throw StateError(
-                    'Payv cubicCommands returned an unconverted quadratic.',
-                  );
-                case 'ClosePath':
-                  canvas.closePath();
-                default:
-                  throw StateError('Unsupported Payv outline command: $command');
+              for (final command in outline.cubicCommands) {
+                final dynamic pathCommand = command;
+                switch (command.runtimeType.toString()) {
+                  case 'MoveTo':
+                    canvas.moveTo(
+                      originX + _pathCoordinate(pathCommand.x) * scale,
+                      originY + _pathCoordinate(pathCommand.y) * scale,
+                    );
+                  case 'LineTo':
+                    canvas.lineTo(
+                      originX + _pathCoordinate(pathCommand.x) * scale,
+                      originY + _pathCoordinate(pathCommand.y) * scale,
+                    );
+                  case 'CubicTo':
+                    canvas.curveTo(
+                      originX + _pathCoordinate(pathCommand.c1x) * scale,
+                      originY + _pathCoordinate(pathCommand.c1y) * scale,
+                      originX + _pathCoordinate(pathCommand.c2x) * scale,
+                      originY + _pathCoordinate(pathCommand.c2y) * scale,
+                      originX + _pathCoordinate(pathCommand.x) * scale,
+                      originY + _pathCoordinate(pathCommand.y) * scale,
+                    );
+                  case 'QuadTo':
+                    // cubicCommands converts every quadratic exactly. Keep this
+                    // defensive branch so a future Payv API change fails loudly.
+                    throw StateError(
+                      'Payv cubicCommands returned an unconverted quadratic.',
+                    );
+                  case 'ClosePath':
+                    canvas.closePath();
+                  default:
+                    throw StateError('Unsupported Payv outline command: $command');
+                }
               }
-            }
-            if (glyph.outline.isNotEmpty) {
               canvas.fillPath();
             }
             penX += glyph.xAdvance * scale;

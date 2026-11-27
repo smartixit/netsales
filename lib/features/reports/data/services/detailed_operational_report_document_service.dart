@@ -1,10 +1,7 @@
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
@@ -75,21 +72,12 @@ class DetailedOperationalReportDocumentService {
     final organization = organizationName.trim().isEmpty
         ? 'NetSales'
         : organizationName.trim();
-    final logoBytes = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(logoUrl);
-    final fontService = DocumentEngineFontService.instance;
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: organization,
       tagline: 'التقارير التشغيلية — NetSales',
-      primaryColor: _colorHex(AppColors.lightColors.primary),
-      secondaryColor: _colorHex(AppColors.lightColors.secondary),
-      accentColor: _colorHex(AppColors.lightColors.tertiary),
-      surfaceColor: _colorHex(AppColors.lightColors.surface),
-      textColor: _colorHex(AppColors.lightColors.onSurface),
-      mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logoBytes,
-      fonts: await fontService.loadArabicBrandingFonts(),
+      logoUrl: logoUrl,
     );
+    final logoBytes = branding.logoBytes!;
 
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
@@ -155,7 +143,20 @@ class DetailedOperationalReportDocumentService {
           direction: DocumentTextDirection.rightToLeft,
         ),
       );
-      nodes.add(_metricsTable(summary.metrics, currencyCode));
+      nodes.add(
+        DocumentMetricGrid(
+          columns: 3,
+          metrics: summary.metrics.map((metric) => DocumentMetric(
+            label: metric.label,
+            value: DocumentTextValue(
+              metric.isCurrency && currencyCode != null
+                  ? '${metric.value} $currencyCode'
+                  : metric.value,
+            ),
+            caption: metric.isCurrency ? 'قيمة معتمدة من الخادم' : null,
+          )),
+        ),
+      );
     }
     if (presentation.includeCharts) {
       nodes.addAll(_buildCharts(entry, summary));
@@ -232,6 +233,8 @@ class DetailedOperationalReportDocumentService {
         TemplateCapability.repeatingHeader,
         TemplateCapability.repeatingFooter,
         TemplateCapability.tables,
+        TemplateCapability.metrics,
+        TemplateCapability.coverPage,
         TemplateCapability.charts,
         TemplateCapability.watermark,
         TemplateCapability.portraitPage,
@@ -265,15 +268,22 @@ class DetailedOperationalReportDocumentService {
       ],
     );
 
-    final result =
-        await PdfDocumentRenderer(
-          textShapingProvider: await fontService.arabicTextShapingProvider(),
-        ).render(
+    final bytes = await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
             pageProfile: _pageProfile(pageProfileId),
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: 'التقرير التشغيلي التفصيلي',
+            coverSubtitle: entry.label,
+            coverMetadata: {
+              'الجهة': organization,
+              if (scopeLabel != null && scopeLabel.trim().isNotEmpty)
+                'النطاق': scopeLabel.trim(),
+              'عدد السجلات': records.length.toString(),
+              'تاريخ الإصدار': _date(generatedAt),
+            },
             showPageNumbers: true,
             headerText: '$organization · ${entry.label}',
             footerText:
@@ -290,64 +300,14 @@ class DetailedOperationalReportDocumentService {
           ),
         );
 
-    if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess) {
-      throw StateError('تعذر إنشاء التقرير التفصيلي بصيغة PDF.');
-    }
-
     return FileExportService.instance.saveFile(
-      bytes: result.artifact.bytes,
+      bytes: bytes,
       fileName: 'تقرير_تفصيلي_${type.wireValue}',
       extension: 'pdf',
       folderName: 'Reports',
       namingStrategy: const FileNamingStrategy(appPrefix: 'NetSales_RPT'),
       autoOpen: true,
       showFeedback: false,
-    );
-  }
-
-  DocumentTable _metricsTable(
-    List<OperationalReportMetric> metrics,
-    String? currencyCode,
-  ) {
-    final rows = metrics
-        .map((metric) {
-          final value = metric.isCurrency && currencyCode != null
-              ? '${metric.value} $currencyCode'
-              : metric.value;
-          return DocumentTableRow(
-            id: 'metric-${metric.id}',
-            cells: [
-              DocumentTableCell(
-                value: DocumentTextValue(metric.label),
-                direction: DocumentTextDirection.rightToLeft,
-              ),
-              DocumentTableCell(
-                value: DocumentTextValue(value),
-                direction: DocumentTextDirection.leftToRight,
-              ),
-            ],
-          );
-        })
-        .toList(growable: false);
-    return DocumentTable(
-      columns: [
-        DocumentTableColumn(id: 'metric', label: 'المؤشر'),
-        DocumentTableColumn(
-          id: 'value',
-          label: 'القيمة',
-          alignment: DocumentCellAlignment.decimal,
-        ),
-      ],
-      rows: rows,
-      style: DocumentTableStyle(
-        stripedRows: true,
-        compact: true,
-        showBorders: true,
-        headerColor: 'E8F3EF',
-        alternateRowColor: 'F7FAF9',
-        columnWeights: const [2.4, 1.1],
-      ),
     );
   }
 
@@ -592,8 +552,4 @@ class DetailedOperationalReportDocumentService {
   String _date(DateTime value) =>
       value.toIso8601String().replaceFirst('T', ' ').substring(0, 19);
 
-  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
-      .toRadixString(16)
-      .padLeft(6, '0')
-      .toUpperCase();
 }

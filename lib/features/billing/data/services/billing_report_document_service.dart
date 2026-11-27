@@ -1,10 +1,7 @@
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 
 /// Branded Arabic executive PDF summaries for Billing reports.
 /// Financial totals are consumed from the API response and never recalculated here.
@@ -18,6 +15,8 @@ class BillingReportDocumentService {
     required String reportLabel,
     required Map<String, dynamic> summary,
     required bool includeMetrics,
+    required bool includeCharts,
+    required List<Map<String, dynamic>> charts,
     required List<Map<String, dynamic>> rows,
     required List<Map<String, dynamic>> columns,
     required String localeTag,
@@ -29,23 +28,13 @@ class BillingReportDocumentService {
   }) async {
     final generatedAt = DateTime.now();
     final isArabic = localeTag.toLowerCase().startsWith('ar');
-    final logo = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(null);
-    final fonts = DocumentEngineFontService.instance;
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: 'NetSales',
       tagline: isArabic
           ? 'تقارير الاشتراكات والفوترة'
           : 'Subscription and Billing Reports',
-      primaryColor: _hex(AppColors.lightColors.primary),
-      secondaryColor: _hex(AppColors.lightColors.secondary),
-      accentColor: _hex(AppColors.lightColors.tertiary),
-      surfaceColor: _hex(AppColors.lightColors.surface),
-      textColor: _hex(AppColors.lightColors.onSurface),
-      mutedTextColor: _hex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logo,
-      fonts: await fonts.loadArabicBrandingFonts(),
     );
+    final logo = branding.logoBytes!;
     if (rows.length > 1500) {
       throw StateError(
         'يتجاوز التقرير الحد الآمن لملف PDF؛ استخدم تصدير CSV الكامل.',
@@ -108,6 +97,22 @@ class BillingReportDocumentService {
         ),
       );
     }
+    final statusInfo = status != null && status.isNotEmpty
+        ? DocumentInfoItem(
+            label: isArabic ? 'الحالة' : 'Status',
+            value: DocumentTextValue(status),
+            direction: DocumentTextDirection.leftToRight,
+          )
+        : null;
+    final searchInfo = search != null && search.isNotEmpty
+        ? DocumentInfoItem(
+            label: isArabic ? 'بحث' : 'Search',
+            value: DocumentTextValue(search),
+            direction: isArabic
+                ? DocumentTextDirection.rightToLeft
+                : DocumentTextDirection.leftToRight,
+          )
+        : null;
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: isArabic ? 'التقرير' : 'Report',
@@ -142,20 +147,8 @@ class BillingReportDocumentService {
           value: DocumentTextValue(toDate),
           direction: DocumentTextDirection.leftToRight,
         ),
-      if (status != null && status.isNotEmpty)
-        DocumentInfoItem(
-          label: isArabic ? 'الحالة' : 'Status',
-          value: DocumentTextValue(status),
-          direction: DocumentTextDirection.leftToRight,
-        ),
-      if (search != null && search.isNotEmpty)
-        DocumentInfoItem(
-          label: isArabic ? 'بحث' : 'Search',
-          value: DocumentTextValue(search),
-          direction: isArabic
-              ? DocumentTextDirection.rightToLeft
-              : DocumentTextDirection.leftToRight,
-        ),
+      ?statusInfo,
+      ?searchInfo,
     ];
     final snapshot = DocumentSnapshot(
       metadata: DocumentMetadata(
@@ -206,23 +199,9 @@ class BillingReportDocumentService {
                     ? DocumentTextDirection.rightToLeft
                     : DocumentTextDirection.leftToRight,
               ),
-              DocumentTable(
-                columns: [
-                  DocumentTableColumn(
-                    id: 'metric',
-                    label: isArabic ? 'المؤشر' : 'Metric',
-                    alignment: DocumentCellAlignment.leading,
-                  ),
-                  DocumentTableColumn(
-                    id: 'value',
-                    label: isArabic ? 'القيمة' : 'Value',
-                    alignment: DocumentCellAlignment.trailing,
-                  ),
-                ],
-                rows: metricRows,
-                style: DocumentTableStyle(stripedRows: true, compact: true),
-              ),
+              ..._metricGrids(metricRows),
             ],
+            if (includeCharts) ..._buildCharts(charts, isArabic),
             if (rows.isNotEmpty) ...[
               DocumentHeading(
                 text: isArabic ? 'تفاصيل السجلات' : 'Detailed records',
@@ -304,10 +283,7 @@ class BillingReportDocumentService {
       isDefault: true,
       layout: DocumentTemplateLayout.executive,
     );
-    final result =
-        await PdfDocumentRenderer(
-          textShapingProvider: await fonts.arabicTextShapingProvider(),
-        ).render(
+    final bytes = await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
@@ -318,6 +294,15 @@ class BillingReportDocumentService {
               marginLeft: 36,
             ),
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: isArabic ? 'تقرير الفوترة التنفيذي' : 'Executive Billing Report',
+            coverSubtitle: reportLabel,
+            coverMetadata: {
+              (isArabic ? 'الجهة' : 'Organization'): 'NetSales',
+              (isArabic ? 'تاريخ الإصدار' : 'Generated at'): _date(generatedAt),
+              if (fromDate != null) (isArabic ? 'من تاريخ' : 'From'): fromDate,
+              if (toDate != null) (isArabic ? 'إلى تاريخ' : 'To'): toDate,
+            },
             headerText: 'NetSales · $reportLabel',
             footerText: isArabic
                 ? 'تقرير فوترة — بيانات معتمدة من الخادم'
@@ -333,17 +318,13 @@ class BillingReportDocumentService {
             maxPages: 100,
           ),
         );
-    if (result is DocumentRenderFailure) throw StateError(result.message);
-    if (result is! DocumentRenderSuccess) {
-      throw StateError('تعذر إنشاء PDF لتقرير الفوترة.');
-    }
     if (!isCurrent()) {
       throw StateError(
         'تغير نطاق التقرير أثناء تجهيز PDF؛ لم يتم حفظ المستند القديم.',
       );
     }
     return FileExportService.instance.saveFile(
-      bytes: result.artifact.bytes,
+      bytes: bytes,
       fileName: 'Billing-$reportType-Summary',
       extension: 'pdf',
       folderName: 'Reports',
@@ -351,6 +332,163 @@ class BillingReportDocumentService {
       autoOpen: true,
       showFeedback: false,
     );
+  }
+
+  List<DocumentNode> _buildCharts(
+    List<Map<String, dynamic>> charts,
+    bool isArabic,
+  ) {
+    final nodes = <DocumentNode>[];
+    var omitted = 0;
+
+    if (charts.length > 8) {
+      omitted += charts.length - 8;
+    }
+
+    for (final chart in charts.take(8)) {
+      final id = chart['id']?.toString().trim() ?? '';
+      final title = chart['title']?.toString().trim() ?? '';
+      final rawData = chart['data'];
+      final data = rawData is List
+          ? rawData.whereType<Map<String, dynamic>>().toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      final rawType = chart['type']?.toString().toLowerCase();
+      final type = switch (rawType) {
+        'line' => DocumentChartType.line,
+        'pie' => DocumentChartType.pie,
+        'donut' => DocumentChartType.donut,
+        _ => DocumentChartType.bar,
+      };
+      final maxPoints = type == DocumentChartType.pie ||
+              type == DocumentChartType.donut
+          ? 12
+          : 24;
+
+      final rawSeries = chart['series'];
+      final seriesDefinitions = rawSeries is List
+          ? rawSeries.whereType<Map<String, dynamic>>().toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      final definitions = seriesDefinitions.isEmpty &&
+              (type == DocumentChartType.pie || type == DocumentChartType.donut)
+          ? const <Map<String, dynamic>>[
+              {'key': 'value', 'label': 'القيمة'},
+            ]
+          : seriesDefinitions;
+
+      if (id.isEmpty ||
+          title.isEmpty ||
+          data.isEmpty ||
+          data.length > maxPoints ||
+          definitions.isEmpty ||
+          definitions.length > 4) {
+        omitted++;
+        continue;
+      }
+
+      final renderedSeries = <DocumentChartSeries>[];
+      var invalidSeries = false;
+      for (final definition in definitions) {
+        final key = definition['key']?.toString() ?? '';
+        final label = definition['label']?.toString().trim() ?? '';
+        if (key.isEmpty || label.isEmpty) {
+          invalidSeries = true;
+          break;
+        }
+
+        final points = <DocumentChartPoint>[];
+        for (final item in data) {
+          final rawValue = item[key];
+          final value = rawValue is num
+              ? rawValue.toDouble()
+              : double.tryParse(rawValue?.toString() ?? '');
+          final pointLabel = item['label']?.toString().trim() ?? '';
+          if (value == null || !value.isFinite || pointLabel.isEmpty) {
+            continue;
+          }
+          points.add(
+            DocumentChartPoint(
+              label: pointLabel,
+              value: value,
+              displayValue: rawValue.toString(),
+            ),
+          );
+        }
+
+        if (points.isEmpty ||
+            ((type == DocumentChartType.pie ||
+                    type == DocumentChartType.donut) &&
+                (points.any((point) => point.value < 0) ||
+                    points.every((point) => point.value == 0)))) {
+          invalidSeries = true;
+          break;
+        }
+
+        renderedSeries.add(
+          DocumentChartSeries(
+            id: '$id-$key',
+            label: label,
+            points: points,
+          ),
+        );
+      }
+
+      if (invalidSeries || renderedSeries.isEmpty) {
+        omitted++;
+        continue;
+      }
+
+      nodes.add(
+        DocumentChart(
+          title: title,
+          type: type,
+          series: renderedSeries,
+        ),
+      );
+    }
+
+    if (nodes.isNotEmpty) {
+      nodes.insert(
+        0,
+        DocumentHeading(
+          text: isArabic ? 'الرسوم البيانية' : 'Charts',
+          level: 2,
+          direction: isArabic
+              ? DocumentTextDirection.rightToLeft
+              : DocumentTextDirection.leftToRight,
+        ),
+      );
+    }
+
+    if (omitted > 0) {
+      nodes.add(
+        DocumentCallout(
+          title: isArabic ? 'بعض الرسوم لم تُدرج' : 'Some charts were omitted',
+          body: isArabic
+              ? 'تجاوزت بعض الرسوم حدود النقاط أو احتوت قيماً لا يدعمها نوع الرسم. بقيت البيانات التفصيلية دون حذف.'
+              : 'Some charts exceeded rendering limits or contained unsupported values. Detail rows were preserved.',
+          tone: DocumentStatusTone.warning,
+        ),
+      );
+    }
+
+    return nodes;
+  }
+
+  List<DocumentNode> _metricGrids(List<DocumentTableRow> rows) {
+    const metricsPerGrid = 12;
+    return [
+      for (var start = 0; start < rows.length; start += metricsPerGrid)
+        DocumentMetricGrid(
+          columns: 3,
+          metrics: rows
+              .skip(start)
+              .take(metricsPerGrid)
+              .map((row) => DocumentMetric(
+                    label: (row.cells[0].value as DocumentTextValue).value,
+                    value: row.cells[1].value,
+                  )),
+        ),
+    ];
   }
 
   String _label(String key, String localeTag) {
@@ -570,6 +708,4 @@ class BillingReportDocumentService {
             : DocumentTextDirection.leftToRight);
   String _date(DateTime value) =>
       '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
-  String _hex(Color color) =>
-      color.toARGB32().toRadixString(16).substring(2).toUpperCase();
 }

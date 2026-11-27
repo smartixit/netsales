@@ -196,7 +196,9 @@ final class PayvTextShapingProvider {
           }
 
           final outline = face.font.raw.outline(info.glyphId);
-          if (outline == null) {
+          if (outline == null &&
+              !_isDefaultIgnorable(info.codepoint) &&
+              String.fromCharCode(info.codepoint).trim().isNotEmpty) {
             throw const UnsupportedDocumentFontException(
               'Only TrueType glyf outlines are supported by the selected '
               'Payv renderer integration. CFF/CFF2 fonts are not accepted.',
@@ -369,7 +371,7 @@ final class ShapedDocumentGlyph {
   final int xOffset;
   final int yOffset;
 
-  final payv.GlyphPath outline;
+  final payv.GlyphPath? outline;
 }
 
 /// A visually ordered run that has one bidi direction and OpenType script.

@@ -1,6 +1,7 @@
 import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/presentation/controllers/operational_reports_controller.dart';
 import 'package:netsales/features/reports/presentation/widgets/operational_report_preset_dialog.dart';
@@ -111,9 +112,7 @@ class OperationalReportStudioWorkspace extends StatelessWidget {
             ),
         onSavePreset: () =>
             OperationalReportPresetDialog.show(onSave: controller.savePreset),
-        onPreview: controller.summary.value == null
-            ? null
-            : controller.exportDetailedPdf,
+        onPreview: controller.showReportSummary,
         actionBuilder:
             (
               context, {
@@ -134,6 +133,10 @@ class OperationalReportStudioWorkspace extends StatelessWidget {
               ),
         isBusy:
             controller.isLoading.value || controller.isPdfActionRunning.value,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.md,
+        ),
       ),
     );
   }

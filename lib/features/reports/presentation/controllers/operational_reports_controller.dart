@@ -19,6 +19,7 @@ import 'package:netsales/features/reports/domain/entities/operational_report_rec
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/usecases/operational_report_use_cases.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class OperationalReportsController extends GetxController {
@@ -67,6 +68,7 @@ class OperationalReportsController extends GetxController {
   final isDeletingPreset = false.obs;
   int _presetRevision = 0;
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
+  final activeReportPane = 0.obs;
   final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
   final selectedPosId = RxnInt();
@@ -93,6 +95,8 @@ class OperationalReportsController extends GetxController {
   int _scopeRevision = 0;
   int _exportActionRevision = 0;
   int _documentActionRevision = 0;
+  int _loadingOverlayOperations = 0;
+  bool _ownsLoadingOverlay = false;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -262,6 +266,60 @@ class OperationalReportsController extends GetxController {
         '${local.day.toString().padLeft(2, '0')}';
   }
 
+  void selectReportPane(int index) {
+    if (index == 0) {
+      activeReportPane.value = 0;
+      return;
+    }
+    if (index == 1) {
+      unawaited(showReportSummary());
+      return;
+    }
+    if (index == 2) {
+      unawaited(_showReportRecords());
+    }
+  }
+
+  Future<void> showReportSummary() async {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+
+    if (criteria.value.validateAgainst(definition).isNotEmpty) {
+      activeReportPane.value = 0;
+      CustomSnackbar.show(
+        title: 'معايير التقرير غير مكتملة',
+        message: 'أكمل الحقول المطلوبة وصحح القيم قبل عرض النتائج.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    activeReportPane.value = 1;
+    if (summary.value == null && !isLoading.value) {
+      await loadReport(refresh: true);
+    }
+  }
+
+  Future<void> _showReportRecords() async {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+
+    if (criteria.value.validateAgainst(definition).isNotEmpty) {
+      activeReportPane.value = 0;
+      CustomSnackbar.show(
+        title: 'معايير التقرير غير مكتملة',
+        message: 'أكمل الحقول المطلوبة وصحح القيم قبل عرض السجلات.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    activeReportPane.value = 2;
+    if (summary.value == null && !isLoading.value) {
+      await loadReport(refresh: true);
+    }
+  }
+
   Future<bool> _loadReportCatalog({required int scopeRevision}) async {
     final networkId = _networkId;
     if (networkId == null) {
@@ -351,6 +409,7 @@ class OperationalReportsController extends GetxController {
     final scopeRevision = ++_scopeRevision;
     ++_presetRevision;
     _scopeConfigured = true;
+    activeReportPane.value = 0;
     _networkId = networkId;
     _workspacePosId = posId;
     _isNetworkWorkspace = isNetworkWorkspace;
@@ -446,6 +505,7 @@ class OperationalReportsController extends GetxController {
 
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
+    activeReportPane.value = 0;
     selectedType.value = type;
     _invalidateExportActions();
     _criteriaDebounce?.cancel();
@@ -513,6 +573,24 @@ class OperationalReportsController extends GetxController {
     }
   }
 
+  Future<void> _beginActionLoading(String message) async {
+    _loadingOverlayOperations++;
+    if (_loadingOverlayOperations == 1 &&
+        !CustomAnimationOverlay.isShowing) {
+      _ownsLoadingOverlay = true;
+      await CustomAnimationOverlay.showLoading(message: message);
+    }
+  }
+
+  Future<void> _endActionLoading() async {
+    if (_loadingOverlayOperations == 0) return;
+    _loadingOverlayOperations--;
+    if (_loadingOverlayOperations == 0 && _ownsLoadingOverlay) {
+      _ownsLoadingOverlay = false;
+      await CustomAnimationOverlay.hide();
+    }
+  }
+
   Future<void> savePreset(String name) async {
     final type = selectedType.value;
     final networkId = _networkId;
@@ -538,6 +616,7 @@ class OperationalReportsController extends GetxController {
 
     isSavingPreset.value = true;
     try {
+      await _beginActionLoading('جارٍ حفظ إعداد التقرير...');
       final existing = savedPresets.firstWhereOrNull(
         (item) => item.name.toLowerCase() == normalizedName.toLowerCase(),
       );
@@ -585,10 +664,13 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isSavingPreset.value = false;
       }
+    
+      await _endActionLoading();
     }
   }
 
   void applyPreset(SavedReportPreset preset) {
+    activeReportPane.value = 0;
     final definition = selectedReportEntry?.definition;
     if (definition == null) return;
     if (preset.assessAgainst(definition).requiresReview) {
@@ -620,6 +702,7 @@ class OperationalReportsController extends GetxController {
 
     isDeletingPreset.value = true;
     try {
+      await _beginActionLoading('جارٍ حذف الإعداد المحفوظ...');
       await deletePresetUseCase(
         presetId: preset.id,
         type: type,
@@ -644,26 +727,33 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isDeletingPreset.value = false;
       }
+    
+      await _endActionLoading();
     }
   }
 
   Future<void> clearFilters() async {
-    _invalidateExportActions();
-    _criteriaDebounce?.cancel();
-    criteria.value = ReportCriteria();
-    for (final controller in _criteriaTextControllers.values) {
-      controller.clear();
+    await _beginActionLoading('جارٍ تحديث التقرير بعد مسح عوامل التصفية...');
+    try {
+      _invalidateExportActions();
+      _criteriaDebounce?.cancel();
+      criteria.value = ReportCriteria();
+      for (final controller in _criteriaTextControllers.values) {
+        controller.clear();
+      }
+      for (final selection in _choiceValues.values) {
+        selection.value = null;
+      }
+      if (_isNetworkWorkspace) {
+        selectedPosId.value = null;
+        _posSearchQuery = '';
+        unawaited(loadPosOptions(refresh: true, search: ''));
+      }
+      await loadReport(refresh: true);
+      await loadSavedPresets();
+    } finally {
+      await _endActionLoading();
     }
-    for (final selection in _choiceValues.values) {
-      selection.value = null;
-    }
-    if (_isNetworkWorkspace) {
-      selectedPosId.value = null;
-      _posSearchQuery = '';
-      unawaited(loadPosOptions(refresh: true, search: ''));
-    }
-    await loadReport(refresh: true);
-    await loadSavedPresets();
   }
 
   Future<void> searchPosOptions(String query) async {
@@ -941,6 +1031,7 @@ class OperationalReportsController extends GetxController {
 
     isExportActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ إرسال طلب تجهيز ملف التقرير...');
       final result = await requestExportUseCase(
         type: type,
         networkId: networkId,
@@ -968,6 +1059,8 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentRequest()) isExportActionRunning.value = false;
+    
+      await _endActionLoading();
     }
   }
 
@@ -1002,6 +1095,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ إنشاء ملف PDF للملخص...');
       await saveSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1031,6 +1125,8 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
+      await _endActionLoading();
     }
   }
 
@@ -1074,6 +1170,7 @@ class OperationalReportsController extends GetxController {
     isPdfActionRunning.value = true;
 
     try {
+      await _beginActionLoading('جارٍ تجهيز السجلات وإنشاء PDF التفصيلي...');
       final allRecords = await _loadAllRecordsForPdf(
         type: type,
         networkId: networkId,
@@ -1165,6 +1262,8 @@ class OperationalReportsController extends GetxController {
           scopeRevision == _scopeRevision) {
         isPdfActionRunning.value = false;
       }
+    
+      await _endActionLoading();
     }
   }
 
@@ -1289,6 +1388,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ تجهيز ملف PDF للمشاركة...');
       final shared = await shareSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1318,6 +1418,8 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
+      await _endActionLoading();
     }
   }
 
@@ -1352,6 +1454,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ تجهيز التقرير للطباعة...');
       final printed = await printSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1381,6 +1484,8 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
+      await _endActionLoading();
     }
   }
 
@@ -1397,6 +1502,7 @@ class OperationalReportsController extends GetxController {
     isCheckingExport.value = true;
 
     try {
+      await _beginActionLoading('جارٍ التحقق من حالة التصدير وتنزيل الملف...');
       final status = await getExportStatusUseCase(job.exportId);
       if (!isCurrentJob()) return;
       exportJob.value = status;
@@ -1462,6 +1568,8 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentJob()) isCheckingExport.value = false;
+    
+      await _endActionLoading();
     }
   }
 }

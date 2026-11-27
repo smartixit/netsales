@@ -67,12 +67,16 @@ class CustomSegmentedBar extends StatelessWidget {
   /// Padding خارجي إجباري للحاوية — القيمة الافتراضية تتبع [AppSpacing].
   final EdgeInsetsGeometry? padding;
 
+  /// Uses tighter horizontal insets while preserving a 44 logical-pixel touch target.
+  final bool compact;
+
   const CustomSegmentedBar({
     super.key,
     required this.selectedIndex,
     required this.onSegmentChanged,
     required this.items,
     this.padding,
+    this.compact = false,
   }) : assert(
          items.length >= 2,
          'CustomSegmentedBar requires at least 2 items',
@@ -98,6 +102,7 @@ class CustomSegmentedBar extends StatelessWidget {
                 item: items[i],
                 isSelected: selectedIndex == i,
                 onTap: () => onSegmentChanged(i),
+                compact: compact,
               ),
             ),
           ],
@@ -114,11 +119,13 @@ class _SegmentTab extends StatelessWidget {
   final CustomSegmentItem item;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool compact;
 
   const _SegmentTab({
     required this.item,
     required this.isSelected,
     required this.onTap,
+    required this.compact,
   });
 
   @override
@@ -129,9 +136,10 @@ class _SegmentTab extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        constraints: const BoxConstraints(minHeight: 44),
         padding: EdgeInsets.symmetric(
           vertical: AppSpacing.sm,
-          horizontal: AppSpacing.md,
+          horizontal: compact ? AppSpacing.xs : AppSpacing.md,
         ),
         decoration: BoxDecoration(
           color: isSelected ? colors.surface : Colors.transparent,
@@ -145,10 +153,10 @@ class _SegmentTab extends StatelessWidget {
             if (item.icon != null) ...[
               Icon(
                 item.icon,
-                size: 15.r,
+                size: compact ? 14.r : 15.r,
                 color: isSelected ? colors.primary : colors.onSurfaceVariant,
               ),
-              AppSpacing.hXxs,
+              SizedBox(width: compact ? AppSpacing.xxs : AppSpacing.xxs),
             ],
 
             // النص الرئيسي
@@ -160,6 +168,7 @@ class _SegmentTab extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
                 maxLines: 1,
+                softWrap: false,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

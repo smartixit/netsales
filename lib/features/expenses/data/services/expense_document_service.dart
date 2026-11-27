@@ -1,270 +1,223 @@
 import 'dart:typed_data';
 
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:document_engine/document_engine.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/utils/amount_formatter.dart';
 import 'package:netsales/features/expenses/domain/entities/expense_entity.dart';
 
-/// خدمة تصدير وطباعة ومشاركة سندات المصروفات الرسمية (ExpenseDocumentService)
-///
-/// تستهلك الخدمات الموحدة للنظام [FileExportService] و [ShareService]
-/// وتولد مستند PDF متوافقاً مع الهوية البصرية والخطوط المعتمدة (Cairo Font).
+/// Official operational-expense voucher PDF generation and delivery.
 class ExpenseDocumentService {
   const ExpenseDocumentService();
 
-  /// توليد مصفوفة بايتات مستند PDF لسند المصروف
   Future<Uint8List> generateExpensePdfBytes(ExpenseEntity expense) async {
-    final pdf = pw.Document();
-
-    final font = await PdfGoogleFonts.cairoRegular();
-    final boldFont = await PdfGoogleFonts.cairoBold();
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        textDirection: pw.TextDirection.rtl,
-        theme: pw.ThemeData.withFont(base: font, bold: boldFont),
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-            children: [
-              // 1. ترويسة سند الصرف
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'سند صرف مصروف تشغيلي',
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 18,
-                          color: PdfColors.blueGrey900,
-                        ),
-                      ),
-                      pw.SizedBox(height: 4),
-                      pw.Text(
-                        'رقم السند: ${expense.displayReference}',
-                        style: const pw.TextStyle(
-                          fontSize: 12,
-                          color: PdfColors.grey700,
-                        ),
-                      ),
-                      pw.Text(
-                        'تاريخ الصرف: ${expense.formattedExpenseDate}',
-                        style: const pw.TextStyle(
-                          fontSize: 11,
-                          color: PdfColors.grey600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.end,
-                    children: [
-                      pw.Container(
-                        padding: const pw.EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: pw.BoxDecoration(
-                          color: PdfColors.blueGrey50,
-                          borderRadius: pw.BorderRadius.circular(6),
-                        ),
-                        child: pw.Text(
-                          'مصروف تشغيلي مخصوم',
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 11,
-                            color: PdfColors.blueGrey800,
-                          ),
-                        ),
-                      ),
-                      if (expense.createdByName != null) ...[
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'سُجل بواسطة: ${expense.createdByName}',
-                          style: const pw.TextStyle(
-                            fontSize: 10,
-                            color: PdfColors.grey600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 16),
-              pw.Divider(color: PdfColors.grey300),
-              pw.SizedBox(height: 12),
-
-              // 2. معلومات الشبكة التابع لها المصروف
-              if (expense.networkName != null) ...[
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(10),
-                  decoration: pw.BoxDecoration(
-                    color: PdfColors.grey100,
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text(
-                        'الشبكة: ${expense.networkName}',
-                        style: pw.TextStyle(font: boldFont, fontSize: 12),
-                      ),
-                      if (expense.networkPhoneNumber != null)
-                        pw.Text(
-                          'الهاتف: ${expense.networkPhoneNumber}',
-                          style: const pw.TextStyle(fontSize: 11),
-                        ),
-                    ],
-                  ),
-                ),
-                pw.SizedBox(height: 16),
-              ],
-
-              // 3. جدول بنود المصروف التفصيلية
-              pw.Text(
-                'بيان البنود والمبالغ:',
-                style: pw.TextStyle(font: boldFont, fontSize: 13),
-              ),
-              pw.SizedBox(height: 8),
-              pw.TableHelper.fromTextArray(
-                context: context,
-                border: pw.TableBorder.all(color: PdfColors.grey300),
-                headerStyle: pw.TextStyle(
-                  font: boldFont,
-                  fontSize: 11,
-                  color: PdfColors.white,
-                ),
-                headerDecoration: const pw.BoxDecoration(
-                  color: PdfColors.blueGrey800,
-                ),
-                cellStyle: const pw.TextStyle(fontSize: 10),
-                cellAlignment: pw.Alignment.centerRight,
-                headers: <String>['#', 'بيان البند', 'المبلغ (ر.ي)'],
-                data: List<List<String>>.generate(expense.items.length, (
-                  index,
-                ) {
-                  final item = expense.items[index];
-                  return [
-                    '${index + 1}',
-                    item.itemStatement,
-                    AmountFormatter.formatValue(item.itemAmount),
-                  ];
-                }),
-              ),
-              pw.SizedBox(height: 16),
-
-              // 4. إجمالي المصروف
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.end,
-                children: [
-                  pw.Container(
-                    width: 220,
-                    padding: const pw.EdgeInsets.all(10),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.grey100,
-                      borderRadius: pw.BorderRadius.circular(8),
-                      border: pw.Border.all(color: PdfColors.grey300),
-                    ),
-                    child: pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text(
-                          'إجمالي المصروف:',
-                          style: pw.TextStyle(font: boldFont, fontSize: 13),
-                        ),
-                        pw.Text(
-                          AmountFormatter.formatValue(
-                            expense.expenseTotalAmount,
-                          ),
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 13,
-                            color: PdfColors.blueGrey900,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              pw.Spacer(),
-
-              // 5. التذييل والختم الرسمي
-              pw.Divider(color: PdfColors.grey300),
-              pw.SizedBox(height: 6),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'تم إصدار هذا السند رسمياً عبر منصة NetSales لإدارة مبيعات الكروت',
-                    style: const pw.TextStyle(
-                      fontSize: 8,
-                      color: PdfColors.grey500,
-                    ),
-                  ),
-                  pw.Text(
-                    'التاريخ: ${expense.formattedExpenseDate}',
-                    style: const pw.TextStyle(
-                      fontSize: 9,
-                      color: PdfColors.grey600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      ),
+    final generatedAt = DateTime.now();
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
+      organizationName: 'NetSales',
+      tagline: 'المستندات المالية الرسمية',
+      logoUrl: expense.networkLogo,
     );
 
-    return pdf.save();
+    final info = <DocumentInfoItem>[
+      DocumentInfoItem(
+        label: 'مرجع السند',
+        value: DocumentTextValue(expense.displayReference),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+      DocumentInfoItem(
+        label: 'تاريخ الصرف',
+        value: DocumentTextValue(expense.formattedExpenseDate),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+      if (expense.networkName != null)
+        DocumentInfoItem(
+          label: 'الشبكة',
+          value: DocumentTextValue(expense.networkName!),
+        ),
+      if (expense.networkPhoneNumber != null)
+        DocumentInfoItem(
+          label: 'هاتف الشبكة',
+          value: DocumentTextValue(expense.networkPhoneNumber!),
+          direction: DocumentTextDirection.leftToRight,
+        ),
+      if (expense.createdByName != null)
+        DocumentInfoItem(
+          label: 'سُجل بواسطة',
+          value: DocumentTextValue(expense.createdByName!),
+        ),
+      DocumentInfoItem(
+        label: 'عدد البنود',
+        value: DocumentTextValue(expense.itemsCount.toString()),
+        direction: DocumentTextDirection.leftToRight,
+      ),
+    ];
+
+    final rows = expense.items.asMap().entries.map((entry) {
+      final item = entry.value;
+      return DocumentTableRow(
+        id: 'expense-item-${entry.key + 1}',
+        cells: [
+          DocumentTableCell(
+            value: DocumentTextValue((entry.key + 1).toString()),
+            direction: DocumentTextDirection.leftToRight,
+          ),
+          DocumentTableCell(
+            value: DocumentTextValue(item.itemStatement),
+            direction: DocumentTextDirection.rightToLeft,
+          ),
+          DocumentTableCell(
+            value: DocumentTextValue(AmountFormatter.formatValue(item.itemAmount)),
+            direction: DocumentTextDirection.leftToRight,
+          ),
+        ],
+      );
+    });
+
+    final snapshot = DocumentSnapshot(
+      metadata: DocumentMetadata(
+        id: DocumentId('netsales-expense-${expense.expenseId}-${generatedAt.microsecondsSinceEpoch}'),
+        documentTypeId: DocumentTypeId('netsales.expense-voucher'),
+        title: 'سند صرف مصروف تشغيلي',
+        subtitle: 'سند مصروف مسجل على الشبكة',
+        reference: expense.displayReference,
+        locale: DocumentLocale(
+          languageTag: 'ar-YE',
+          direction: DocumentTextDirection.rightToLeft,
+        ),
+        createdAt: generatedAt,
+        timeZoneId: 'Asia/Aden',
+      ),
+      sections: [
+        DocumentSection(
+          id: 'expense-voucher-details',
+          title: 'بيانات سند الصرف',
+          nodes: [
+            DocumentStatusBanner(
+              label: 'مصروف تشغيلي مسجل',
+              tone: DocumentStatusTone.info,
+              detail: 'مرجع السند: ${expense.displayReference}',
+            ),
+            DocumentInfoGrid(items: info, columns: 3, compact: true),
+            DocumentHeading(
+              text: 'بيان البنود والمبالغ',
+              level: 2,
+              direction: DocumentTextDirection.rightToLeft,
+            ),
+            DocumentTable(
+              columns: [
+                DocumentTableColumn(
+                  id: 'sequence',
+                  label: '#',
+                  alignment: DocumentCellAlignment.center,
+                ),
+                DocumentTableColumn(id: 'statement', label: 'بيان البند'),
+                DocumentTableColumn(
+                  id: 'amount',
+                  label: 'المبلغ',
+                  alignment: DocumentCellAlignment.trailing,
+                ),
+              ],
+              rows: rows,
+              style: DocumentTableStyle(
+                stripedRows: true,
+                compact: true,
+                headerColor: 'E8F3EF',
+                alternateRowColor: 'F7FAF9',
+              ),
+            ),
+            DocumentFinancialSummary(
+              title: 'إجمالي السند',
+              lines: [
+                DocumentFinancialLine(
+                  label: 'إجمالي المصروف',
+                  value: DocumentTextValue(AmountFormatter.formatValue(expense.expenseTotalAmount)),
+                  emphasis: DocumentFinancialEmphasis.total,
+                ),
+              ],
+            ),
+            const DocumentParagraph(
+              text: 'إجمالي المصروف هو المبلغ المسجل والمعتمد في سند الصرف، ولا يعيد هذا المستند جمع البنود أو تعديل القيمة.',
+              direction: DocumentTextDirection.rightToLeft,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final template = DocumentTemplateDefinition(
+      id: TemplateId('netsales.expense-voucher.official'),
+      version: TemplateVersion(major: 1, minor: 0, patch: 0),
+      documentTypeId: DocumentTypeId('netsales.expense-voucher'),
+      displayName: 'NetSales Official Expense Voucher',
+      supportedLocaleTags: const ['ar-YE', 'ar'],
+      capabilities: TemplateCapabilities([
+        TemplateCapability.pageNumbering,
+        TemplateCapability.repeatingHeader,
+        TemplateCapability.repeatingFooter,
+        TemplateCapability.tables,
+        TemplateCapability.watermark,
+        TemplateCapability.portraitPage,
+      ]),
+      isDefault: true,
+      layout: DocumentTemplateLayout.standard,
+    );
+
+    return DocumentEnginePdfService.instance.render(
+      snapshot: snapshot,
+      template: template,
+      options: DocumentRenderOptions(
+        pageProfile: DocumentPageProfile.a4Portrait(
+          marginTop: 42,
+          marginRight: 36,
+          marginBottom: 44,
+          marginLeft: 36,
+        ),
+        generatedAt: generatedAt,
+        headerText: 'NetSales · سند صرف ${expense.displayReference}',
+        footerText: 'مستند مالي رسمي — بيانات المصروف المعتمدة',
+        watermark: DocumentWatermark(
+          imageBytes: branding.logoBytes!,
+          opacity: 0.055,
+          angleRadians: -0.6108652381980153,
+          widthFactor: 0.52,
+          heightFactor: 0.42,
+        ),
+        branding: branding,
+        maxPages: 20,
+      ),
+    );
   }
 
-  /// طباعة سند المصروف عبر الطابعة المتصلة
   Future<bool> printExpense(ExpenseEntity expense) async {
     final bytes = await generateExpensePdfBytes(expense);
     return Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => bytes,
+      onLayout: (_) async => bytes,
       name: 'سند_صرف_${expense.displayReference}.pdf',
     );
   }
 
-  /// مشاركة سند المصروف عبر خدمة المشاركة الموحدة [ShareService]
   Future<bool> shareExpense(ExpenseEntity expense) async {
     final bytes = await generateExpensePdfBytes(expense);
-    final fileName = 'expense_${expense.expenseId}.pdf';
-
     final result = await ShareService.instance.shareBytes(
       bytes: bytes,
-      fileName: fileName,
+      fileName: 'expense_${expense.expenseId}.pdf',
       mimeType: 'application/pdf',
       text: 'سند صرف مصروف تشغيلي رقم ${expense.displayReference}',
     );
-
     return result.status == ShareResultStatus.success;
   }
 
-  /// تصدير وحفظ سند المصروف عبر خدمة تصدير الملفات الموحدة [FileExportService]
   Future<bool> exportAndSaveExpense(ExpenseEntity expense) async {
     final bytes = await generateExpensePdfBytes(expense);
-    final fileName = 'expense_${expense.expenseId}.pdf';
-
     final result = await FileExportService.instance.saveFile(
       bytes: bytes,
-      fileName: fileName,
+      fileName: 'expense_${expense.expenseId}.pdf',
       folderName: 'Expenses',
       autoOpen: true,
     );
-
     return result.isSuccess;
   }
 }

@@ -7,7 +7,7 @@ import 'package:document_engine/document_engine_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=';
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=';
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late PayvTextShapingProvider shapingProvider;
@@ -43,9 +43,9 @@ void main() {
       final streamIndex = source.indexOf('stream', cursor);
       if (streamIndex < 0) break;
       var dataStart = streamIndex + 'stream'.length;
-      if (source.startsWith('\\r\\n', dataStart)) {
+      if (source.startsWith('\r\n', dataStart)) {
         dataStart += 2;
-      } else if (source.startsWith('\\n', dataStart)) {
+      } else if (source.startsWith('\n', dataStart)) {
         dataStart += 1;
       }
       final end = source.indexOf('endstream', dataStart);
@@ -54,17 +54,26 @@ void main() {
       final dictionary = dictionaryStart < 0
           ? ''
           : source.substring(dictionaryStart, streamIndex);
+      var dataEnd = end;
+      if (dataEnd > dataStart && source.codeUnitAt(dataEnd - 1) == 0x0A) {
+        dataEnd--;
+        if (dataEnd > dataStart && source.codeUnitAt(dataEnd - 1) == 0x0D) {
+          dataEnd--;
+        }
+      } else if (dataEnd > dataStart &&
+          source.codeUnitAt(dataEnd - 1) == 0x0D) {
+        dataEnd--;
+      }
+      final streamBytes = bytes.sublist(dataStart, dataEnd);
       if (dictionary.contains('/FlateDecode')) {
         try {
-          decoded.add(
-            latin1.decode(
-              ZLibDecoder().convert(bytes.sublist(dataStart, end)),
-            ),
-          );
+          decoded.add(latin1.decode(ZLibDecoder().convert(streamBytes)));
         } on FormatException {
           // Ignore non-zlib streams; the test asserts the expected page stream
           // was decoded below rather than treating unrelated streams as text.
         }
+      } else {
+        decoded.add(latin1.decode(streamBytes));
       }
       cursor = end + 'endstream'.length;
     }
@@ -83,6 +92,7 @@ void main() {
       TemplateCapability.metrics,
       TemplateCapability.charts,
       TemplateCapability.coverPage,
+      TemplateCapability.watermark,
       TemplateCapability.pageNumbering,
       TemplateCapability.repeatingHeader,
       TemplateCapability.repeatingFooter,
@@ -887,7 +897,7 @@ void main() {
       final artifact = (result as DocumentRenderSuccess).artifact;
       expect(artifact.bytes.take(5), [37, 80, 68, 70, 45]);
       expect(artifact.byteLength, greaterThan(500));
-      expect(artifact.rendererVersion, '1.3.0');
+      expect(artifact.rendererVersion, '1.4.0');
     },
   );
 

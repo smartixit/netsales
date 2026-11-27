@@ -586,9 +586,9 @@ class CustomAnimationOverlay {
                             ),
                           ),
 
-                          if (defaultMessage.isNotEmpty) AppSpacing.vSm,
+                          if ((cleanMessage ?? defaultMessage).isNotEmpty) AppSpacing.vSm,
 
-                          if (defaultMessage.isNotEmpty)
+                          if ((cleanMessage ?? defaultMessage).isNotEmpty)
                             Text(
                               cleanMessage ?? defaultMessage,
                               textAlign: TextAlign.center,

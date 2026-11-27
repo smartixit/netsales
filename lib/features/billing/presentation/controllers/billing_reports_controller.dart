@@ -629,6 +629,7 @@ class BillingReportsController extends GetxController {
   Future<void> exportPdfSummary() async {
     final type = selectedType.value;
     final metrics = summary.value;
+    final chartSnapshot = charts.toList(growable: false);
     final definition = catalog.firstWhereOrNull((item) => item['id'] == type);
     final network = networkId();
     final revision = _revision;
@@ -751,6 +752,8 @@ class BillingReportsController extends GetxController {
         reportLabel: label,
         summary: metrics,
         includeMetrics: presentationSnapshot.includeMetrics,
+        includeCharts: presentationSnapshot.includeCharts,
+        charts: chartSnapshot,
         rows: allRows,
         columns: columns,
         localeTag: presentationSnapshot.languageTag ?? 'ar-YE',
