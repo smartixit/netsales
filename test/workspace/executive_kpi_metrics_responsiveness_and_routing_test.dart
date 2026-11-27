@@ -229,13 +229,14 @@ void main() {
     );
 
     testWidgets(
-      'Uses the shared theme toggle and opens Profile from the avatar',
+      'Uses the shared theme toggle instead of the legacy sheet trigger',
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
             child: const WorkspaceAppBar(
               title: 'مساحة العمل',
               workspace: AppWorkspace.network,
+              onProfileTap: () {},
             ),
           ),
         );
@@ -254,6 +255,7 @@ void main() {
             child: const WorkspaceAppBar(
               title: 'نقطة بيع الأمل',
               workspace: AppWorkspace.pos,
+              onProfileTap: () {},
             ),
           ),
         );
