@@ -84,12 +84,17 @@ final class PdfDocumentRenderer implements DocumentRenderer {
       document.addPage(
         pw.MultiPage(
           theme: _pdfTheme(options.branding, textShapingProvider),
-          pageFormat: pageFormat,
-          margin: pw.EdgeInsets.fromLTRB(
-            profile.marginLeft,
-            profile.marginTop,
-            profile.marginRight,
-            profile.marginBottom,
+          pageTheme: pw.PageTheme(
+            pageFormat: pageFormat,
+            margin: pw.EdgeInsets.fromLTRB(
+              profile.marginLeft,
+              profile.marginTop,
+              profile.marginRight,
+              profile.marginBottom,
+            ),
+            buildBackground: options.watermark == null
+                ? null
+                : (_) => _watermarkBackground(options.watermark!, profile),
           ),
           maxPages: options.maxPages - (options.coverPage ? 1 : 0),
           header: (context) {
@@ -114,11 +119,7 @@ final class PdfDocumentRenderer implements DocumentRenderer {
                   : null,
             );
           },
-          build: (_) => [
-            if (options.watermark != null)
-              _watermarkWidget(options.watermark!, profile),
-            ..._buildContent(snapshot, template, options.branding),
-          ],
+          build: (_) => _buildContent(snapshot, template, options.branding),
         ),
       );
 
@@ -1214,20 +1215,24 @@ final class PdfDocumentRenderer implements DocumentRenderer {
     );
   }
 
-  pw.Widget _watermarkWidget(
+  /// Watermarks belong to the page decoration layer, not the MultiPage
+  /// flow. A page-sized Watermark in the flow has unbounded height and makes
+  /// the PDF paginator fail before the actual report content is laid out.
+  pw.Widget _watermarkBackground(
     DocumentWatermark watermark,
     DocumentPageProfile profile,
   ) {
-    return pw.Watermark(
-      angle: watermark.angleRadians,
-      fit: pw.BoxFit.contain,
+    return pw.Center(
       child: pw.Opacity(
         opacity: watermark.opacity,
-        child: pw.Image(
-          pw.MemoryImage(watermark.imageBytes),
-          width: profile.widthPoints * watermark.widthFactor,
-          height: profile.heightPoints * watermark.heightFactor,
-          fit: pw.BoxFit.contain,
+        child: pw.Transform.rotate(
+          angle: watermark.angleRadians,
+          child: pw.Image(
+            pw.MemoryImage(watermark.imageBytes),
+            width: profile.widthPoints * watermark.widthFactor,
+            height: profile.heightPoints * watermark.heightFactor,
+            fit: pw.BoxFit.contain,
+          ),
         ),
       ),
     );
