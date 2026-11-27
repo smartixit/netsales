@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 
@@ -20,7 +21,6 @@ abstract class BaseMembershipsController extends GetxController {
 
   /// الزر التفاعلي في ترويسة الصفحة (زر إضافة عضو جديد)
   bool get canAddMember;
-  void openAddMemberSheet();
   bool get canChangeMemberRole;
   bool get canChangeMemberStatus;
   bool get canRemoveMember;
@@ -28,9 +28,6 @@ abstract class BaseMembershipsController extends GetxController {
   int get activeMembersCount;
   int get suspendedMembersCount;
   int get invitedMembersCount;
-  void openChangeRoleSheet(WorkspaceMemberEntity member);
-  void promptToggleMemberStatus(WorkspaceMemberEntity member);
-  void promptRemoveMember(WorkspaceMemberEntity member);
 
   /// تلميح حقل البحث النصي
   String get searchHint;
@@ -59,6 +56,31 @@ abstract class BaseMembershipsController extends GetxController {
   /// معرف العضو المفتوح في الأكورديون حالياً
   RxnInt get expandedMemberId;
 
+  RxList<MembershipRoleEntity> get assignableRoles;
+
+  Future<void> addMember({
+    required String phoneNumber,
+    required int roleId,
+    String? status,
+  });
+
+  Future<void> changeMemberRole(
+    WorkspaceMemberEntity member,
+    int roleId,
+    String? reason,
+  );
+
+  Future<void> changeMemberStatus(
+    WorkspaceMemberEntity member,
+    String status,
+    String? reason,
+  );
+
+  Future<void> removeMember(
+    WorkspaceMemberEntity member,
+    String? reason,
+  );
+
   /// إعادة تحديث البيانات والقائمة من البداية
   Future<void> refreshMembers();
 
@@ -71,8 +93,6 @@ abstract class BaseMembershipsController extends GetxController {
   /// تبديل فتح وإغلاق أكورديون بطاقة العضو
   void toggleAccordion(int memberId);
 
-  /// الانتقال لشيت تفاصيل العضو الكاملة
-  void openMemberDetails(WorkspaceMemberEntity member);
 
   /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
   /// بناء خيارات التصفية لشيت البحث الموحد
