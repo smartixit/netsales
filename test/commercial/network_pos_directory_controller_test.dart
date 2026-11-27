@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -35,6 +37,7 @@ import 'package:netsales/features/commercial/presentation/controllers/pos_commer
 
 class _FakeCommercialRepository implements CommercialRepository {
   final List<NetworkPosLinkEntity> links;
+  Completer<PaginatedList<NetworkPosLinkEntity>>? networkListCompleter;
 
   _FakeCommercialRepository(this.links);
 
@@ -103,6 +106,9 @@ class _FakeCommercialRepository implements CommercialRepository {
     String? cursor,
     int? perPage,
   }) async {
+    final pendingResponse = networkListCompleter;
+    networkListCompleter = null;
+    if (pendingResponse != null) return pendingResponse.future;
     var filtered = links.where((l) => l.networkId == networkId);
     if (status != null) {
       filtered = filtered.where((l) => l.isActive == status);
@@ -537,6 +543,29 @@ void main() {
         isFalse,
       );
       expect(controller.links.length, equals(1));
+    });
+
+    test('ignores stale directory responses after a newer search completes', () async {
+      await controller.loadInitialData();
+      final staleResponse =
+          Completer<PaginatedList<NetworkPosLinkEntity>>();
+      repo.networkListCompleter = staleResponse;
+
+      final staleRequest = controller.loadLinks(
+        isRefresh: true,
+        clearOnStart: true,
+      );
+      controller.searchQuery.value = 'لا توجد نقطة بهذا الاسم';
+      await controller.loadLinks(isRefresh: true, clearOnStart: true);
+
+      expect(controller.links, isEmpty);
+
+      staleResponse.complete(
+        PaginatedList<NetworkPosLinkEntity>(items: repo.links),
+      );
+      await staleRequest;
+
+      expect(controller.links, isEmpty);
     });
 
     test('removes a toggled link when it no longer matches the active filter', () async {
