@@ -22,7 +22,7 @@ class OperationalReportChartsSection extends StatelessWidget {
         final availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : 440.0;
-        final cardWidth = availableWidth.clamp(0.0, 440.0);
+        final cardWidth = availableWidth.clamp(0.0, 440.0).toDouble();
 
         return SizedBox(
           height: 338,
