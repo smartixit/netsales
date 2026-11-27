@@ -180,7 +180,7 @@ class NetworkCommercialDirectoryController
   bool get hasHeaderAction => canCreateInvitation;
 
   @override
-  void onHeaderAction() => openCreateQrInvitation;
+  void onHeaderAction() => openCreateQrInvitation();
 
   @override
   void onInit() {
