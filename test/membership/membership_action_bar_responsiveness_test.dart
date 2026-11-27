@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card_action_bar.dart';
 
 void main() {
@@ -42,7 +41,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(harness(width: width, theme: AppThemes.light));
+      await tester.pumpWidget(harness(width: width, theme: ThemeData.light()));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -62,7 +61,7 @@ void main() {
       ScreenUtilInit(
         designSize: const Size(375, 812),
         builder: (context, child) => MaterialApp(
-          theme: AppThemes.dark,
+          theme: ThemeData.dark(),
           home: Scaffold(
             body: Center(
               child: SizedBox(
