@@ -162,6 +162,9 @@ jobs:
           flutter test test/requests/local_checkout_calculation_test.dart
           flutter test test/requests/procurement_requests_controller_test.dart
 
+      - name: Run Document Engine PDF and IBM Arabic font tests
+        run: flutter test packages/document_engine/test/rendering/pdf_document_renderer_test.dart
+
       - name: Analyze project
         run: flutter analyze
 
