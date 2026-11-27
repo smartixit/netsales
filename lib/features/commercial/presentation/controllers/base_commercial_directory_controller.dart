@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 
 /// العقد المعماري الموحد لمتحكمات استعراض وإدارة دليل الشركاء التجاريين (BaseCommercialDirectoryController)
@@ -20,7 +19,23 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   IconData get pageIcon;
 
   /// الزر التفاعلي في ترويسة الصفحة (مثل زر دعوة نقطة بيع أو ربط مزود)
-  Widget? get headerAction;
+  bool get hasHeaderAction;
+  void onHeaderAction();
+  bool get canTogglePartnerLink;
+  bool get canDeletePartnerLink;
+  bool get canViewPartnerWallet;
+  bool get canViewRelationshipLifecycle;
+  void onToggleStatus(NetworkPosLinkEntity link);
+  void onDeleteLink(NetworkPosLinkEntity link);
+  void openPosWalletStatement(NetworkPosLinkEntity link);
+  void openRelationshipLifecycle(NetworkPosLinkEntity link);
+  RxnInt get selectedScopeId;
+  String get scopeFilterLabel;
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions;
+  void onScopeFilterChanged(int? id);
+  int get totalPartnersCount;
+  int get activePartnersCount;
+  int get inactivePartnersCount;
 
   /// تلميح حقل البحث النصي
   String get searchHint;
@@ -79,17 +94,4 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   /// معالجة النقر المباشر على كرت الشريك التجاري
   void onPartnerCardTap(NetworkPosLinkEntity link) => openPartnerDetails(link);
 
-  /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
-  List<CustomKpiCardData> buildKpiCards(BuildContext context);
-
-  /// بناء خيارات التصفية لشيت البحث الموحد
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  );
-
-  /// بناء أي فلاتر إضافية خاصة بمساحة العمل
-  Widget? buildExtraFilters(BuildContext context);
-
-  /// بناء شريط أزرار الإجراءات الخاصة ببطاقة الشريك وفق سياق مساحة العمل
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link);
 }
