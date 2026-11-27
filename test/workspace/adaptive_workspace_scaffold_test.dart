@@ -80,6 +80,18 @@ void main() {
     expect(find.byKey(const ValueKey('nav_item_4')), findsNothing);
   });
 
+  testWidgets('narrow 320dp phone keeps all four destinations without overflow', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(320, 740));
+
+    expect(find.byType(CustomFloatingBottomNavBar), findsOneWidget);
+    for (var index = 0; index < 4; index++) {
+      expect(find.byKey(ValueKey('nav_item_$index')), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('compact phone and tablet use NavigationRail', (tester) async {
     await pumpAt(tester, const Size(375, 450));
     expect(find.byType(NavigationRail), findsOneWidget);
