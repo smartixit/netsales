@@ -213,6 +213,7 @@ class CommercialDirectoryScreen
                     onMoreActions: () => presentation.showPartnerActions(
                       link: link,
                       onViewDetails: () => presentation.openPartnerDetails(link),
+                    onMoreActions: () => presentation.showPartnerActions(link),
                       onToggleStatus: controller.canTogglePartnerLink
                           ? () => presentation.togglePartnerStatus(link)
                           : null,
