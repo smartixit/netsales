@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_network_actions.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_pos_actions.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_action_bar.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 
 /// شريط أزرار الإجراءات التفاعلية لبطاقة الشريك التجاري (Partner Card Actions Bar)
@@ -102,18 +101,11 @@ class CommercialPartnerCardActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isNetworkView) {
-      return CommercialPartnerCardNetworkActions(
-        isActive: link.isActive,
-        onViewDetails: onViewDetails,
-        onToggleStatus: onToggleStatus,
-        onDelete: onDelete,
-        onMoreActions: _showMoreActions,
-      );
-    }
-
-    return CommercialPartnerCardPosActions(
+    return CommercialPartnerActionBar(
+      isNetworkView: isNetworkView,
+      isActive: link.isActive,
       onViewDetails: onViewDetails,
+      onToggleStatus: onToggleStatus,
       onDelete: onDelete,
       onMoreActions: _showMoreActions,
     );
