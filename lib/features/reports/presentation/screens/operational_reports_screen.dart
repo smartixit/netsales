@@ -12,6 +12,7 @@ import 'package:netsales/features/reports/presentation/widgets/operational_repor
 import 'package:netsales/features/reports/presentation/widgets/operational_report_type_selector.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
+import 'package:netsales/widgets/indicators/custom_segmented_bar.dart';
 
 class OperationalReportsScreen extends GetView<OperationalReportsController> {
   const OperationalReportsScreen({
@@ -34,15 +35,13 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        controller.configureScope(
-          networkId: networkId,
-          posId: posId,
-          isNetworkWorkspace: isNetworkWorkspace,
-          organizationName: organizationName,
-          logoUrl: logoUrl,
-        ),
-      );
+      unawaited(controller.configureScope(
+        networkId: networkId,
+        posId: posId,
+        isNetworkWorkspace: isNetworkWorkspace,
+        organizationName: organizationName,
+        logoUrl: logoUrl,
+      ));
     });
 
     final content = Padding(
@@ -75,7 +74,6 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                   icon: Icons.lock_outline_rounded,
                 );
               }
-
               if (!controller.hasNetworkScope) {
                 return const CustomEmptyState.boxed(
                   title: 'حدد مساحة العمل أولاً',
@@ -83,30 +81,35 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
                   icon: Icons.business_outlined,
                 );
               }
-
               final entry = controller.selectedReportEntry;
+              if (entry == null) {
+                return const CustomEmptyState.boxed(
+                  title: 'جارٍ تجهيز التقارير',
+                  subtitle: 'يتم تحميل تعريفات التقارير المصرح بها.',
+                  icon: Icons.pending_outlined,
+                );
+              }
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  OperationalReportTypeSelector(
-                    controller: controller,
-                    types: types,
+                  OperationalReportTypeSelector(controller: controller, types: types),
+                  AppSpacing.vMd,
+                  CustomSegmentedBar(
+                    selectedIndex: controller.activeReportPane.value,
+                    onSegmentChanged: controller.selectReportPane,
+                    items: const [
+                      CustomSegmentItem(label: 'الإعدادات', icon: Icons.tune_rounded),
+                      CustomSegmentItem(label: 'الملخص', icon: Icons.insights_rounded),
+                      CustomSegmentItem(label: 'السجلات', icon: Icons.receipt_long_rounded),
+                    ],
                   ),
                   AppSpacing.vMd,
-                  if (entry != null)
-                    Expanded(
-                      flex: 3,
-                      child: OperationalReportStudioWorkspace(
-                        controller: controller,
-                        entry: entry,
-                      ),
-                    ),
-                  OperationalReportActionsBar(controller: controller),
-                  OperationalReportSummaryAndCharts(controller: controller),
-                  AppSpacing.vSm,
                   Expanded(
-                    flex: 2,
-                    child: OperationalReportRecordsList(controller: controller),
+                    child: switch (controller.activeReportPane.value) {
+                      0 => OperationalReportStudioWorkspace(controller: controller, entry: entry),
+                      1 => _ReportSummaryPane(controller: controller),
+                      _ => _ReportRecordsPane(controller: controller),
+                    },
                   ),
                 ],
               );
@@ -115,11 +118,43 @@ class OperationalReportsScreen extends GetView<OperationalReportsController> {
         ],
       ),
     );
+    return embedded ? content : CustomAppScaffold(body: content);
+  }
+}
 
-    if (embedded) {
-      return content;
-    }
+class _ReportSummaryPane extends StatelessWidget {
+  const _ReportSummaryPane({required this.controller});
+  final OperationalReportsController controller;
 
-    return CustomAppScaffold(body: content);
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        OperationalReportActionsBar(controller: controller),
+        AppSpacing.vSm,
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: OperationalReportSummaryAndCharts(controller: controller),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportRecordsPane extends StatelessWidget {
+  const _ReportRecordsPane({required this.controller});
+  final OperationalReportsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        OperationalReportActionsBar(controller: controller),
+        AppSpacing.vSm,
+        Expanded(child: OperationalReportRecordsList(controller: controller)),
+      ],
+    );
   }
 }
