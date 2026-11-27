@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/repositories/commercial_repository.dart';
@@ -77,6 +80,45 @@ NetworkPosLinkEntity _link({required int posId}) => NetworkPosLinkEntity(
 );
 
 void main() {
+  test('routes POS shortcuts correctly with and without the optional Team tab', () {
+    final controller = _buildController(_FakeCommercialRepository());
+
+    PermissionService.to.setWorkspaceContext(
+      scope: RoleScope.pos,
+      tenantId: 10,
+      roleKey: 'POS_AGENT',
+      permissions: const [AppPermissions.posMembersView],
+    );
+
+    controller.openTeamManagement();
+    expect(controller.selectedNavIndex.value, 4);
+
+    controller.openOperationalReports();
+    expect(controller.selectedNavIndex.value, 5);
+
+    controller.openLinkedNetworks();
+    expect(controller.selectedNavIndex.value, 7);
+
+    controller.openPurchaseInvoices();
+    expect(controller.selectedNavIndex.value, 2);
+
+    PermissionService.to.setWorkspaceContext(
+      scope: RoleScope.pos,
+      tenantId: 10,
+      roleKey: 'POS_AGENT',
+      permissions: const [],
+    );
+    controller.selectedNavIndex.value = 0;
+    controller.openTeamManagement();
+    expect(controller.selectedNavIndex.value, 0);
+
+    controller.openOperationalReports();
+    expect(controller.selectedNavIndex.value, 4);
+
+    controller.openLinkedNetworks();
+    expect(controller.selectedNavIndex.value, 6);
+  });
+
   group('POS workspace relationship context safety', () {
     test('does not select a network relationship owned by another POS', () async {
       final controller = _buildController(_FakeCommercialRepository());
