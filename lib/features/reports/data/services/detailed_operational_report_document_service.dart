@@ -1,10 +1,7 @@
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_catalog.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_record.dart';
@@ -75,21 +72,12 @@ class DetailedOperationalReportDocumentService {
     final organization = organizationName.trim().isEmpty
         ? 'NetSales'
         : organizationName.trim();
-    final logoBytes = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(logoUrl);
-    final fontService = DocumentEngineFontService.instance;
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: organization,
       tagline: 'التقارير التشغيلية — NetSales',
-      primaryColor: _colorHex(AppColors.lightColors.primary),
-      secondaryColor: _colorHex(AppColors.lightColors.secondary),
-      accentColor: _colorHex(AppColors.lightColors.tertiary),
-      surfaceColor: _colorHex(AppColors.lightColors.surface),
-      textColor: _colorHex(AppColors.lightColors.onSurface),
-      mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logoBytes,
-      fonts: await fontService.loadArabicBrandingFonts(),
+      logoUrl: logoUrl,
     );
+    final logoBytes = branding.logoBytes!;
 
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
@@ -281,9 +269,7 @@ class DetailedOperationalReportDocumentService {
     );
 
     final result =
-        await PdfDocumentRenderer(
-          textShapingProvider: await fontService.arabicTextShapingProvider(),
-        ).render(
+        await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
@@ -572,8 +558,4 @@ class DetailedOperationalReportDocumentService {
   String _date(DateTime value) =>
       value.toIso8601String().replaceFirst('T', ' ').substring(0, 19);
 
-  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
-      .toRadixString(16)
-      .padLeft(6, '0')
-      .toUpperCase();
 }

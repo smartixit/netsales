@@ -1,10 +1,7 @@
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 
 /// Branded Arabic executive PDF summaries for Billing reports.
 /// Financial totals are consumed from the API response and never recalculated here.
@@ -31,23 +28,13 @@ class BillingReportDocumentService {
   }) async {
     final generatedAt = DateTime.now();
     final isArabic = localeTag.toLowerCase().startsWith('ar');
-    final logo = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(null);
-    final fonts = DocumentEngineFontService.instance;
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: 'NetSales',
       tagline: isArabic
           ? 'تقارير الاشتراكات والفوترة'
           : 'Subscription and Billing Reports',
-      primaryColor: _hex(AppColors.lightColors.primary),
-      secondaryColor: _hex(AppColors.lightColors.secondary),
-      accentColor: _hex(AppColors.lightColors.tertiary),
-      surfaceColor: _hex(AppColors.lightColors.surface),
-      textColor: _hex(AppColors.lightColors.onSurface),
-      mutedTextColor: _hex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logo,
-      fonts: await fonts.loadArabicBrandingFonts(),
     );
+    final logo = branding.logoBytes!;
     if (rows.length > 1500) {
       throw StateError(
         'يتجاوز التقرير الحد الآمن لملف PDF؛ استخدم تصدير CSV الكامل.',
@@ -286,7 +273,6 @@ class BillingReportDocumentService {
         TemplateCapability.pageNumbering,
         TemplateCapability.tables,
         TemplateCapability.metrics,
-        TemplateCapability.coverPage,
         TemplateCapability.watermark,
         TemplateCapability.portraitPage,
       ]),
@@ -294,9 +280,7 @@ class BillingReportDocumentService {
       layout: DocumentTemplateLayout.executive,
     );
     final result =
-        await PdfDocumentRenderer(
-          textShapingProvider: await fonts.arabicTextShapingProvider(),
-        ).render(
+        await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: template,
           options: DocumentRenderOptions(
@@ -725,6 +709,4 @@ class BillingReportDocumentService {
             : DocumentTextDirection.leftToRight);
   String _date(DateTime value) =>
       '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
-  String _hex(Color color) =>
-      color.toARGB32().toRadixString(16).substring(2).toUpperCase();
 }

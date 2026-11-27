@@ -1,13 +1,10 @@
 import 'package:netsales/features/reports/domain/entities/operational_report_filter_display.dart';
 
 import 'dart:typed_data';
-import 'dart:ui' show Color;
 
 import 'package:document_engine/document_engine.dart';
-import 'package:netsales/core/services/document_engine_brand_asset_service.dart';
-import 'package:netsales/core/services/document_engine_font_service.dart';
+import 'package:netsales/core/services/document_engine_pdf_service.dart';
 import 'package:netsales/core/services/file_export_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:printing/printing.dart';
@@ -30,24 +27,12 @@ class OperationalReportDocumentService {
     String? scopeLabel,
   }) async {
     final normalizedOrganization = _display(organizationName, 'NetSales');
-    final logoBytes = await DocumentEngineBrandAssetService.instance
-        .resolveLogoBytes(logoUrl);
-    final fontService = DocumentEngineFontService.instance;
-    final brandingFonts = await fontService.loadArabicBrandingFonts();
-    final shapingProvider = await fontService.arabicTextShapingProvider();
-
-    final branding = DocumentBranding(
+    final branding = await DocumentEnginePdfService.instance.loadBranding(
       organizationName: normalizedOrganization,
       tagline: 'التقارير التشغيلية — NetSales',
-      primaryColor: _colorHex(AppColors.lightColors.primary),
-      secondaryColor: _colorHex(AppColors.lightColors.secondary),
-      accentColor: _colorHex(AppColors.lightColors.tertiary),
-      surfaceColor: _colorHex(AppColors.lightColors.surface),
-      textColor: _colorHex(AppColors.lightColors.onSurface),
-      mutedTextColor: _colorHex(AppColors.lightColors.onSurfaceVariant),
-      logoBytes: logoBytes,
-      fonts: brandingFonts,
+      logoUrl: logoUrl,
     );
+    final logoBytes = branding.logoBytes!;
 
     final pageProfile = _resolvePageProfile(pageProfileId);
 
@@ -62,7 +47,7 @@ class OperationalReportDocumentService {
     );
 
     final result =
-        await PdfDocumentRenderer(textShapingProvider: shapingProvider).render(
+        await DocumentEnginePdfService.instance.render(
           snapshot: snapshot,
           template: _template(type),
           options: DocumentRenderOptions(
@@ -359,11 +344,6 @@ class OperationalReportDocumentService {
     final value = summary.reportTitle.trim();
     return value.isEmpty ? type.wireValue : value;
   }
-
-  static String _colorHex(Color color) => (color.toARGB32() & 0x00FFFFFF)
-      .toRadixString(16)
-      .padLeft(6, '0')
-      .toUpperCase();
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;
