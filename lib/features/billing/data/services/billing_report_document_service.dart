@@ -300,8 +300,8 @@ class BillingReportDocumentService {
             coverMetadata: {
               (isArabic ? 'الجهة' : 'Organization'): 'NetSales',
               (isArabic ? 'تاريخ الإصدار' : 'Generated at'): _date(generatedAt),
-              if (fromDate != null) (isArabic ? 'من تاريخ' : 'From'): fromDate,
-              if (toDate != null) (isArabic ? 'إلى تاريخ' : 'To'): toDate,
+              (isArabic ? 'من تاريخ' : 'From'): ?fromDate,
+              (isArabic ? 'إلى تاريخ' : 'To'): ?toDate,
             },
             headerText: 'NetSales · $reportLabel',
             footerText: isArabic
