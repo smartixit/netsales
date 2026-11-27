@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 
 /// العقد المعماري الموحد لمتحكمات استعراض وإدارة عضويات مساحة العمل (BaseMembershipsController)
@@ -20,7 +19,18 @@ abstract class BaseMembershipsController extends GetxController {
   IconData get pageIcon;
 
   /// الزر التفاعلي في ترويسة الصفحة (زر إضافة عضو جديد)
-  Widget? get headerAction;
+  bool get canAddMember;
+  void openAddMemberSheet();
+  bool get canChangeMemberRole;
+  bool get canChangeMemberStatus;
+  bool get canRemoveMember;
+  int get totalMembersCount;
+  int get activeMembersCount;
+  int get suspendedMembersCount;
+  int get invitedMembersCount;
+  void openChangeRoleSheet(WorkspaceMemberEntity member);
+  void promptToggleMemberStatus(WorkspaceMemberEntity member);
+  void promptRemoveMember(WorkspaceMemberEntity member);
 
   /// تلميح حقل البحث النصي
   String get searchHint;
@@ -65,16 +75,8 @@ abstract class BaseMembershipsController extends GetxController {
   void openMemberDetails(WorkspaceMemberEntity member);
 
   /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
-  List<CustomKpiCardData> buildKpiCards(BuildContext context);
-
   /// بناء خيارات التصفية لشيت البحث الموحد
   List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
   );
 
-  /// بناء أي فلاتر إضافية خاصة بمساحة العمل (مثل قائمة اختيار الشبكة أو نقطة البيع)
-  Widget? buildExtraFilters(BuildContext context);
-
-  /// بناء شريط أزرار الإجراءات الخاصة ببطاقة العضو وفق سياق مساحة العمل
-  Widget buildCardActions(BuildContext context, WorkspaceMemberEntity member);
 }
