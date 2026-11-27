@@ -38,6 +38,8 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   int get inactivePartnersCount;
 
   /// تلميح حقل البحث النصي
+  List<CustomSearchFilterOption<String?>> buildFilterOptions();
+
   String get searchHint;
 
   /// هل العرض من منظور مساحة الشبكة
