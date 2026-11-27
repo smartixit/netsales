@@ -19,6 +19,7 @@ import 'package:netsales/features/reports/domain/entities/operational_report_rec
 import 'package:netsales/features/reports/domain/entities/operational_report_type.dart';
 import 'package:netsales/features/reports/domain/entities/operational_report_summary.dart';
 import 'package:netsales/features/reports/domain/usecases/operational_report_use_cases.dart';
+import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 class OperationalReportsController extends GetxController {
@@ -94,6 +95,7 @@ class OperationalReportsController extends GetxController {
   int _scopeRevision = 0;
   int _exportActionRevision = 0;
   int _documentActionRevision = 0;
+  int _loadingOverlayOperations = 0;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -569,6 +571,21 @@ class OperationalReportsController extends GetxController {
     }
   }
 
+  Future<void> _beginActionLoading(String message) async {
+    _loadingOverlayOperations++;
+    if (_loadingOverlayOperations == 1) {
+      await CustomAnimationOverlay.showLoading(message: message);
+    }
+  }
+
+  Future<void> _endActionLoading() async {
+    if (_loadingOverlayOperations == 0) return;
+    _loadingOverlayOperations--;
+    if (_loadingOverlayOperations == 0) {
+      await CustomAnimationOverlay.hide();
+    }
+  }
+
   Future<void> savePreset(String name) async {
     final type = selectedType.value;
     final networkId = _networkId;
@@ -594,6 +611,7 @@ class OperationalReportsController extends GetxController {
 
     isSavingPreset.value = true;
     try {
+      await _beginActionLoading('savePreset');
       final existing = savedPresets.firstWhereOrNull(
         (item) => item.name.toLowerCase() == normalizedName.toLowerCase(),
       );
@@ -641,6 +659,7 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isSavingPreset.value = false;
       }
+      await _endActionLoading();
     }
   }
 
@@ -676,6 +695,7 @@ class OperationalReportsController extends GetxController {
 
     isDeletingPreset.value = true;
     try {
+      await _beginActionLoading('deletePreset');
       await deletePresetUseCase(
         presetId: preset.id,
         type: type,
@@ -700,26 +720,32 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isDeletingPreset.value = false;
       }
+      await _endActionLoading();
     }
   }
 
   Future<void> clearFilters() async {
-    _invalidateExportActions();
-    _criteriaDebounce?.cancel();
-    criteria.value = ReportCriteria();
-    for (final controller in _criteriaTextControllers.values) {
-      controller.clear();
+    await _beginActionLoading('جارٍ تحديث التقرير بعد مسح عوامل التصفية...');
+    try {
+      _invalidateExportActions();
+      _criteriaDebounce?.cancel();
+      criteria.value = ReportCriteria();
+      for (final controller in _criteriaTextControllers.values) {
+        controller.clear();
+      }
+      for (final selection in _choiceValues.values) {
+        selection.value = null;
+      }
+      if (_isNetworkWorkspace) {
+        selectedPosId.value = null;
+        _posSearchQuery = '';
+        unawaited(loadPosOptions(refresh: true, search: ''));
+      }
+      await loadReport(refresh: true);
+      await loadSavedPresets();
+    } finally {
+      await _endActionLoading();
     }
-    for (final selection in _choiceValues.values) {
-      selection.value = null;
-    }
-    if (_isNetworkWorkspace) {
-      selectedPosId.value = null;
-      _posSearchQuery = '';
-      unawaited(loadPosOptions(refresh: true, search: ''));
-    }
-    await loadReport(refresh: true);
-    await loadSavedPresets();
   }
 
   Future<void> searchPosOptions(String query) async {
@@ -997,6 +1023,7 @@ class OperationalReportsController extends GetxController {
 
     isExportActionRunning.value = true;
     try {
+      await _beginActionLoading('requestExport');
       final result = await requestExportUseCase(
         type: type,
         networkId: networkId,
@@ -1024,6 +1051,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentRequest()) isExportActionRunning.value = false;
+      await _endActionLoading();
     }
   }
 
@@ -1058,6 +1086,9 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('printSummaryPdf');
+      await _beginActionLoading('shareSummaryPdf');
+      await _beginActionLoading('exportSummaryPdf');
       await saveSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1087,6 +1118,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+      await _endActionLoading();
     }
   }
 
@@ -1130,6 +1162,7 @@ class OperationalReportsController extends GetxController {
     isPdfActionRunning.value = true;
 
     try {
+      await _beginActionLoading('exportDetailedPdf');
       final allRecords = await _loadAllRecordsForPdf(
         type: type,
         networkId: networkId,
@@ -1221,6 +1254,7 @@ class OperationalReportsController extends GetxController {
           scopeRevision == _scopeRevision) {
         isPdfActionRunning.value = false;
       }
+      await _endActionLoading();
     }
   }
 
@@ -1374,6 +1408,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+      await _endActionLoading();
     }
   }
 
@@ -1437,6 +1472,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+      await _endActionLoading();
     }
   }
 
@@ -1453,6 +1489,7 @@ class OperationalReportsController extends GetxController {
     isCheckingExport.value = true;
 
     try {
+      await _beginActionLoading('refreshExportStatus');
       final status = await getExportStatusUseCase(job.exportId);
       if (!isCurrentJob()) return;
       exportJob.value = status;
@@ -1518,6 +1555,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentJob()) isCheckingExport.value = false;
+      await _endActionLoading();
     }
   }
 }
