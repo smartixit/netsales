@@ -18,7 +18,7 @@ void main() {
           source.contains('buildKpiCards') ||
           source.contains('buildCardActions') ||
           source.contains('buildExtraFilters') ||
-          RegExp(r'''import\\s+['\"]package:netsales/features/membership/presentation/widgets/''').hasMatch(source) ||
+          RegExp(r'''import\s+['\"]package:netsales/features/membership/presentation/widgets/''').hasMatch(source) ||
           source.contains('CustomBottomSheet') ||
           source.contains('CustomSnackbar')) {
         violations.add(path);
