@@ -68,6 +68,14 @@ class OperationalReportDocumentService {
           options: DocumentRenderOptions(
             pageProfile: pageProfile,
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: 'التقرير التنفيذي',
+            coverSubtitle: _reportTitle(summary, type),
+            coverMetadata: {
+              'الجهة': normalizedOrganization,
+              if (_hasText(scopeLabel)) 'النطاق': scopeLabel!.trim(),
+              'تاريخ الإصدار': _date(generatedAt),
+            },
             showPageNumbers: true,
             headerText:
                 '$normalizedOrganization · ${_reportTitle(summary, type)}',
@@ -214,27 +222,6 @@ class OperationalReportDocumentService {
       currencyCode = rawCurrencyCode.trim();
     }
 
-    final rows = metrics
-        .map((metric) {
-          final value = metric.isCurrency
-              ? '${metric.value} $currencyCode'
-              : metric.value;
-          return DocumentTableRow(
-            id: 'report-metric-${metric.id}',
-            cells: [
-              DocumentTableCell(
-                value: DocumentTextValue(metric.label),
-                direction: DocumentTextDirection.rightToLeft,
-              ),
-              DocumentTableCell(
-                value: DocumentTextValue(value),
-                direction: DocumentTextDirection.leftToRight,
-              ),
-            ],
-          );
-        })
-        .toList(growable: false);
-
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: 'الجهة',
@@ -315,24 +302,17 @@ class OperationalReportDocumentService {
                 tone: DocumentStatusTone.neutral,
               )
             else
-              DocumentTable(
-                columns: [
-                  DocumentTableColumn(id: 'metric', label: 'المؤشر'),
-                  DocumentTableColumn(
-                    id: 'value',
-                    label: 'القيمة',
-                    alignment: DocumentCellAlignment.decimal,
+              DocumentMetricGrid(
+                columns: 3,
+                metrics: metrics.map((metric) => DocumentMetric(
+                  label: metric.label,
+                  value: DocumentTextValue(
+                    metric.isCurrency
+                        ? '${metric.value} ${currencyCode ?? ''}'
+                        : metric.value,
                   ),
-                ],
-                rows: rows,
-                style: DocumentTableStyle(
-                  stripedRows: true,
-                  compact: true,
-                  showBorders: true,
-                  headerColor: 'E8F3EF',
-                  alternateRowColor: 'F7FAF9',
-                  columnWeights: const [2.4, 1.1],
-                ),
+                  caption: metric.isCurrency ? 'قيمة معتمدة من الخادم' : null,
+                )),
               ),
             DocumentCallout(
               title: 'نطاق هذا المستند',
@@ -362,6 +342,8 @@ class OperationalReportDocumentService {
           TemplateCapability.repeatingHeader,
           TemplateCapability.repeatingFooter,
           TemplateCapability.tables,
+          TemplateCapability.metrics,
+          TemplateCapability.coverPage,
           TemplateCapability.watermark,
           TemplateCapability.portraitPage,
           TemplateCapability.landscapePage,

@@ -155,7 +155,20 @@ class DetailedOperationalReportDocumentService {
           direction: DocumentTextDirection.rightToLeft,
         ),
       );
-      nodes.add(_metricsTable(summary.metrics, currencyCode));
+      nodes.add(
+        DocumentMetricGrid(
+          columns: 3,
+          metrics: summary.metrics.map((metric) => DocumentMetric(
+            label: metric.label,
+            value: DocumentTextValue(
+              metric.isCurrency && currencyCode != null
+                  ? '${metric.value} $currencyCode'
+                  : metric.value,
+            ),
+            caption: metric.isCurrency ? 'قيمة معتمدة من الخادم' : null,
+          )),
+        ),
+      );
     }
     if (presentation.includeCharts) {
       nodes.addAll(_buildCharts(entry, summary));
@@ -232,6 +245,8 @@ class DetailedOperationalReportDocumentService {
         TemplateCapability.repeatingHeader,
         TemplateCapability.repeatingFooter,
         TemplateCapability.tables,
+        TemplateCapability.metrics,
+        TemplateCapability.coverPage,
         TemplateCapability.charts,
         TemplateCapability.watermark,
         TemplateCapability.portraitPage,
@@ -274,6 +289,16 @@ class DetailedOperationalReportDocumentService {
           options: DocumentRenderOptions(
             pageProfile: _pageProfile(pageProfileId),
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: 'التقرير التشغيلي التفصيلي',
+            coverSubtitle: entry.label,
+            coverMetadata: {
+              'الجهة': organization,
+              if (scopeLabel != null && scopeLabel.trim().isNotEmpty)
+                'النطاق': scopeLabel.trim(),
+              'عدد السجلات': records.length.toString(),
+              'تاريخ الإصدار': _date(generatedAt),
+            },
             showPageNumbers: true,
             headerText: '$organization · ${entry.label}',
             footerText:
@@ -303,51 +328,6 @@ class DetailedOperationalReportDocumentService {
       namingStrategy: const FileNamingStrategy(appPrefix: 'NetSales_RPT'),
       autoOpen: true,
       showFeedback: false,
-    );
-  }
-
-  DocumentTable _metricsTable(
-    List<OperationalReportMetric> metrics,
-    String? currencyCode,
-  ) {
-    final rows = metrics
-        .map((metric) {
-          final value = metric.isCurrency && currencyCode != null
-              ? '${metric.value} $currencyCode'
-              : metric.value;
-          return DocumentTableRow(
-            id: 'metric-${metric.id}',
-            cells: [
-              DocumentTableCell(
-                value: DocumentTextValue(metric.label),
-                direction: DocumentTextDirection.rightToLeft,
-              ),
-              DocumentTableCell(
-                value: DocumentTextValue(value),
-                direction: DocumentTextDirection.leftToRight,
-              ),
-            ],
-          );
-        })
-        .toList(growable: false);
-    return DocumentTable(
-      columns: [
-        DocumentTableColumn(id: 'metric', label: 'المؤشر'),
-        DocumentTableColumn(
-          id: 'value',
-          label: 'القيمة',
-          alignment: DocumentCellAlignment.decimal,
-        ),
-      ],
-      rows: rows,
-      style: DocumentTableStyle(
-        stripedRows: true,
-        compact: true,
-        showBorders: true,
-        headerColor: 'E8F3EF',
-        alternateRowColor: 'F7FAF9',
-        columnWeights: const [2.4, 1.1],
-      ),
     );
   }
 

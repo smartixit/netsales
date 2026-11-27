@@ -206,21 +206,12 @@ class BillingReportDocumentService {
                     ? DocumentTextDirection.rightToLeft
                     : DocumentTextDirection.leftToRight,
               ),
-              DocumentTable(
-                columns: [
-                  DocumentTableColumn(
-                    id: 'metric',
-                    label: isArabic ? 'المؤشر' : 'Metric',
-                    alignment: DocumentCellAlignment.leading,
-                  ),
-                  DocumentTableColumn(
-                    id: 'value',
-                    label: isArabic ? 'القيمة' : 'Value',
-                    alignment: DocumentCellAlignment.trailing,
-                  ),
-                ],
-                rows: metricRows,
-                style: DocumentTableStyle(stripedRows: true, compact: true),
+              DocumentMetricGrid(
+                columns: 3,
+                metrics: metricRows.map((row) => DocumentMetric(
+                  label: (row.cells[0].value as DocumentTextValue).value,
+                  value: row.cells[1].value,
+                )),
               ),
             ],
             if (rows.isNotEmpty) ...[
@@ -298,6 +289,7 @@ class BillingReportDocumentService {
         TemplateCapability.pageNumbering,
         TemplateCapability.tables,
         TemplateCapability.metrics,
+        TemplateCapability.coverPage,
         TemplateCapability.watermark,
         TemplateCapability.portraitPage,
       ]),
@@ -318,6 +310,15 @@ class BillingReportDocumentService {
               marginLeft: 36,
             ),
             generatedAt: generatedAt,
+            coverPage: true,
+            coverTitle: isArabic ? 'تقرير الفوترة التنفيذي' : 'Executive Billing Report',
+            coverSubtitle: reportLabel,
+            coverMetadata: {
+              (isArabic ? 'الجهة' : 'Organization'): 'NetSales',
+              (isArabic ? 'تاريخ الإصدار' : 'Generated at'): _date(generatedAt),
+              if (fromDate != null) (isArabic ? 'من تاريخ' : 'From'): fromDate,
+              if (toDate != null) (isArabic ? 'إلى تاريخ' : 'To'): toDate,
+            },
             headerText: 'NetSales · $reportLabel',
             footerText: isArabic
                 ? 'تقرير فوترة — بيانات معتمدة من الخادم'
