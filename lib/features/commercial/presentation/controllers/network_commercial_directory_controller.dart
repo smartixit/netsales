@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
@@ -14,7 +12,6 @@ import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
@@ -30,15 +27,11 @@ import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_action_dialogs.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_invitation_target_dialog.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_qr_invitation_sheet.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -184,18 +177,10 @@ class NetworkCommercialDirectoryController
   String get searchHint => 'البحث باسم نقطة البيع أو المعرف أو الهاتف...';
 
   @override
-  Widget? get headerAction {
-    if (!canCreateInvitation) return null;
-    return CustomButton.icon(
-      tooltip: 'دعوة نقطة بيع',
-      icon: Icons.qr_code_rounded,
-      shape: AppButtonShape.rounded,
-      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
-      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
-      size: AppButtonSize.small,
-      onPressed: openCreateQrInvitation,
-    );
-  }
+  bool get hasHeaderAction => canCreateInvitation;
+
+  @override
+  void onHeaderAction() => openCreateQrInvitation;
 
   @override
   void onInit() {
@@ -455,97 +440,23 @@ class NetworkCommercialDirectoryController
   }
 
   @override
-  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
-    final colors = context.colors;
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      CustomKpiCardData(
-        label: 'الكل',
-        count: totalPartnersCount,
-        icon: Icons.all_inbox_rounded,
-        accentColor: colors.primary,
-        statusKey: null,
-      ),
-      CustomKpiCardData(
-        label: activePres.label,
-        count: activePartnersCount,
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-        accentColor: activePres.tone.color(context),
-        statusKey: '1',
-      ),
-      CustomKpiCardData(
-        label: inactivePres.label,
-        count: inactivePartnersCount,
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-        accentColor: inactivePres.tone.color(context),
-        statusKey: '0',
-      ),
-    ];
-  }
+  RxnInt get selectedScopeId => selectedNetworkId;
 
   @override
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  ) {
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      const CustomSearchFilterOption<String?>(
-        label: 'جميع الشركاء',
-        value: null,
-        icon: Icons.all_inbox_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: activePres.label,
-        value: '1',
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: inactivePres.label,
-        value: '0',
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-      ),
-    ];
-  }
+  String get scopeFilterLabel => 'تصفية بحسب الشبكة';
 
   @override
-  Widget? buildExtraFilters(BuildContext context) {
-    if (initialNetworkId != null) return null;
-    final networks = authorizedNetworks;
-    if (networks.length <= 1) return null;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: CustomDropdown<int>(
-        label: 'تصفية بحسب الشبكة',
-        searchEnabled: false,
-        rxValue: selectedNetworkId,
-        items: networks.map((net) {
-          return DropdownItem<int>(
-            value: net.networkId,
-            child: Text(net.networkName),
-          );
-        }).toList(),
-        onChanged: onNetworkFilterChanged,
-      ),
-    );
-  }
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions =>
+      initialNetworkId != null || authorizedNetworks.length <= 1
+          ? const []
+          : authorizedNetworks.map((network) => CustomSearchFilterOption<int?>(
+                label: network.networkName,
+                value: network.networkId,
+                icon: Icons.hub_rounded,
+              )).toList(growable: false);
 
   @override
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link) {
-    return CommercialPartnerCardActions(
-      link: link,
-      isNetworkView: true,
-      onViewDetails: () => openPartnerDetails(link),
-      onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
-      onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
-      onViewWallet: canViewPartnerWallet ? () => openPosWalletStatement(link) : null,
-      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
-    );
-  }
+  void onScopeFilterChanged(int? id) => onNetworkFilterChanged(id);
 
   void onToggleStatus(NetworkPosLinkEntity link) {
     if (!canTogglePartnerLink) return;
