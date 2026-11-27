@@ -21,6 +21,7 @@ class MembershipCard extends StatelessWidget {
     this.onChangeRole,
     this.onToggleStatus,
     this.onRemove,
+    this.onMoreActions,
     this.actions,
   });
 
@@ -32,6 +33,7 @@ class MembershipCard extends StatelessWidget {
   final VoidCallback? onChangeRole;
   final VoidCallback? onToggleStatus;
   final VoidCallback? onRemove;
+  final VoidCallback? onMoreActions;
   final Widget? actions;
 
   @override
@@ -88,6 +90,7 @@ class MembershipCard extends StatelessWidget {
             onChangeRole: onChangeRole,
             onToggleStatus: onToggleStatus,
             onRemove: onRemove,
+            onMoreActions: onMoreActions ?? onDetails,
           ),
       onTap: onDetails,
       isExpanded: isExpanded,
