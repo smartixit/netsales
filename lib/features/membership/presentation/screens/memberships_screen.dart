@@ -67,7 +67,7 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                     : null,
               ),
 
-              const MembershipKpiStrip(),
+              MembershipKpiStrip(controller: controller),
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
