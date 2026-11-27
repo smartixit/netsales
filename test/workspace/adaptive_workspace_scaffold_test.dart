@@ -55,6 +55,7 @@ void main() {
           appBar: const WorkspaceAppBar(
             title: 'مساحة العمل',
             workspace: AppWorkspace.network,
+            onProfileTap: () {},
           ),
           items: items,
           mobileItems: items,
