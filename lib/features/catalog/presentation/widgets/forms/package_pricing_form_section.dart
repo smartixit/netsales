@@ -33,6 +33,7 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
           prefixIcon: const Icon(Icons.attach_money_rounded),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           isRequired: true,
+          textInputAction: TextInputAction.next,
           validator: FormValidators.amountValidator(
             fieldName: 'سعر الكرت الأساسي',
             decimalPlaces: 2,
@@ -49,6 +50,7 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
                 controller: controller.cashDiscountController,
                 label: 'الخصم النقدي (%)',
                 hint: '0.0',
+                textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.discount_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -65,6 +67,7 @@ class PackagePricingFormSection extends GetView<PackageFormController> {
                 controller: controller.creditDiscountController,
                 label: 'الخصم الآجل (%)',
                 hint: '0.0',
+                textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.credit_score_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,

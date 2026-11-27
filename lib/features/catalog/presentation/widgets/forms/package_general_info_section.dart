@@ -122,7 +122,7 @@ class PackageGeneralInfoSection extends GetView<PackageFormController> {
             return Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
               child: CustomDropdown<int>(
-                label: 'شبكة الكروت التابعة',
+                label: 'الشبكة التابعة للباقة',
                 searchEnabled: false,
                 rxValue: controller.selectedNetworkId,
                 items: controller.authorizedNetworks.map((net) {
@@ -161,6 +161,7 @@ class PackageGeneralInfoSection extends GetView<PackageFormController> {
           hint: 'مثال: باقة النجم الأسبوعية 5GB',
           prefixIcon: const Icon(Icons.label_outline_rounded),
           isRequired: true,
+          textInputAction: TextInputAction.next,
           validator: FormValidators.required(fieldName: 'اسم الباقة'),
         ),
 

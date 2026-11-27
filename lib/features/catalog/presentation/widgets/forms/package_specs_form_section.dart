@@ -29,6 +29,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
           controller: controller.voucherCountController,
           label: 'عدد الكروت في الورقة',
           hint: 'مثال: 51',
+          textInputAction: TextInputAction.next,
           prefixIcon: const Icon(Icons.style_outlined),
           keyboardType: TextInputType.number,
           isRequired: true,
@@ -49,6 +50,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                 controller: controller.balanceController,
                 label: 'رصيد البيانات',
                 hint: '0',
+                textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.data_usage_rounded),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -102,6 +104,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                 controller: controller.uptimeController,
                 label: 'وقت الاستخدام (اختياري)',
                 hint: 'مفتوح',
+                textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.timer_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -155,6 +158,7 @@ class PackageSpecsFormSection extends GetView<PackageFormController> {
                 controller: controller.validityController,
                 label: 'فترة الصلاحية (اختياري)',
                 hint: 'مفتوح',
+                textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.event_available_outlined),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
