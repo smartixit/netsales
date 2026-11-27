@@ -54,17 +54,16 @@ void main() {
       final dictionary = dictionaryStart < 0
           ? ''
           : source.substring(dictionaryStart, streamIndex);
+      final streamBytes = bytes.sublist(dataStart, end);
       if (dictionary.contains('/FlateDecode')) {
         try {
-          decoded.add(
-            latin1.decode(
-              ZLibDecoder().convert(bytes.sublist(dataStart, end)),
-            ),
-          );
+          decoded.add(latin1.decode(ZLibDecoder().convert(streamBytes)));
         } on FormatException {
           // Ignore non-zlib streams; the test asserts the expected page stream
           // was decoded below rather than treating unrelated streams as text.
         }
+      } else {
+        decoded.add(latin1.decode(streamBytes));
       }
       cursor = end + 'endstream'.length;
     }

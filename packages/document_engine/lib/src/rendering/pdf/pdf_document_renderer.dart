@@ -136,7 +136,8 @@ final class PdfDocumentRenderer implements DocumentRenderer {
           pageCount: pageCount,
         ),
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      print('DOCUMENT_ENGINE_PDF_RENDER_FAILURE: $error\\n$stackTrace');
       final message = error.toString().toLowerCase();
       final isPageLimit =
           message.contains('toomanypagesexception') ||
