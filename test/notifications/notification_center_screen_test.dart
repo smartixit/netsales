@@ -164,7 +164,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Enter search query with no matches
-        controller.searchQuery.value = 'كلمة غير موجودة بتاتا';
+        controller.searchController.text = 'كلمة غير موجودة بتاتا';
         // Let the controller's production debounce interval elapse so its
         // scheduled search completes before the widget test is torn down.
         await tester.pump(const Duration(milliseconds: 400));
