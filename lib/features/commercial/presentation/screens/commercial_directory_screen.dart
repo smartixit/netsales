@@ -190,7 +190,6 @@ class CommercialDirectoryScreen
                   isExpanded: isExpanded,
                   onToggleExpand: () =>
                       controller.toggleAccordion(link.networkPosId),
-                  onDetails: () => presentation.openPartnerDetails(link),
                   onTap: controller.canViewPartnerWallet
                       ? () => controller.openPosWalletStatement(link)
                       : () => presentation.openPartnerDetails(link),
