@@ -4,6 +4,7 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/controllers/network_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/controllers/pos_memberships_controller.dart';
+import 'package:netsales/features/membership/presentation/flows/membership_presentation_coordinator.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_kpi_strip.dart';
@@ -42,6 +43,7 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
 
   @override
   Widget build(BuildContext context) {
+    final actions = MembershipPresentationCoordinator(controller);
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshMembers,
@@ -62,7 +64,7 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                         icon: Icons.person_add_alt_1_rounded,
                         shape: AppButtonShape.rounded,
                         size: AppButtonSize.small,
-                        onPressed: controller.openAddMemberSheet,
+                        onPressed: actions.openAddMemberSheet,
                       )
                     : null,
               ),
@@ -155,19 +157,19 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   isNetworkView: controller.isNetworkView,
                   isExpanded: isExpanded,
                   onToggleExpand: () => controller.toggleAccordion(member.id),
-                  onDetails: () => controller.openMemberDetails(member),
+                  onDetails: () => actions.openMemberDetails(member),
                   actions: MembershipCardActions(
                     member: member,
                     isNetworkView: controller.isNetworkView,
-                    onDetails: () => controller.openMemberDetails(member),
+                    onDetails: () => actions.openMemberDetails(member),
                     onChangeRole: controller.canChangeMemberRole && !member.isOwner
-                        ? () => controller.openChangeRoleSheet(member)
+                        ? () => actions.openChangeRoleSheet(member)
                         : null,
                     onToggleStatus: controller.canChangeMemberStatus && !member.isOwner
-                        ? () => controller.promptToggleMemberStatus(member)
+                        ? () => actions.promptToggleMemberStatus(member)
                         : null,
                     onRemove: controller.canRemoveMember && !member.isOwner
-                        ? () => controller.promptRemoveMember(member)
+                        ? () => actions.promptRemoveMember(member)
                         : null,
                   ),
                 );
