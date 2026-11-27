@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/core/services/storage_service.dart';
@@ -96,6 +98,52 @@ void main() {
     expect(controller.overviewError.value, isNull);
     expect(controller.isLoadingNetworks.value, isFalse);
     expect(controller.isLoadingOverview.value, isFalse);
+  });
+
+  test('routes dashboard shortcuts to their matching Network destinations', () async {
+    final controller = NetworkWorkspaceController(
+      getMyNetworksUseCase: GetMyNetworksUseCase(_MultipleNetworksRepository()),
+      getOverviewUseCase: GetNetworkWorkspaceOverviewUseCase(
+        _NetworkOverviewRepository(),
+      ),
+    );
+
+    PermissionService.to.setWorkspaceContext(
+      scope: RoleScope.network,
+      tenantId: 10,
+      roleKey: 'NETWORK_OWNER',
+      permissions: const [AppPermissions.networkMembersView],
+    );
+
+    controller.onMetricTap('pos');
+    expect(controller.selectedNavIndex.value, 4);
+
+    controller.openWholesaleInvoices();
+    expect(controller.selectedNavIndex.value, 5);
+
+    controller.openOperatingExpenses();
+    expect(controller.selectedNavIndex.value, 6);
+
+    controller.openPlatformBilling();
+    expect(controller.selectedNavIndex.value, 7);
+
+    controller.openBillingReports();
+    expect(controller.selectedNavIndex.value, 8);
+
+    controller.openTeamManagement();
+    expect(controller.selectedNavIndex.value, 9);
+
+    controller.openOperationalReports();
+    expect(controller.selectedNavIndex.value, 10);
+
+    PermissionService.to.setWorkspaceContext(
+      scope: RoleScope.network,
+      tenantId: 10,
+      roleKey: 'NETWORK_OWNER',
+      permissions: const [],
+    );
+    controller.openOperationalReports();
+    expect(controller.selectedNavIndex.value, 9);
   });
 
   test('keeps the saved network when it is still authorized', () async {
