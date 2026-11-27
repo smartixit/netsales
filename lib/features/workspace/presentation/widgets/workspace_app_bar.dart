@@ -13,8 +13,6 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_badge_button.dart';
-import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
-import 'package:netsales/features/workspace/presentation/widgets/workspace_entity_picker_sheet.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
@@ -33,7 +31,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? userProfileLogo;
   final String? userInitials;
   final VoidCallback onProfileTap;
-  final VoidCallback? onEntityPickerTap;
+  final VoidCallback onEntityPickerTap;
   final List<Widget>? actions;
 
   const WorkspaceAppBar({
@@ -47,7 +45,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.userProfileLogo,
     this.userInitials,
     required this.onProfileTap,
-    this.onEntityPickerTap,
+    required this.onEntityPickerTap,
     this.actions,
   });
 
@@ -164,9 +162,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                             ],
                           )
                         : CustomInteractiveBounce(
-                            onTap:
-                                onEntityPickerTap ??
-                                () => _showEntityPicker(context),
+                            onTap: onEntityPickerTap,
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
@@ -223,11 +219,6 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
-  }
-
-  void _showEntityPicker(BuildContext context) {
-    WorkspaceEntityPickerController.to.prepareForWorkspace(workspace);
-    WorkspaceEntityPickerSheet.show(context, currentWorkspace: workspace);
   }
 
 }
