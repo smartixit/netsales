@@ -215,6 +215,7 @@ void main() {
               title: 'شبكة يمن واي فاي',
               workspace: AppWorkspace.network,
               onProfileTap: () {},
+              onEntityPickerTap: () {},
               entityInitials: 'شي',
               entityLogo: null,
             ),
@@ -238,6 +239,7 @@ void main() {
               title: 'مساحة العمل',
               workspace: AppWorkspace.network,
               onProfileTap: () {},
+              onEntityPickerTap: () {},
             ),
           ),
         );
@@ -257,6 +259,7 @@ void main() {
               title: 'نقطة بيع الأمل',
               workspace: AppWorkspace.pos,
               onProfileTap: () {},
+              onEntityPickerTap: () {},
             ),
           ),
         );
