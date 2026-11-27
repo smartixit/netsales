@@ -56,6 +56,7 @@ void main() {
             title: 'مساحة العمل',
             workspace: AppWorkspace.network,
             onProfileTap: () {},
+            onEntityPickerTap: () {},
           ),
           items: items,
           mobileItems: items,
