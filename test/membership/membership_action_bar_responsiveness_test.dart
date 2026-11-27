@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card_action_bar.dart';
 
 void main() {
-  Widget harness({required double width, required ThemeData theme}) {
+  Widget harness({required double width, required ThemeData Function() themeBuilder}) {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       builder: (context, child) => MaterialApp(
-        theme: theme,
+        theme: themeBuilder(),
         home: Scaffold(
           body: Center(
             child: SizedBox(
