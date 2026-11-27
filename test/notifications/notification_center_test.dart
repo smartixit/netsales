@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
+import 'package:netsales/core/enums/notification_filter.dart';
 import 'package:netsales/core/enums/notification_type.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
@@ -207,21 +208,21 @@ void main() {
       await controller.loadInitialData();
 
       // Filter unread only
-      controller.setFilter(false);
+      controller.setFilter(NotificationFilter.unread);
       await controller.loadNotifications();
       expect(controller.notifications.length, equals(2));
       expect(controller.notifications.every((n) => !n.isRead), isTrue);
       expect(mockRepo.lastIsReadFilter, isFalse);
 
       // Filter read only
-      controller.setFilter(true);
+      controller.setFilter(NotificationFilter.read);
       await controller.loadNotifications();
       expect(controller.notifications.length, equals(1));
       expect(controller.notifications.first.notificationId, equals(103));
       expect(mockRepo.lastIsReadFilter, isTrue);
 
       // Reset to all
-      controller.setFilter(null);
+      controller.setFilter(NotificationFilter.all);
       await controller.loadNotifications();
       expect(controller.notifications.length, equals(3));
       expect(mockRepo.lastIsReadFilter, isNull);
@@ -386,9 +387,18 @@ void main() {
         // sample1 is voucherRequestCreated (OPERATIONAL)
         // sample2 is saleInvoiceCompleted (FINANCIAL)
         // sample3 is walletDeposit (FINANCIAL)
-        expect(controller.financialCount, equals(2));
-        expect(controller.operationalCount, equals(1));
-        expect(controller.securityCount, equals(0));
+        expect(
+          controller.countForCategory(NotificationFilter.financial),
+          equals(2),
+        );
+        expect(
+          controller.countForCategory(NotificationFilter.operational),
+          equals(1),
+        );
+        expect(
+          controller.countForCategory(NotificationFilter.security),
+          equals(0),
+        );
       },
     );
 
@@ -398,23 +408,23 @@ void main() {
       expect(controller.filteredNotifications.length, equals(3));
 
       // Filter FINANCIAL
-      controller.setCategory('FINANCIAL');
-      expect(controller.selectedCategory.value, equals('FINANCIAL'));
+      controller.setFilter(NotificationFilter.financial);
+      expect(controller.selectedFilter.value, equals(NotificationFilter.financial));
       expect(controller.filteredNotifications.length, equals(2));
       expect(
         controller.filteredNotifications.every(
-          (n) => n.notificationType.category == 'FINANCIAL',
+          (n) => n.notificationType.category == NotificationFilter.financial.wireValue,
         ),
         isTrue,
       );
 
       // Toggle off
-      controller.setCategory('FINANCIAL');
-      expect(controller.selectedCategory.value, isNull);
+      controller.setFilter(NotificationFilter.financial);
+      expect(controller.selectedFilter.value, equals(NotificationFilter.all));
       expect(controller.filteredNotifications.length, equals(3));
 
       // Filter OPERATIONAL
-      controller.setCategory('OPERATIONAL');
+      controller.setFilter(NotificationFilter.operational);
       expect(controller.filteredNotifications.length, equals(1));
       expect(
         controller.filteredNotifications.first.notificationId,
@@ -423,7 +433,7 @@ void main() {
 
       // Reset filters clears category
       controller.resetFilters();
-      expect(controller.selectedCategory.value, isNull);
+      expect(controller.selectedFilter.value, equals(NotificationFilter.all));
       expect(controller.filteredNotifications.length, equals(3));
     });
   });

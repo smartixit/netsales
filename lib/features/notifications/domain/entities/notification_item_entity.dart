@@ -61,9 +61,20 @@ class NotificationItemEntity {
   /// المسار المستهدف عند النقر للتوجيه الذكي
   String get targetRoute => notificationType.defaultRoute;
 
+  bool get hasTargetRoute => targetRoute.trim().isNotEmpty;
+
+  bool get hasImage =>
+      notificationImage != null && notificationImage!.trim().isNotEmpty;
+
   /// الوقت النسبي المعتمد من DateFormatter
   String get relativeTime {
     if (createdAt == null) return '';
     return DateFormatter.timeAgo(createdAt!);
+  }
+
+  /// التاريخ والوقت المنسقان للعرض في ورقة التفاصيل
+  String get formattedDateTime {
+    if (createdAt == null) return '---';
+    return DateFormatter.dateTime(createdAt!);
   }
 }

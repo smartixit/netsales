@@ -3,28 +3,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
+import 'package:netsales/core/enums/notification_filter.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/controllers/notification_controller.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_item_card.dart';
-import 'package:netsales/features/notifications/presentation/widgets/notification_kpi_strip.dart';
-import 'package:netsales/features/notifications/presentation/widgets/notification_search_filter_bar.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_results_counter_bar.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
-/// شاشة مركز الإشعارات والتنبيهات الموجهة داخل التطبيق (NotificationCenterScreen - VIP)
-///
-/// صُممت الشاشة وفق المعيار الهندسي الأعلى:
-/// - مبنية بنمط [CustomRefreshablePage.slivers] الموحد لجميع شاشات المنظومة مع مطابقة هوامش الشاشة المركزية بالكامل.
-/// - تجميع عناصر التحكم العلوية (المؤشرات، البحث والتصفية، وعداد النتائج) في شريحة موحدة.
-/// - ظهور حالة التحميل [CustomStateView.loading] بالهيكل الشبحي فوراً عند الفلترة أو البحث أو التحديث.
-/// - استخدام [CustomCursorLoadMore] القياسي في ذيل القائمة للترقيم اللانهائي.
+/// شاشة مركز الإشعارات بأسلوب قيد — نقيّة عبر [GetView<NotificationController>].
 class NotificationCenterScreen extends GetView<NotificationController> {
   const NotificationCenterScreen({super.key});
 
@@ -33,6 +26,7 @@ class NotificationCenterScreen extends GetView<NotificationController> {
     final colors = context.colors;
 
     return CustomAppScaffold(
+      showBackButton: true,
       appBarTitleWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -50,15 +44,14 @@ class NotificationCenterScreen extends GetView<NotificationController> {
               margin: EdgeInsetsDirectional.only(start: 8.w),
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.15),
+                color: colors.primary.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(AppRadius.full),
                 border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.4),
-                  width: 1.0,
+                  color: colors.primary.withValues(alpha: 0.35),
                 ),
               ),
               child: Text(
-                unread > 99 ? '99+' : unread.toString(),
+                unread > 99 ? '99+' : '$unread',
                 style: AppTypography.labelSmall.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
@@ -91,55 +84,60 @@ class NotificationCenterScreen extends GetView<NotificationController> {
           );
         }),
       ],
-
       body: CustomRefreshablePage.slivers(
-        onRefresh: () => controller.loadInitialData(),
+        onRefresh: controller.loadInitialData,
         onLoadMore: controller.loadMoreNotifications,
         hasMorePredicate: () =>
             controller.hasMore && !controller.isLoadingMore.value,
+        maxContentWidth: 720,
+        scrollKey: const PageStorageKey<String>('notifications-center-scroll'),
         slivers: [
-          // 1. ترويسة الصفحة الموحدة: المؤشرات الحيوية، البحث والتصفية، وعداد النتائج
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const NotificationKpiStrip(),
-                SizedBox(height: AppSpacing.xs),
-                const NotificationSearchFilterBar(),
-                SizedBox(height: AppSpacing.xs),
-                Obx(
-                  () => CustomResultsCounterBar(
-                    count: controller.filteredNotifications.length,
+            child: Obx(() {
+              final items = controller.filteredNotifications;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CustomSearchFilterBar<NotificationFilter>(
+                    searchController: controller.searchController,
+                    searchQuery: controller.searchQuery.value,
+                    searchHint: 'بحث في الإشعارات والتنبيهات...',
+                    onClearSearch: controller.clearSearch,
+                    selectedFilter: controller.selectedFilter.value,
+                    filterOptions: controller.filterOptions,
+                    onFilterChanged: (filter) {
+                      if (filter != null) controller.setFilter(filter);
+                    },
+                    kpiCards: controller.buildKpiCards(context),
+                    selectedKpiKey: controller.selectedFilter.value.wireValue,
+                    isKpiLoading: controller.isLoading.value &&
+                        controller.notifications.isEmpty,
+                    onKpiSelected: controller.onKpiSelected,
+                    resultsCount: controller.isLoading.value &&
+                            controller.notifications.isEmpty
+                        ? null
+                        : items.length,
+                    totalCount: controller.notifications.length,
                     recordLabel: 'إشعار',
-                    isFiltered:
-                        controller.searchQuery.value.isNotEmpty ||
-                        controller.selectedFilter.value != null ||
-                        controller.selectedCategory.value != null,
-                    isLoading: controller.isLoading.value,
-                    onClear: controller.resetFilters,
+                    hasActiveFilters: controller.hasActiveFilters,
+                    isLoadingResults: controller.isLoading.value,
+                    onClearAll: controller.resetFilters,
                   ),
-                ),
-                SizedBox(height: AppSpacing.sm),
-              ],
-            ),
+                  AppSpacing.vSm,
+                ],
+              );
+            }),
           ),
-
-          // 2. منطقة المحتوى: حالات التحميل والخطأ والفراغ أو عناصر الإشعارات
           Obx(() {
-            // إظهار هيكل التحميل الموحد عند أي عملية جلب أو فلترة أو بحث
-            if (controller.isLoading.value) {
+            if (controller.isLoading.value && controller.notifications.isEmpty) {
               return const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomStateView.loading(
-                    presentation: CustomStatePresentation.skeletonOnly,
-                    skeleton: CustomStateSkeleton(
-                      layout: CustomStateSkeletonLayout.list,
-                      itemCount: 4,
-                      cardHeight: 120,
-                      maxColumns: 1,
-                      hasLeading: true,
-                    ),
+                child: CustomStateView.loading(
+                  presentation: CustomStatePresentation.skeletonOnly,
+                  skeleton: CustomStateSkeleton(
+                    layout: CustomStateSkeletonLayout.list,
+                    itemCount: 4,
+                    cardHeight: 120,
+                    hasLeading: true,
                   ),
                 ),
               );
@@ -151,74 +149,47 @@ class NotificationCenterScreen extends GetView<NotificationController> {
                 child: CustomErrorState(
                   title: 'تعذر تحميل الإشعارات',
                   subtitle: controller.errorMessage.value,
-                  onRetry: () => controller.loadNotifications(isRefresh: true),
-                ),
-              );
-            }
-
-            if (controller.filteredNotifications.isEmpty) {
-              final isSearching = controller.searchQuery.value
-                  .trim()
-                  .isNotEmpty;
-              final isFiltering =
-                  controller.selectedFilter.value != null ||
-                  controller.selectedCategory.value != null;
-
-              if (isSearching) {
-                return SliverToBoxAdapter(
-                  child: CustomEmptyState.search(
-                    query: controller.searchQuery.value.trim(),
-                    onClearSearch: controller.resetFilters,
-                  ),
-                );
-              }
-
-              if (isFiltering) {
-                return SliverToBoxAdapter(
-                  child: CustomEmptyState(
-                    icon: Icons.filter_alt_off_rounded,
-                    title: 'لا توجد إشعارات مطابقة للتصفية',
-                    subtitle: 'جرّب تغيير فئة الإشعارات المحددة أو تصفية حالة القراءة.',
-                    actionLabel: 'إعادة تعيين الفلاتر',
-                    actionIcon: Icons.refresh_rounded,
-                    onAction: controller.resetFilters,
-                  ),
-                );
-              }
-
-              return SliverToBoxAdapter(
-                child: CustomEmptyState(
-                  title: 'لا توجد إشعارات',
-                  subtitle: 'سوف تظهر هنا كافة التنبيهات وإشعارات العمليات فور ورودها.',
-                  icon: Icons.notifications_none_rounded,
-                  actionLabel: 'تحديث القائمة',
-                  actionIcon: Icons.refresh_rounded,
-                  onAction: () => controller.loadNotifications(isRefresh: true),
+                  onRetry: controller.loadInitialData,
                 ),
               );
             }
 
             final items = controller.filteredNotifications;
+            if (items.isEmpty) {
+              return SliverToBoxAdapter(
+                child: CustomEmptyState.boxed(
+                  icon: Icons.notifications_off_outlined,
+                  title: 'لا توجد إشعارات مطابقة',
+                  subtitle: controller.hasActiveFilters
+                      ? 'جرّب تعديل البحث أو مسح الفلاتر.'
+                      : 'ستظهر هنا كافة الإشعارات والتنبيهات الواردة إليك.',
+                ),
+              );
+            }
 
-            return SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
+            return SliverList.separated(
+              itemCount: items.length,
+              separatorBuilder: (_, _) => AppSpacing.vSm,
+              itemBuilder: (ctx, index) {
                 final item = items[index];
                 return NotificationItemCard(
-                  key: ValueKey('notification_${item.notificationId}'),
                   notification: item,
-                  onTap: () => controller.onNotificationTap(item),
-                  onMarkAsRead: () => controller.markAsRead(item),
+                  onTap: () => controller.openNotificationDetails(ctx, item),
+                  onPreviewImage: item.hasImage
+                      ? () => controller.openMediaPreview(ctx, item)
+                      : null,
+                  onMarkAsRead: item.isRead
+                      ? null
+                      : () => controller.markAsRead(item),
                 );
-              }, childCount: items.length),
+              },
             );
           }),
-
-          // 3. ذيل التحميل الإضافي الموحد (CustomCursorLoadMore)
           SliverToBoxAdapter(
             child: Obx(
               () => CustomCursorLoadMore(
-                hasMore: controller.hasMore,
                 isLoading: controller.isLoadingMore.value,
+                hasMore: controller.hasMore,
                 error: null,
                 onPressed: controller.loadMoreNotifications,
               ),
