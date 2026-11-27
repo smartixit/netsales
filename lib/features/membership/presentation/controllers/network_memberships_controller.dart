@@ -318,7 +318,11 @@ class NetworkMembershipsController extends BaseMembershipsController {
           }
         },
       ),
-    );
+    ).whenComplete(() {
+      phoneController.dispose();
+      roleNotifier.dispose();
+      statusNotifier.dispose();
+    });
   }
 
   void openChangeRoleSheet(WorkspaceMemberEntity member) {
@@ -387,7 +391,10 @@ class NetworkMembershipsController extends BaseMembershipsController {
           }
         },
       ),
-    );
+    ).whenComplete(() {
+      reasonController.dispose();
+      roleNotifier.dispose();
+    });
   }
 
   void promptToggleMemberStatus(WorkspaceMemberEntity member) {
