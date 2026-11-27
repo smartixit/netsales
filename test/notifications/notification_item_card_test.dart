@@ -53,12 +53,14 @@ void main() {
       (tester) async {
         bool tapped = false;
         bool markReadTapped = false;
+        bool previewTapped = false;
 
         await tester.pumpWidget(
           createTestApp(
             NotificationItemCard(
               notification: sampleUnreadWithImage,
               onTap: () => tapped = true,
+              onPreviewImage: () => previewTapped = true,
               onMarkAsRead: () => markReadTapped = true,
             ),
           ),
@@ -74,48 +76,44 @@ void main() {
 
         // Action buttons rendered
         expect(find.text('تعليم كمقروء'), findsOneWidget);
-        expect(find.text('عرض الإجراء'), findsOneWidget);
+        expect(find.text('عرض الصورة المرفقة'), findsOneWidget);
 
         // Tap on Mark as read
         await tester.tap(find.text('تعليم كمقروء'));
         await tester.pump(const Duration(milliseconds: 100));
         expect(markReadTapped, isTrue);
 
-        // Tap on card
-        await tester.tap(find.text('عرض الإجراء'));
+        // Tap on card title and the attached-image action.
+        await tester.tap(find.text('تم إصدار فاتورة مبيعات جديدة #9901'));
         await tester.pump(const Duration(milliseconds: 100));
         expect(tapped, isTrue);
+
+        await tester.tap(find.text('عرض الصورة المرفقة'));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(previewTapped, isTrue);
       },
     );
 
     testWidgets(
-      'toggles expansion between collapsed thumbnail and expanded wide banner',
+      'renders the attachment preview action without introducing local expansion state',
       (tester) async {
+        var previewTapped = false;
         await tester.pumpWidget(
           createTestApp(
             NotificationItemCard(
               notification: sampleUnreadWithImage,
               onTap: () {},
+              onPreviewImage: () => previewTapped = true,
             ),
           ),
         );
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump();
 
-        // Initially collapsed, "قراءة المزيد..." button visible
-        expect(find.text('قراءة المزيد...'), findsOneWidget);
+        expect(find.byType(NotificationCardMedia), findsOneWidget);
+        await tester.tap(find.byType(NotificationCardMedia));
+        await tester.pump();
 
-        // Tap to expand
-        await tester.tap(find.text('قراءة المزيد...'));
-        await tester.pump(const Duration(milliseconds: 300));
-
-        // In expanded state: "إخفاء التفاصيل" visible
-        expect(find.text('إخفاء التفاصيل'), findsOneWidget);
-
-        // Tap to collapse again
-        await tester.tap(find.text('إخفاء التفاصيل'));
-        await tester.pump(const Duration(milliseconds: 300));
-
-        expect(find.text('قراءة المزيد...'), findsOneWidget);
+        expect(previewTapped, isTrue);
       },
     );
 
