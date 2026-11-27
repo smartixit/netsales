@@ -16,7 +16,8 @@ class MembershipRoleModel extends MembershipRoleEntity {
       roleName: json['role_name'] as String? ?? '',
       roleKey: json['role_key'] as String? ?? '',
       scope: json['scope'] as String? ?? '',
-      description: json['description'] as String?,
+      // RoleResource exposes role_desc; keep description as a legacy fallback.
+      description: json['role_desc'] as String? ?? json['description'] as String?,
     );
   }
 
