@@ -86,7 +86,7 @@ class CommercialDirectoryScreen
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   selectedFilter: controller.statusFilter.value,
-                  filterOptions: controller.buildFilterOptions(),
+                  filterOptions: controller.filterOptions,
                   onFilterChanged: controller.setStatusFilter,
                   onClearSearch: controller.searchController.clear,
                 ),
