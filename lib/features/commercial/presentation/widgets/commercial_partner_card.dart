@@ -22,10 +22,7 @@ class CommercialPartnerCard extends StatelessWidget {
     this.isNetworkView = true,
     this.isExpanded = false,
     this.onToggleExpand,
-    this.onToggleStatus,
-    this.onDelete,
-    this.onMoreActions,
-    this.actions,
+    required this.actions,
   });
 
   final NetworkPosLinkEntity link;
@@ -34,10 +31,7 @@ class CommercialPartnerCard extends StatelessWidget {
   final bool isNetworkView;
   final bool isExpanded;
   final VoidCallback? onToggleExpand;
-  final VoidCallback? onToggleStatus;
-  final VoidCallback? onDelete;
-  final VoidCallback? onMoreActions;
-  final Widget? actions;
+  final Widget actions;
 
   @override
   Widget build(BuildContext context) {
