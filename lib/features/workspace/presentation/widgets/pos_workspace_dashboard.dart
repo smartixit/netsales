@@ -87,6 +87,7 @@ class PosWorkspaceDashboard extends StatelessWidget {
               title: 'إدارة نقطة البيع',
               subtitle: 'الفريق والشبكات المرتبطة وتقارير الأداء.',
               items: [
+                if (controller.canViewMembers)
                 WorkspaceFunctionAccessItem(
                   title: 'فريق العمل',
                   icon: Icons.groups_outlined,
