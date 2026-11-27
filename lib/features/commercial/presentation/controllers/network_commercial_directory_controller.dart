@@ -27,8 +27,6 @@ import 'package:netsales/features/commercial/domain/usecases/search_network_link
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_action_dialogs.dart';
-import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_invitation_target_dialog.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_qr_invitation_sheet.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
@@ -422,25 +420,6 @@ class NetworkCommercialDirectoryController
     }
   }
 
-  @override
-  void openPartnerDetails(NetworkPosLinkEntity link) {
-    CustomBottomSheet.show<void>(
-      title: 'ملف نقطة البيع',
-      subtitle: 'البيانات التجارية المعتمدة للشريك',
-      leadingIcon: Icons.storefront_rounded,
-      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: true),
-    );
-  }
-
-  @override
-  void onPartnerCardTap(NetworkPosLinkEntity link) {
-    if (canViewPartnerWallet) {
-      openPosWalletStatement(link);
-      return;
-    }
-    openPartnerDetails(link);
-  }
-
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
@@ -482,61 +461,26 @@ class NetworkCommercialDirectoryController
   @override
   void onScopeFilterChanged(int? id) => onNetworkFilterChanged(id);
 
-  void onToggleStatus(NetworkPosLinkEntity link) {
-    if (!canTogglePartnerLink) return;
-    CommercialActionDialogs.showToggleStatusDialog(
-      partnerName: link.displayPosName,
-      willDeactivate: link.isActive,
-      onConfirm: () async {
-        if (!canTogglePartnerLink) return;
-        try {
-          final updated = await toggleNetworkPosLinkStatusUseCase(
-            link.networkPosId,
-          );
-          final index = links.indexWhere(
-            (item) => item.networkPosId == link.networkPosId,
-          );
-          if (index != -1) {
-            links[index] = updated;
-          }
-          await CustomAnimationOverlay.showSuccess(
-            message: updated.isActive
-                ? 'تم تنشيط الارتباط بنجاح'
-                : 'تم تجميد الارتباط بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
+  @override
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link) async {
+    if (!canTogglePartnerLink) {
+      throw const AppException('لا تملك صلاحية تغيير حالة الارتباط التجاري.');
+    }
+    final updated = await toggleNetworkPosLinkStatusUseCase(link.networkPosId);
+    final index = links.indexWhere(
+      (item) => item.networkPosId == link.networkPosId,
     );
+    if (index != -1) links[index] = updated;
   }
 
-  void onDeleteLink(NetworkPosLinkEntity link) {
-    if (!canDeletePartnerLink) return;
-    CommercialActionDialogs.showUnlinkDialog(
-      partnerName: link.displayPosName,
-      onConfirm: () async {
-        if (!canDeletePartnerLink) return;
-        try {
-          await deleteNetworkPosLinkUseCase(link.networkPosId);
-          links.removeWhere(
-            (element) => element.networkPosId == link.networkPosId,
-          );
-          await CustomAnimationOverlay.showSuccess(
-            message: 'تم فك الارتباط التجاري بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
+  @override
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link) async {
+    if (!canDeletePartnerLink) {
+      throw const AppException('لا تملك صلاحية فك الارتباط التجاري.');
+    }
+    await deleteNetworkPosLinkUseCase(link.networkPosId);
+    links.removeWhere(
+      (item) => item.networkPosId == link.networkPosId,
     );
   }
 
