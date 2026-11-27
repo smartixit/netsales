@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -191,6 +193,37 @@ void main() {
       expect(repository.lastArgs['search'], isNull);
       expect(repository.lastArgs['status'], isNull);
       expect(controller.members, hasLength(4));
+    });
+
+    test('ignores stale list responses after a newer search completes', () async {
+      final staleResponse =
+          Completer<PaginatedList<WorkspaceMemberEntity>>();
+      repository.networkMembersCompleter = staleResponse;
+
+      final staleRequest = controller.loadMembers();
+      controller.searchQuery.value = 'محمد';
+      await controller.loadMembers();
+
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.displayFullName, 'محمد الموقوف');
+
+      staleResponse.complete(
+        PaginatedList<WorkspaceMemberEntity>(
+          items: repository.networkMembers,
+          meta: {
+            'summary': {
+              'total': 4,
+              'active': 2,
+              'suspended': 1,
+              'invited': 1,
+            },
+          },
+        ),
+      );
+      await staleRequest;
+
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.displayFullName, 'محمد الموقوف');
     });
 
     test('Loads subsequent member pages without duplicates', () async {
