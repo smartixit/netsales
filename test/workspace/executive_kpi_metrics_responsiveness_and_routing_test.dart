@@ -7,6 +7,7 @@ import 'package:netsales/features/workspace/presentation/widgets/executive_metri
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 
 void main() {
   final sampleMetrics = [
@@ -224,6 +225,24 @@ void main() {
         expect(find.byType(CustomAvatarBadge), findsOneWidget);
         expect(find.text('شي'), findsOneWidget);
         expect(find.text('شبكة يمن واي فاي'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Uses the shared theme toggle and opens Profile from the avatar',
+      (tester) async {
+        await tester.pumpWidget(
+          buildHarness(
+            child: const WorkspaceAppBar(
+              title: 'مساحة العمل',
+              workspace: AppWorkspace.network,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CustomThemeToggleButton), findsOneWidget);
+        expect(find.byIcon(Icons.tune_rounded), findsNothing);
       },
     );
 
