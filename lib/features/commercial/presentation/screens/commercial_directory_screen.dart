@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/flows/commercial_presentation_coordinator.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_kpi_strip.dart';
@@ -42,6 +43,7 @@ class CommercialDirectoryScreen
 
   @override
   Widget build(BuildContext context) {
+    final presentation = CommercialPresentationCoordinator(controller);
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshDirectory,
@@ -188,17 +190,19 @@ class CommercialDirectoryScreen
                   isExpanded: isExpanded,
                   onToggleExpand: () =>
                       controller.toggleAccordion(link.networkPosId),
-                  onDetails: () => controller.openPartnerDetails(link),
-                  onTap: () => controller.onPartnerCardTap(link),
+                  onDetails: () => presentation.openPartnerDetails(link),
+                  onTap: controller.canViewPartnerWallet
+                      ? () => controller.openPosWalletStatement(link)
+                      : () => presentation.openPartnerDetails(link),
                   actions: CommercialPartnerCardActions(
                     link: link,
                     isNetworkView: controller.isNetworkView,
                     onViewDetails: () => controller.openPartnerDetails(link),
                     onToggleStatus: controller.canTogglePartnerLink
-                        ? () => controller.onToggleStatus(link)
+                        ? () => presentation.togglePartnerStatus(link)
                         : null,
                     onDelete: controller.canDeletePartnerLink
-                        ? () => controller.onDeleteLink(link)
+                        ? () => presentation.unlinkPartner(link)
                         : null,
                     onViewWallet: controller.canViewPartnerWallet
                         ? () => controller.openPosWalletStatement(link)
