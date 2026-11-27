@@ -105,6 +105,65 @@ class CommercialPresentationCoordinator {
     );
   }
 
+  void showPartnerActions(NetworkPosLinkEntity link) {
+    final isNetworkView = controller.isNetworkView;
+    final partnerName = isNetworkView
+        ? link.displayPosName
+        : link.displayNetworkName;
+    final items = <CustomBottomSheetActionItem>[
+      CustomBottomSheetActionItem(
+        title: isNetworkView
+            ? 'عرض ملف نقطة البيع المعتمد'
+            : 'عرض ملف مزود الشبكة المعتمد',
+        icon: isNetworkView ? Icons.storefront_outlined : Icons.hub_outlined,
+        onTap: () => openPartnerDetails(link),
+      ),
+      if (controller.canViewRelationshipLifecycle)
+        CustomBottomSheetActionItem(
+          title: 'الاتفاقيات وسجل أحداث العلاقة',
+          subtitle: 'إصدارات الاتفاقيات والتغييرات التاريخية',
+          icon: Icons.history_edu_rounded,
+          onTap: () => controller.openRelationshipLifecycle(link),
+        ),
+      if (controller.canViewPartnerWallet)
+        CustomBottomSheetActionItem(
+          title: 'دفتر أستاذ المحفظة',
+          subtitle: isNetworkView
+              ? 'عرض الحركات المالية والعمليات لنقطة البيع'
+              : 'عرض الرصيد والحركات المالية ضمن هذه العلاقة',
+          icon: Icons.account_balance_wallet_outlined,
+          onTap: () => controller.openPosWalletStatement(link),
+        ),
+      if (isNetworkView && controller.canTogglePartnerLink)
+        CustomBottomSheetActionItem(
+          title: link.isActive
+              ? 'تجميد الارتباط التجاري'
+              : 'تنشيط الارتباط التجاري',
+          icon: link.isActive
+              ? Icons.pause_circle_outline_rounded
+              : Icons.play_circle_outline_rounded,
+          onTap: () => togglePartnerStatus(link),
+        ),
+      if (controller.canDeletePartnerLink)
+        CustomBottomSheetActionItem(
+          title: isNetworkView
+              ? 'فك الارتباط التجاري'
+              : 'فك الارتباط بمزود الشبكة',
+          icon: Icons.link_off_rounded,
+          isDestructive: true,
+          onTap: () => unlinkPartner(link),
+        ),
+    ];
+
+    CustomBottomSheet.showActions<void>(
+      title: 'إجراءات الشريك: $partnerName',
+      leadingIcon: isNetworkView
+          ? Icons.storefront_rounded
+          : Icons.hub_rounded,
+      items: items,
+    );
+  }
+
   Future<void> togglePartnerStatus(NetworkPosLinkEntity link) async {
     if (!controller.canTogglePartnerLink) return;
     final partnerName = controller.isNetworkView
