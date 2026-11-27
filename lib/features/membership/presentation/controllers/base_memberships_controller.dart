@@ -145,7 +145,9 @@ abstract class BaseMembershipsController extends GetxController {
       if (revision != _listRevision ||
           tenantId != resolvedTenantId ||
           search != _currentSearchQuery ||
-          status != statusFilter.value) return;
+          status != statusFilter.value) {
+        return;
+      }
       members.assignAll(page.items);
       _nextCursor.value = page.nextCursor;
       _applySummary(page);
@@ -169,8 +171,15 @@ abstract class BaseMembershipsController extends GetxController {
     final cursor = _nextCursor.value;
     final search = _currentSearchQuery;
     final status = statusFilter.value;
-    if (tenantId == null || cursor == null || cursor.isEmpty || isLoading.value || isLoadingMore.value ||
-        _lastRequestedSearch != search || _lastRequestedStatus != status) return;
+    if (tenantId == null ||
+        cursor == null ||
+        cursor.isEmpty ||
+        isLoading.value ||
+        isLoadingMore.value ||
+        _lastRequestedSearch != search ||
+        _lastRequestedStatus != status) {
+      return;
+    }
     final revision = _listRevision;
     isLoadingMore.value = true;
     loadMoreError.value = null;
@@ -182,13 +191,21 @@ abstract class BaseMembershipsController extends GetxController {
         cursor: cursor,
         perPage: pageSize,
       );
-      if (revision != _listRevision || tenantId != resolvedTenantId ||
-          search != _currentSearchQuery || status != statusFilter.value) return;
+      if (revision != _listRevision ||
+          tenantId != resolvedTenantId ||
+          search != _currentSearchQuery ||
+          status != statusFilter.value) {
+        return;
+      }
       final knownIds = members.map((member) => member.id).toSet();
       members.addAll(page.items.where((member) => knownIds.add(member.id)));
       _nextCursor.value = page.nextCursor == cursor ? null : page.nextCursor;
     } catch (error) {
-      if (revision == _listRevision) loadMoreError.value = error.toString();
+      if (revision == _listRevision &&
+          search == _currentSearchQuery &&
+          status == statusFilter.value) {
+        loadMoreError.value = error.toString();
+      }
     } finally {
       if (revision == _listRevision) isLoadingMore.value = false;
     }
