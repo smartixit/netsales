@@ -125,6 +125,7 @@ class NetworkCommercialDirectoryController
   String? _nextCursor;
   int _listRevision = 0;
   int _loadMoreRevision = 0;
+  final Set<int> _pendingLinkMutations = <int>{};
 
   @override
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
@@ -475,11 +476,27 @@ class NetworkCommercialDirectoryController
     if (!canTogglePartnerLink) {
       throw const AppException('لا تملك صلاحية تغيير حالة الارتباط التجاري.');
     }
-    final updated = await toggleNetworkPosLinkStatusUseCase(link.networkPosId);
-    final index = links.indexWhere(
-      (item) => item.networkPosId == link.networkPosId,
-    );
-    if (index != -1) links[index] = updated;
+    final linkId = link.networkPosId;
+    if (!_pendingLinkMutations.add(linkId)) return;
+
+    try {
+      final updated = await toggleNetworkPosLinkStatusUseCase(linkId);
+      final index = links.indexWhere((item) => item.networkPosId == linkId);
+      if (index == -1) return;
+
+      final filter = statusFilter.value;
+      final noLongerMatchesFilter =
+          ((filter == '1' || filter == 'true') && !updated.isActive) ||
+          ((filter == '0' || filter == 'false') && updated.isActive);
+
+      if (noLongerMatchesFilter) {
+        links.removeAt(index);
+      } else {
+        links[index] = updated;
+      }
+    } finally {
+      _pendingLinkMutations.remove(linkId);
+    }
   }
 
   @override
@@ -487,10 +504,15 @@ class NetworkCommercialDirectoryController
     if (!canDeletePartnerLink) {
       throw const AppException('لا تملك صلاحية فك الارتباط التجاري.');
     }
-    await deleteNetworkPosLinkUseCase(link.networkPosId);
-    links.removeWhere(
-      (item) => item.networkPosId == link.networkPosId,
-    );
+    final linkId = link.networkPosId;
+    if (!_pendingLinkMutations.add(linkId)) return;
+
+    try {
+      await deleteNetworkPosLinkUseCase(linkId);
+      links.removeWhere((item) => item.networkPosId == linkId);
+    } finally {
+      _pendingLinkMutations.remove(linkId);
+    }
   }
 
   void onInvitationBusinessCodeChanged(String value) {
