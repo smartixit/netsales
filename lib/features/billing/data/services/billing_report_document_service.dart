@@ -206,13 +206,7 @@ class BillingReportDocumentService {
                     ? DocumentTextDirection.rightToLeft
                     : DocumentTextDirection.leftToRight,
               ),
-              DocumentMetricGrid(
-                columns: 3,
-                metrics: metricRows.map((row) => DocumentMetric(
-                  label: (row.cells[0].value as DocumentTextValue).value,
-                  value: row.cells[1].value,
-                )),
-              ),
+              ..._metricGrids(metricRows),
             ],
             if (rows.isNotEmpty) ...[
               DocumentHeading(
@@ -352,6 +346,23 @@ class BillingReportDocumentService {
       autoOpen: true,
       showFeedback: false,
     );
+  }
+
+  List<DocumentNode> _metricGrids(List<DocumentTableRow> rows) {
+    const metricsPerGrid = 12;
+    return [
+      for (var start = 0; start < rows.length; start += metricsPerGrid)
+        DocumentMetricGrid(
+          columns: 3,
+          metrics: rows
+              .skip(start)
+              .take(metricsPerGrid)
+              .map((row) => DocumentMetric(
+                    label: (row.cells[0].value as DocumentTextValue).value,
+                    value: row.cells[1].value,
+                  )),
+        ),
+    ];
   }
 
   String _label(String key, String localeTag) {
