@@ -95,6 +95,8 @@ abstract final class AppRoutes {
   // مسارات الأمان الموحدة لكافة البيئات (Security Routes)
   // ----------------------------------------------------------------------------
   static const String activeSessions = '/security/active-sessions';
+  static const String userDevices = '/security/devices';
+  static const String userSessions = '/security/sessions';
   static const String securitySettings = '/security/settings';
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';

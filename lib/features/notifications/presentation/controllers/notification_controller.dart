@@ -1,17 +1,28 @@
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/enums/notification_filter.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/core/models/media_gallery_item_model.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
+import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/notifications/domain/entities/notification_item_entity.dart';
 import 'package:netsales/features/notifications/domain/usecases/get_my_notifications_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/get_unread_notifications_count_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/mark_all_notifications_as_read_use_case.dart';
 import 'package:netsales/features/notifications/domain/usecases/mark_notification_as_read_use_case.dart';
+import 'package:netsales/features/notifications/presentation/widgets/notification_details_sheet.dart';
+import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
+import 'package:netsales/widgets/media_gallery/media_gallery_viewer.dart';
+import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
-/// متحكم مركز الإشعارات والتنبيهات الموجهة (Notification Center Controller)
+/// متحكم مركز الإشعارات والتنبيهات الموجهة (NotificationCenter Controller).
 class NotificationController extends GetxController {
   final GetMyNotificationsUseCase getMyNotificationsUseCase;
   final GetUnreadNotificationsCountUseCase getUnreadNotificationsCountUseCase;
@@ -27,7 +38,10 @@ class NotificationController extends GetxController {
 
   static NotificationController get to => Get.find<NotificationController>();
 
+  // -------------------------------------------------------------------------
   // State
+  // -------------------------------------------------------------------------
+
   final notifications = <NotificationItemEntity>[].obs;
   final unreadCount = 0.obs;
   final isLoading = false.obs;
@@ -36,105 +50,168 @@ class NotificationController extends GetxController {
   final errorMessage = RxnString();
   final nextCursor = RxnString();
 
-  /// null = الكل، false = غير المقروءة، true = المقروءة
-  final selectedFilter = Rxn<bool>();
-
-  /// تصنيف الدومين: null = الكل، FINANCIAL، OPERATIONAL، SECURITY، SUPPORT، SYSTEM
-  final selectedCategory = RxnString();
+  final selectedFilter = NotificationFilter.all.obs;
 
   final searchController = TextEditingController();
   final searchQuery = ''.obs;
 
-  bool get hasMore => nextCursor.value != null && nextCursor.value!.isNotEmpty;
-  bool get isEmpty => !isLoading.value && filteredNotifications.isEmpty;
-
-  // ── مؤشرات الـ VIP التنفيذية ──
-  int get totalCount => notifications.length;
-  int get financialCount => notifications
-      .where((n) => n.notificationType.category == 'FINANCIAL')
-      .length;
-  int get operationalCount => notifications
-      .where((n) => n.notificationType.category == 'OPERATIONAL')
-      .length;
-  int get securityCount => notifications
-      .where((n) => n.notificationType.category == 'SECURITY')
-      .length;
-
-  /// القائمة المفلترة حسب التصنيف المختار محلياً
-  List<NotificationItemEntity> get filteredNotifications {
-    final cat = selectedCategory.value;
-    if (cat == null) return notifications;
-    return notifications
-        .where((n) => n.notificationType.category == cat)
-        .toList();
-  }
-
+  Timer? _debounce;
+  bool _suppressSearchListener = false;
   int _loadRevision = 0;
+
+  // -------------------------------------------------------------------------
+  // Lifecycle
+  // -------------------------------------------------------------------------
 
   @override
   void onInit() {
     super.onInit();
-
-    searchController.addListener(() {
-      searchQuery.value = searchController.text;
-    });
-
-    debounce(
-      searchQuery,
-      (_) => loadNotifications(isRefresh: true),
-      time: const Duration(milliseconds: 400),
-    );
-
+    searchController.addListener(_onSearchChanged);
     loadInitialData();
   }
 
   @override
   void onClose() {
+    _debounce?.cancel();
+    searchController.removeListener(_onSearchChanged);
     searchController.dispose();
     super.onClose();
   }
 
-  /// تحميل البيانات الأولية للإشعارات مع عداد غير المقروء
+  void _onSearchChanged() {
+    if (_suppressSearchListener) return;
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      searchQuery.value = searchController.text.trim();
+      loadNotifications(isRefresh: true);
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Computed / Filters / KPIs
+  // -------------------------------------------------------------------------
+
+  bool get hasMore => nextCursor.value != null && nextCursor.value!.isNotEmpty;
+
+  bool get isEmpty => !isLoading.value && filteredNotifications.isEmpty;
+
+  bool get hasActiveFilters =>
+      searchQuery.value.trim().isNotEmpty ||
+      selectedFilter.value != NotificationFilter.all;
+
+  bool? get _apiIsReadParam => switch (selectedFilter.value) {
+    NotificationFilter.unread => false,
+    NotificationFilter.read => true,
+    _ => null,
+  };
+
+  int get totalCount => notifications.length;
+
+  int countForCategory(NotificationFilter filter) => notifications
+      .where((n) => n.notificationType.category == filter.wireValue)
+      .length;
+
+  List<NotificationItemEntity> get filteredNotifications {
+    final active = selectedFilter.value;
+    if (!active.isCategoryFilter) return notifications;
+    return notifications
+        .where((n) => n.notificationType.category == active.wireValue)
+        .toList(growable: false);
+  }
+
+  List<CustomSearchFilterOption<NotificationFilter>> get filterOptions {
+    return NotificationFilter.values.map((filter) {
+      final pres = EnumPresentationRegistry.resolveNotificationFilter(filter);
+      return CustomSearchFilterOption<NotificationFilter>(
+        value: filter,
+        label: pres.label,
+        icon: pres.icon,
+      );
+    }).toList(growable: false);
+  }
+
+  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
+    final colors = context.colors;
+    const kpiFilters = [
+      NotificationFilter.all,
+      NotificationFilter.unread,
+      NotificationFilter.financial,
+      NotificationFilter.security,
+    ];
+
+    return kpiFilters.map((filter) {
+      final pres = EnumPresentationRegistry.resolveNotificationFilter(filter);
+      final count = switch (filter) {
+        NotificationFilter.all => totalCount,
+        NotificationFilter.unread => unreadCount.value,
+        _ => countForCategory(filter),
+      };
+
+      return CustomKpiCardData(
+        label: pres.label,
+        count: count,
+        icon: pres.icon ?? Icons.notifications_rounded,
+        accentColor: pres.tone.resolveColor(colors),
+        statusKey: filter.wireValue,
+      );
+    }).toList(growable: false);
+  }
+
+  // -------------------------------------------------------------------------
+  // Data Loading & Filters
+  // -------------------------------------------------------------------------
+
   Future<void> loadInitialData() async {
     await Future.wait([fetchUnreadCount(), loadNotifications(isRefresh: true)]);
   }
 
-  /// جلب وتحديث عداد الإشعارات غير المقروءة
   Future<void> fetchUnreadCount() async {
     try {
       final count = await getUnreadNotificationsCountUseCase();
       unreadCount.value = count >= 0 ? count : 0;
     } catch (_) {
-      // Non-fatal, keep existing count
+      // Non-fatal
     }
   }
 
-  /// تغيير فلتر العرض (الكل / غير المقروءة / المقروءة)
-  void setFilter(bool? isRead) {
-    if (selectedFilter.value == isRead) return;
-    selectedFilter.value = isRead;
-    loadNotifications(isRefresh: true);
-  }
+  void setFilter(NotificationFilter filter) {
+    final next = selectedFilter.value == filter && filter != NotificationFilter.all
+        ? NotificationFilter.all
+        : filter;
 
-  /// تغيير تصنيف الدومين (مالية، عمليات، أمان، إلخ)
-  void setCategory(String? category) {
-    if (selectedCategory.value == category) {
-      selectedCategory.value = null;
-    } else {
-      selectedCategory.value = category;
+    final previousWasReadParam = _apiIsReadParam;
+    selectedFilter.value = next;
+    final currentReadParam = _apiIsReadParam;
+
+    if (previousWasReadParam != currentReadParam ||
+        next == NotificationFilter.all) {
+      loadNotifications(isRefresh: true);
     }
   }
 
-  /// إعادة تعيين الفلاتر والبحث
-  void resetFilters() {
+  void onKpiSelected(String? statusKey) {
+    setFilter(NotificationFilter.fromWire(statusKey));
+  }
+
+  void clearSearch() {
+    _debounce?.cancel();
+    _suppressSearchListener = true;
     searchController.clear();
+    _suppressSearchListener = false;
     searchQuery.value = '';
-    selectedFilter.value = null;
-    selectedCategory.value = null;
     loadNotifications(isRefresh: true);
   }
 
-  /// تحميل قائمة الإشعارات من الخادم مع ترقيم المؤشر
+  void resetFilters() {
+    _debounce?.cancel();
+    _suppressSearchListener = true;
+    searchController.clear();
+    _suppressSearchListener = false;
+    searchQuery.value = '';
+    selectedFilter.value = NotificationFilter.all;
+    loadNotifications(isRefresh: true);
+  }
+
   Future<void> loadNotifications({bool isRefresh = false}) async {
     final revision = ++_loadRevision;
     if (isRefresh) {
@@ -143,35 +220,34 @@ class NotificationController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    final effectiveSearch = searchQuery.value.trim().isEmpty
-        ? null
-        : searchQuery.value.trim();
+    final effectiveSearch =
+        searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
 
     try {
       final PaginatedList<NotificationItemEntity> result =
           await getMyNotificationsUseCase(
-            isRead: selectedFilter.value,
+            isRead: _apiIsReadParam,
             search: effectiveSearch,
             cursor: null,
           );
 
-      if (revision != _loadRevision) return;
+      if (revision != _loadRevision || isClosed) return;
 
       notifications.assignAll(result.items);
       nextCursor.value = result.nextCursor;
     } catch (e) {
-      if (revision != _loadRevision) return;
-      errorMessage.value = e is AppException
-          ? e.message
-          : 'تعذر تحميل الإشعارات: ${e.toString()}';
+      if (revision != _loadRevision || isClosed) return;
+      errorMessage.value = AppException.sanitizeMessage(
+        e,
+        fallback: 'تعذر تحميل الإشعارات.',
+      );
     } finally {
-      if (revision == _loadRevision) {
+      if (revision == _loadRevision && !isClosed) {
         isLoading.value = false;
       }
     }
   }
 
-  /// تحميل المزيد من الإشعارات (Infinite Scrolling)
   Future<void> loadMoreNotifications() async {
     final cursor = nextCursor.value;
     if (isLoadingMore.value || isLoading.value || cursor == null) {
@@ -181,19 +257,18 @@ class NotificationController extends GetxController {
     final revision = _loadRevision;
     isLoadingMore.value = true;
 
-    final effectiveSearch = searchQuery.value.trim().isEmpty
-        ? null
-        : searchQuery.value.trim();
+    final effectiveSearch =
+        searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
 
     try {
       final PaginatedList<NotificationItemEntity> result =
           await getMyNotificationsUseCase(
-            isRead: selectedFilter.value,
+            isRead: _apiIsReadParam,
             search: effectiveSearch,
             cursor: cursor,
           );
 
-      if (revision != _loadRevision) return;
+      if (revision != _loadRevision || isClosed) return;
 
       final existingIds = notifications.map((n) => n.notificationId).toSet();
       final newItems = result.items
@@ -203,19 +278,21 @@ class NotificationController extends GetxController {
       notifications.addAll(newItems);
       nextCursor.value = result.nextCursor;
     } catch (_) {
-      // Allow explicit retry
+      // Allow retry
     } finally {
-      if (revision == _loadRevision) {
+      if (revision == _loadRevision && !isClosed) {
         isLoadingMore.value = false;
       }
     }
   }
 
-  /// تعليم إشعار فردي كمقروء
+  // -------------------------------------------------------------------------
+  // Read State & Media Preview & Details
+  // -------------------------------------------------------------------------
+
   Future<void> markAsRead(NotificationItemEntity item) async {
     if (item.isRead) return;
 
-    // Optimistic UI update
     final index = notifications.indexWhere(
       (n) => n.notificationId == item.notificationId,
     );
@@ -232,7 +309,6 @@ class NotificationController extends GetxController {
     try {
       await markNotificationAsReadUseCase(item.notificationId);
     } catch (_) {
-      // Revert if request fails
       if (index != -1) {
         notifications[index] = item;
       }
@@ -240,7 +316,6 @@ class NotificationController extends GetxController {
     }
   }
 
-  /// تعليم كافة الإشعارات كمقروءة دفعة واحدة مع مؤشرات التحميل والنجاح الموحدة
   Future<void> markAllAsRead() async {
     if (unreadCount.value == 0 && notifications.every((n) => n.isRead)) {
       return;
@@ -250,7 +325,6 @@ class NotificationController extends GetxController {
     final previousUnread = unreadCount.value;
     final previousList = List<NotificationItemEntity>.from(notifications);
 
-    // Optimistic UI update
     unreadCount.value = 0;
     notifications.assignAll(
       notifications.map(
@@ -260,7 +334,7 @@ class NotificationController extends GetxController {
 
     try {
       await CustomAnimationOverlay.showLoading(
-        message: 'جاري تعليم كافة الإشعارات كمقروءة...',
+        message: 'جارٍ تعليم كافة الإشعارات كمقروءة...',
       );
 
       await markAllNotificationsAsReadUseCase();
@@ -269,7 +343,6 @@ class NotificationController extends GetxController {
         message: 'تم تعليم جميع الإشعارات كمقروءة بنجاح.',
       );
     } catch (e) {
-      // Revert
       unreadCount.value = previousUnread;
       notifications.assignAll(previousList);
       if (CustomAnimationOverlay.isShowing) {
@@ -277,9 +350,10 @@ class NotificationController extends GetxController {
       }
       CustomSnackbar.show(
         title: 'فشل التحديث',
-        message: e is AppException
-            ? e.message
-            : 'تعذر تعليم الإشعارات كمقروءة.',
+        message: AppException.sanitizeMessage(
+          e,
+          fallback: 'تعذر تعليم الإشعارات كمقروءة.',
+        ),
         type: SnackType.error,
       );
     } finally {
@@ -290,14 +364,52 @@ class NotificationController extends GetxController {
     }
   }
 
-  /// فتح شاشة مركز الإشعارات
   Future<void> openNotificationCenter() async {
     if (Get.currentRoute != AppRoutes.notifications) {
       await Get.toNamed<dynamic>(AppRoutes.notifications);
     }
   }
 
-  /// معالجة النقر على الإشعار: تعليمه كمقروء ثم التوجيه الذكي
+  Future<void> openMediaPreview(
+    BuildContext context,
+    NotificationItemEntity item,
+  ) async {
+    if (!item.hasImage) return;
+    await MediaGalleryViewer.showSingle(
+      context,
+      MediaGalleryItemModel(
+        url: item.notificationImage!,
+        title: item.notificationTitle,
+        subtitle: item.relativeTime,
+        type: MediaGalleryType.image,
+        heroTag: 'notification_media_${item.notificationId}',
+      ),
+    );
+  }
+
+  Future<void> openNotificationDetails(
+    BuildContext context,
+    NotificationItemEntity item,
+  ) async {
+    unawaited(markAsRead(item));
+    await CustomBottomSheet.show<void>(
+      title: 'تفاصيل الإشعار',
+      leadingIcon: Icons.notifications_rounded,
+      child: NotificationDetailsSheet(
+        notification: item,
+        onPreviewImage: item.hasImage
+            ? () => openMediaPreview(context, item)
+            : null,
+        onNavigateTarget: item.hasTargetRoute
+            ? () {
+                Get.back<void>();
+                onNotificationTap(item);
+              }
+            : null,
+      ),
+    );
+  }
+
   Future<void> onNotificationTap(NotificationItemEntity item) async {
     if (!item.isRead) {
       await markAsRead(item);
@@ -309,7 +421,6 @@ class NotificationController extends GetxController {
     }
   }
 
-  /// دالة استدعاء لحظية عند وصول إشعار جديد أثناء فتح التطبيق
   void onNewNotificationReceived([NotificationItemEntity? newItem]) {
     unreadCount.value++;
     if (newItem != null) {

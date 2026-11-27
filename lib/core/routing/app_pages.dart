@@ -8,7 +8,6 @@ import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/routing/middlewares/workspace_guard.dart';
 import 'package:netsales/core/services/session_service.dart';
 import 'package:netsales/features/profile/presentation/bindings/profile_binding.dart';
-import 'package:netsales/features/auth/presentation/bindings/active_sessions_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/forgot_password_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/login_binding.dart';
 import 'package:netsales/features/auth/presentation/bindings/register_network_binding.dart';
@@ -19,7 +18,10 @@ import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_bin
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
-import 'package:netsales/features/auth/presentation/screens/active_sessions_screen.dart';
+import 'package:netsales/features/user_devices/presentation/bindings/user_devices_binding.dart';
+import 'package:netsales/features/user_devices/presentation/screens/user_devices_screen.dart';
+import 'package:netsales/features/user_sessions/presentation/bindings/user_sessions_binding.dart';
+import 'package:netsales/features/user_sessions/presentation/screens/user_sessions_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
@@ -223,12 +225,6 @@ abstract final class AppPages {
     // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)
     // ========================================================================
     GetPage(
-      name: AppRoutes.activeSessions,
-      page: () => const ActiveSessionsScreen(),
-      binding: ActiveSessionsBinding(),
-      middlewares: [AuthGuard()],
-    ),
-    GetPage(
       name: AppRoutes.securitySettings,
       page: () => const SecuritySettingsScreen(),
       binding: SecuritySettingsBinding(),
@@ -245,6 +241,18 @@ abstract final class AppPages {
       name: AppRoutes.editProfile,
       page: () => const EditProfileScreen(),
       binding: ProfileBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.userDevices,
+      page: () => const UserDevicesScreen(),
+      binding: UserDevicesBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.userSessions,
+      page: () => const UserSessionsScreen(),
+      binding: UserSessionsBinding(),
       middlewares: [AuthGuard()],
     ),
 

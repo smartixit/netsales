@@ -44,10 +44,17 @@ class ProfileSecurityCard extends GetView<ProfileController> {
         }),
         ProfileSettingsTile(
           icon: Icons.devices_outlined,
-          title: 'الأجهزة والجلسات',
-          subtitle: 'عرض الجلسات النشطة وإدارتها',
+          title: 'الأجهزة المقترنة',
+          subtitle: 'مراجعة الأجهزة المعتمدة وفصلها',
           color: colors.secondary,
-          onTap: controller.openActiveSessions,
+          onTap: controller.openUserDevices,
+        ),
+        ProfileSettingsTile(
+          icon: Icons.sensors_rounded,
+          title: 'جلسات تسجيل الدخول',
+          subtitle: 'متابعة الجلسات النشطة والسابقة والتحكم بها',
+          color: colors.tertiary,
+          onTap: controller.openUserSessions,
         ),
       ],
     );

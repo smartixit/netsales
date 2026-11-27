@@ -41,6 +41,8 @@ abstract final class ApiConstants {
   static const String toggle2fa = '/auth/toggle-2fa';
   static const String authDevices = '/auth/devices';
   static String disconnectDevice(int id) => '/auth/devices/$id';
+  static const String authSessions = '/auth/sessions';
+  static String terminateAuthSession(int id) => '/auth/sessions/$id';
 
   // ==========================================================================
   // 3. خدمات التحقق بالرمز المؤقت (OTP Verification)

@@ -280,7 +280,6 @@ class CustomCarouselCard extends StatelessWidget {
                                     color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 9.sp,
                                     fontWeight: FontWeight.w600,
-                                    fontFamily: 'monospace',
                                   ),
                                 ),
                                 SizedBox(width: 4.w),
