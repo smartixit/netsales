@@ -90,10 +90,13 @@ void main() {
     final glyphs = visualRuns.expand((run) => run.glyphs);
     expect(glyphs, isNotEmpty);
     expect(line.advance, greaterThan(0));
+
+    // Whitespace glyphs may legitimately have no outline. Validate the
+    // outlines that are present, and ensure shaping produced drawable glyphs.
+    final outlinedGlyphs = glyphs.where((glyph) => glyph.outline != null);
+    expect(outlinedGlyphs, isNotEmpty);
     expect(
-      glyphs.every(
-        (glyph) => glyph.outline.isNotEmpty,
-      ),
+      outlinedGlyphs.every((glyph) => glyph.outline?.isNotEmpty ?? false),
       isTrue,
     );
   });
@@ -132,6 +135,42 @@ void main() {
     final glyphs = line.visualRuns.expand((run) => run.glyphs);
     expect(glyphs, isNotEmpty);
     expect(glyphs.every((glyph) => glyph.glyphId > 0), isTrue);
+  });
+
+  test('shapes Arabic yaa and alif maqsura in all tested word positions', () {
+    // U+064A ARABIC LETTER YEH and U+0649 ARABIC LETTER ALEF MAKSURA
+    // must both resolve to drawable glyphs in the supplied Arabic font.
+    final cases = <({String text, int codepoint, String label})>[
+      (text: 'ي', codepoint: 0x064A, label: 'yaa isolated'),
+      (text: 'يمن', codepoint: 0x064A, label: 'yaa initial'),
+      (text: 'بيئة', codepoint: 0x064A, label: 'yaa medial'),
+      (text: 'علي', codepoint: 0x064A, label: 'yaa final'),
+      (text: 'ى', codepoint: 0x0649, label: 'alif maqsura isolated'),
+      (text: 'مصطفى', codepoint: 0x0649, label: 'alif maqsura final'),
+      (text: 'هدى', codepoint: 0x0649, label: 'alif maqsura final in huda'),
+      (text: 'على', codepoint: 0x0649, label: 'alif maqsura final in ala'),
+    ];
+
+    for (final sample in cases) {
+      final line = provider.shapeLine(
+        sample.text,
+        direction: DocumentTextDirection.rightToLeft,
+      );
+      final glyphs = line.visualRuns.expand((run) => run.glyphs).toList();
+      final matchingGlyphs = glyphs
+          .where((glyph) => glyph.sourceCodepoints.contains(sample.codepoint))
+          .toList();
+
+      expect(line.isRightToLeft, isTrue, reason: sample.label);
+      expect(matchingGlyphs, isNotEmpty, reason: sample.label);
+      expect(
+        matchingGlyphs.every(
+          (glyph) => glyph.glyphId > 0 && (glyph.outline?.isNotEmpty ?? false),
+        ),
+        isTrue,
+        reason: '${sample.label} must map to a non-empty drawable glyph.',
+      );
+    }
   });
 
   test('rejects paragraph separators in the single-line shaping contract', () {
