@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -16,13 +18,7 @@ import 'package:netsales/features/membership/domain/usecases/remove_pos_member_u
 import 'package:netsales/features/membership/domain/usecases/update_pos_member_role_use_case.dart';
 import 'package:netsales/features/membership/domain/usecases/update_pos_member_status_use_case.dart';
 import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_action_dialogs.dart';
-import 'package:netsales/features/membership/presentation/widgets/sheets/add_member_sheet.dart';
-import 'package:netsales/features/membership/presentation/widgets/sheets/change_member_role_sheet.dart';
-import 'package:netsales/features/membership/presentation/widgets/sheets/member_details_sheet.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
-import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم إدارة أعضاء وموظفي نقطة البيع (POS Memberships Controller)
 class PosMembershipsController extends BaseMembershipsController {
@@ -84,6 +80,7 @@ class PosMembershipsController extends BaseMembershipsController {
   final _allMembers = <WorkspaceMemberEntity>[].obs;
   @override
   final members = <WorkspaceMemberEntity>[].obs;
+  @override
   final assignableRoles = <MembershipRoleEntity>[].obs;
 
   @override
@@ -244,228 +241,89 @@ class PosMembershipsController extends BaseMembershipsController {
   }
 
   @override
-  void openMemberDetails(WorkspaceMemberEntity member) {
-    CustomBottomSheet.show<void>(
-      title: 'الملف التعريفي للعضو',
-      subtitle: 'تفاصيل الحساب والصلاحيات وتاريخ الانضمام',
-      leadingIcon: Icons.badge_outlined,
-      child: MemberDetailsSheet(
-        member: member,
-        onClose: () => Get.back<void>(),
-      ),
+  Future<void> addMember({
+    required String phoneNumber,
+    required int roleId,
+    String? status,
+  }) async {
+    if (!canAddMember) {
+      throw const AppException('لا تملك صلاحية إضافة أعضاء إلى نقطة البيع.');
+    }
+    final posId = resolvedPosId;
+    if (posId == null) {
+      throw const AppException('تعذر تحديد نقطة البيع النشطة.');
+    }
+    await addPosMemberUseCase(
+      posId: posId,
+      phoneNumber: phoneNumber,
+      roleId: roleId,
+      status: status,
     );
+    await loadMembers();
   }
 
-  void openAddMemberSheet() {
-    if (!canAddMember) return;
-    final formKey = GlobalKey<FormState>();
-    final phoneController = TextEditingController();
-    final roleNotifier = ValueNotifier<int?>(
-      assignableRoles.isNotEmpty ? assignableRoles.first.roleId : null,
+  @override
+  Future<void> changeMemberRole(
+    WorkspaceMemberEntity member,
+    int roleId,
+    String? reason,
+  ) async {
+    if (!canChangeMemberRole || member.isOwner) {
+      throw const AppException('لا تملك صلاحية تغيير دور هذا العضو.');
+    }
+    final posId = resolvedPosId;
+    if (posId == null) {
+      throw const AppException('تعذر تحديد نقطة البيع النشطة.');
+    }
+    await updatePosMemberRoleUseCase(
+      posId: posId,
+      userId: member.userId,
+      roleId: roleId,
+      reason: reason,
     );
-    final statusNotifier = ValueNotifier<String?>('ACTIVE');
-    final isSubmitting = false.obs;
-
-    CustomBottomSheet.show<void>(
-      title: 'إضافة عضو جديد',
-      subtitle: 'أدخل رقم هاتف العضو المسجل وحدد الدور والصلاحيات',
-      leadingIcon: Icons.person_add_alt_1_rounded,
-      child: AddMemberSheet(
-        assignableRoles: assignableRoles,
-        formKey: formKey,
-        phoneController: phoneController,
-        roleNotifier: roleNotifier,
-        statusNotifier: statusNotifier,
-        isSubmitting: isSubmitting,
-        onSubmit: () async {
-          if (!canAddMember) return;
-          if (!formKey.currentState!.validate()) return;
-          if (roleNotifier.value == null) {
-            CustomSnackbar.show(
-              title: 'تنبيه',
-              message: 'يرجى اختيار الدور الوظيفي للعضو.',
-              type: SnackType.warning,
-            );
-            return;
-          }
-
-          final posId = resolvedPosId;
-          if (posId == null) return;
-
-          isSubmitting.value = true;
-          try {
-            await addPosMemberUseCase(
-              posId: posId,
-              phoneNumber: phoneController.text.trim(),
-              roleId: roleNotifier.value!,
-              status: statusNotifier.value,
-            );
-            Get.back<void>();
-            CustomSnackbar.show(
-              title: 'تمت الإضافة بنجاح',
-              message: 'تمت إضافة العضو لنقطة البيع وتعيين الدور بنجاح.',
-              type: SnackType.success,
-            );
-            await loadMembers();
-          } catch (e) {
-            CustomSnackbar.show(
-              title: 'فشلت إضافة العضو',
-              message: e.toString(),
-              type: SnackType.error,
-            );
-          } finally {
-            isSubmitting.value = false;
-          }
-        },
-      ),
-    ).whenComplete(() {
-      phoneController.dispose();
-      roleNotifier.dispose();
-      statusNotifier.dispose();
-    });
+    await loadMembers();
   }
 
-  void openChangeRoleSheet(WorkspaceMemberEntity member) {
-    if (!canChangeMemberRole) return;
-    final formKey = GlobalKey<FormState>();
-    final reasonController = TextEditingController();
-    final roleNotifier = ValueNotifier<int?>(
-      assignableRoles.any((r) => r.roleId == member.roleId)
-          ? member.roleId
-          : (assignableRoles.isNotEmpty ? assignableRoles.first.roleId : null),
+  @override
+  Future<void> changeMemberStatus(
+    WorkspaceMemberEntity member,
+    String status,
+    String? reason,
+  ) async {
+    if (!canChangeMemberStatus || member.isOwner) {
+      throw const AppException('لا تملك صلاحية تغيير حالة هذا العضو.');
+    }
+    final posId = resolvedPosId;
+    if (posId == null) {
+      throw const AppException('تعذر تحديد نقطة البيع النشطة.');
+    }
+    await updatePosMemberStatusUseCase(
+      posId: posId,
+      userId: member.userId,
+      status: status,
+      reason: reason,
     );
-    final isSubmitting = false.obs;
-
-    CustomBottomSheet.show<void>(
-      title: 'تعديل الدور الوظيفي',
-      subtitle: 'ترقية أو تغيير صلاحيات ${member.displayFullName}',
-      leadingIcon: Icons.manage_accounts_rounded,
-      child: ChangeMemberRoleSheet(
-        member: member,
-        assignableRoles: assignableRoles,
-        formKey: formKey,
-        reasonController: reasonController,
-        roleNotifier: roleNotifier,
-        isSubmitting: isSubmitting,
-        onSubmit: () async {
-          if (!canChangeMemberRole) return;
-          if (!formKey.currentState!.validate()) return;
-          if (roleNotifier.value == null) {
-            CustomSnackbar.show(
-              title: 'تنبيه',
-              message: 'يرجى اختيار الدور الجديد.',
-              type: SnackType.warning,
-            );
-            return;
-          }
-
-          final posId = resolvedPosId;
-          if (posId == null) return;
-
-          isSubmitting.value = true;
-          try {
-            await updatePosMemberRoleUseCase(
-              posId: posId,
-              userId: member.userId,
-              roleId: roleNotifier.value!,
-              reason: reasonController.text.trim().isNotEmpty
-                  ? reasonController.text.trim()
-                  : null,
-            );
-            Get.back<void>();
-            CustomSnackbar.show(
-              title: 'تم تحديث الدور',
-              message:
-                  'تم تحديث دور وصلاحيات العضو ${member.displayFullName} بنجاح.',
-              type: SnackType.success,
-            );
-            await loadMembers();
-          } catch (e) {
-            CustomSnackbar.show(
-              title: 'فشل تحديث الدور',
-              message: e.toString(),
-              type: SnackType.error,
-            );
-          } finally {
-            isSubmitting.value = false;
-          }
-        },
-      ),
-    ).whenComplete(() {
-      reasonController.dispose();
-      roleNotifier.dispose();
-    });
+    await loadMembers();
   }
 
-  void promptToggleMemberStatus(WorkspaceMemberEntity member) {
-    if (!canChangeMemberStatus) return;
-    final willSuspend = member.isActive;
-    final nextStatus = willSuspend ? 'SUSPENDED' : 'ACTIVE';
-
-    MembershipActionDialogs.showToggleStatusDialog(
-      memberName: member.displayFullName,
-      willSuspend: willSuspend,
-      onConfirm: (reason) async {
-          if (!canChangeMemberStatus) return;
-        final posId = resolvedPosId;
-        if (posId == null) return;
-
-        try {
-          await updatePosMemberStatusUseCase(
-            posId: posId,
-            userId: member.userId,
-            status: nextStatus,
-            reason: reason,
-          );
-          CustomSnackbar.show(
-            title: willSuspend ? 'تم إيقاف العضوية' : 'تم تفعيل العضوية',
-            message: willSuspend
-                ? 'تم إيقاف صلاحيات ${member.displayFullName} مؤقتاً.'
-                : 'تمت إعادة تفعيل حساب ${member.displayFullName} بنجاح.',
-            type: SnackType.success,
-          );
-          await loadMembers();
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'فشل تعديل حالة العضوية',
-            message: e.toString(),
-            type: SnackType.error,
-          );
-        }
-      },
+  @override
+  Future<void> removeMember(
+    WorkspaceMemberEntity member,
+    String? reason,
+  ) async {
+    if (!canRemoveMember || member.isOwner) {
+      throw const AppException('لا تملك صلاحية إنهاء عضوية هذا العضو.');
+    }
+    final posId = resolvedPosId;
+    if (posId == null) {
+      throw const AppException('تعذر تحديد نقطة البيع النشطة.');
+    }
+    await removePosMemberUseCase(
+      posId: posId,
+      userId: member.userId,
+      reason: reason,
     );
+    await loadMembers();
   }
 
-  void promptRemoveMember(WorkspaceMemberEntity member) {
-    if (!canRemoveMember) return;
-    MembershipActionDialogs.showRemoveMemberDialog(
-      memberName: member.displayFullName,
-      onConfirm: (reason) async {
-          if (!canRemoveMember) return;
-        final posId = resolvedPosId;
-        if (posId == null) return;
-
-        try {
-          await removePosMemberUseCase(
-            posId: posId,
-            userId: member.userId,
-            reason: reason,
-          );
-          CustomSnackbar.show(
-            title: 'تم إنهاء العضوية',
-            message:
-                'تمت إزالة ${member.displayFullName} من طاقم نقطة البيع بنجاح.',
-            type: SnackType.success,
-          );
-          await loadMembers();
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'فشل إنهاء العضوية',
-            message: e.toString(),
-            type: SnackType.error,
-          );
-        }
-      },
-    );
-  }
 }
