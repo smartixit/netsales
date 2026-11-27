@@ -25,8 +25,8 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   bool get canDeletePartnerLink;
   bool get canViewPartnerWallet;
   bool get canViewRelationshipLifecycle;
-  void onToggleStatus(NetworkPosLinkEntity link);
-  void onDeleteLink(NetworkPosLinkEntity link);
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link);
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link);
   void openPosWalletStatement(NetworkPosLinkEntity link);
   void openRelationshipLifecycle(NetworkPosLinkEntity link);
   RxnInt get selectedScopeId;
@@ -90,10 +90,5 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   /// تبديل فتح وإغلاق أكورديون بطاقة الشريك
   void toggleAccordion(int linkId);
 
-  /// فتح الشيت التعريفي لبيانات الشريك
-  void openPartnerDetails(NetworkPosLinkEntity link);
-
-  /// معالجة النقر المباشر على كرت الشريك التجاري
-  void onPartnerCardTap(NetworkPosLinkEntity link) => openPartnerDetails(link);
 
 }
