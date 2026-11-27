@@ -83,9 +83,9 @@ final class PdfDocumentRenderer implements DocumentRenderer {
 
       document.addPage(
         pw.MultiPage(
-          theme: _pdfTheme(options.branding, textShapingProvider),
           pageTheme: pw.PageTheme(
             pageFormat: pageFormat,
+            theme: _pdfTheme(options.branding, textShapingProvider),
             margin: pw.EdgeInsets.fromLTRB(
               profile.marginLeft,
               profile.marginTop,
