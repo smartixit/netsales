@@ -214,6 +214,7 @@ void main() {
             child: const WorkspaceAppBar(
               title: 'شبكة يمن واي فاي',
               workspace: AppWorkspace.network,
+              onProfileTap: () {},
               entityInitials: 'شي',
               entityLogo: null,
             ),
