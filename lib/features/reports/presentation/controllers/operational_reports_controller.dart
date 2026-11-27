@@ -611,7 +611,7 @@ class OperationalReportsController extends GetxController {
 
     isSavingPreset.value = true;
     try {
-      await _beginActionLoading('savePreset');
+      await _beginActionLoading('جارٍ حفظ إعداد التقرير...');
       final existing = savedPresets.firstWhereOrNull(
         (item) => item.name.toLowerCase() == normalizedName.toLowerCase(),
       );
@@ -659,6 +659,7 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isSavingPreset.value = false;
       }
+    
       await _endActionLoading();
     }
   }
@@ -695,7 +696,7 @@ class OperationalReportsController extends GetxController {
 
     isDeletingPreset.value = true;
     try {
-      await _beginActionLoading('deletePreset');
+      await _beginActionLoading('جارٍ حذف الإعداد المحفوظ...');
       await deletePresetUseCase(
         presetId: preset.id,
         type: type,
@@ -720,6 +721,7 @@ class OperationalReportsController extends GetxController {
       if (scopeRevision == _scopeRevision) {
         isDeletingPreset.value = false;
       }
+    
       await _endActionLoading();
     }
   }
@@ -1023,7 +1025,7 @@ class OperationalReportsController extends GetxController {
 
     isExportActionRunning.value = true;
     try {
-      await _beginActionLoading('requestExport');
+      await _beginActionLoading('جارٍ إرسال طلب تجهيز ملف التقرير...');
       final result = await requestExportUseCase(
         type: type,
         networkId: networkId,
@@ -1051,6 +1053,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentRequest()) isExportActionRunning.value = false;
+    
       await _endActionLoading();
     }
   }
@@ -1086,9 +1089,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
-      await _beginActionLoading('printSummaryPdf');
-      await _beginActionLoading('shareSummaryPdf');
-      await _beginActionLoading('exportSummaryPdf');
+      await _beginActionLoading('جارٍ إنشاء ملف PDF للملخص...');
       await saveSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1118,6 +1119,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
       await _endActionLoading();
     }
   }
@@ -1162,7 +1164,7 @@ class OperationalReportsController extends GetxController {
     isPdfActionRunning.value = true;
 
     try {
-      await _beginActionLoading('exportDetailedPdf');
+      await _beginActionLoading('جارٍ تجهيز السجلات وإنشاء PDF التفصيلي...');
       final allRecords = await _loadAllRecordsForPdf(
         type: type,
         networkId: networkId,
@@ -1254,6 +1256,7 @@ class OperationalReportsController extends GetxController {
           scopeRevision == _scopeRevision) {
         isPdfActionRunning.value = false;
       }
+    
       await _endActionLoading();
     }
   }
@@ -1379,6 +1382,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ تجهيز ملف PDF للمشاركة...');
       final shared = await shareSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1408,6 +1412,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
       await _endActionLoading();
     }
   }
@@ -1443,6 +1448,7 @@ class OperationalReportsController extends GetxController {
 
     isPdfActionRunning.value = true;
     try {
+      await _beginActionLoading('جارٍ تجهيز التقرير للطباعة...');
       final printed = await printSummaryPdfUseCase(
         type: type,
         pageProfileId: pageProfileId,
@@ -1472,6 +1478,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentAction()) isPdfActionRunning.value = false;
+    
       await _endActionLoading();
     }
   }
@@ -1489,7 +1496,7 @@ class OperationalReportsController extends GetxController {
     isCheckingExport.value = true;
 
     try {
-      await _beginActionLoading('refreshExportStatus');
+      await _beginActionLoading('جارٍ التحقق من حالة التصدير وتنزيل الملف...');
       final status = await getExportStatusUseCase(job.exportId);
       if (!isCurrentJob()) return;
       exportJob.value = status;
@@ -1555,6 +1562,7 @@ class OperationalReportsController extends GetxController {
       }
     } finally {
       if (isCurrentJob()) isCheckingExport.value = false;
+    
       await _endActionLoading();
     }
   }
