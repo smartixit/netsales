@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/services/permission_service.dart';
@@ -143,43 +146,111 @@ void main() {
   });
 
   tearDown(() {
+    controller.onClose();
     Get.reset();
   });
 
   group('NetworkMembershipsController KPI & Filtering', () {
     test('Calculates KPI metrics accurately from members list', () async {
       await controller.loadMembers();
-      // Directly assign for synchronous assertion
-      controller.members.assignAll(repository.networkMembers);
 
       expect(controller.pageTitle, 'إدارة أعضاء الشبكة');
       expect(controller.isNetworkView, isTrue);
       expect(controller.expandedMemberId.value, isNull);
+      expect(controller.totalMembersCount, 4);
+      expect(controller.activeMembersCount, 2);
+      expect(controller.suspendedMembersCount, 1);
+      expect(controller.invitedMembersCount, 1);
     });
 
-    test('Filters members by status filter', () {
-      controller.members.assignAll(repository.networkMembers);
-
-      controller.setStatusFilter('ACTIVE');
-      expect(controller.statusFilter.value, 'ACTIVE');
+    test('Filters members on the server when status changes', () async {
+      await controller.loadMembers();
 
       controller.setStatusFilter('SUSPENDED');
+      await Future<void>.delayed(Duration.zero);
+
       expect(controller.statusFilter.value, 'SUSPENDED');
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.status.wireValue, 'SUSPENDED');
+      expect(repository.lastArgs['status'], 'SUSPENDED');
 
       controller.setStatusFilter(null);
+      await Future<void>.delayed(Duration.zero);
       expect(controller.statusFilter.value, isNull);
+      expect(controller.members, hasLength(4));
     });
 
-    test('Resets all filters', () {
-      controller.members.assignAll(repository.networkMembers);
-
+    test('Resets all server-side filters', () async {
+      await controller.loadMembers();
       controller.setStatusFilter('SUSPENDED');
-      controller.searchController.text = 'محمد';
-      expect(controller.statusFilter.value, 'SUSPENDED');
+      await Future<void>.delayed(Duration.zero);
+      controller.searchQuery.value = 'محمد';
+      await controller.loadMembers();
 
       controller.resetFilters();
+      await Future<void>.delayed(Duration.zero);
       expect(controller.statusFilter.value, isNull);
       expect(controller.searchQuery.value, isEmpty);
+      expect(repository.lastArgs['search'], isNull);
+      expect(repository.lastArgs['status'], isNull);
+      expect(controller.members, hasLength(4));
+    });
+
+    test('ignores stale list responses after a newer search completes', () async {
+      final staleResponse =
+          Completer<PaginatedList<WorkspaceMemberEntity>>();
+      repository.networkMembersCompleter = staleResponse;
+
+      final staleRequest = controller.loadMembers();
+      controller.searchQuery.value = 'محمد';
+      await controller.loadMembers();
+
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.displayFullName, 'محمد الموقوف');
+
+      staleResponse.complete(
+        PaginatedList<WorkspaceMemberEntity>(
+          items: repository.networkMembers,
+          meta: {
+            'summary': {
+              'total': 4,
+              'active': 2,
+              'suspended': 1,
+              'invited': 1,
+            },
+          },
+        ),
+      );
+      await staleRequest;
+
+      expect(controller.members, hasLength(1));
+      expect(controller.members.single.displayFullName, 'محمد الموقوف');
+    });
+
+    test('Loads subsequent member pages without duplicates', () async {
+      repository.networkNextCursor = 'next-members';
+      repository.networkNextPage = [
+        const WorkspaceMemberEntity(
+          id: 5,
+          tenantId: 5,
+          userId: 5,
+          roleId: 2,
+          statusRaw: 'ACTIVE',
+          statusLabel: 'نشط',
+          isOwner: false,
+        ),
+      ];
+
+      await controller.loadMembers();
+      expect(controller.hasMore, isTrue);
+      expect(controller.members, hasLength(4));
+
+      await controller.loadMoreMembers();
+
+      expect(controller.members, hasLength(5));
+      expect(controller.members.map((member) => member.id).toSet(), hasLength(5));
+      expect(repository.lastArgs['cursor'], 'next-members');
+      expect(controller.hasMore, isFalse);
     });
 
     test('Accordion expansion works exclusively for single member', () {

@@ -1,18 +1,16 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
-import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/qr_code_service.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_challenge_entity.dart';
+import 'package:netsales/features/commercial/presentation/services/repaint_boundary_capture_service.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_invitation_share_card.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/buttons/custom_button.dart';
@@ -52,36 +50,6 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
   final String posName;
   final GlobalKey _shareCardKey = GlobalKey();
 
-  Future<Uint8List> _captureShareCard(BuildContext context) async {
-    await precacheImage(
-      const AssetImage('assets/images/brand_icon.png'),
-      context,
-    );
-    await WidgetsBinding.instance.endOfFrame;
-    final renderObject =
-        _shareCardKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderRepaintBoundary) {
-      throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
-    }
-
-    final image = await renderObject.toImage(pixelRatio: 1);
-    try {
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (data == null) {
-        throw const AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
-      }
-      final bytes = data.buffer.asUint8List(
-        data.offsetInBytes,
-        data.lengthInBytes,
-      );
-      if (bytes.isEmpty) {
-        throw const AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
-      }
-      return bytes;
-    } finally {
-      image.dispose();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +223,11 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     loading: isExporting,
                     onPressed: isActive && !isExporting && !isRevoking
                         ? () => onShare(
-                            () => _captureShareCard(context),
+                            () => RepaintBoundaryCaptureService.capture(
+                              context: context,
+                              boundaryKey: _shareCardKey,
+                              preloadAsset: 'assets/images/brand_icon.png',
+                            ),
                           )
                         : null,
                   ),
@@ -269,7 +241,11 @@ class NetworkPosQrInvitationSheet extends StatelessWidget {
                     loading: isExporting,
                     onPressed: isActive && !isExporting && !isRevoking
                         ? () => onSave(
-                            () => _captureShareCard(context),
+                            () => RepaintBoundaryCaptureService.capture(
+                              context: context,
+                              boundaryKey: _shareCardKey,
+                              preloadAsset: 'assets/images/brand_icon.png',
+                            ),
                           )
                         : null,
                   ),

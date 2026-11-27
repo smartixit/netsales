@@ -1,20 +1,18 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/services/file_export_service.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/share_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/utils/date_formatter.dart';
 import 'package:netsales/features/commercial/domain/entities/network_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/network_linkable_pos_entity.dart';
@@ -29,17 +27,10 @@ import 'package:netsales/features/commercial/domain/usecases/search_network_link
 import 'package:netsales/features/commercial/domain/usecases/revoke_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/toggle_network_pos_link_status_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_action_dialogs.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
-import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_invitation_target_dialog.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_qr_invitation_sheet.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/dialogs/custom_dialog.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 import 'package:share_plus/share_plus.dart' show ShareResultStatus;
@@ -132,6 +123,8 @@ class NetworkCommercialDirectoryController
 
   String? _nextCursor;
   int _listRevision = 0;
+  int _loadMoreRevision = 0;
+  final Set<int> _pendingLinkMutations = <int>{};
 
   @override
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
@@ -139,22 +132,29 @@ class NetworkCommercialDirectoryController
   @override
   bool get isNetworkView => true;
 
+  @override
   int get totalPartnersCount => links.length;
 
+  @override
   int get activePartnersCount => links.where((link) => link.isActive).length;
 
+  @override
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
   bool get canCreateInvitation =>
       PermissionService.to.can(AppPermissions.networkCreateLinkChallenge);
   bool get canRevokeInvitation =>
       PermissionService.to.can(AppPermissions.networkRevokeLinkChallenge);
+  @override
   bool get canTogglePartnerLink =>
       PermissionService.to.can(AppPermissions.networkTogglePosLink);
+  @override
   bool get canDeletePartnerLink =>
       PermissionService.to.can(AppPermissions.networkDeletePosLink);
+  @override
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  @override
   bool get canViewRelationshipLifecycle =>
       PermissionService.to.can(AppPermissions.networkViewPosAgreements) ||
       PermissionService.to.can(AppPermissions.networkViewPosLinkEvents) ||
@@ -183,18 +183,10 @@ class NetworkCommercialDirectoryController
   String get searchHint => 'البحث باسم نقطة البيع أو المعرف أو الهاتف...';
 
   @override
-  Widget? get headerAction {
-    if (!canCreateInvitation) return null;
-    return CustomButton.icon(
-      tooltip: 'دعوة نقطة بيع',
-      icon: Icons.qr_code_rounded,
-      shape: AppButtonShape.rounded,
-      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
-      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
-      size: AppButtonSize.small,
-      onPressed: openCreateQrInvitation,
-    );
-  }
+  bool get hasHeaderAction => canCreateInvitation;
+
+  @override
+  void onHeaderAction() => openCreateQrInvitation();
 
   @override
   void onInit() {
@@ -272,6 +264,7 @@ class NetworkCommercialDirectoryController
     bool clearOnStart = false,
   }) async {
     final currentRevision = ++_listRevision;
+    _loadMoreRevision++;
     final netId = resolvedNetworkId;
 
     if (netId == null) {
@@ -328,13 +321,22 @@ class NetworkCommercialDirectoryController
     final netId = resolvedNetworkId;
     if (netId == null || !hasMore || isLoadingMore.value) return;
 
+    // Bind this page request to the exact directory query that produced its cursor.
+    // A response from an older workspace/search/filter must never contaminate the
+    // currently visible result set.
+    final requestRevision = _listRevision;
+    final requestToken = ++_loadMoreRevision;
+    final requestSearch = searchQuery.value.trim();
+    final requestStatus = statusFilter.value;
+    final requestCursor = _nextCursor;
+
     isLoadingMore.value = true;
     loadMoreError.value = null;
 
     final bool? statusParam;
-    if (statusFilter.value == '1' || statusFilter.value == 'true') {
+    if (requestStatus == '1' || requestStatus == 'true') {
       statusParam = true;
-    } else if (statusFilter.value == '0' || statusFilter.value == 'false') {
+    } else if (requestStatus == '0' || requestStatus == 'false') {
       statusParam = false;
     } else {
       statusParam = null;
@@ -345,19 +347,33 @@ class NetworkCommercialDirectoryController
           await getNetworkPosListUseCase(
             networkId: netId,
             status: statusParam,
-            search: searchQuery.value.trim().isEmpty
-                ? null
-                : searchQuery.value.trim(),
-            cursor: _nextCursor,
+            search: requestSearch.isEmpty ? null : requestSearch,
+            cursor: requestCursor,
             perPage: 15,
           );
 
+      if (requestRevision != _listRevision ||
+          resolvedNetworkId != netId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus ||
+          _nextCursor != requestCursor) {
+        return;
+      }
+
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
-      isLoadingMore.value = false;
     } catch (e) {
-      isLoadingMore.value = false;
+      if (requestRevision != _listRevision ||
+          resolvedNetworkId != netId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus) {
+        return;
+      }
       loadMoreError.value = AppException.sanitizeMessage(e.toString());
+    } finally {
+      if (requestToken == _loadMoreRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -389,24 +405,6 @@ class NetworkCommercialDirectoryController
   }
 
   @override
-  void openPartnerDetails(NetworkPosLinkEntity link) {
-    CustomBottomSheet.show<void>(
-      title: 'ملف نقطة البيع',
-      subtitle: 'البيانات التجارية المعتمدة للشريك',
-      leadingIcon: Icons.storefront_rounded,
-      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: true),
-    );
-  }
-
-  @override
-  void onPartnerCardTap(NetworkPosLinkEntity link) {
-    if (canViewPartnerWallet) {
-      openPosWalletStatement(link);
-      return;
-    }
-    openPartnerDetails(link);
-  }
-
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(
@@ -422,6 +420,7 @@ class NetworkCommercialDirectoryController
   }
 
   /// فتح دفتر أستاذ وكشف حساب محفظة نقطة البيع
+  @override
   void openPosWalletStatement(NetworkPosLinkEntity link) {
     Get.toNamed<void>(
       AppRoutes.posWalletStatement,
@@ -430,154 +429,70 @@ class NetworkCommercialDirectoryController
   }
 
   @override
-  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
-    final colors = context.colors;
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
+  RxnInt get selectedScopeId => selectedNetworkId;
 
-    return [
-      CustomKpiCardData(
-        label: 'الكل',
-        count: totalPartnersCount,
-        icon: Icons.all_inbox_rounded,
-        accentColor: colors.primary,
-        statusKey: null,
-      ),
-      CustomKpiCardData(
-        label: activePres.label,
-        count: activePartnersCount,
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-        accentColor: activePres.tone.color(context),
-        statusKey: '1',
-      ),
-      CustomKpiCardData(
-        label: inactivePres.label,
-        count: inactivePartnersCount,
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-        accentColor: inactivePres.tone.color(context),
-        statusKey: '0',
-      ),
-    ];
+  @override
+  String get scopeFilterLabel => 'تصفية بحسب الشبكة';
+
+  @override
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions =>
+      initialNetworkId != null || authorizedNetworks.length <= 1
+          ? const []
+          : authorizedNetworks.map((network) => CustomSearchFilterOption<int?>(
+                label: network.networkName,
+                value: network.networkId,
+                icon: Icons.hub_rounded,
+              )).toList(growable: false);
+
+  @override
+  void onScopeFilterChanged(int? id) => onNetworkFilterChanged(id);
+
+  @override
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link) async {
+    if (!canTogglePartnerLink) {
+      throw const AppException('لا تملك صلاحية تغيير حالة الارتباط التجاري.');
+    }
+    final linkId = link.networkPosId;
+    if (!_pendingLinkMutations.add(linkId)) {
+      throw const AppException('هناك عملية أخرى قيد التنفيذ لهذا الارتباط.');
+    }
+
+    try {
+      final updated = await toggleNetworkPosLinkStatusUseCase(linkId);
+      final index = links.indexWhere((item) => item.networkPosId == linkId);
+      if (index == -1) return;
+
+      final filter = statusFilter.value;
+      final noLongerMatchesFilter =
+          ((filter == '1' || filter == 'true') && !updated.isActive) ||
+          ((filter == '0' || filter == 'false') && updated.isActive);
+
+      if (noLongerMatchesFilter) {
+        links.removeAt(index);
+      } else {
+        links[index] = updated;
+      }
+    } finally {
+      _pendingLinkMutations.remove(linkId);
+    }
   }
 
   @override
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  ) {
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link) async {
+    if (!canDeletePartnerLink) {
+      throw const AppException('لا تملك صلاحية فك الارتباط التجاري.');
+    }
+    final linkId = link.networkPosId;
+    if (!_pendingLinkMutations.add(linkId)) {
+      throw const AppException('هناك عملية أخرى قيد التنفيذ لهذا الارتباط.');
+    }
 
-    return [
-      const CustomSearchFilterOption<String?>(
-        label: 'جميع الشركاء',
-        value: null,
-        icon: Icons.all_inbox_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: activePres.label,
-        value: '1',
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: inactivePres.label,
-        value: '0',
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildExtraFilters(BuildContext context) {
-    if (initialNetworkId != null) return null;
-    final networks = authorizedNetworks;
-    if (networks.length <= 1) return null;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: CustomDropdown<int>(
-        label: 'تصفية بحسب الشبكة',
-        searchEnabled: false,
-        rxValue: selectedNetworkId,
-        items: networks.map((net) {
-          return DropdownItem<int>(
-            value: net.networkId,
-            child: Text(net.networkName),
-          );
-        }).toList(),
-        onChanged: onNetworkFilterChanged,
-      ),
-    );
-  }
-
-  @override
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link) {
-    return CommercialPartnerCardActions(
-      link: link,
-      isNetworkView: true,
-      onViewDetails: () => openPartnerDetails(link),
-      onToggleStatus: canTogglePartnerLink ? () => onToggleStatus(link) : null,
-      onDelete: canDeletePartnerLink ? () => onDeleteLink(link) : null,
-      onViewWallet: canViewPartnerWallet ? () => openPosWalletStatement(link) : null,
-      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
-    );
-  }
-
-  void onToggleStatus(NetworkPosLinkEntity link) {
-    if (!canTogglePartnerLink) return;
-    CommercialActionDialogs.showToggleStatusDialog(
-      partnerName: link.displayPosName,
-      willDeactivate: link.isActive,
-      onConfirm: () async {
-        if (!canTogglePartnerLink) return;
-        try {
-          final updated = await toggleNetworkPosLinkStatusUseCase(
-            link.networkPosId,
-          );
-          final index = links.indexWhere(
-            (item) => item.networkPosId == link.networkPosId,
-          );
-          if (index != -1) {
-            links[index] = updated;
-          }
-          await CustomAnimationOverlay.showSuccess(
-            message: updated.isActive
-                ? 'تم تنشيط الارتباط بنجاح'
-                : 'تم تجميد الارتباط بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
-    );
-  }
-
-  void onDeleteLink(NetworkPosLinkEntity link) {
-    if (!canDeletePartnerLink) return;
-    CommercialActionDialogs.showUnlinkDialog(
-      partnerName: link.displayPosName,
-      onConfirm: () async {
-        if (!canDeletePartnerLink) return;
-        try {
-          await deleteNetworkPosLinkUseCase(link.networkPosId);
-          links.removeWhere(
-            (element) => element.networkPosId == link.networkPosId,
-          );
-          await CustomAnimationOverlay.showSuccess(
-            message: 'تم فك الارتباط التجاري بنجاح',
-          );
-        } catch (e) {
-          CustomSnackbar.show(
-            title: 'خطأ',
-            message: AppException.sanitizeMessage(e.toString()),
-            type: SnackType.error,
-          );
-        }
-      },
-    );
+    try {
+      await deleteNetworkPosLinkUseCase(linkId);
+      links.removeWhere((item) => item.networkPosId == linkId);
+    } finally {
+      _pendingLinkMutations.remove(linkId);
+    }
   }
 
   void onInvitationBusinessCodeChanged(String value) {

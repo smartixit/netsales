@@ -5,6 +5,7 @@ import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 
 void main() {
   Widget buildTestableWidget(Widget child) {
@@ -42,9 +43,15 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () {},
-            onToggleStatus: () {},
-            onDelete: () {},
+            onTap: () {},
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () {},
+              onToggleStatus: () {},
+              onDelete: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );
@@ -64,9 +71,15 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () => detailsTapped = true,
-            onToggleStatus: () {},
-            onDelete: () {},
+            onTap: () {},
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () => detailsTapped = true,
+              onToggleStatus: () {},
+              onDelete: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );
@@ -85,8 +98,13 @@ void main() {
           CommercialPartnerCard(
             link: link,
             isNetworkView: true,
-            onDetails: () {},
             onTap: () => cardBodyTapped = true,
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );

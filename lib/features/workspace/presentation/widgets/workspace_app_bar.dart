@@ -13,14 +13,11 @@ import 'package:netsales/core/themes/app_breakpoints.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/core/themes/app_typography.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_badge_button.dart';
-import 'package:netsales/features/workspace/presentation/controllers/workspace_coordinator_controller.dart';
-import 'package:netsales/features/workspace/presentation/controllers/workspace_entity_picker_controller.dart';
-import 'package:netsales/features/workspace/presentation/widgets/workspace_entity_picker_sheet.dart';
-import 'package:netsales/features/workspace/presentation/widgets/workspace_executive_profile_sheet.dart';
 import 'package:netsales/widgets/badges/custom_status_badge.dart';
 import 'package:netsales/widgets/feedback/custom_skeleton_shimmer.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
 import 'package:netsales/widgets/interactions/custom_interactive_bounce.dart';
+import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 
 /// شريط التطبيق القيادي الفاخر العائم والضبابي لمساحات العمل (WorkspaceAppBar - Executive Frosted Glass Floating Edition)
 /// مكوّن عرض نقي خاضع بالكامل للحوكمة ولا يحتوي أي منطق أعمال أو استعلامات جلسة
@@ -33,8 +30,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? entityInitials;
   final String? userProfileLogo;
   final String? userInitials;
-  final VoidCallback? onProfileTap;
-  final VoidCallback? onEntityPickerTap;
+  final VoidCallback onProfileTap;
+  final VoidCallback onEntityPickerTap;
   final List<Widget>? actions;
 
   const WorkspaceAppBar({
@@ -47,8 +44,8 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.entityInitials,
     this.userProfileLogo,
     this.userInitials,
-    this.onProfileTap,
-    this.onEntityPickerTap,
+    required this.onProfileTap,
+    required this.onEntityPickerTap,
     this.actions,
   });
 
@@ -125,11 +122,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       customDimension: 46,
                       pulseColor: colors.primary,
                       onTap:
-                          onProfileTap ??
-                          () => _showExecutiveProfile(
-                            context,
-                            effectivePresentation,
-                          ),
+                          onProfileTap,
                     ),
                   AppSpacing.hSm,
 
@@ -169,9 +162,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                             ],
                           )
                         : CustomInteractiveBounce(
-                            onTap:
-                                onEntityPickerTap ??
-                                () => _showEntityPicker(context),
+                            onTap: onEntityPickerTap,
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: AlignmentDirectional.centerStart,
@@ -220,31 +211,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ...?actions,
                   const NotificationBadgeButton(),
                   AppSpacing.hSm,
-                  CustomInteractiveBounce(
-                    onTap: () =>
-                        _showExecutiveProfile(context, effectivePresentation),
-                    child: Container(
-                      width: 42.r,
-                      height: 42.r,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF131D2E)
-                            : colors.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.1)
-                              : colors.outlineVariant,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.tune_rounded,
-                        size: 20.r,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
+                  const CustomThemeToggleButton(size: 20),
                 ],
               ),
             ),
@@ -254,31 +221,4 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  void _showEntityPicker(BuildContext context) {
-    WorkspaceEntityPickerController.to.prepareForWorkspace(workspace);
-    WorkspaceEntityPickerSheet.show(context, currentWorkspace: workspace);
-  }
-
-  void _showExecutiveProfile(
-    BuildContext context,
-    EnumPresentation presentation,
-  ) {
-    final coordinator = WorkspaceCoordinatorController.to;
-    WorkspaceExecutiveProfileSheet.show(
-      context,
-      currentWorkspace: workspace,
-      userName: coordinator.currentUserName,
-      userRole: presentation.label,
-      userInitials: coordinator.currentUserInitials,
-      userPhoneNumber: coordinator.currentUserPhoneNumber,
-      userProfileLogo: coordinator.currentUserProfileLogo,
-      canSwitchWorkspace: coordinator.canSwitchWorkspace,
-      switchWorkspaceTooltip: coordinator.switchWorkspaceTooltip,
-      onSwitchWorkspace: coordinator.toggleWorkspace,
-      onLogout: coordinator.logout,
-      onOpenSecuritySettings: coordinator.openSecuritySettings,
-      onOpenActiveSessions: coordinator.openActiveSessions,
-      onToggleTheme: coordinator.toggleTheme,
-    );
-  }
 }

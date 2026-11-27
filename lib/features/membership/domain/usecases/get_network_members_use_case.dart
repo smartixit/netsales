@@ -1,3 +1,4 @@
+import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 import 'package:netsales/features/membership/domain/repositories/membership_repository.dart';
 
@@ -7,7 +8,19 @@ class GetNetworkMembersUseCase {
 
   const GetNetworkMembersUseCase(this._repository);
 
-  Future<List<WorkspaceMemberEntity>> call(int networkId) {
-    return _repository.getNetworkMembers(networkId);
+  Future<PaginatedList<WorkspaceMemberEntity>> call(
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) {
+    return _repository.getNetworkMembers(
+      networkId,
+      search: search,
+      status: status,
+      cursor: cursor,
+      perPage: perPage,
+    );
   }
 }

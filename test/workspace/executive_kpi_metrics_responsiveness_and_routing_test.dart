@@ -7,6 +7,7 @@ import 'package:netsales/features/workspace/presentation/widgets/executive_metri
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
 import 'package:netsales/widgets/dashboard_metrics/dashboard_metrics.dart';
 import 'package:netsales/widgets/images/custom_avatar_badge.dart';
+import 'package:netsales/widgets/buttons/custom_theme_toggle_button.dart';
 
 void main() {
   final sampleMetrics = [
@@ -210,9 +211,11 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
-            child: const WorkspaceAppBar(
+            child: WorkspaceAppBar(
               title: 'شبكة يمن واي فاي',
               workspace: AppWorkspace.network,
+              onProfileTap: () {},
+              onEntityPickerTap: () {},
               entityInitials: 'شي',
               entityLogo: null,
             ),
@@ -228,13 +231,35 @@ void main() {
     );
 
     testWidgets(
+      'Uses the shared theme toggle instead of the legacy sheet trigger',
+      (tester) async {
+        await tester.pumpWidget(
+          buildHarness(
+            child: WorkspaceAppBar(
+              title: 'مساحة العمل',
+              workspace: AppWorkspace.network,
+              onProfileTap: () {},
+              onEntityPickerTap: () {},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CustomThemeToggleButton), findsOneWidget);
+        expect(find.byIcon(Icons.tune_rounded), findsNothing);
+      },
+    );
+
+    testWidgets(
       'Falls back to workspace letter when entity initials are empty',
       (tester) async {
         await tester.pumpWidget(
           buildHarness(
-            child: const WorkspaceAppBar(
+            child: WorkspaceAppBar(
               title: 'نقطة بيع الأمل',
               workspace: AppWorkspace.pos,
+              onProfileTap: () {},
+              onEntityPickerTap: () {},
             ),
           ),
         );

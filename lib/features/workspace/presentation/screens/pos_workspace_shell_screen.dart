@@ -9,6 +9,7 @@ import 'package:netsales/features/profile/presentation/screens/profile_screen.da
 import 'package:netsales/features/reports/presentation/screens/operational_reports_screen.dart';
 import 'package:netsales/features/requests/presentation/screens/procurement_orders_screen.dart';
 import 'package:netsales/features/workspace/presentation/controllers/pos_workspace_controller.dart';
+import 'package:netsales/features/workspace/presentation/flows/workspace_entity_picker_coordinator.dart';
 import 'package:netsales/features/workspace/presentation/widgets/adaptive_workspace_scaffold.dart';
 import 'package:netsales/features/workspace/presentation/widgets/pos_workspace_dashboard.dart';
 import 'package:netsales/features/workspace/presentation/widgets/workspace_app_bar.dart';
@@ -93,6 +94,7 @@ class PosWorkspaceShell extends GetView<PosWorkspaceController> {
           entityLogo: controller.entityLogo,
           entityInitials: controller.entityInitials,
           onProfileTap: controller.openProfile,
+          onEntityPickerTap: () => const WorkspaceEntityPickerCoordinator().open(context, AppWorkspace.pos),
         ),
         items: items,
         mobileItems: items.take(4).toList(growable: false),

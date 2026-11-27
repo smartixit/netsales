@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/models/paginated_list.dart';
+import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/enums/linking_challenge_status.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
@@ -34,6 +37,7 @@ import 'package:netsales/features/commercial/presentation/controllers/pos_commer
 
 class _FakeCommercialRepository implements CommercialRepository {
   final List<NetworkPosLinkEntity> links;
+  Completer<PaginatedList<NetworkPosLinkEntity>>? networkListCompleter;
 
   _FakeCommercialRepository(this.links);
 
@@ -102,6 +106,9 @@ class _FakeCommercialRepository implements CommercialRepository {
     String? cursor,
     int? perPage,
   }) async {
+    final pendingResponse = networkListCompleter;
+    networkListCompleter = null;
+    if (pendingResponse != null) return pendingResponse.future;
     var filtered = links.where((l) => l.networkId == networkId);
     if (status != null) {
       filtered = filtered.where((l) => l.isActive == status);
@@ -439,8 +446,14 @@ void main() {
       expect(controller.canDeletePartnerLink, isFalse);
       expect(controller.canRevokeInvitation, isFalse);
 
-      controller.onToggleStatus(controller.links.first);
-      controller.onDeleteLink(controller.links.first);
+      await expectLater(
+        controller.togglePartnerLink(controller.links.first),
+        throwsA(isA<AppException>()),
+      );
+      await expectLater(
+        controller.deletePartnerLink(controller.links.first),
+        throwsA(isA<AppException>()),
+      );
       expect(repo.links, hasLength(2));
 
       PermissionService.instance.setWorkspaceContext(
@@ -493,28 +506,87 @@ void main() {
       expect(controller.links.first.posId, equals(20));
     });
 
-    test('Toggles partner status locally and updates entity', () async {
+    test('Toggles partner status and updates the visible entity', () async {
       await controller.loadInitialData();
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [AppPermissions.networkTogglePosLink],
+      );
       final link = controller.links.first;
 
-      final updated = await controller.toggleNetworkPosLinkStatusUseCase(
-        link.networkPosId,
+      await controller.togglePartnerLink(link);
+
+      expect(
+        controller.links.firstWhere(
+          (item) => item.networkPosId == link.networkPosId,
+        ).isActive,
+        isFalse,
       );
-      expect(updated.isActive, isFalse);
     });
 
-    test('Deletes partner link and removes from list', () async {
+    test('Removes a partner link after successful unlink', () async {
       await controller.loadInitialData();
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [AppPermissions.networkDeletePosLink],
+      );
       final link = controller.links.first;
 
-      await controller.deleteNetworkPosLinkUseCase(link.networkPosId);
-      controller.links.removeWhere(
-        (element) => element.networkPosId == link.networkPosId,
+      await controller.deletePartnerLink(link);
+
+      expect(
+        controller.links.any((item) => item.networkPosId == link.networkPosId),
+        isFalse,
       );
       expect(controller.links.length, equals(1));
     });
 
-    testWidgets('onPartnerCardTap delegates to openPosWalletStatement', (tester) async {
+    test('ignores stale directory responses after a newer search completes', () async {
+      await controller.loadInitialData();
+      final staleResponse =
+          Completer<PaginatedList<NetworkPosLinkEntity>>();
+      repo.networkListCompleter = staleResponse;
+
+      final staleRequest = controller.loadLinks(
+        isRefresh: true,
+        clearOnStart: true,
+      );
+      controller.searchQuery.value = 'لا توجد نقطة بهذا الاسم';
+      await controller.loadLinks(isRefresh: true, clearOnStart: true);
+
+      expect(controller.links, isEmpty);
+
+      staleResponse.complete(
+        PaginatedList<NetworkPosLinkEntity>(items: repo.links),
+      );
+      await staleRequest;
+
+      expect(controller.links, isEmpty);
+    });
+
+    test('removes a toggled link when it no longer matches the active filter', () async {
+      await controller.loadInitialData();
+      controller.statusFilter.value = '1';
+      await controller.loadLinks();
+      expect(controller.links, hasLength(1));
+
+      PermissionService.instance.setWorkspaceContext(
+        scope: RoleScope.network,
+        tenantId: 1,
+        roleKey: 'NETWORK_OWNER',
+        permissions: const [AppPermissions.networkTogglePosLink],
+      );
+      await controller.togglePartnerLink(controller.links.first);
+
+      expect(controller.statusFilter.value, '1');
+      expect(controller.links, isEmpty);
+    });
+
+    testWidgets('wallet access opens the POS wallet statement route', (tester) async {
       PermissionService.instance.setWorkspaceContext(
         scope: RoleScope.network,
         tenantId: 1,
@@ -535,7 +607,7 @@ void main() {
       await controller.loadInitialData();
       final link = controller.links.first;
 
-      controller.onPartnerCardTap(link);
+      controller.openPosWalletStatement(link);
       await tester.pumpAndSettle();
 
       expect(Get.currentRoute, AppRoutes.posWalletStatement);

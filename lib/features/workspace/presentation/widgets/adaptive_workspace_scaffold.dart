@@ -38,7 +38,7 @@ class AdaptiveWorkspaceScaffold extends StatelessWidget {
         : 0;
     final activeMobileIndex = mobileCurrentIndex >= 0 && mobileCurrentIndex < 4
         ? mobileCurrentIndex
-        : 0;
+        : -1;
 
     if (AppBreakpoints.usesBottomBar(context)) {
       final floatingItems = mobileItems

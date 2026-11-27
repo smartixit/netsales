@@ -4,15 +4,19 @@ import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/controllers/network_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/controllers/pos_memberships_controller.dart';
+import 'package:netsales/features/membership/presentation/flows/membership_presentation_coordinator.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_card.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
+import 'package:netsales/features/membership/presentation/widgets/membership_kpi_strip.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
+import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
 
 /// واجهة استعراض وإدارة أعضاء مساحة العمل الموحدة (MembershipsScreen)
 ///
@@ -40,9 +44,13 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
 
   @override
   Widget build(BuildContext context) {
+    final actions = MembershipPresentationCoordinator(controller);
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshMembers,
+      onLoadMore: controller.loadMoreMembers,
+      hasMore: controller.hasMore,
+      hasMorePredicate: () => controller.hasMore,
       scrollKey: const PageStorageKey<String>('memberships-screen-scroll'),
       slivers: [
         // 1. ترويسة الصفحة وبطاقات المؤشرات والبحث والتصفية
@@ -54,18 +62,18 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                 title: controller.pageTitle,
                 subtitle: controller.pageSubtitle,
                 icon: controller.pageIcon,
-                action: controller.headerAction,
+                action: controller.canAddMember
+                    ? CustomButton.primary(
+                        text: 'إضافة عضو',
+                        icon: Icons.person_add_alt_1_rounded,
+                        shape: AppButtonShape.rounded,
+                        size: AppButtonSize.small,
+                        onPressed: actions.openAddMemberSheet,
+                      )
+                    : null,
               ),
 
-              Obx(
-                () => CustomStatusSummaryStrip(
-                  cards: controller.buildKpiCards(context),
-                  isLoading:
-                      controller.isLoading.value && controller.members.isEmpty,
-                  selectedKey: controller.statusFilter.value,
-                  onSelectKey: controller.setStatusFilter,
-                ),
-              ),
+              MembershipKpiStrip(controller: controller),
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
@@ -73,17 +81,12 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   selectedFilter: controller.statusFilter.value,
-                  filterOptions: controller.buildFilterOptions(context),
+                  filterOptions: controller.filterOptions,
                   onFilterChanged: controller.setStatusFilter,
                   onClearSearch: controller.searchController.clear,
                 ),
               ),
 
-              Obx(
-                () =>
-                    controller.buildExtraFilters(context) ??
-                    const SizedBox.shrink(),
-              ),
               SizedBox(height: AppSpacing.sm),
             ],
           ),
@@ -158,13 +161,38 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                   isNetworkView: controller.isNetworkView,
                   isExpanded: isExpanded,
                   onToggleExpand: () => controller.toggleAccordion(member.id),
-                  onDetails: () => controller.openMemberDetails(member),
-                  actions: controller.buildCardActions(context, member),
+                  onDetails: () => actions.openMemberDetails(member),
+                  actions: MembershipCardActions(
+                    member: member,
+                    isNetworkView: controller.isNetworkView,
+                    onDetails: () => actions.openMemberDetails(member),
+                    onMoreActions: () => actions.showMemberActions(member),
+                    onChangeRole: controller.canChangeMemberRole && !member.isOwner
+                        ? () => actions.openChangeRoleSheet(member)
+                        : null,
+                    onToggleStatus: controller.canChangeMemberStatus && !member.isOwner
+                        ? () => actions.promptToggleMemberStatus(member)
+                        : null,
+                    onRemove: controller.canRemoveMember && !member.isOwner
+                        ? () => actions.promptRemoveMember(member)
+                        : null,
+                  ),
                 );
               });
             }, childCount: memberCount == 0 ? 0 : memberCount * 2 - 1),
           );
         }),
+
+        SliverToBoxAdapter(
+          child: Obx(
+            () => CustomCursorLoadMore(
+              hasMore: controller.hasMore,
+              isLoading: controller.isLoadingMore.value,
+              error: controller.loadMoreError.value,
+              onPressed: controller.loadMoreMembers,
+            ),
+          ),
+        ),
       ],
     );
 

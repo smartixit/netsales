@@ -585,7 +585,7 @@ class PosWorkspaceController extends GetxController {
   void openNewProcurementOrder() =>
       Get.toNamed<void>(AppRoutes.newProcurementOrder);
 
-  void openPurchaseInvoices() => Get.toNamed<void>(AppRoutes.purchaseInvoices);
+  void openPurchaseInvoices() => onNavItemSelected(2);
 
   void openWalletStatement() => Get.toNamed<void>(AppRoutes.posWalletStatement);
 
@@ -609,7 +609,7 @@ class PosWorkspaceController extends GetxController {
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;
-    if (index < 4) selectedMobileNavIndex.value = index;
+    selectedMobileNavIndex.value = index < 4 ? index : -1;
   }
 
   bool get canViewMembers =>
@@ -624,7 +624,14 @@ class PosWorkspaceController extends GetxController {
   }
 
   void openProfile() => onNavItemSelected(3);
-  void openTeamManagement() => onNavItemSelected(4);
-  void openOperationalReports() => onNavItemSelected(5);
-  void openLinkedNetworks() => onNavItemSelected(6);
+
+  void openTeamManagement() {
+    if (canViewMembers) onNavItemSelected(4);
+  }
+
+  void openOperationalReports() =>
+      onNavItemSelected(canViewMembers ? 5 : 4);
+
+  void openLinkedNetworks() =>
+      onNavItemSelected(canViewMembers ? 7 : 6);
 }

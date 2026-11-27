@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
+import 'package:netsales/features/commercial/presentation/flows/commercial_presentation_coordinator.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_kpi_strip.dart';
 import 'package:netsales/widgets/cards/custom_page_hero_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
 import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/feedback/states/custom_error_state.dart';
 import 'package:netsales/widgets/foundation/custom_app_scaffold.dart';
-import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
+import 'package:netsales/widgets/buttons/custom_button.dart';
+import 'package:netsales/widgets/inputs/custom_dropdown.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_bar.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:netsales/widgets/lists/custom_cursor_load_more.dart';
@@ -39,6 +43,7 @@ class CommercialDirectoryScreen
 
   @override
   Widget build(BuildContext context) {
+    final presentation = CommercialPresentationCoordinator(controller);
     final content = CustomRefreshablePage.slivers(
       embedded: embedded,
       onRefresh: controller.refreshDirectory,
@@ -57,19 +62,23 @@ class CommercialDirectoryScreen
                   title: controller.pageTitle,
                   subtitle: controller.pageSubtitle,
                   icon: controller.pageIcon,
-                  action: controller.headerAction,
+                  action: controller.hasHeaderAction
+                      ? CustomButton.icon(
+                          tooltip: controller.isNetworkView ? 'دعوة نقطة بيع' : 'ربط مزود شبكة',
+                          icon: controller.isNetworkView
+                              ? Icons.qr_code_rounded
+                              : Icons.qr_code_scanner_rounded,
+                          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          shape: AppButtonShape.rounded,
+                          size: AppButtonSize.small,
+                          onPressed: controller.onHeaderAction,
+                        )
+                      : null,
                 ),
               ),
 
-              Obx(
-                () => CustomStatusSummaryStrip(
-                  cards: controller.buildKpiCards(context),
-                  isLoading:
-                      controller.isLoading.value && controller.links.isEmpty,
-                  selectedKey: controller.statusFilter.value,
-                  onSelectKey: controller.setStatusFilter,
-                ),
-              ),
+              CommercialKpiStrip(controller: controller),
 
               Obx(
                 () => CustomSearchFilterBar<String?>(
@@ -77,17 +86,29 @@ class CommercialDirectoryScreen
                   searchQuery: controller.searchQuery.value,
                   searchHint: controller.searchHint,
                   selectedFilter: controller.statusFilter.value,
-                  filterOptions: controller.buildFilterOptions(context),
+                  filterOptions: controller.filterOptions,
                   onFilterChanged: controller.setStatusFilter,
                   onClearSearch: controller.searchController.clear,
                 ),
               ),
 
-              Obx(
-                () =>
-                    controller.buildExtraFilters(context) ??
-                    const SizedBox.shrink(),
-              ),
+              Obx(() {
+                final options = controller.scopeFilterOptions;
+                if (options.isEmpty) return const SizedBox.shrink();
+                return Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: CustomDropdown<int>(
+                    label: controller.scopeFilterLabel,
+                    searchEnabled: false,
+                    rxValue: controller.selectedScopeId,
+                    items: options.map((option) => DropdownItem<int>(
+                      value: option.value!,
+                      child: Text(option.label),
+                    )).toList(growable: false),
+                    onChanged: controller.onScopeFilterChanged,
+                  ),
+                );
+              }),
               SizedBox(height: AppSpacing.sm),
             ],
           ),
@@ -169,9 +190,21 @@ class CommercialDirectoryScreen
                   isExpanded: isExpanded,
                   onToggleExpand: () =>
                       controller.toggleAccordion(link.networkPosId),
-                  onDetails: () => controller.openPartnerDetails(link),
-                  onTap: () => controller.onPartnerCardTap(link),
-                  actions: controller.buildCardActions(context, link),
+                  onTap: controller.canViewPartnerWallet
+                      ? () => controller.openPosWalletStatement(link)
+                      : () => presentation.openPartnerDetails(link),
+                  actions: CommercialPartnerCardActions(
+                    link: link,
+                    isNetworkView: controller.isNetworkView,
+                    onViewDetails: () => presentation.openPartnerDetails(link),
+                    onMoreActions: () => presentation.showPartnerActions(link),
+                    onToggleStatus: controller.canTogglePartnerLink
+                        ? () => presentation.togglePartnerStatus(link)
+                        : null,
+                    onDelete: controller.canDeletePartnerLink
+                        ? () => presentation.unlinkPartner(link)
+                        : null,
+                  ),
                 );
               });
             }, childCount: linkCount == 0 ? 0 : (linkCount * 2) - 1),

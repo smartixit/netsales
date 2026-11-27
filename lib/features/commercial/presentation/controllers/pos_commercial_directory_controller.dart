@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
-import 'package:netsales/core/constants/app_spacing.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
 import 'package:netsales/core/models/paginated_list.dart';
 import 'package:netsales/core/routing/app_routes.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/domain/usecases/confirm_network_pos_link_challenge_use_case.dart';
@@ -17,16 +15,9 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
-import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
-import 'package:netsales/widgets/inputs/custom_dropdown.dart';
-import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شبكات التزويد المرتبطة بنقطة البيع (POS Commercial Directory)
@@ -80,6 +71,7 @@ class PosCommercialDirectoryController
 
   String? _nextCursor;
   int _listRevision = 0;
+  int _loadMoreRevision = 0;
 
   @override
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
@@ -87,10 +79,13 @@ class PosCommercialDirectoryController
   @override
   bool get isNetworkView => false;
 
+  @override
   int get totalPartnersCount => links.length;
 
+  @override
   int get activePartnersCount => links.where((link) => link.isActive).length;
 
+  @override
   int get inactivePartnersCount => links.where((link) => !link.isActive).length;
 
   bool get canPreviewLinkChallenge =>
@@ -99,8 +94,10 @@ class PosCommercialDirectoryController
       PermissionService.to.can(AppPermissions.posConfirmLinkChallenge);
   bool get canLinkNetwork =>
       canPreviewLinkChallenge && canConfirmLinkChallenge;
+  @override
   bool get canViewPartnerWallet =>
       PermissionService.to.can(AppPermissions.posWalletsView);
+  @override
   bool get canViewRelationshipLifecycle =>
       PermissionService.to.can(AppPermissions.posViewNetworkAgreements) ||
       PermissionService.to.can(AppPermissions.posViewNetworkLinkEvents) ||
@@ -127,18 +124,10 @@ class PosCommercialDirectoryController
   String get searchHint => 'البحث باسم الشبكة المزودة أو المعرف أو الهاتف...';
 
   @override
-  Widget? get headerAction {
-    if (!canLinkNetwork) return null;
-    return CustomButton.icon(
-      tooltip: 'ربط مزود شبكة',
-      icon: Icons.qr_code_scanner_rounded,
-      backgroundColor: Theme.of(Get.context!).colorScheme.surfaceContainer,
-      foregroundColor: Theme.of(Get.context!).colorScheme.primary,
-      shape: AppButtonShape.rounded,
-      size: AppButtonSize.small,
-      onPressed: openQrScannerFlow,
-    );
-  }
+  bool get hasHeaderAction => canLinkNetwork;
+
+  @override
+  void onHeaderAction() => openQrScannerFlow();
 
   @override
   void onInit() {
@@ -157,6 +146,7 @@ class PosCommercialDirectoryController
   @override
   void onClose() {
     _listRevision++;
+    _loadMoreRevision++;
     searchController.dispose();
     super.onClose();
   }
@@ -200,6 +190,7 @@ class PosCommercialDirectoryController
     bool clearOnStart = false,
   }) async {
     final currentRevision = ++_listRevision;
+    _loadMoreRevision++;
     final posId = resolvedPosId;
 
     if (posId == null) {
@@ -256,13 +247,22 @@ class PosCommercialDirectoryController
     final posId = resolvedPosId;
     if (posId == null || !hasMore || isLoadingMore.value) return;
 
+    // Bind this page request to the exact directory query that produced its cursor.
+    // A response from an older workspace/search/filter must never contaminate the
+    // currently visible result set.
+    final requestRevision = _listRevision;
+    final requestToken = ++_loadMoreRevision;
+    final requestSearch = searchQuery.value.trim();
+    final requestStatus = statusFilter.value;
+    final requestCursor = _nextCursor;
+
     isLoadingMore.value = true;
     loadMoreError.value = null;
 
     final bool? statusParam;
-    if (statusFilter.value == '1' || statusFilter.value == 'true') {
+    if (requestStatus == '1' || requestStatus == 'true') {
       statusParam = true;
-    } else if (statusFilter.value == '0' || statusFilter.value == 'false') {
+    } else if (requestStatus == '0' || requestStatus == 'false') {
       statusParam = false;
     } else {
       statusParam = null;
@@ -273,19 +273,33 @@ class PosCommercialDirectoryController
           await getPosNetworksListUseCase(
             posId: posId,
             status: statusParam,
-            search: searchQuery.value.trim().isEmpty
-                ? null
-                : searchQuery.value.trim(),
-            cursor: _nextCursor,
+            search: requestSearch.isEmpty ? null : requestSearch,
+            cursor: requestCursor,
             perPage: 15,
           );
 
+      if (requestRevision != _listRevision ||
+          resolvedPosId != posId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus ||
+          _nextCursor != requestCursor) {
+        return;
+      }
+
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
-      isLoadingMore.value = false;
     } catch (e) {
-      isLoadingMore.value = false;
+      if (requestRevision != _listRevision ||
+          resolvedPosId != posId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus) {
+        return;
+      }
       loadMoreError.value = AppException.sanitizeMessage(e.toString());
+    } finally {
+      if (requestToken == _loadMoreRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -317,111 +331,49 @@ class PosCommercialDirectoryController
   }
 
   @override
-  void openPartnerDetails(NetworkPosLinkEntity link) {
-    CustomBottomSheet.show<void>(
-      title: 'ملف مزود الشبكة',
-      subtitle: 'البيانات التجارية المعتمدة للشريك',
-      leadingIcon: Icons.hub_rounded,
-      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: false),
+  RxnInt get selectedScopeId => selectedPosId;
+
+  @override
+  String get scopeFilterLabel => 'تصفية بحسب نقطة البيع';
+
+  @override
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions =>
+      initialPosId != null || authorizedPosList.length <= 1
+          ? const []
+          : authorizedPosList.map((pos) => CustomSearchFilterOption<int?>(
+                label: pos.posName,
+                value: pos.posId,
+                icon: Icons.storefront_rounded,
+              )).toList(growable: false);
+
+  @override
+  void onScopeFilterChanged(int? id) => onPosFilterChanged(id);
+
+  @override
+  bool get canTogglePartnerLink => false;
+
+  @override
+  bool get canDeletePartnerLink => false;
+
+  @override
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link) async {
+    throw const AppException('تغيير حالة الارتباط غير متاح من مساحة نقطة البيع.');
+  }
+
+  @override
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link) async {
+    throw const AppException('فك الارتباط غير متاح من مساحة نقطة البيع.');
+  }
+
+  @override
+  void openPosWalletStatement(NetworkPosLinkEntity link) {
+    Get.toNamed<void>(
+      AppRoutes.posWalletStatement,
+      arguments: {'network_id': link.networkId, 'pos_id': link.posId},
     );
   }
 
   @override
-  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
-    final colors = context.colors;
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      CustomKpiCardData(
-        label: 'الكل',
-        count: totalPartnersCount,
-        icon: Icons.all_inbox_rounded,
-        accentColor: colors.primary,
-        statusKey: null,
-      ),
-      CustomKpiCardData(
-        label: activePres.label,
-        count: activePartnersCount,
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-        accentColor: activePres.tone.color(context),
-        statusKey: '1',
-      ),
-      CustomKpiCardData(
-        label: inactivePres.label,
-        count: inactivePartnersCount,
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-        accentColor: inactivePres.tone.color(context),
-        statusKey: '0',
-      ),
-    ];
-  }
-
-  @override
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  ) {
-    final activePres = EnumPresentationRegistry.resolveLinkStatus(true);
-    final inactivePres = EnumPresentationRegistry.resolveLinkStatus(false);
-
-    return [
-      const CustomSearchFilterOption<String?>(
-        label: 'جميع المزودين',
-        value: null,
-        icon: Icons.all_inbox_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: activePres.label,
-        value: '1',
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-      ),
-      CustomSearchFilterOption<String?>(
-        label: inactivePres.label,
-        value: '0',
-        icon: inactivePres.icon ?? Icons.pause_circle_rounded,
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildExtraFilters(BuildContext context) {
-    if (initialPosId != null) return null;
-    final posList = authorizedPosList;
-    if (posList.length <= 1) return null;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-      child: CustomDropdown<int>(
-        label: 'تصفية بحسب نقطة البيع',
-        searchEnabled: false,
-        rxValue: selectedPosId,
-        items: posList.map((pos) {
-          return DropdownItem<int>(value: pos.posId, child: Text(pos.posName));
-        }).toList(),
-        onChanged: onPosFilterChanged,
-      ),
-    );
-  }
-
-  @override
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link) {
-    return CommercialPartnerCardActions(
-      link: link,
-      isNetworkView: false,
-      onViewDetails: () => openPartnerDetails(link),
-      onDelete: null,
-      onViewLifecycle: canViewRelationshipLifecycle ? () => openRelationshipLifecycle(link) : null,
-      onViewWallet: canViewPartnerWallet
-          ? () => Get.toNamed<void>(
-              AppRoutes.posWalletStatement,
-              arguments: {'network_id': link.networkId, 'pos_id': link.posId},
-            )
-          : null,
-    );
-  }
-
-
-
   void openRelationshipLifecycle(NetworkPosLinkEntity link) {
     if (!canViewRelationshipLifecycle) return;
     Get.toNamed<void>(

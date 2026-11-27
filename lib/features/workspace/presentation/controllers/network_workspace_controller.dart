@@ -168,19 +168,19 @@ class NetworkWorkspaceController extends GetxController {
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;
-    if (index < 4) selectedMobileNavIndex.value = index;
+    selectedMobileNavIndex.value = index < 4 ? index : -1;
   }
 
   void openProfile() => onNavItemSelected(3);
-  void openWholesaleInvoices() => Get.toNamed<void>(AppRoutes.wholesaleInvoices);
-  void openOperatingExpenses() =>
-      Get.toNamed<void>(AppRoutes.operatingExpenses);
-  void openPlatformBilling() => onNavItemSelected(6);
-  void openBillingReports() => Get.toNamed<void>(AppRoutes.operatingExpenses);
-  void openTeamManagement() =>
-      Get.toNamed<void>(AppRoutes.networkTeamManagement);
+  void openWholesaleInvoices() => onNavItemSelected(5);
+  void openOperatingExpenses() => onNavItemSelected(6);
+
+  void openTeamManagement() {
+    if (canViewMembers) onNavItemSelected(7);
+  }
+
   void openOperationalReports() =>
-      Get.toNamed<void>(AppRoutes.operatingExpenses);
+      onNavItemSelected(canViewMembers ? 8 : 7);
 
   Future<void> loadWorkspace() async {
     final revision = ++_revision;

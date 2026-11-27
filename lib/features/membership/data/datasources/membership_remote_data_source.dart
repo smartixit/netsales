@@ -6,8 +6,12 @@ import 'package:netsales/features/membership/data/models/workspace_member_model.
 abstract interface class MembershipRemoteDataSource {
   // ── مساحة عمل الشبكة (Network Workspace) ──
   Future<ApiResponse<List<WorkspaceMemberModel>>> getNetworkMembers(
-    int networkId,
-  );
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  });
 
   Future<ApiResponse<List<MembershipRoleModel>>> getNetworkAssignableRoles(
     int networkId,
@@ -37,7 +41,13 @@ abstract interface class MembershipRemoteDataSource {
   });
 
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
-  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(int posId);
+  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(
+    int posId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  });
 
   Future<ApiResponse<List<MembershipRoleModel>>> getPosAssignableRoles(
     int posId,

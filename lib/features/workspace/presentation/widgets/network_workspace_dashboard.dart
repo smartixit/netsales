@@ -126,7 +126,7 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
             AppSpacing.vLg,
             WorkspaceFunctionAccessSection(
               title: 'إدارة النشاط التجاري',
-              subtitle: 'الفواتير والكتالوج والمصروفات التشغيلية.',
+              subtitle: 'فواتير المبيعات والمصروفات وكتالوج الباقات.',
               items: [
                 WorkspaceFunctionAccessItem(
                   title: 'فواتير المبيعات',
@@ -143,28 +143,19 @@ class NetworkWorkspaceDashboard extends StatelessWidget {
                   icon: Icons.inventory_2_rounded,
                   onTap: controller.openPackagesCatalog,
                 ),
-                WorkspaceFunctionAccessItem(
-                  title: 'فريق العمل',
-                  icon: Icons.groups_outlined,
-                  onTap: controller.openTeamManagement,
-                ),
               ],
             ),
             AppSpacing.vLg,
             WorkspaceFunctionAccessSection(
-              title: 'الإدارة والمتابعة',
-              subtitle: 'الفريق واشتراك المنصة وتقارير الأداء.',
+              title: 'إدارة مساحة العمل',
+              subtitle: 'فريق العمل والتقارير التشغيلية.',
               items: [
-                WorkspaceFunctionAccessItem(
-                  title: 'اشتراك المنصة',
-                  icon: Icons.workspace_premium_outlined,
-                  onTap: controller.openPlatformBilling,
-                ),
-                WorkspaceFunctionAccessItem(
-                  title: 'تقارير الاشتراكات',
-                  icon: Icons.query_stats_outlined,
-                  onTap: controller.openBillingReports,
-                ),
+                if (controller.canViewMembers)
+                  WorkspaceFunctionAccessItem(
+                    title: 'فريق العمل',
+                    icon: Icons.groups_outlined,
+                    onTap: controller.openTeamManagement,
+                  ),
                 WorkspaceFunctionAccessItem(
                   title: 'التقارير التشغيلية',
                   icon: Icons.analytics_outlined,

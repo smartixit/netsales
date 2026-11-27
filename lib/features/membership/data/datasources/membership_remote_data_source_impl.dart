@@ -13,23 +13,24 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
 
   @override
   Future<ApiResponse<List<WorkspaceMemberModel>>> getNetworkMembers(
-    int networkId,
-  ) {
-    return ApiService.instance.get<List<WorkspaceMemberModel>>(
+    int networkId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) {
+    return ApiService.instance.getList<WorkspaceMemberModel>(
       ApiConstants.networkMembers(networkId),
-      fromJson: (data) {
-        if (data is List) {
-          return data
-              .map(
-                (item) => WorkspaceMemberModel.fromJson(
-                  item as Map<String, dynamic>,
-                  defaultTenantId: networkId,
-                ),
-              )
-              .toList();
-        }
-        return [];
+      fromJson: (item) => WorkspaceMemberModel.fromJson(
+        item as Map<String, dynamic>,
+        defaultTenantId: networkId,
+      ),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
       },
+      cursor: cursor,
+      perPage: perPage,
     );
   }
 
@@ -115,22 +116,25 @@ class MembershipRemoteDataSourceImpl implements MembershipRemoteDataSource {
   // ── مساحة عمل نقطة البيع (POS Workspace) ──
 
   @override
-  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(int posId) {
-    return ApiService.instance.get<List<WorkspaceMemberModel>>(
+  Future<ApiResponse<List<WorkspaceMemberModel>>> getPosMembers(
+    int posId, {
+    String? search,
+    String? status,
+    String? cursor,
+    int perPage = 20,
+  }) {
+    return ApiService.instance.getList<WorkspaceMemberModel>(
       ApiConstants.posMembers(posId),
-      fromJson: (data) {
-        if (data is List) {
-          return data
-              .map(
-                (item) => WorkspaceMemberModel.fromJson(
-                  item as Map<String, dynamic>,
-                  defaultTenantId: posId,
-                ),
-              )
-              .toList();
-        }
-        return [];
+      fromJson: (item) => WorkspaceMemberModel.fromJson(
+        item as Map<String, dynamic>,
+        defaultTenantId: posId,
+      ),
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (status != null && status.isNotEmpty) 'status': status,
       },
+      cursor: cursor,
+      perPage: perPage,
     );
   }
 

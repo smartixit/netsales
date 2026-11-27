@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 
 /// العقد المعماري الموحد لمتحكمات استعراض وإدارة دليل الشركاء التجاريين (BaseCommercialDirectoryController)
@@ -20,9 +20,47 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   IconData get pageIcon;
 
   /// الزر التفاعلي في ترويسة الصفحة (مثل زر دعوة نقطة بيع أو ربط مزود)
-  Widget? get headerAction;
+  bool get hasHeaderAction;
+  void onHeaderAction();
+  bool get canTogglePartnerLink;
+  bool get canDeletePartnerLink;
+  bool get canViewPartnerWallet;
+  bool get canViewRelationshipLifecycle;
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link);
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link);
+  void openPosWalletStatement(NetworkPosLinkEntity link);
+  void openRelationshipLifecycle(NetworkPosLinkEntity link);
+  RxnInt get selectedScopeId;
+  String get scopeFilterLabel;
+  List<CustomSearchFilterOption<int?>> get scopeFilterOptions;
+  void onScopeFilterChanged(int? id);
+  int get totalPartnersCount;
+  int get activePartnersCount;
+  int get inactivePartnersCount;
 
   /// تلميح حقل البحث النصي
+  List<CustomSearchFilterOption<String?>> get filterOptions {
+    final active = EnumPresentationRegistry.resolveLinkStatus(true);
+    final inactive = EnumPresentationRegistry.resolveLinkStatus(false);
+    return [
+      const CustomSearchFilterOption<String?>(
+        label: 'الكل',
+        value: null,
+        icon: Icons.all_inbox_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: active.label,
+        value: '1',
+        icon: active.icon ?? Icons.check_circle_rounded,
+      ),
+      CustomSearchFilterOption<String?>(
+        label: inactive.label,
+        value: '0',
+        icon: inactive.icon ?? Icons.pause_circle_rounded,
+      ),
+    ];
+  }
+
   String get searchHint;
 
   /// هل العرض من منظور مساحة الشبكة
@@ -73,23 +111,5 @@ abstract class BaseCommercialDirectoryController extends GetxController {
   /// تبديل فتح وإغلاق أكورديون بطاقة الشريك
   void toggleAccordion(int linkId);
 
-  /// فتح الشيت التعريفي لبيانات الشريك
-  void openPartnerDetails(NetworkPosLinkEntity link);
 
-  /// معالجة النقر المباشر على كرت الشريك التجاري
-  void onPartnerCardTap(NetworkPosLinkEntity link) => openPartnerDetails(link);
-
-  /// بناء بطاقات المؤشرات الإحصائية لشريط الملخص
-  List<CustomKpiCardData> buildKpiCards(BuildContext context);
-
-  /// بناء خيارات التصفية لشيت البحث الموحد
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  );
-
-  /// بناء أي فلاتر إضافية خاصة بمساحة العمل
-  Widget? buildExtraFilters(BuildContext context);
-
-  /// بناء شريط أزرار الإجراءات الخاصة ببطاقة الشريك وفق سياق مساحة العمل
-  Widget buildCardActions(BuildContext context, NetworkPosLinkEntity link);
 }

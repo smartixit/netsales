@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/utils/text_formatter.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
 import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 
 /// بطاقة عضو مساحة العمل بنظام الأكورديون القيادي (Membership Card - Executive Edition)
@@ -18,10 +17,7 @@ class MembershipCard extends StatelessWidget {
     this.isNetworkView = false,
     this.isExpanded = false,
     this.onToggleExpand,
-    this.onChangeRole,
-    this.onToggleStatus,
-    this.onRemove,
-    this.actions,
+    required this.actions,
   });
 
   final WorkspaceMemberEntity member;
@@ -29,10 +25,7 @@ class MembershipCard extends StatelessWidget {
   final bool isNetworkView;
   final bool isExpanded;
   final VoidCallback? onToggleExpand;
-  final VoidCallback? onChangeRole;
-  final VoidCallback? onToggleStatus;
-  final VoidCallback? onRemove;
-  final Widget? actions;
+  final Widget actions;
 
   @override
   Widget build(BuildContext context) {
@@ -79,16 +72,7 @@ class MembershipCard extends StatelessWidget {
           textColor: status.tone.color(context),
         ),
       ],
-      actions:
-          actions ??
-          MembershipCardActions(
-            member: member,
-            onDetails: onDetails,
-            isNetworkView: isNetworkView,
-            onChangeRole: onChangeRole,
-            onToggleStatus: onToggleStatus,
-            onRemove: onRemove,
-          ),
+      actions: actions,
       onTap: onDetails,
       isExpanded: isExpanded,
       onToggleExpand: onToggleExpand,
