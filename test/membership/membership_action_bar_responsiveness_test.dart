@@ -41,7 +41,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(harness(width: width, theme: ThemeData.light()));
+      await tester.pumpWidget(harness(width: width, themeBuilder: () => ThemeData.light()));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
