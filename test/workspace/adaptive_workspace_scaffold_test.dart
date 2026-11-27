@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(
       harness(
         AdaptiveWorkspaceScaffold(
-          appBar: const WorkspaceAppBar(
+          appBar: WorkspaceAppBar(
             title: 'مساحة العمل',
             workspace: AppWorkspace.network,
             onProfileTap: () {},
