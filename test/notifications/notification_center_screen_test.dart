@@ -16,7 +16,6 @@ import 'package:netsales/features/notifications/presentation/controllers/notific
 import 'package:netsales/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:netsales/features/notifications/presentation/widgets/notification_item_card.dart';
 import 'package:netsales/widgets/feedback/custom_state_view.dart';
-import 'package:netsales/widgets/feedback/states/custom_empty_state.dart';
 import 'package:netsales/widgets/layouts/custom_refreshable_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -159,25 +158,25 @@ void main() {
     );
 
     testWidgets(
-      'displays CustomEmptyState.search when search yields no matches',
+      'displays the shared empty state when search yields no matches',
       (tester) async {
         await tester.pumpWidget(createNotificationTestScreen());
         await tester.pumpAndSettle();
 
         // Enter search query with no matches
-        controller.searchQuery.value = 'كلمة غير موجودة بتاتا';
+        controller.searchController.text = 'كلمة غير موجودة بتاتا';
         // Let the controller's production debounce interval elapse so its
         // scheduled search completes before the widget test is torn down.
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
 
-        expect(find.byType(CustomEmptyState), findsOneWidget);
-        expect(find.text('لم يتم العثور على أي نتائج'), findsOneWidget);
+        expect(find.byType(CustomStateView), findsOneWidget);
+        expect(find.text('لا توجد إشعارات مطابقة'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'displays CustomStateView loading skeleton when filtering or loading',
+      'keeps loaded notifications visible while a filtered request is loading',
       (tester) async {
         await tester.pumpWidget(createNotificationTestScreen());
         await tester.pumpAndSettle();
@@ -189,8 +188,10 @@ void main() {
         controller.isLoading.value = true;
         await tester.pump();
 
-        // CustomStateView skeleton must appear during filtering
-        expect(find.byType(CustomStateView), findsOneWidget);
+        // Existing results remain visible; the page-level skeleton is reserved
+        // for the initial empty load to avoid replacing useful content.
+        expect(find.byType(NotificationItemCard), findsOneWidget);
+        expect(find.byType(CustomStateView), findsNothing);
 
         controller.isLoading.value = false;
         await tester.pump();

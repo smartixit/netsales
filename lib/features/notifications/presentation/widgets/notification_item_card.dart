@@ -132,13 +132,16 @@ class NotificationItemCard extends StatelessWidget {
                 ],
               ),
               AppSpacing.vSm,
-              Row(
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
                 children: [
                   CustomChip.fromPresentation(
                     presentation,
                     isCompact: true,
                   ),
-                  const Spacer(),
                   if (isUnread && onMarkAsRead != null)
                     CustomButton(
                       text: 'تعليم كمقروء',
