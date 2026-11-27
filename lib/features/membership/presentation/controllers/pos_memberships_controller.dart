@@ -1,15 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_permissions.dart';
 import 'package:netsales/core/enums/membership_status.dart';
 import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
-import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/services/permission_service.dart';
 import 'package:netsales/core/services/workspace_service.dart';
-import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/membership/domain/entities/membership_role_entity.dart';
 import 'package:netsales/features/membership/domain/entities/workspace_member_entity.dart';
 import 'package:netsales/features/membership/domain/usecases/add_pos_member_use_case.dart';
@@ -20,12 +17,9 @@ import 'package:netsales/features/membership/domain/usecases/update_pos_member_r
 import 'package:netsales/features/membership/domain/usecases/update_pos_member_status_use_case.dart';
 import 'package:netsales/features/membership/presentation/controllers/base_memberships_controller.dart';
 import 'package:netsales/features/membership/presentation/widgets/membership_action_dialogs.dart';
-import 'package:netsales/features/membership/presentation/widgets/membership_card_actions.dart';
 import 'package:netsales/features/membership/presentation/widgets/sheets/add_member_sheet.dart';
 import 'package:netsales/features/membership/presentation/widgets/sheets/change_member_role_sheet.dart';
 import 'package:netsales/features/membership/presentation/widgets/sheets/member_details_sheet.dart';
-import 'package:netsales/widgets/buttons/custom_button.dart';
-import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
@@ -64,68 +58,10 @@ class PosMembershipsController extends BaseMembershipsController {
   bool get isNetworkView => false;
 
   @override
-  Widget? get headerAction => canAddMember
-      ? CustomButton.primary(
-          text: 'إضافة عضو',
-          icon: Icons.person_add_alt_1_rounded,
-          shape: AppButtonShape.rounded,
-          size: AppButtonSize.small,
-          onPressed: openAddMemberSheet,
-        )
-      : null;
-
-  @override
   String get searchHint => 'بحث باسم العضو، رقم الهاتف، أو المعرف...';
 
   @override
-  List<CustomKpiCardData> buildKpiCards(BuildContext context) {
-    final colors = context.colors;
-    final activePres = EnumPresentationRegistry.resolveMembershipStatus(
-      MembershipStatus.active,
-    );
-    final suspendedPres = EnumPresentationRegistry.resolveMembershipStatus(
-      MembershipStatus.suspended,
-    );
-    final invitedPres = EnumPresentationRegistry.resolveMembershipStatus(
-      MembershipStatus.invited,
-    );
-
-    return [
-      CustomKpiCardData(
-        label: 'الكل',
-        count: totalMembersCount,
-        icon: Icons.people_alt_rounded,
-        accentColor: colors.primary,
-        statusKey: null,
-      ),
-      CustomKpiCardData(
-        label: activePres.label,
-        count: activeMembersCount,
-        icon: activePres.icon ?? Icons.check_circle_rounded,
-        accentColor: activePres.tone.color(context),
-        statusKey: MembershipStatus.active.wireValue,
-      ),
-      CustomKpiCardData(
-        label: suspendedPres.label,
-        count: suspendedMembersCount,
-        icon: suspendedPres.icon ?? Icons.pause_circle_outline_rounded,
-        accentColor: suspendedPres.tone.color(context),
-        statusKey: MembershipStatus.suspended.wireValue,
-      ),
-      CustomKpiCardData(
-        label: invitedPres.label,
-        count: invitedMembersCount,
-        icon: invitedPres.icon ?? Icons.hourglass_top_rounded,
-        accentColor: invitedPres.tone.color(context),
-        statusKey: MembershipStatus.invited.wireValue,
-      ),
-    ];
-  }
-
-  @override
-  List<CustomSearchFilterOption<String?>> buildFilterOptions(
-    BuildContext context,
-  ) {
+  List<CustomSearchFilterOption<String?>> buildFilterOptions() {
     return [
       const CustomSearchFilterOption<String?>(
         label: 'جميع الحالات',
@@ -138,32 +74,10 @@ class PosMembershipsController extends BaseMembershipsController {
         CustomSearchFilterOption<String?>(
           label: EnumPresentationRegistry.resolveMembershipStatus(status).label,
           value: status.wireValue,
-          icon:
-              EnumPresentationRegistry.resolveMembershipStatus(status).icon ??
+          icon: EnumPresentationRegistry.resolveMembershipStatus(status).icon ??
               Icons.label_outline_rounded,
         ),
     ];
-  }
-
-  @override
-  Widget? buildExtraFilters(BuildContext context) => null;
-
-  @override
-  Widget buildCardActions(BuildContext context, WorkspaceMemberEntity member) {
-    return MembershipCardActions(
-      member: member,
-      isNetworkView: false,
-      onDetails: () => openMemberDetails(member),
-      onChangeRole: canChangeMemberRole && !member.isOwner
-          ? () => openChangeRoleSheet(member)
-          : null,
-      onToggleStatus: canChangeMemberStatus && !member.isOwner
-          ? () => promptToggleMemberStatus(member)
-          : null,
-      onRemove: canRemoveMember && !member.isOwner
-          ? () => promptRemoveMember(member)
-          : null,
-    );
   }
 
   // ── الحالة التفاعلية ──
