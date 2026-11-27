@@ -7,8 +7,10 @@ import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
 
 /// شريط مؤشرات دليل الشركاء؛ ألوانه مشتقة من Theme ولا تُنشأ داخل Controller.
-class CommercialKpiStrip extends GetView<BaseCommercialDirectoryController> {
-  const CommercialKpiStrip({super.key});
+class CommercialKpiStrip extends StatelessWidget {
+  const CommercialKpiStrip({super.key, required this.controller});
+
+  final BaseCommercialDirectoryController controller;
 
   @override
   Widget build(BuildContext context) {
