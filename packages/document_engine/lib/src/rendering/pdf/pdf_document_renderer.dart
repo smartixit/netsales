@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -138,7 +140,12 @@ final class PdfDocumentRenderer implements DocumentRenderer {
         ),
       );
     } catch (error, stackTrace) {
-      print('DOCUMENT_ENGINE_PDF_RENDER_FAILURE: $error\\n$stackTrace');
+      developer.log(
+        'DOCUMENT_ENGINE_PDF_RENDER_FAILURE: $error',
+        name: 'document_engine.pdf',
+        error: error,
+        stackTrace: stackTrace,
+      );
       final message = error.toString().toLowerCase();
       final isPageLimit =
           message.contains('toomanypagesexception') ||
