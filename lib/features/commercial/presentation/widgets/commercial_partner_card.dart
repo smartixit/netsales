@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
-import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 import 'package:netsales/widgets/cards/custom_executive_transaction_card.dart';
 
 /// بطاقة الشريك التجاري المتطورة بنظام الأكورديون التنفيذي (Commercial Partner Card - Executive Edition)
@@ -100,16 +99,7 @@ class CommercialPartnerCard extends StatelessWidget {
           textColor: link.isActive ? colors.primary : colors.onSurfaceVariant,
         ),
       ],
-      actions:
-          actions ??
-          CommercialPartnerCardActions(
-            link: link,
-            isNetworkView: isNetworkView,
-            onViewDetails: onDetails,
-            onToggleStatus: onToggleStatus,
-            onDelete: onDelete,
-            onMoreActions: onMoreActions ?? onDetails,
-          ),
+      actions: actions,
       onTap: onTap,
       isExpanded: isExpanded,
       onToggleExpand: onToggleExpand,
