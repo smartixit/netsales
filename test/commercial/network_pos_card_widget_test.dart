@@ -5,6 +5,7 @@ import 'package:netsales/core/themes/app_themes.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/domain/entities/pos_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card.dart';
+import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
 
 void main() {
   Widget buildTestableWidget(Widget child) {
@@ -46,6 +47,14 @@ void main() {
             onTap: () {},
             onToggleStatus: () {},
             onDelete: () {},
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () {},
+              onToggleStatus: () {},
+              onDelete: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );
@@ -69,6 +78,14 @@ void main() {
             onTap: () {},
             onToggleStatus: () {},
             onDelete: () {},
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () => detailsTapped = true,
+              onToggleStatus: () {},
+              onDelete: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );
@@ -89,6 +106,12 @@ void main() {
             isNetworkView: true,
             onDetails: () {},
             onTap: () => cardBodyTapped = true,
+            actions: CommercialPartnerCardActions(
+              link: link,
+              isNetworkView: true,
+              onViewDetails: () {},
+              onMoreActions: () {},
+            ),
           ),
         ),
       );
