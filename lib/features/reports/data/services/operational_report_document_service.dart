@@ -295,7 +295,7 @@ class OperationalReportDocumentService {
               level: 2,
               direction: DocumentTextDirection.rightToLeft,
             ),
-            if (rows.isEmpty)
+            if (metrics.isEmpty)
               DocumentCallout(
                 title: 'لا توجد مؤشرات',
                 body: 'لم يرسل الخادم مؤشرات قابلة للعرض لهذا التقرير.',

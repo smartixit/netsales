@@ -83,7 +83,7 @@ class ExpenseDocumentService {
         title: 'سند صرف مصروف تشغيلي',
         subtitle: 'سند مصروف مسجل على الشبكة',
         reference: expense.displayReference,
-        locale: const DocumentLocale(
+        locale: DocumentLocale(
           languageTag: 'ar-YE',
           direction: DocumentTextDirection.rightToLeft,
         ),

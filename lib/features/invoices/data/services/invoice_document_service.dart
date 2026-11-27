@@ -117,7 +117,7 @@ class InvoiceDocumentService {
         title: 'فاتورة مبيعات رسمية',
         subtitle: 'فاتورة مبيعات بين الشبكة ونقطة البيع',
         reference: invoice.displayReference,
-        locale: const DocumentLocale(
+        locale: DocumentLocale(
           languageTag: 'ar-YE',
           direction: DocumentTextDirection.rightToLeft,
         ),
