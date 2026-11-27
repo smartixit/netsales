@@ -56,6 +56,7 @@ class ReportConfigurationStudio extends StatelessWidget {
     this.filterSectionBuilder,
     this.presentationSectionBuilder,
     this.isBusy = false,
+    this.contentPadding = const EdgeInsets.all(24),
     super.key,
   });
 
@@ -71,6 +72,9 @@ class ReportConfigurationStudio extends StatelessWidget {
   final ReportStudioFilterSectionBuilder? filterSectionBuilder;
   final ReportStudioPresentationSectionBuilder? presentationSectionBuilder;
   final bool isBusy;
+
+  /// Host-controlled inset for compact mobile shells; defaults to 24 on all sides.
+  final EdgeInsetsGeometry contentPadding;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -97,7 +101,7 @@ class ReportConfigurationStudio extends StatelessWidget {
           _buildPresentationSection(context);
 
       return SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: contentPadding,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1320),
