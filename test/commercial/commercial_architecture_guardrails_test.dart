@@ -6,7 +6,7 @@ void main() {
   test('commercial widgets do not declare private helper methods', () {
     final directory = Directory('lib/features/commercial/presentation/widgets');
     final helper = RegExp(
-      r'^\\s*(?:Future<[^>]+>|Future<void>|void|bool|int|String|Widget|List<[^>]+>|Map<[^>]+>)\\s+_\\w+\\s*\\(',
+      r'^\s*(?:Future<[^>]+>|Future<void>|void|bool|int|String|Widget|List<[^>]+>|Map<[^>]+>)\s+_\w+\s*\(',
       multiLine: true,
     );
     final violations = <String>[];
