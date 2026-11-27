@@ -8,8 +8,10 @@ import 'package:netsales/widgets/cards/custom_kpi_card_data.dart';
 import 'package:netsales/widgets/indicators/custom_status_summary_strip.dart';
 
 /// مؤشرات العضويات. تُنشأ بيانات العرض هنا لأن الألوان تعتمد على Theme/BuildContext.
-class MembershipKpiStrip extends GetView<BaseMembershipsController> {
-  const MembershipKpiStrip({super.key});
+class MembershipKpiStrip extends StatelessWidget {
+  const MembershipKpiStrip({super.key, required this.controller});
+
+  final BaseMembershipsController controller;
 
   @override
   Widget build(BuildContext context) {
