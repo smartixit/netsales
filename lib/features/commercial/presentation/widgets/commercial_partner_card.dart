@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/presentation/enums/enum_presentation_registry.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_colors.dart';
 import 'package:netsales/features/commercial/domain/entities/network_pos_link_entity.dart';
 import 'package:netsales/features/commercial/presentation/widgets/commercial_partner_card_actions.dart';
@@ -109,18 +107,7 @@ class CommercialPartnerCard extends StatelessWidget {
             onToggleStatus: onToggleStatus,
             onDelete: onDelete,
           ),
-      onTap: onTap ??
-          (isNetworkView
-              ? () {
-                  Get.toNamed<void>(
-                    AppRoutes.posWalletStatement,
-                    arguments: {
-                      'network_id': link.networkId,
-                      'pos_id': link.posId,
-                    },
-                  );
-                }
-              : onDetails),
+      onTap: onTap ?? onDetails,
       isExpanded: isExpanded,
       onToggleExpand: onToggleExpand,
     );
