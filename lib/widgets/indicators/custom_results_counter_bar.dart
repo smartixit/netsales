@@ -64,7 +64,11 @@ class CustomResultsCounterBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             mainAxisSize: MainAxisSize.min,
             children: [
               // كبسولة عدد النتائج
