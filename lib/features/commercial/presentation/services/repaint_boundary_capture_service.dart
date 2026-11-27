@@ -1,11 +1,10 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:netsales/core/exceptions/app_exception.dart';
+import 'package:netsales/widgets/charts/adapters/netsales_charts_export_adapter.dart';
 
-/// التقاط RepaintBoundary كصورة PNG دون وضع منطق التصوير داخل Widgets.
+/// يضيف تجهيز أصول بطاقة الدعوة فوق آلية التقاط PNG المشتركة المعتمدة في النظام.
 class RepaintBoundaryCaptureService {
   const RepaintBoundaryCaptureService._();
 
@@ -18,29 +17,14 @@ class RepaintBoundaryCaptureService {
     if (preloadAsset != null) {
       await precacheImage(AssetImage(preloadAsset), context);
     }
-    await WidgetsBinding.instance.endOfFrame;
 
-    final renderObject = boundaryKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderRepaintBoundary) {
+    final bytes = await NetSalesChartsExportAdapter.capturePng(
+      boundaryKey,
+      pixelRatio: pixelRatio,
+    );
+    if (bytes == null || bytes.isEmpty) {
       throw const AppException('تعذر تجهيز بطاقة الدعوة للتصدير.');
     }
-
-    final image = await renderObject.toImage(pixelRatio: pixelRatio);
-    try {
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (data == null) {
-        throw const AppException('تعذر تحويل بطاقة الدعوة إلى صورة.');
-      }
-      final bytes = data.buffer.asUint8List(
-        data.offsetInBytes,
-        data.lengthInBytes,
-      );
-      if (bytes.isEmpty) {
-        throw const AppException('الصورة الناتجة لبطاقة الدعوة فارغة.');
-      }
-      return bytes;
-    } finally {
-      image.dispose();
-    }
+    return bytes;
   }
 }
