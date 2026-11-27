@@ -96,6 +96,7 @@ class MembershipPresentationCoordinator {
       phoneController.dispose();
       roleNotifier.dispose();
       statusNotifier.dispose();
+      isSubmitting.close();
     });
   }
 
@@ -166,6 +167,7 @@ class MembershipPresentationCoordinator {
     ).whenComplete(() {
       reasonController.dispose();
       roleNotifier.dispose();
+      isSubmitting.close();
     });
   }
 
