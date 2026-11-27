@@ -13,7 +13,7 @@ class ProfileAppearanceCard extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = controller.isDarkMode;
 
     return ProfileSettingsGroup(
       title: 'تفضيلات المظهر',
