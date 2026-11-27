@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
-import 'package:netsales/features/billing/presentation/screens/billing_reports_screen.dart';
-import 'package:netsales/features/billing/presentation/screens/billing_workspace_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/commercial_directory_screen.dart';
 import 'package:netsales/features/commercial/presentation/screens/network_directory_screen.dart';
 import 'package:netsales/features/expenses/presentation/screens/expenses_screen.dart';
@@ -37,10 +35,10 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         content: ProcurementOrdersScreen(embedded: true, isNetwork: true),
       ),
       const WorkspaceNavItem(
-        label: 'شبكاتي',
-        icon: Icons.hub_outlined,
-        activeIcon: Icons.hub_rounded,
-        content: NetworkDirectoryScreen(embedded: true),
+        label: 'نقاط البيع',
+        icon: Icons.storefront_outlined,
+        activeIcon: Icons.storefront_rounded,
+        content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
       ),
       const WorkspaceNavItem(
         label: 'البروفايل',
@@ -49,10 +47,10 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         content: ProfileScreen(embedded: true),
       ),
       const WorkspaceNavItem(
-        label: 'نقاط البيع',
-        icon: Icons.storefront_outlined,
-        activeIcon: Icons.storefront_rounded,
-        content: CommercialDirectoryScreen(embedded: true, isNetwork: true),
+        label: 'شبكاتي',
+        icon: Icons.hub_outlined,
+        activeIcon: Icons.hub_rounded,
+        content: NetworkDirectoryScreen(embedded: true),
       ),
       const WorkspaceNavItem(
         label: 'فواتير المبيعات',
@@ -65,18 +63,6 @@ class NetworkWorkspaceShell extends GetView<NetworkWorkspaceController> {
         icon: Icons.payments_outlined,
         activeIcon: Icons.payments_rounded,
         content: ExpensesScreen(embedded: true),
-      ),
-      const WorkspaceNavItem(
-        label: 'اشتراك المنصة',
-        icon: Icons.workspace_premium_outlined,
-        activeIcon: Icons.workspace_premium_rounded,
-        content: BillingWorkspaceScreen(),
-      ),
-      const WorkspaceNavItem(
-        label: 'تقارير الاشتراكات',
-        icon: Icons.query_stats_outlined,
-        activeIcon: Icons.query_stats_rounded,
-        content: BillingReportsScreen(),
       ),
       if (controller.canViewMembers)
         const WorkspaceNavItem(

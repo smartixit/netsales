@@ -609,7 +609,7 @@ class PosWorkspaceController extends GetxController {
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;
-    if (index < 4) selectedMobileNavIndex.value = index;
+    selectedMobileNavIndex.value = index < 4 ? index : -1;
   }
 
   bool get canViewMembers =>

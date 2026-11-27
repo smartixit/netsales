@@ -159,7 +159,7 @@ class NetworkWorkspaceController extends GetxController {
       case 'requests':
         onNavItemSelected(1);
       case 'pos':
-        onNavItemSelected(4);
+        onNavItemSelected(2);
       case 'packages':
         openPackagesCatalog();
     }
@@ -168,21 +168,19 @@ class NetworkWorkspaceController extends GetxController {
   void onNavItemSelected(int index) {
     if (index < 0) return;
     selectedNavIndex.value = index;
-    if (index < 4) selectedMobileNavIndex.value = index;
+    selectedMobileNavIndex.value = index < 4 ? index : -1;
   }
 
   void openProfile() => onNavItemSelected(3);
   void openWholesaleInvoices() => onNavItemSelected(5);
   void openOperatingExpenses() => onNavItemSelected(6);
-  void openPlatformBilling() => onNavItemSelected(7);
-  void openBillingReports() => onNavItemSelected(8);
 
   void openTeamManagement() {
-    if (canViewMembers) onNavItemSelected(9);
+    if (canViewMembers) onNavItemSelected(7);
   }
 
   void openOperationalReports() =>
-      onNavItemSelected(canViewMembers ? 10 : 9);
+      onNavItemSelected(canViewMembers ? 8 : 7);
 
   Future<void> loadWorkspace() async {
     final revision = ++_revision;

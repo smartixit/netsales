@@ -124,17 +124,12 @@ void main() {
     controller.openOperatingExpenses();
     expect(controller.selectedNavIndex.value, 6);
 
-    controller.openPlatformBilling();
+    controller.openTeamManagement();
     expect(controller.selectedNavIndex.value, 7);
 
-    controller.openBillingReports();
-    expect(controller.selectedNavIndex.value, 8);
-
-    controller.openTeamManagement();
-    expect(controller.selectedNavIndex.value, 9);
-
     controller.openOperationalReports();
-    expect(controller.selectedNavIndex.value, 10);
+    expect(controller.selectedNavIndex.value, 8);
+    expect(controller.selectedMobileNavIndex.value, -1);
 
     PermissionService.to.setWorkspaceContext(
       scope: RoleScope.network,
@@ -143,7 +138,7 @@ void main() {
       permissions: const [],
     );
     controller.openOperationalReports();
-    expect(controller.selectedNavIndex.value, 9);
+    expect(controller.selectedNavIndex.value, 7);
   });
 
   test('keeps the saved network when it is still authorized', () async {
