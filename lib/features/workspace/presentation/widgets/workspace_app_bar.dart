@@ -126,8 +126,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       customDimension: 46,
                       pulseColor: colors.primary,
                       onTap:
-                          onProfileTap ??
-                          () => onProfileTap?.call() ?? Get.toNamed<void>(AppRoutes.profile),
+                          onProfileTap ?? () => Get.toNamed<void>(AppRoutes.profile),
                     ),
                   AppSpacing.hSm,
 
