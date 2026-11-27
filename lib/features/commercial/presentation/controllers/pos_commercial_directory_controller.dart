@@ -15,12 +15,10 @@ import 'package:netsales/features/commercial/domain/usecases/get_my_pos_use_case
 import 'package:netsales/features/commercial/domain/usecases/get_pos_networks_list_use_case.dart';
 import 'package:netsales/features/commercial/domain/usecases/preview_network_pos_link_challenge_use_case.dart';
 import 'package:netsales/features/commercial/presentation/controllers/base_commercial_directory_controller.dart';
-import 'package:netsales/features/commercial/presentation/widgets/sheets/commercial_partner_details_sheet.dart';
 import 'package:netsales/features/commercial/presentation/widgets/sheets/network_pos_link_confirm_sheet.dart';
 import 'package:netsales/widgets/dialogs/custom_animation_overlay.dart';
 import 'package:netsales/widgets/inputs/custom_search_filter_option.dart';
 import 'package:netsales/widgets/qr/custom_qr_scanner.dart';
-import 'package:netsales/widgets/sheets/custom_bottom_sheet.dart';
 import 'package:netsales/widgets/toasts/custom_snackbar.dart';
 
 /// متحكم شبكات التزويد المرتبطة بنقطة البيع (POS Commercial Directory)
@@ -352,16 +350,6 @@ class PosCommercialDirectoryController
   }
 
   @override
-  void openPartnerDetails(NetworkPosLinkEntity link) {
-    CustomBottomSheet.show<void>(
-      title: 'ملف مزود الشبكة',
-      subtitle: 'البيانات التجارية المعتمدة للشريك',
-      leadingIcon: Icons.hub_rounded,
-      child: CommercialPartnerDetailsSheet(link: link, isNetworkView: false),
-    );
-  }
-
-  @override
   RxnInt get selectedScopeId => selectedPosId;
 
   @override
@@ -387,10 +375,14 @@ class PosCommercialDirectoryController
   bool get canDeletePartnerLink => false;
 
   @override
-  void onToggleStatus(NetworkPosLinkEntity link) {}
+  Future<void> togglePartnerLink(NetworkPosLinkEntity link) async {
+    throw const AppException('تغيير حالة الارتباط غير متاح من مساحة نقطة البيع.');
+  }
 
   @override
-  void onDeleteLink(NetworkPosLinkEntity link) {}
+  Future<void> deletePartnerLink(NetworkPosLinkEntity link) async {
+    throw const AppException('فك الارتباط غير متاح من مساحة نقطة البيع.');
+  }
 
   @override
   void openPosWalletStatement(NetworkPosLinkEntity link) {
