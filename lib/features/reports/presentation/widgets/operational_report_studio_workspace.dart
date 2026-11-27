@@ -111,9 +111,7 @@ class OperationalReportStudioWorkspace extends StatelessWidget {
             ),
         onSavePreset: () =>
             OperationalReportPresetDialog.show(onSave: controller.savePreset),
-        onPreview: controller.summary.value == null
-            ? null
-            : controller.exportDetailedPdf,
+        onPreview: controller.showReportSummary,
         actionBuilder:
             (
               context, {
