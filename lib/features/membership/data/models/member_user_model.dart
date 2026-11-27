@@ -31,6 +31,7 @@ class MemberUserModel extends MemberUserEntity {
       profilePictureUrl:
           json['user_profile_picture'] as String? ??
           json['user_profile_logo_url'] as String? ??
+          json['user_profile_logo'] as String? ??
           json['profile_picture'] as String?,
     );
   }

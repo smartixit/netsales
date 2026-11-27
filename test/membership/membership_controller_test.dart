@@ -143,6 +143,7 @@ void main() {
   });
 
   tearDown(() {
+    controller.onClose();
     Get.reset();
   });
 

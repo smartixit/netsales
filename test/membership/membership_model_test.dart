@@ -15,7 +15,7 @@ void main() {
           'user_id': 42,
           'user_full_name': 'Test Member',
           'user_phone_number': '777123456',
-          'user_profile_logo_url': 'https://example.test/avatar.png',
+          'user_profile_logo': 'https://example.test/avatar.png',
         },
         'role': {
           'role_id': 7,

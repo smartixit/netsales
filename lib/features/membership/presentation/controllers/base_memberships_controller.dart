@@ -112,6 +112,8 @@ abstract class BaseMembershipsController extends GetxController {
       _nextCursor.value = null;
       _resetSummary();
       isLoading.value = false;
+      isLoadingMore.value = false;
+      loadMoreError.value = null;
       errorMessage.value = 'لم يتم تحديد ${isNetworkView ? 'شبكة' : 'نقطة بيع'} نشطة لعرض أعضائها.';
       return;
     }
@@ -140,12 +142,18 @@ abstract class BaseMembershipsController extends GetxController {
         cursor: null,
         perPage: pageSize,
       );
-      if (revision != _listRevision || tenantId != resolvedTenantId) return;
+      if (revision != _listRevision ||
+          tenantId != resolvedTenantId ||
+          search != _currentSearchQuery ||
+          status != statusFilter.value) return;
       members.assignAll(page.items);
       _nextCursor.value = page.nextCursor;
       _applySummary(page);
     } catch (error) {
-      if (revision != _listRevision || tenantId != resolvedTenantId) return;
+      if (revision != _listRevision ||
+          tenantId != resolvedTenantId ||
+          search != _currentSearchQuery ||
+          status != statusFilter.value) return;
       if (members.isEmpty) {
         errorMessage.value = error.toString();
       } else {
@@ -159,19 +167,23 @@ abstract class BaseMembershipsController extends GetxController {
   Future<void> loadMoreMembers() async {
     final tenantId = resolvedTenantId;
     final cursor = _nextCursor.value;
-    if (tenantId == null || cursor == null || cursor.isEmpty || isLoading.value || isLoadingMore.value) return;
+    final search = _currentSearchQuery;
+    final status = statusFilter.value;
+    if (tenantId == null || cursor == null || cursor.isEmpty || isLoading.value || isLoadingMore.value ||
+        _lastRequestedSearch != search || _lastRequestedStatus != status) return;
     final revision = _listRevision;
     isLoadingMore.value = true;
     loadMoreError.value = null;
     try {
       final page = await fetchMembersPage(
         tenantId,
-        search: searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim(),
-        status: statusFilter.value,
+        search: search,
+        status: status,
         cursor: cursor,
         perPage: pageSize,
       );
-      if (revision != _listRevision || tenantId != resolvedTenantId) return;
+      if (revision != _listRevision || tenantId != resolvedTenantId ||
+          search != _currentSearchQuery || status != statusFilter.value) return;
       final knownIds = members.map((member) => member.id).toSet();
       members.addAll(page.items.where((member) => knownIds.add(member.id)));
       _nextCursor.value = page.nextCursor == cursor ? null : page.nextCursor;
@@ -203,7 +215,9 @@ abstract class BaseMembershipsController extends GetxController {
 
   void setStatusFilter(String? status) {
     if (statusFilter.value == status) return;
+    _searchWorker?.dispose();
     statusFilter.value = status;
+    _startSearchDebounce();
     unawaited(loadMembers());
   }
 
@@ -262,7 +276,15 @@ abstract class BaseMembershipsController extends GetxController {
     );
   }
 
-  void _syncSearchQuery() => searchQuery.value = searchController.text;
+  String? get _currentSearchQuery =>
+      searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
+
+  void _syncSearchQuery() {
+    final nextQuery = searchController.text;
+    if (searchQuery.value == nextQuery) return;
+    searchQuery.value = nextQuery;
+    _nextCursor.value = null;
+  }
 
   void _applySummary(PaginatedList<WorkspaceMemberEntity> page) {
     final summary = page.meta?['summary'];
