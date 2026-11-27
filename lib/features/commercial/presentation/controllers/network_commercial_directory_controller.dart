@@ -507,7 +507,9 @@ class NetworkCommercialDirectoryController
       throw const AppException('لا تملك صلاحية فك الارتباط التجاري.');
     }
     final linkId = link.networkPosId;
-    if (!_pendingLinkMutations.add(linkId)) return;
+    if (!_pendingLinkMutations.add(linkId)) {
+      throw const AppException('هناك عملية أخرى قيد التنفيذ لهذا الارتباط.');
+    }
 
     try {
       await deleteNetworkPosLinkUseCase(linkId);
