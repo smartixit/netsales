@@ -57,6 +57,9 @@ abstract class BaseMembershipsController extends GetxController {
 
   Worker? _searchWorker;
   int _listRevision = 0;
+  String? _lastRequestedSearch;
+  String? _lastRequestedStatus;
+  int? _lastRequestedTenantId;
   int _totalMembersCount = 0;
   int _activeMembersCount = 0;
   int _suspendedMembersCount = 0;
@@ -81,7 +84,7 @@ abstract class BaseMembershipsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    searchController.addListener(() => searchQuery.value = searchController.text);
+    searchController.addListener(_syncSearchQuery);
     _searchWorker = debounce(searchQuery, (_) => unawaited(loadMembers()), time: const Duration(milliseconds: 350));
     unawaited(loadInitialData());
   }
@@ -90,6 +93,7 @@ abstract class BaseMembershipsController extends GetxController {
   void onClose() {
     _listRevision++;
     _searchWorker?.dispose();
+    searchController.removeListener(_syncSearchQuery);
     searchController.dispose();
     super.onClose();
   }
@@ -108,22 +112,31 @@ abstract class BaseMembershipsController extends GetxController {
       _nextCursor.value = null;
       _resetSummary();
       isLoading.value = false;
-      errorMessage.value = 'لم يتم تحديد ' + (isNetworkView ? 'شبكة' : 'نقطة بيع') + ' نشطة لعرض أعضائها.';
+      errorMessage.value = 'لم يتم تحديد \${isNetworkView ? 'شبكة' : 'نقطة بيع'} نشطة لعرض أعضائها.';
       return;
     }
+
+    final search = searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim();
+    final status = statusFilter.value;
+    final queryChanged = _lastRequestedSearch != search ||
+        _lastRequestedStatus != status ||
+        _lastRequestedTenantId != tenantId;
 
     isLoading.value = true;
     errorMessage.value = null;
     loadMoreError.value = null;
     isLoadingMore.value = false;
-    members.clear();
+    if (queryChanged) members.clear();
+    _lastRequestedSearch = search;
+    _lastRequestedStatus = status;
+    _lastRequestedTenantId = tenantId;
     _nextCursor.value = null;
 
     try {
       final page = await fetchMembersPage(
         tenantId,
-        search: searchQuery.value.trim().isEmpty ? null : searchQuery.value.trim(),
-        status: statusFilter.value,
+        search: search,
+        status: status,
         cursor: null,
         perPage: pageSize,
       );
@@ -133,7 +146,11 @@ abstract class BaseMembershipsController extends GetxController {
       _applySummary(page);
     } catch (error) {
       if (revision != _listRevision || tenantId != resolvedTenantId) return;
-      errorMessage.value = error.toString();
+      if (members.isEmpty) {
+        errorMessage.value = error.toString();
+      } else {
+        loadMoreError.value = error.toString();
+      }
     } finally {
       if (revision == _listRevision) isLoading.value = false;
     }
@@ -192,8 +209,10 @@ abstract class BaseMembershipsController extends GetxController {
 
   void resetFilters() {
     statusFilter.value = null;
+    searchController.removeListener(_syncSearchQuery);
     searchController.clear();
     searchQuery.value = '';
+    searchController.addListener(_syncSearchQuery);
     unawaited(loadMembers());
   }
 
@@ -203,7 +222,7 @@ abstract class BaseMembershipsController extends GetxController {
 
   Future<void> addMember({required String phoneNumber, required int roleId, String? status}) async {
     if (!canAddMember) {
-      throw AppException('لا تملك صلاحية إضافة أعضاء إلى ' + (isNetworkView ? 'الشبكة.' : 'نقطة البيع.'));
+      throw AppException('لا تملك صلاحية إضافة أعضاء إلى \${isNetworkView ? 'الشبكة' : 'نقطة البيع'}.');
     }
     await addMemberToTenant(_requireTenantId(), phoneNumber: phoneNumber, roleId: roleId, status: status);
     await loadMembers();
@@ -230,10 +249,12 @@ abstract class BaseMembershipsController extends GetxController {
   int _requireTenantId() {
     final tenantId = resolvedTenantId;
     if (tenantId == null) {
-      throw AppException('تعذر تحديد ' + (isNetworkView ? 'الشبكة' : 'نقطة البيع') + ' النشطة.');
+      throw AppException('تعذر تحديد \${isNetworkView ? 'الشبكة' : 'نقطة البيع'} النشطة.');
     }
     return tenantId;
   }
+
+  void _syncSearchQuery() => searchQuery.value = searchController.text;
 
   void _applySummary(PaginatedList<WorkspaceMemberEntity> page) {
     final summary = page.meta?['summary'];

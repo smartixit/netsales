@@ -180,8 +180,8 @@ void main() {
       await controller.loadMembers();
       controller.setStatusFilter('SUSPENDED');
       await Future<void>.delayed(Duration.zero);
-      controller.searchController.text = 'محمد';
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      controller.searchQuery.value = 'محمد';
+      await controller.loadMembers();
 
       controller.resetFilters();
       await Future<void>.delayed(Duration.zero);
