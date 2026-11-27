@@ -132,6 +132,7 @@ class NetworkCommercialDirectoryController
 
   String? _nextCursor;
   int _listRevision = 0;
+  int _loadMoreRevision = 0;
 
   @override
   bool get hasMore => _nextCursor != null && _nextCursor!.isNotEmpty;
@@ -272,6 +273,7 @@ class NetworkCommercialDirectoryController
     bool clearOnStart = false,
   }) async {
     final currentRevision = ++_listRevision;
+    _loadMoreRevision++;
     final netId = resolvedNetworkId;
 
     if (netId == null) {
@@ -332,6 +334,7 @@ class NetworkCommercialDirectoryController
     // A response from an older workspace/search/filter must never contaminate the
     // currently visible result set.
     final requestRevision = _listRevision;
+    final requestToken = ++_loadMoreRevision;
     final requestSearch = searchQuery.value.trim();
     final requestStatus = statusFilter.value;
     final requestCursor = _nextCursor;
@@ -368,7 +371,6 @@ class NetworkCommercialDirectoryController
 
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
-      isLoadingMore.value = false;
     } catch (e) {
       if (requestRevision != _listRevision ||
           resolvedNetworkId != netId ||
@@ -376,8 +378,11 @@ class NetworkCommercialDirectoryController
           statusFilter.value != requestStatus) {
         return;
       }
-      isLoadingMore.value = false;
       loadMoreError.value = AppException.sanitizeMessage(e.toString());
+    } finally {
+      if (requestToken == _loadMoreRevision) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
