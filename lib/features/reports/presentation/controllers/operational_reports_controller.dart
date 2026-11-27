@@ -96,6 +96,7 @@ class OperationalReportsController extends GetxController {
   int _exportActionRevision = 0;
   int _documentActionRevision = 0;
   int _loadingOverlayOperations = 0;
+  bool _ownsLoadingOverlay = false;
   int _posRevision = 0;
   final Set<String> _seenReportCursors = <String>{};
   String _posSearchQuery = '';
@@ -504,6 +505,7 @@ class OperationalReportsController extends GetxController {
 
   Future<void> selectType(OperationalReportType type) async {
     if (!availableTypes.contains(type) || selectedType.value == type) return;
+    activeReportPane.value = 0;
     selectedType.value = type;
     _invalidateExportActions();
     _criteriaDebounce?.cancel();
@@ -573,7 +575,9 @@ class OperationalReportsController extends GetxController {
 
   Future<void> _beginActionLoading(String message) async {
     _loadingOverlayOperations++;
-    if (_loadingOverlayOperations == 1) {
+    if (_loadingOverlayOperations == 1 &&
+        !CustomAnimationOverlay.isShowing) {
+      _ownsLoadingOverlay = true;
       await CustomAnimationOverlay.showLoading(message: message);
     }
   }
@@ -581,7 +585,8 @@ class OperationalReportsController extends GetxController {
   Future<void> _endActionLoading() async {
     if (_loadingOverlayOperations == 0) return;
     _loadingOverlayOperations--;
-    if (_loadingOverlayOperations == 0) {
+    if (_loadingOverlayOperations == 0 && _ownsLoadingOverlay) {
+      _ownsLoadingOverlay = false;
       await CustomAnimationOverlay.hide();
     }
   }
@@ -665,6 +670,7 @@ class OperationalReportsController extends GetxController {
   }
 
   void applyPreset(SavedReportPreset preset) {
+    activeReportPane.value = 0;
     final definition = selectedReportEntry?.definition;
     if (definition == null) return;
     if (preset.assessAgainst(definition).requiresReview) {
