@@ -67,6 +67,7 @@ class OperationalReportsController extends GetxController {
   final isDeletingPreset = false.obs;
   int _presetRevision = 0;
   final Rxn<OperationalReportSummary> summary = Rxn<OperationalReportSummary>();
+  final activeReportPane = 0.obs;
   final RxnString summaryError = RxnString();
   final selectedType = Rxn<OperationalReportType>();
   final selectedPosId = RxnInt();
@@ -262,6 +263,60 @@ class OperationalReportsController extends GetxController {
         '${local.day.toString().padLeft(2, '0')}';
   }
 
+  void selectReportPane(int index) {
+    if (index == 0) {
+      activeReportPane.value = 0;
+      return;
+    }
+    if (index == 1) {
+      unawaited(showReportSummary());
+      return;
+    }
+    if (index == 2) {
+      unawaited(_showReportRecords());
+    }
+  }
+
+  Future<void> showReportSummary() async {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+
+    if (criteria.value.validateAgainst(definition).isNotEmpty) {
+      activeReportPane.value = 0;
+      CustomSnackbar.show(
+        title: 'معايير التقرير غير مكتملة',
+        message: 'أكمل الحقول المطلوبة وصحح القيم قبل عرض النتائج.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    activeReportPane.value = 1;
+    if (summary.value == null && !isLoading.value) {
+      await loadReport(refresh: true);
+    }
+  }
+
+  Future<void> _showReportRecords() async {
+    final definition = selectedReportEntry?.definition;
+    if (definition == null) return;
+
+    if (criteria.value.validateAgainst(definition).isNotEmpty) {
+      activeReportPane.value = 0;
+      CustomSnackbar.show(
+        title: 'معايير التقرير غير مكتملة',
+        message: 'أكمل الحقول المطلوبة وصحح القيم قبل عرض السجلات.',
+        type: SnackType.warning,
+      );
+      return;
+    }
+
+    activeReportPane.value = 2;
+    if (summary.value == null && !isLoading.value) {
+      await loadReport(refresh: true);
+    }
+  }
+
   Future<bool> _loadReportCatalog({required int scopeRevision}) async {
     final networkId = _networkId;
     if (networkId == null) {
@@ -351,6 +406,7 @@ class OperationalReportsController extends GetxController {
     final scopeRevision = ++_scopeRevision;
     ++_presetRevision;
     _scopeConfigured = true;
+    activeReportPane.value = 0;
     _networkId = networkId;
     _workspacePosId = posId;
     _isNetworkWorkspace = isNetworkWorkspace;
