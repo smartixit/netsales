@@ -521,7 +521,7 @@ void main() {
       expect(controller.links.length, equals(1));
     });
 
-    testWidgets('onPartnerCardTap delegates to openPosWalletStatement', (tester) async {
+    testWidgets('wallet access opens the POS wallet statement route', (tester) async {
       PermissionService.instance.setWorkspaceContext(
         scope: RoleScope.network,
         tenantId: 1,
