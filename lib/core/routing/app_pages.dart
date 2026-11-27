@@ -19,7 +19,6 @@ import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_bin
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
-import 'package:netsales/features/auth/presentation/screens/active_sessions_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
@@ -222,12 +221,6 @@ abstract final class AppPages {
     // ========================================================================
     // 5. مسارات الأمان والجلسات المعتمدة (Security & Active Sessions)
     // ========================================================================
-    GetPage(
-      name: AppRoutes.activeSessions,
-      page: () => const ActiveSessionsScreen(),
-      binding: ActiveSessionsBinding(),
-      middlewares: [AuthGuard()],
-    ),
     GetPage(
       name: AppRoutes.securitySettings,
       page: () => const SecuritySettingsScreen(),
