@@ -97,6 +97,22 @@ class BillingReportDocumentService {
         ),
       );
     }
+    final statusInfo = status != null && status.isNotEmpty
+        ? DocumentInfoItem(
+            label: isArabic ? 'الحالة' : 'Status',
+            value: DocumentTextValue(status),
+            direction: DocumentTextDirection.leftToRight,
+          )
+        : null;
+    final searchInfo = search != null && search.isNotEmpty
+        ? DocumentInfoItem(
+            label: isArabic ? 'بحث' : 'Search',
+            value: DocumentTextValue(search),
+            direction: isArabic
+                ? DocumentTextDirection.rightToLeft
+                : DocumentTextDirection.leftToRight,
+          )
+        : null;
     final info = <DocumentInfoItem>[
       DocumentInfoItem(
         label: isArabic ? 'التقرير' : 'Report',
@@ -131,20 +147,8 @@ class BillingReportDocumentService {
           value: DocumentTextValue(toDate),
           direction: DocumentTextDirection.leftToRight,
         ),
-      if (status != null && status.isNotEmpty)
-        DocumentInfoItem(
-          label: isArabic ? 'الحالة' : 'Status',
-          value: DocumentTextValue(status),
-          direction: DocumentTextDirection.leftToRight,
-        ),
-      if (search != null && search.isNotEmpty)
-        DocumentInfoItem(
-          label: isArabic ? 'بحث' : 'Search',
-          value: DocumentTextValue(search),
-          direction: isArabic
-              ? DocumentTextDirection.rightToLeft
-              : DocumentTextDirection.leftToRight,
-        ),
+      ?statusInfo,
+      ?searchInfo,
     ];
     final snapshot = DocumentSnapshot(
       metadata: DocumentMetadata(
