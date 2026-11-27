@@ -43,9 +43,9 @@ void main() {
       final streamIndex = source.indexOf('stream', cursor);
       if (streamIndex < 0) break;
       var dataStart = streamIndex + 'stream'.length;
-      if (source.startsWith('\\r\\n', dataStart)) {
+      if (source.startsWith('\r\n', dataStart)) {
         dataStart += 2;
-      } else if (source.startsWith('\\n', dataStart)) {
+      } else if (source.startsWith('\n', dataStart)) {
         dataStart += 1;
       }
       final end = source.indexOf('endstream', dataStart);
@@ -54,7 +54,17 @@ void main() {
       final dictionary = dictionaryStart < 0
           ? ''
           : source.substring(dictionaryStart, streamIndex);
-      final streamBytes = bytes.sublist(dataStart, end);
+      var dataEnd = end;
+      if (dataEnd > dataStart && source.codeUnitAt(dataEnd - 1) == 0x0A) {
+        dataEnd--;
+        if (dataEnd > dataStart && source.codeUnitAt(dataEnd - 1) == 0x0D) {
+          dataEnd--;
+        }
+      } else if (dataEnd > dataStart &&
+          source.codeUnitAt(dataEnd - 1) == 0x0D) {
+        dataEnd--;
+      }
+      final streamBytes = bytes.sublist(dataStart, dataEnd);
       if (dictionary.contains('/FlateDecode')) {
         try {
           decoded.add(latin1.decode(ZLibDecoder().convert(streamBytes)));
@@ -82,6 +92,7 @@ void main() {
       TemplateCapability.metrics,
       TemplateCapability.charts,
       TemplateCapability.coverPage,
+      TemplateCapability.watermark,
       TemplateCapability.pageNumbering,
       TemplateCapability.repeatingHeader,
       TemplateCapability.repeatingFooter,
