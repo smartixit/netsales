@@ -1,0 +1,84 @@
+import 'package:equatable/equatable.dart';
+import 'package:netsales/core/enums/device_type.dart';
+import 'package:netsales/core/enums/user_device_status.dart';
+import 'package:netsales/core/utils/date_formatter.dart';
+
+/// كيان جهاز المستخدم المقترن (User Device Entity).
+class UserDeviceEntity extends Equatable {
+  const UserDeviceEntity({
+    required this.deviceId,
+    required this.userId,
+    required this.deviceUuid,
+    this.deviceName,
+    this.deviceType,
+    this.deviceTypeLabel,
+    this.isPrimary = false,
+    this.status,
+    this.statusLabel,
+    this.lastUsedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final int deviceId;
+  final int userId;
+  final String deviceUuid;
+  final String? deviceName;
+  final String? deviceType;
+  final String? deviceTypeLabel;
+  final bool isPrimary;
+  final String? status;
+  final String? statusLabel;
+  final String? lastUsedAt;
+  final String? createdAt;
+  final String? updatedAt;
+
+  UserDeviceStatus get typedStatus => UserDeviceStatus.fromWire(status);
+
+  DeviceType get typedDeviceType => DeviceType.fromWire(deviceType);
+
+  bool get isActive => typedStatus == UserDeviceStatus.active;
+
+  bool get isBanned => typedStatus == UserDeviceStatus.banned;
+
+  String get displayName =>
+      (deviceName?.trim().isNotEmpty == true) ? deviceName!.trim() : 'جهاز مقترن';
+
+  String get shortUuid => deviceUuid.length <= 12
+      ? deviceUuid
+      : '${deviceUuid.substring(0, 6)}...${deviceUuid.substring(deviceUuid.length - 4)}';
+
+  String get formattedLastUsed {
+    if (lastUsedAt == null || lastUsedAt!.trim().isEmpty) return 'غير معروف';
+    final parsed = DateTime.tryParse(lastUsedAt!);
+    return parsed != null ? DateFormatter.smart(parsed) : lastUsedAt!;
+  }
+
+  String get formattedCreatedAt {
+    if (createdAt == null || createdAt!.trim().isEmpty) return '---';
+    final parsed = DateTime.tryParse(createdAt!);
+    return parsed != null ? DateFormatter.dateTime(parsed) : createdAt!;
+  }
+
+  String get formattedUpdatedAt {
+    if (updatedAt == null || updatedAt!.trim().isEmpty) return '---';
+    final parsed = DateTime.tryParse(updatedAt!);
+    return parsed != null ? DateFormatter.dateTime(parsed) : updatedAt!;
+  }
+
+  @override
+  List<Object?> get props => [
+    deviceId,
+    userId,
+    deviceUuid,
+    deviceName,
+    deviceType,
+    deviceTypeLabel,
+    isPrimary,
+    status,
+    statusLabel,
+    lastUsedAt,
+    createdAt,
+    updatedAt,
+  ];
+}

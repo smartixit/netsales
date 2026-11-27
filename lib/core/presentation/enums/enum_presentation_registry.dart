@@ -11,6 +11,7 @@ import 'package:netsales/core/enums/role_key.dart';
 import 'package:netsales/core/enums/role_scope.dart';
 import 'package:netsales/core/enums/sale_type.dart';
 import 'package:netsales/core/enums/user_device_status.dart';
+import 'package:netsales/core/enums/user_session_status.dart';
 import 'package:netsales/core/enums/user_status.dart';
 import 'package:netsales/core/enums/accounting_status.dart';
 import 'package:netsales/core/enums/wallet_operation_type.dart';
@@ -1140,6 +1141,38 @@ class EnumPresentationRegistry {
         icon: Icons.toggle_off_outlined,
       ),
       PackageDiscountActivationStatus.unknown =>
+        EnumPresentation.unknown(fallbackLabel: label),
+    };
+  }
+
+  static EnumPresentation resolveUserSessionStatus(
+    UserSessionStatus status, {
+    String? serverLabel,
+  }) {
+    final label = _effectiveLabel(serverLabel, switch (status) {
+      UserSessionStatus.active => 'نشطة',
+      UserSessionStatus.expired => 'منتهية',
+      UserSessionStatus.revoked => 'ملغاة',
+      UserSessionStatus.unknown => 'غير معروفة',
+    });
+
+    return switch (status) {
+      UserSessionStatus.active => EnumPresentation(
+        label: label,
+        tone: SemanticTone.success,
+        icon: Icons.sensors_rounded,
+      ),
+      UserSessionStatus.expired => EnumPresentation(
+        label: label,
+        tone: SemanticTone.neutral,
+        icon: Icons.schedule_rounded,
+      ),
+      UserSessionStatus.revoked => EnumPresentation(
+        label: label,
+        tone: SemanticTone.danger,
+        icon: Icons.sensors_off_rounded,
+      ),
+      UserSessionStatus.unknown =>
         EnumPresentation.unknown(fallbackLabel: label),
     };
   }

@@ -18,6 +18,10 @@ import 'package:netsales/features/auth/presentation/bindings/two_factor_auth_bin
 import 'package:netsales/features/auth/presentation/bindings/verify_otp_binding.dart';
 import 'package:netsales/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:netsales/features/profile/presentation/screens/profile_screen.dart';
+import 'package:netsales/features/user_devices/presentation/bindings/user_devices_binding.dart';
+import 'package:netsales/features/user_devices/presentation/screens/user_devices_screen.dart';
+import 'package:netsales/features/user_sessions/presentation/bindings/user_sessions_binding.dart';
+import 'package:netsales/features/user_sessions/presentation/screens/user_sessions_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/login_screen.dart';
 import 'package:netsales/features/auth/presentation/screens/register_network_screen.dart';
@@ -237,6 +241,18 @@ abstract final class AppPages {
       name: AppRoutes.editProfile,
       page: () => const EditProfileScreen(),
       binding: ProfileBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.userDevices,
+      page: () => const UserDevicesScreen(),
+      binding: UserDevicesBinding(),
+      middlewares: [AuthGuard()],
+    ),
+    GetPage(
+      name: AppRoutes.userSessions,
+      page: () => const UserSessionsScreen(),
+      binding: UserSessionsBinding(),
       middlewares: [AuthGuard()],
     ),
 

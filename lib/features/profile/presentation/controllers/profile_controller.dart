@@ -270,7 +270,15 @@ class ProfileController extends GetxController {
   }
 
   Future<void> openActiveSessions() async {
-    await Get.toNamed<void>(AppRoutes.activeSessions);
+    await Get.toNamed<void>(AppRoutes.userDevices);
+  }
+
+  Future<void> openUserDevices() async {
+    await Get.toNamed<void>(AppRoutes.userDevices);
+  }
+
+  Future<void> openUserSessions() async {
+    await Get.toNamed<void>(AppRoutes.userSessions);
   }
 
   Future<void> openMembership(ProfileMembershipEntity membership) async {
