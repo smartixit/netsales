@@ -18,6 +18,8 @@ class BillingReportDocumentService {
     required String reportLabel,
     required Map<String, dynamic> summary,
     required bool includeMetrics,
+    required bool includeCharts,
+    required List<Map<String, dynamic>> charts,
     required List<Map<String, dynamic>> rows,
     required List<Map<String, dynamic>> columns,
     required String localeTag,
@@ -208,6 +210,7 @@ class BillingReportDocumentService {
               ),
               ..._metricGrids(metricRows),
             ],
+            if (includeCharts) ..._buildCharts(charts, isArabic),
             if (rows.isNotEmpty) ...[
               DocumentHeading(
                 text: isArabic ? 'تفاصيل السجلات' : 'Detailed records',
@@ -346,6 +349,146 @@ class BillingReportDocumentService {
       autoOpen: true,
       showFeedback: false,
     );
+  }
+
+  List<DocumentNode> _buildCharts(
+    List<Map<String, dynamic>> charts,
+    bool isArabic,
+  ) {
+    final nodes = <DocumentNode>[];
+    var omitted = 0;
+
+    if (charts.length > 8) {
+      omitted += charts.length - 8;
+    }
+
+    for (final chart in charts.take(8)) {
+      final id = chart['id']?.toString().trim() ?? '';
+      final title = chart['title']?.toString().trim() ?? '';
+      final rawData = chart['data'];
+      final data = rawData is List
+          ? rawData.whereType<Map<String, dynamic>>().toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      final rawType = chart['type']?.toString().toLowerCase();
+      final type = switch (rawType) {
+        'line' => DocumentChartType.line,
+        'pie' => DocumentChartType.pie,
+        'donut' => DocumentChartType.donut,
+        _ => DocumentChartType.bar,
+      };
+      final maxPoints = type == DocumentChartType.pie ||
+              type == DocumentChartType.donut
+          ? 12
+          : 24;
+
+      final rawSeries = chart['series'];
+      final seriesDefinitions = rawSeries is List
+          ? rawSeries.whereType<Map<String, dynamic>>().toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      final definitions = seriesDefinitions.isEmpty &&
+              (type == DocumentChartType.pie || type == DocumentChartType.donut)
+          ? const <Map<String, dynamic>>[
+              {'key': 'value', 'label': 'القيمة'},
+            ]
+          : seriesDefinitions;
+
+      if (id.isEmpty ||
+          title.isEmpty ||
+          data.isEmpty ||
+          data.length > maxPoints ||
+          definitions.isEmpty ||
+          definitions.length > 4) {
+        omitted++;
+        continue;
+      }
+
+      final renderedSeries = <DocumentChartSeries>[];
+      var invalidSeries = false;
+      for (final definition in definitions) {
+        final key = definition['key']?.toString() ?? '';
+        final label = definition['label']?.toString().trim() ?? '';
+        if (key.isEmpty || label.isEmpty) {
+          invalidSeries = true;
+          break;
+        }
+
+        final points = <DocumentChartPoint>[];
+        for (final item in data) {
+          final rawValue = item[key];
+          final value = rawValue is num
+              ? rawValue.toDouble()
+              : double.tryParse(rawValue?.toString() ?? '');
+          final pointLabel = item['label']?.toString().trim() ?? '';
+          if (value == null || !value.isFinite || pointLabel.isEmpty) {
+            continue;
+          }
+          points.add(
+            DocumentChartPoint(
+              label: pointLabel,
+              value: value,
+              displayValue: rawValue.toString(),
+            ),
+          );
+        }
+
+        if (points.isEmpty ||
+            ((type == DocumentChartType.pie ||
+                    type == DocumentChartType.donut) &&
+                (points.any((point) => point.value < 0) ||
+                    points.every((point) => point.value == 0)))) {
+          invalidSeries = true;
+          break;
+        }
+
+        renderedSeries.add(
+          DocumentChartSeries(
+            id: '$id-$key',
+            label: label,
+            points: points,
+          ),
+        );
+      }
+
+      if (invalidSeries || renderedSeries.isEmpty) {
+        omitted++;
+        continue;
+      }
+
+      nodes.add(
+        DocumentChart(
+          title: title,
+          type: type,
+          series: renderedSeries,
+        ),
+      );
+    }
+
+    if (nodes.isNotEmpty) {
+      nodes.insert(
+        0,
+        DocumentHeading(
+          text: isArabic ? 'الرسوم البيانية' : 'Charts',
+          level: 2,
+          direction: isArabic
+              ? DocumentTextDirection.rightToLeft
+              : DocumentTextDirection.leftToRight,
+        ),
+      );
+    }
+
+    if (omitted > 0) {
+      nodes.add(
+        DocumentCallout(
+          title: isArabic ? 'بعض الرسوم لم تُدرج' : 'Some charts were omitted',
+          body: isArabic
+              ? 'تجاوزت بعض الرسوم حدود النقاط أو احتوت قيماً لا يدعمها نوع الرسم. بقيت البيانات التفصيلية دون حذف.'
+              : 'Some charts exceeded rendering limits or contained unsupported values. Detail rows were preserved.',
+          tone: DocumentStatusTone.warning,
+        ),
+      );
+    }
+
+    return nodes;
   }
 
   List<DocumentNode> _metricGrids(List<DocumentTableRow> rows) {
