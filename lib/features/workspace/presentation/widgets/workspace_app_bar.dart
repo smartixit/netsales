@@ -2,10 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:netsales/core/constants/app_radius.dart';
 import 'package:netsales/core/constants/app_spacing.dart';
-import 'package:netsales/core/routing/app_routes.dart';
 import 'package:netsales/core/themes/app_elevation.dart';
 import 'package:netsales/core/enums/app_workspace.dart';
 import 'package:netsales/core/enums/role_scope.dart';
@@ -34,7 +32,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? entityInitials;
   final String? userProfileLogo;
   final String? userInitials;
-  final VoidCallback? onProfileTap;
+  final VoidCallback onProfileTap;
   final VoidCallback? onEntityPickerTap;
   final List<Widget>? actions;
 
@@ -48,7 +46,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.entityInitials,
     this.userProfileLogo,
     this.userInitials,
-    this.onProfileTap,
+    required this.onProfileTap,
     this.onEntityPickerTap,
     this.actions,
   });
@@ -126,7 +124,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
                       customDimension: 46,
                       pulseColor: colors.primary,
                       onTap:
-                          onProfileTap ?? () => Get.toNamed<void>(AppRoutes.profile),
+                          onProfileTap,
                     ),
                   AppSpacing.hSm,
 
