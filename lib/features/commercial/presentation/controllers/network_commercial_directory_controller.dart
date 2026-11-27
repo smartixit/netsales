@@ -328,13 +328,21 @@ class NetworkCommercialDirectoryController
     final netId = resolvedNetworkId;
     if (netId == null || !hasMore || isLoadingMore.value) return;
 
+    // Bind this page request to the exact directory query that produced its cursor.
+    // A response from an older workspace/search/filter must never contaminate the
+    // currently visible result set.
+    final requestRevision = _listRevision;
+    final requestSearch = searchQuery.value.trim();
+    final requestStatus = statusFilter.value;
+    final requestCursor = _nextCursor;
+
     isLoadingMore.value = true;
     loadMoreError.value = null;
 
     final bool? statusParam;
-    if (statusFilter.value == '1' || statusFilter.value == 'true') {
+    if (requestStatus == '1' || requestStatus == 'true') {
       statusParam = true;
-    } else if (statusFilter.value == '0' || statusFilter.value == 'false') {
+    } else if (requestStatus == '0' || requestStatus == 'false') {
       statusParam = false;
     } else {
       statusParam = null;
@@ -345,17 +353,29 @@ class NetworkCommercialDirectoryController
           await getNetworkPosListUseCase(
             networkId: netId,
             status: statusParam,
-            search: searchQuery.value.trim().isEmpty
-                ? null
-                : searchQuery.value.trim(),
-            cursor: _nextCursor,
+            search: requestSearch.isEmpty ? null : requestSearch,
+            cursor: requestCursor,
             perPage: 15,
           );
+
+      if (requestRevision != _listRevision ||
+          resolvedNetworkId != netId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus ||
+          _nextCursor != requestCursor) {
+        return;
+      }
 
       links.addAll(result.items);
       _nextCursor = result.nextCursor;
       isLoadingMore.value = false;
     } catch (e) {
+      if (requestRevision != _listRevision ||
+          resolvedNetworkId != netId ||
+          searchQuery.value.trim() != requestSearch ||
+          statusFilter.value != requestStatus) {
+        return;
+      }
       isLoadingMore.value = false;
       loadMoreError.value = AppException.sanitizeMessage(e.toString());
     }
