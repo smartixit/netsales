@@ -162,6 +162,7 @@ class MembershipsScreen extends GetView<BaseMembershipsController> {
                     member: member,
                     isNetworkView: controller.isNetworkView,
                     onDetails: () => actions.openMemberDetails(member),
+                    onMoreActions: () => actions.showMemberActions(member),
                     onChangeRole: controller.canChangeMemberRole && !member.isOwner
                         ? () => actions.openChangeRoleSheet(member)
                         : null,
